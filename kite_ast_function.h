@@ -25,9 +25,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef KITE_AST_CONST_BASE_H
-#define KITE_AST_CONST_BASE_H
-
 #include <assert.h>
 #include "kite_ast_base.h"
 
@@ -46,45 +43,15 @@ namespace kite
 	namespace parse_tree
 	{
 		/*
-		 * Kite abstract syntax tree -- constant value.
+		 * Kite abstract syntax tree -- method object.
 		 */
-		template<typename T>
-		class ConstantValue : public IAbstractTree
+		class MethodValue : public IAbstractTree
 		{
 		public:
-			ConstantValue(T value) /*! Creates new instance of the ConstantValue object. */
-			: _value(value)
-			{
-				// empty.
-			}
-			virtual ~ConstantValue() /*! Destroys instance of the ConstantValue object. */
-			{
-				// empty.
-			}
-		
-			virtual Value *codegen(CompilerState *state = NULL) /*! Generates bytecode for constant value. */
-			{
-				// By default, we don't know how to generate for whatever type
-				// the developer throws at us. Therefore, a simple assert(0) will
-				// exit the program here.
-				assert(0);
-				return NULL;
-			}
-		private:
-			T _value;
+			virtual ~MethodValue();
+			
+			virtual Value *codegen(CompilerState *state = NULL); /*! Generates bytecode for current point in tree. */
 		};
-	
-		template<>
-		Value *ConstantValue<int>::codegen(CompilerState *state)
-		{
-			return ConstantInt::get(getGlobalContext(), APInt(_value, 32, true));
-		}
-		
-		template<>
-		Value *ConstantValue<double>::codegen(CompilerState *state)
-		{
-			return ConstantFP::get(getGlobalContext(), APFloat(_value));
-		}
 	};
 };
 
@@ -92,11 +59,10 @@ extern "C"
 {
 #endif // __cplusplus
 	
-	IAbstractTreePtr GenerateConstantIntegerTreeNode(int);
-	IAbstractTreePtr GenerateConstantFloatTreeNode(double);
+	//Value *GenerateCodeForTree(IAbstractTree *);
 	
 #ifdef __cplusplus
 }
 #endif // __cplusplus
 
-#endif // KITE_AST_BASE_H
+#endif // KITE_AST_FUNCTION_H

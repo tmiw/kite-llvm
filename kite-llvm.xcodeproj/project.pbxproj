@@ -10,6 +10,7 @@
 		7F2C066F118FAF5A00E2610A /* kite_lexer.l in Sources */ = {isa = PBXBuildFile; fileRef = 7F2C066D118FAF5A00E2610A /* kite_lexer.l */; };
 		7F2C0670118FAF5A00E2610A /* kite_parser.y in Sources */ = {isa = PBXBuildFile; fileRef = 7F2C066E118FAF5A00E2610A /* kite_parser.y */; };
 		7F2C06A6118FBEFC00E2610A /* kite_ast_const.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7F2C06A5118FBEFC00E2610A /* kite_ast_const.cpp */; };
+		7F740762119BEF030089D73B /* kite_ast_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7F740761119BEF030089D73B /* kite_ast_utils.cpp */; };
 		8DD76F650486A84900D96B5E /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 08FB7796FE84155DC02AAC07 /* main.cpp */; settings = {ATTRIBUTES = (); }; };
 		8DD76F6A0486A84900D96B5E /* kite-llvm.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6859E8B029090EE04C91782 /* kite-llvm.1 */; };
 /* End PBXBuildFile section */
@@ -35,6 +36,8 @@
 		7F2C0696118FB70300E2610A /* kite_ast_base.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kite_ast_base.h; sourceTree = "<group>"; };
 		7F2C069C118FB91800E2610A /* kite_ast_const_base.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kite_ast_const_base.h; sourceTree = "<group>"; };
 		7F2C06A5118FBEFC00E2610A /* kite_ast_const.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = kite_ast_const.cpp; sourceTree = "<group>"; };
+		7F740761119BEF030089D73B /* kite_ast_utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = kite_ast_utils.cpp; sourceTree = "<group>"; };
+		7FD86F0D118FF3F000F986F1 /* kite_ast_function.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kite_ast_function.h; sourceTree = "<group>"; };
 		8DD76F6C0486A84900D96B5E /* kite-llvm */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "kite-llvm"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C6859E8B029090EE04C91782 /* kite-llvm.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = "kite-llvm.1"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -86,6 +89,8 @@
 				7F2C0696118FB70300E2610A /* kite_ast_base.h */,
 				7F2C069C118FB91800E2610A /* kite_ast_const_base.h */,
 				7F2C06A5118FBEFC00E2610A /* kite_ast_const.cpp */,
+				7FD86F0D118FF3F000F986F1 /* kite_ast_function.h */,
+				7F740761119BEF030089D73B /* kite_ast_utils.cpp */,
 			);
 			name = AST;
 			sourceTree = "<group>";
@@ -145,6 +150,7 @@
 				7F2C066F118FAF5A00E2610A /* kite_lexer.l in Sources */,
 				7F2C0670118FAF5A00E2610A /* kite_parser.y in Sources */,
 				7F2C06A6118FBEFC00E2610A /* kite_ast_const.cpp in Sources */,
+				7F740762119BEF030089D73B /* kite_ast_utils.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -161,6 +167,98 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				OTHER_CFLAGS = (
+					"-I/opt/local/include",
+					"-DNDEBUG",
+					"-D_GNU_SOURCE",
+					"-D__STDC_LIMIT_MACROS",
+					"-D__STDC_CONSTANT_MACROS",
+					"-O3",
+					"-fno-common",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-I/opt/local/include",
+					"-DNDEBUG",
+					"-D_GNU_SOURCE",
+					"-D__STDC_LIMIT_MACROS",
+					"-D__STDC_CONSTANT_MACROS",
+					"-O3",
+					"-fno-common",
+					"-Woverloaded-virtual",
+				);
+				OTHER_LDFLAGS = (
+					"-lLLVMXCoreCodeGen",
+					"-lLLVMXCoreAsmPrinter",
+					"-lLLVMXCoreInfo",
+					"-lLLVMSystemZCodeGen",
+					"-lLLVMSystemZAsmPrinter",
+					"-lLLVMSystemZInfo",
+					"-lLLVMSparcCodeGen",
+					"-lLLVMSparcAsmPrinter",
+					"-lLLVMSparcInfo",
+					"-lLLVMPowerPCCodeGen",
+					"-lLLVMPowerPCAsmPrinter",
+					"-lLLVMPowerPCInfo",
+					"-lLLVMPIC16AsmPrinter",
+					"-lLLVMPIC16CodeGen",
+					"-lLLVMPIC16Info",
+					"-lLLVMMSP430CodeGen",
+					"-lLLVMMSP430AsmPrinter",
+					"-lLLVMMSP430Info",
+					"-lLLVMMSIL",
+					"-lLLVMMSILInfo",
+					"-lLLVMMipsAsmPrinter",
+					"-lLLVMMipsCodeGen",
+					"-lLLVMMipsInfo",
+					"-lLLVMLinker",
+					"-lLLVMipo",
+					"-lLLVMInterpreter",
+					"-lLLVMInstrumentation",
+					"-lLLVMJIT",
+					"-lLLVMExecutionEngine",
+					"-lLLVMDebugger",
+					"-lLLVMCppBackend",
+					"-lLLVMCppBackendInfo",
+					"-lLLVMCellSPUCodeGen",
+					"-lLLVMCellSPUAsmPrinter",
+					"-lLLVMCellSPUInfo",
+					"-lLLVMCBackend",
+					"-lLLVMCBackendInfo",
+					"-lLLVMBlackfinCodeGen",
+					"-lLLVMBlackfinAsmPrinter",
+					"-lLLVMBlackfinInfo",
+					"-lLLVMBitWriter",
+					"-lLLVMX86AsmParser",
+					"-lLLVMX86AsmPrinter",
+					"-lLLVMX86CodeGen",
+					"-lLLVMX86Info",
+					"-lLLVMAsmParser",
+					"-lLLVMARMAsmPrinter",
+					"-lLLVMARMCodeGen",
+					"-lLLVMARMInfo",
+					"-lLLVMArchive",
+					"-lLLVMBitReader",
+					"-lLLVMAlphaCodeGen",
+					"-lLLVMSelectionDAG",
+					"-lLLVMAlphaAsmPrinter",
+					"-lLLVMAsmPrinter",
+					"-lLLVMCodeGen",
+					"-lLLVMScalarOpts",
+					"-lLLVMTransformUtils",
+					"-lLLVMipa",
+					"-lLLVMAnalysis",
+					"-lLLVMTarget",
+					"-lLLVMMC",
+					"-lLLVMCore",
+					"-lLLVMAlphaInfo",
+					"-lLLVMSupport",
+					"-lLLVMSystem",
+					"-L/opt/local/lib",
+					"-lpthread",
+					"-lffi",
+					"-lm",
+				);
 				PRODUCT_NAME = "kite-llvm";
 			};
 			name = Debug;
@@ -172,6 +270,98 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				OTHER_CFLAGS = (
+					"-I/opt/local/include",
+					"-DNDEBUG",
+					"-D_GNU_SOURCE",
+					"-D__STDC_LIMIT_MACROS",
+					"-D__STDC_CONSTANT_MACROS",
+					"-O3",
+					"-fno-common",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-I/opt/local/include",
+					"-DNDEBUG",
+					"-D_GNU_SOURCE",
+					"-D__STDC_LIMIT_MACROS",
+					"-D__STDC_CONSTANT_MACROS",
+					"-O3",
+					"-fno-common",
+					"-Woverloaded-virtual",
+				);
+				OTHER_LDFLAGS = (
+					"-lLLVMXCoreCodeGen",
+					"-lLLVMXCoreAsmPrinter",
+					"-lLLVMXCoreInfo",
+					"-lLLVMSystemZCodeGen",
+					"-lLLVMSystemZAsmPrinter",
+					"-lLLVMSystemZInfo",
+					"-lLLVMSparcCodeGen",
+					"-lLLVMSparcAsmPrinter",
+					"-lLLVMSparcInfo",
+					"-lLLVMPowerPCCodeGen",
+					"-lLLVMPowerPCAsmPrinter",
+					"-lLLVMPowerPCInfo",
+					"-lLLVMPIC16AsmPrinter",
+					"-lLLVMPIC16CodeGen",
+					"-lLLVMPIC16Info",
+					"-lLLVMMSP430CodeGen",
+					"-lLLVMMSP430AsmPrinter",
+					"-lLLVMMSP430Info",
+					"-lLLVMMSIL",
+					"-lLLVMMSILInfo",
+					"-lLLVMMipsAsmPrinter",
+					"-lLLVMMipsCodeGen",
+					"-lLLVMMipsInfo",
+					"-lLLVMLinker",
+					"-lLLVMipo",
+					"-lLLVMInterpreter",
+					"-lLLVMInstrumentation",
+					"-lLLVMJIT",
+					"-lLLVMExecutionEngine",
+					"-lLLVMDebugger",
+					"-lLLVMCppBackend",
+					"-lLLVMCppBackendInfo",
+					"-lLLVMCellSPUCodeGen",
+					"-lLLVMCellSPUAsmPrinter",
+					"-lLLVMCellSPUInfo",
+					"-lLLVMCBackend",
+					"-lLLVMCBackendInfo",
+					"-lLLVMBlackfinCodeGen",
+					"-lLLVMBlackfinAsmPrinter",
+					"-lLLVMBlackfinInfo",
+					"-lLLVMBitWriter",
+					"-lLLVMX86AsmParser",
+					"-lLLVMX86AsmPrinter",
+					"-lLLVMX86CodeGen",
+					"-lLLVMX86Info",
+					"-lLLVMAsmParser",
+					"-lLLVMARMAsmPrinter",
+					"-lLLVMARMCodeGen",
+					"-lLLVMARMInfo",
+					"-lLLVMArchive",
+					"-lLLVMBitReader",
+					"-lLLVMAlphaCodeGen",
+					"-lLLVMSelectionDAG",
+					"-lLLVMAlphaAsmPrinter",
+					"-lLLVMAsmPrinter",
+					"-lLLVMCodeGen",
+					"-lLLVMScalarOpts",
+					"-lLLVMTransformUtils",
+					"-lLLVMipa",
+					"-lLLVMAnalysis",
+					"-lLLVMTarget",
+					"-lLLVMMC",
+					"-lLLVMCore",
+					"-lLLVMAlphaInfo",
+					"-lLLVMSupport",
+					"-lLLVMSystem",
+					"-L/opt/local/lib",
+					"-lpthread",
+					"-lffi",
+					"-lm",
+				);
 				PRODUCT_NAME = "kite-llvm";
 			};
 			name = Release;

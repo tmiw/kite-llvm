@@ -33,3 +33,8 @@ IAbstractTreePtr GenerateConstantIntegerTreeNode(int value)
 {
 	return static_cast<IAbstractTreePtr>(new ConstantValue<int>(value));
 }
+
+IAbstractTreePtr GenerateConstantFloatTreeNode(double value)
+{
+	return static_cast<IAbstractTreePtr>(new ConstantValue<double>(value));
+}

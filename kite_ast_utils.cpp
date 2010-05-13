@@ -25,78 +25,34 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef KITE_AST_CONST_BASE_H
-#define KITE_AST_CONST_BASE_H
-
-#include <assert.h>
 #include "kite_ast_base.h"
-
-// LLVM-related files.
-#ifdef __cplusplus
-#include "llvm/DerivedTypes.h"
-#include "llvm/LLVMContext.h"
-#include "llvm/Module.h"
-#include "llvm/Analysis/Verifier.h"
-#include "llvm/Support/IRBuilder.h"
-
-using namespace llvm;
 
 namespace kite
 {
 	namespace parse_tree
 	{
-		/*
-		 * Kite abstract syntax tree -- constant value.
-		 */
-		template<typename T>
-		class ConstantValue : public IAbstractTree
-		{
-		public:
-			ConstantValue(T value) /*! Creates new instance of the ConstantValue object. */
-			: _value(value)
-			{
-				// empty.
-			}
-			virtual ~ConstantValue() /*! Destroys instance of the ConstantValue object. */
-			{
-				// empty.
-			}
 		
-			virtual Value *codegen(CompilerState *state = NULL) /*! Generates bytecode for constant value. */
-			{
-				// By default, we don't know how to generate for whatever type
-				// the developer throws at us. Therefore, a simple assert(0) will
-				// exit the program here.
-				assert(0);
-				return NULL;
-			}
-		private:
-			T _value;
-		};
-	
-		template<>
-		Value *ConstantValue<int>::codegen(CompilerState *state)
+		CompilerState::CompilerState()
+		: _moduleBuilder(getGlobalContext())
 		{
-			return ConstantInt::get(getGlobalContext(), APInt(_value, 32, true));
+			// empty
 		}
 		
-		template<>
-		Value *ConstantValue<double>::codegen(CompilerState *state)
+		CompilerState::~CompilerState()
 		{
-			return ConstantFP::get(getGlobalContext(), APFloat(_value));
+			// empty
 		}
-	};
-};
-
-extern "C"
-{
-#endif // __cplusplus
-	
-	IAbstractTreePtr GenerateConstantIntegerTreeNode(int);
-	IAbstractTreePtr GenerateConstantFloatTreeNode(double);
-	
-#ifdef __cplusplus
+		
+		Module *CompilerState::pop_module()
+		{
+			Module *returnValue = _moduleStack.back();
+			_moduleStack.pop_back();
+			return returnValue;
+		}
+		
+		void CompilerState::push_module(Module *module)
+		{
+			_moduleStack.push_back(module);
+		}
+	}
 }
-#endif // __cplusplus
-
-#endif // KITE_AST_BASE_H

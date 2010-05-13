@@ -41,6 +41,9 @@ namespace kite
 {
 	namespace parse_tree
 	{
+		// Forward declare compiler state object.
+		class CompilerState;
+		
 		/*
 		 * Kite abstract syntax tree -- base object.
 		 */
@@ -49,7 +52,25 @@ namespace kite
 		public:
 			virtual ~IAbstractTree() { }
 		
-			virtual Value *codegen() = 0; /*! Generates bytecode for current point in tree. */
+			virtual Value *codegen(CompilerState *state = NULL) = 0; /*! Generates bytecode for current point in tree. */
+		};
+		
+		/*
+		 * Object to track current compiler state.
+		 */
+		class CompilerState
+		{
+		public:
+			CompilerState();
+			virtual ~CompilerState();
+		
+			void push_module(Module *module); /*! Pushes new module onto stack. */
+			Module *pop_module(); /*! Pops module from top of stack. */
+			
+			inline IRBuilder<> &module_builder() { return _moduleBuilder; }
+		private:
+			std::vector<Module*> _moduleStack;
+			IRBuilder<> _moduleBuilder;
 		};
 	};
 };

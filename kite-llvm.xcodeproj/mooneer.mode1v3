@@ -229,8 +229,6 @@
 			<key>Layout</key>
 			<array>
 				<dict>
-					<key>BecomeActive</key>
-					<true/>
 					<key>ContentConfiguration</key>
 					<dict>
 						<key>PBXBottomSmartGroupGIDs</key>
@@ -274,7 +272,8 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>7</integer>
+									<integer>6</integer>
+									<integer>2</integer>
 									<integer>1</integer>
 									<integer>0</integer>
 								</array>
@@ -310,12 +309,14 @@
 					<key>Dock</key>
 					<array>
 						<dict>
+							<key>BecomeActive</key>
+							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
 								<string>1CE0B20306471E060097A5F4</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>kite_parser.y</string>
+								<string>kite_ast_function.h</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
@@ -323,21 +324,22 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>1CE0B20406471E060097A5F4</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>kite_parser.y</string>
+										<string>kite_ast_function.h</string>
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>7F2C0739118FC87700E2610A</string>
+										<string>7F74075B1193B3C50089D73B</string>
 										<key>history</key>
 										<array>
 											<string>7F2C0681118FB30400E2610A</string>
-											<string>7F2C0699118FB86700E2610A</string>
-											<string>7F2C072C118FC4D200E2610A</string>
 											<string>7F2C0732118FC73D00E2610A</string>
 											<string>7F2C0733118FC73D00E2610A</string>
-											<string>7F2C0737118FC87700E2610A</string>
-											<string>7F2C0738118FC87700E2610A</string>
-											<string>7F2C0734118FC73D00E2610A</string>
+											<string>7FD86EFC118FF34900F986F1</string>
+											<string>7FD86EFE118FF34900F986F1</string>
+											<string>7FD86F10118FF54000F986F1</string>
+											<string>7FD86F11118FF54000F986F1</string>
+											<string>7FD86F12118FF54000F986F1</string>
+											<string>7FD86F1D1190F20100F986F1</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -349,14 +351,14 @@
 							<key>GeometryConfiguration</key>
 							<dict>
 								<key>Frame</key>
-								<string>{{0, 0}, {1002, 535}}</string>
+								<string>{{0, 0}, {1002, 525}}</string>
 								<key>RubberWindowFrame</key>
 								<string>188 239 1210 762 0 0 1680 1028 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXNavigatorGroup</string>
 							<key>Proportion</key>
-							<string>535pt</string>
+							<string>525pt</string>
 						</dict>
 						<dict>
 							<key>ContentConfiguration</key>
@@ -369,14 +371,14 @@
 							<key>GeometryConfiguration</key>
 							<dict>
 								<key>Frame</key>
-								<string>{{0, 540}, {1002, 181}}</string>
+								<string>{{0, 530}, {1002, 191}}</string>
 								<key>RubberWindowFrame</key>
 								<string>188 239 1210 762 0 0 1680 1028 </string>
 							</dict>
 							<key>Module</key>
 							<string>XCDetailModule</string>
 							<key>Proportion</key>
-							<string>181pt</string>
+							<string>191pt</string>
 						</dict>
 					</array>
 					<key>Proportion</key>
@@ -395,9 +397,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>7F2C0665118FAECB00E2610A</string>
+				<string>7F74075C1193B3C50089D73B</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>7F2C0666118FAECB00E2610A</string>
+				<string>7F74075D1193B3C50089D73B</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -535,9 +537,8 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
-		<string>1CD10A99069EF8BA00B06720</string>
 		<string>7F2C0668118FAECB00E2610A</string>
-		<string>/Users/mooneer/Desktop/kite-llvm/kite-llvm.xcodeproj</string>
+		<string>/Users/mooneer/Desktop/misc/kite/interpreter/branches/kite-llvm/kite-llvm.xcodeproj</string>
 	</array>
 	<key>WindowString</key>
 	<string>188 239 1210 762 0 0 1680 1028 </string>
@@ -561,7 +562,7 @@
 								<key>PBXProjectModuleGUID</key>
 								<string>1CD0528F0623707200166675</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>DataTypes.h</string>
+								<string></string>
 								<key>StatusBarVisibility</key>
 								<true/>
 							</dict>
@@ -578,8 +579,6 @@
 							<string>282pt</string>
 						</dict>
 						<dict>
-							<key>BecomeActive</key>
-							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
@@ -619,7 +618,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>7F2C0668118FAECB00E2610A</string>
-				<string>7F2C0669118FAECB00E2610A</string>
+				<string>7F74075E1193B3C50089D73B</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>
@@ -663,8 +662,8 @@
 										<string>yes</string>
 										<key>sizes</key>
 										<array>
-											<string>{{0, 0}, {316, 185}}</string>
-											<string>{{316, 0}, {378, 185}}</string>
+											<string>{{0, 0}, {316, 194}}</string>
+											<string>{{316, 0}, {378, 194}}</string>
 										</array>
 									</dict>
 									<key>VerticalSplitView</key>
@@ -679,8 +678,8 @@
 										<string>yes</string>
 										<key>sizes</key>
 										<array>
-											<string>{{0, 0}, {694, 185}}</string>
-											<string>{{0, 185}, {694, 196}}</string>
+											<string>{{0, 0}, {694, 194}}</string>
+											<string>{{0, 194}, {694, 187}}</string>
 										</array>
 									</dict>
 								</dict>
@@ -713,7 +712,7 @@
 										<real>148</real>
 									</array>
 									<key>Frame</key>
-									<string>{{316, 0}, {378, 185}}</string>
+									<string>{{316, 0}, {378, 194}}</string>
 									<key>RubberWindowFrame</key>
 									<string>209 556 694 422 0 0 1680 1028 </string>
 								</dict>
@@ -741,13 +740,13 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>1CD10A99069EF8BA00B06720</string>
-				<string>7F2C06B3118FBF8B00E2610A</string>
+				<string>7FD86F1E1190F20100F986F1</string>
 				<string>1C162984064C10D400B95A72</string>
-				<string>7F2C06B4118FBF8B00E2610A</string>
-				<string>7F2C06B5118FBF8B00E2610A</string>
-				<string>7F2C06B6118FBF8B00E2610A</string>
-				<string>7F2C06B7118FBF8B00E2610A</string>
-				<string>7F2C06B8118FBF8B00E2610A</string>
+				<string>7FD86F1F1190F20100F986F1</string>
+				<string>7FD86F201190F20100F986F1</string>
+				<string>7FD86F211190F20100F986F1</string>
+				<string>7FD86F221190F20100F986F1</string>
+				<string>7FD86F231190F20100F986F1</string>
 			</array>
 			<key>ToolbarConfiguration</key>
 			<string>xcode.toolbar.config.debugV3</string>

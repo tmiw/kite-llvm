@@ -25,6 +25,9 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
+#ifndef KITE_AST_FUNCTION_H
+#define KITE_AST_FUNCTION_H
+
 #include <assert.h>
 #include "kite_ast_base.h"
 
@@ -45,12 +48,17 @@ namespace kite
 		/*
 		 * Kite abstract syntax tree -- method object.
 		 */
-		class MethodValue : public IAbstractTree
+		class MethodValue : public IAbstractTree, public MultipleChildTrees
 		{
 		public:
+			MethodValue(const char *name);
 			virtual ~MethodValue();
 			
 			virtual Value *codegen(CompilerState *state = NULL); /*! Generates bytecode for current point in tree. */
+		private:
+			const char *_name;
+			std::vector<const Type*> _parameters;
+			std::vector<char*> _parameterNames;
 		};
 	};
 };

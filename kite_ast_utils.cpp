@@ -54,5 +54,47 @@ namespace kite
 		{
 			_moduleStack.push_back(module);
 		}
+		
+		void CompilerState::push_symbol_stack()
+		{
+			_symbolTableStack.push_back(new std::map<const char*, Value*>());
+		}
+		
+		void CompilerState::pop_symbol_stack()
+		{
+			std::map<const char*, Value*> *ptr = _symbolTableStack.back();
+			delete ptr;
+			_symbolTableStack.pop_back();
+		}
+		
+		void CompilerState::push_child_tree(IAbstractTree *tree)
+		{
+			_childStack.push_back(tree);
+		}
+		
+		void CompilerState::pop_child_tree()
+		{
+			_childStack.pop_back();
+		}
+		
+		MultipleChildTrees::~MultipleChildTrees()
+		{
+			std::vector<IAbstractTree*>::iterator i = _instructionList.begin();
+			for(; i != _instructionList.end(); i++)
+			{
+				delete *i;
+			}
+		}
+		
+		Value *MultipleChildTrees::iterate_all_instructions(CompilerState *state)
+		{
+			Value *returnValue = NULL;
+			std::vector<IAbstractTree*>::iterator i = _instructionList.begin();
+			for(; i != _instructionList.end(); i++)
+			{
+				returnValue = (*i)->codegen(state);
+			}
+			return returnValue;
+		}
 	}
 }

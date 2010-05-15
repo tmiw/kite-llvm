@@ -30,6 +30,7 @@
 
 #ifdef __cplusplus
 
+#include <map>
 #include "llvm/DerivedTypes.h"
 #include "llvm/LLVMContext.h"
 #include "llvm/Module.h"
@@ -56,6 +57,20 @@ namespace kite
 		};
 		
 		/*
+		 * Mix-in class to support child instructions.
+		 */
+		class MultipleChildTrees
+		{
+		public:
+			virtual ~MultipleChildTrees();
+			
+			inline void push_instruction(IAbstractTree *tree) { _instructionList.push_back(tree); }
+			Value *iterate_all_instructions(CompilerState *state);
+		protected:
+			std::vector<IAbstractTree*> _instructionList;	
+		};
+		
+		/*
 		 * Object to track current compiler state.
 		 */
 		class CompilerState
@@ -65,11 +80,23 @@ namespace kite
 			virtual ~CompilerState();
 		
 			void push_module(Module *module); /*! Pushes new module onto stack. */
+			inline Module *current_module() { return _moduleStack.back(); }
 			Module *pop_module(); /*! Pops module from top of stack. */
 			
 			inline IRBuilder<> &module_builder() { return _moduleBuilder; }
+			
+			void push_symbol_stack();
+			inline std::map<const char *, Value*> &current_symbol_stack() { return *_symbolTableStack.back(); }
+			void pop_symbol_stack();
+			
+			void push_child_tree(IAbstractTree *tree);
+			inline IAbstractTree *current_child_tree() { return _childStack.back(); }
+			void pop_child_tree();
+			
 		private:
 			std::vector<Module*> _moduleStack;
+			std::vector<IAbstractTree*> _childStack;
+			std::vector<std::map<const char *, Value*> *> _symbolTableStack;
 			IRBuilder<> _moduleBuilder;
 		};
 	};

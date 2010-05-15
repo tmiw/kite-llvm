@@ -75,13 +75,13 @@ namespace kite
 		};
 	
 		template<>
-		Value *ConstantValue<int>::codegen(CompilerState *state)
+		inline Value *ConstantValue<int>::codegen(CompilerState *state)
 		{
 			return ConstantInt::get(getGlobalContext(), APInt(_value, 32, true));
 		}
 		
 		template<>
-		Value *ConstantValue<double>::codegen(CompilerState *state)
+		inline Value *ConstantValue<double>::codegen(CompilerState *state)
 		{
 			return ConstantFP::get(getGlobalContext(), APFloat(_value));
 		}

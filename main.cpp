@@ -11,6 +11,7 @@
 #include "kite_ast_base.h"
 #include "kite_ast_function.h"
 #include "kite_ast_const_base.h"
+#include "kite_ast_binaryop.h"
 
 using namespace kite::parse_tree;
 
@@ -19,7 +20,9 @@ int main (int argc, char * const argv[]) {
 	InitializeNativeTarget();
 	llvm_start_multithreaded();
 	
-	ConstantValue<int> *constant = new ConstantValue<int>(42);
+	ConstantValue<int> *constant1 = new ConstantValue<int>(32);
+	ConstantValue<int> *constant2 = new ConstantValue<int>(10);
+	BinaryOperation *constant = new BinaryOperation(ADDITION, constant1, constant2);
 	MethodValue *method = new MethodValue("life_universe_everything");
 	method->push_instruction(constant);
 	CompilerState *state = new CompilerState();

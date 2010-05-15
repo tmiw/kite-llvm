@@ -77,7 +77,7 @@ namespace kite
 		template<>
 		inline Value *ConstantValue<int>::codegen(CompilerState *state)
 		{
-			return ConstantInt::get(getGlobalContext(), APInt(_value, 32, true));
+			return ConstantInt::get(getGlobalContext(), APInt(32, _value, true));
 		}
 		
 		template<>

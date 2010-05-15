@@ -70,6 +70,10 @@ namespace kite
 			
 			if (Value *rv = this->iterate_all_instructions(state))
 			{
+				if (rv->getType()->isInteger())
+				{
+					rv = builder.CreateSIToFP(rv, Type::getDoubleTy(getGlobalContext()));
+				}
 				builder.CreateRet(rv);
 			}
 			

@@ -229,6 +229,8 @@
 			<key>Layout</key>
 			<array>
 				<dict>
+					<key>BecomeActive</key>
+					<true/>
 					<key>ContentConfiguration</key>
 					<dict>
 						<key>PBXBottomSmartGroupGIDs</key>
@@ -272,7 +274,8 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>11</integer>
+									<integer>5</integer>
+									<integer>2</integer>
 									<integer>1</integer>
 									<integer>0</integer>
 								</array>
@@ -308,14 +311,12 @@
 					<key>Dock</key>
 					<array>
 						<dict>
-							<key>BecomeActive</key>
-							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
 								<string>1CE0B20306471E060097A5F4</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>main.cpp</string>
+								<string>kite_ast_const_base.h</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
@@ -323,11 +324,11 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>1CE0B20406471E060097A5F4</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>main.cpp</string>
+										<string>kite_ast_const_base.h</string>
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>7F740803119E669E0089D73B</string>
+										<string>7F74084C119E9D530089D73B</string>
 										<key>history</key>
 										<array>
 											<string>7F2C0732118FC73D00E2610A</string>
@@ -335,13 +336,13 @@
 											<string>7FD86EFC118FF34900F986F1</string>
 											<string>7F740793119E5A280089D73B</string>
 											<string>7F7407B7119E62A60089D73B</string>
-											<string>7F7407B8119E62A60089D73B</string>
 											<string>7F7407B9119E62A60089D73B</string>
 											<string>7F7407BA119E62A60089D73B</string>
-											<string>7F7407BC119E62A60089D73B</string>
-											<string>7F7407DA119E64000089D73B</string>
 											<string>7F7407DB119E64000089D73B</string>
-											<string>7F7407DD119E64000089D73B</string>
+											<string>7F740848119E9D530089D73B</string>
+											<string>7F740849119E9D530089D73B</string>
+											<string>7F74084A119E9D530089D73B</string>
+											<string>7F74084B119E9D530089D73B</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -563,12 +564,14 @@
 					<key>Dock</key>
 					<array>
 						<dict>
+							<key>BecomeActive</key>
+							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
 								<string>1CD0528F0623707200166675</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>kite_ast_utils.cpp</string>
+								<string>kite_ast_function.cpp</string>
 								<key>StatusBarVisibility</key>
 								<true/>
 							</dict>
@@ -585,8 +588,6 @@
 							<string>282pt</string>
 						</dict>
 						<dict>
-							<key>BecomeActive</key>
-							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>

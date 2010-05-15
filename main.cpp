@@ -19,7 +19,7 @@ int main (int argc, char * const argv[]) {
 	InitializeNativeTarget();
 	llvm_start_multithreaded();
 	
-	ConstantValue<double> *constant = new ConstantValue<double>(42.0);
+	ConstantValue<int> *constant = new ConstantValue<int>(42);
 	MethodValue *method = new MethodValue("life_universe_everything");
 	method->push_instruction(constant);
 	CompilerState *state = new CompilerState();

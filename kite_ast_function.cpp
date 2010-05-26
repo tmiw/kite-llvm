@@ -27,6 +27,7 @@
 
 #include "kite_ast_base.h"
 #include "kite_ast_function.h"
+#include "kite_type_thread.h"
 
 namespace kite
 {
@@ -36,7 +37,7 @@ namespace kite
 		: _name(name)
 		{
 			// First parameter is always a thread type.
-			_parameters.push_back(PointerType::getUnqual(Type::getInt32Ty(getGlobalContext())));
+			_parameters.push_back(kite::types::kite_thread_t::GetPointerType());
 			_parameterNames.push_back("thd");
 		}
 		
@@ -48,7 +49,7 @@ namespace kite
 		Value *MethodValue::codegen_single_pass(CompilerState *state, const Type *desiredReturnType, Type **actualReturnType)
 		{
 			Module *currentModule = state->current_module();
-			FunctionType *FT = FunctionType::get(desiredReturnType, _parameters, true);
+			FunctionType *FT = FunctionType::get(desiredReturnType, _parameters, false);
 			Function *F = Function::Create(FT, Function::ExternalLinkage, _name, currentModule);
 			
 			// TODO: redefinition check and exception if needed.

@@ -19,7 +19,7 @@
 				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
-					763,
+					1016,
 					20,
 					48,
 					43,
@@ -123,6 +123,18 @@
 			7FFE416811ACE7FB00C1965C /* PBXTextBookmark */ = 7FFE416811ACE7FB00C1965C /* PBXTextBookmark */;
 			7FFE416D11ACE81000C1965C /* PBXTextBookmark */ = 7FFE416D11ACE81000C1965C /* PBXTextBookmark */;
 			7FFE416E11ACE81200C1965C /* PBXTextBookmark */ = 7FFE416E11ACE81200C1965C /* PBXTextBookmark */;
+			7FFE417511ACE8E800C1965C /* PBXTextBookmark */ = 7FFE417511ACE8E800C1965C /* PBXTextBookmark */;
+			7FFE417F11ACEAB400C1965C /* XCBuildMessageTextBookmark */ = 7FFE417F11ACEAB400C1965C /* XCBuildMessageTextBookmark */;
+			7FFE418011ACEAB400C1965C /* PBXTextBookmark */ = 7FFE418011ACEAB400C1965C /* PBXTextBookmark */;
+			7FFE418311ACEAD200C1965C /* PBXTextBookmark */ = 7FFE418311ACEAD200C1965C /* PBXTextBookmark */;
+			7FFE418411ACEAD200C1965C /* XCBuildMessageTextBookmark */ = 7FFE418411ACEAD200C1965C /* XCBuildMessageTextBookmark */;
+			7FFE418511ACEAD200C1965C /* PBXTextBookmark */ = 7FFE418511ACEAD200C1965C /* PBXTextBookmark */;
+			7FFE419011ACEB1900C1965C /* PBXTextBookmark */ = 7FFE419011ACEB1900C1965C /* PBXTextBookmark */;
+			7FFE419111ACEB2800C1965C /* PBXTextBookmark */ = 7FFE419111ACEB2800C1965C /* PBXTextBookmark */;
+			7FFE419211ACEB2800C1965C /* PBXTextBookmark */ = 7FFE419211ACEB2800C1965C /* PBXTextBookmark */;
+			7FFE419311ACEB2800C1965C /* PBXTextBookmark */ = 7FFE419311ACEB2800C1965C /* PBXTextBookmark */;
+			7FFE419411ACEB2800C1965C /* PBXTextBookmark */ = 7FFE419411ACEB2800C1965C /* PBXTextBookmark */;
+			7FFE419511ACEB2800C1965C /* PBXTextBookmark */ = 7FFE419511ACEB2800C1965C /* PBXTextBookmark */;
 		};
 		sourceControlManager = 7F2C066A118FAECB00E2610A /* Source Control */;
 		userBuildSettings = {
@@ -204,9 +216,9 @@
 	};
 	7F2C0696118FB70300E2610A /* kite_ast_base.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {941, 1547}}";
-			sepNavSelRange = "{1820, 0}";
-			sepNavVisRange = "{2340, 1148}";
+			sepNavIntBoundsRect = "{{0, 0}, {941, 1443}}";
+			sepNavSelRange = "{1797, 179}";
+			sepNavVisRange = "{435, 1652}";
 			sepNavWindowFrame = "{{38, 357}, {971, 645}}";
 		};
 	};
@@ -250,9 +262,9 @@
 	};
 	7F74079A119E5AC20089D73B /* kite_ast_function.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {941, 1222}}";
-			sepNavSelRange = "{2363, 0}";
-			sepNavVisRange = "{1811, 1301}";
+			sepNavIntBoundsRect = "{{0, 0}, {968, 1365}}";
+			sepNavSelRange = "{1956, 0}";
+			sepNavVisRange = "{1488, 614}";
 		};
 	};
 	7F7407DB119E64000089D73B /* PBXTextBookmark */ = {
@@ -341,7 +353,7 @@
 		fRef = 7F74079A119E5AC20089D73B /* kite_ast_function.cpp */;
 		name = "kite_ast_function.cpp: 68";
 		rLen = 0;
-		rLoc = 3948;
+		rLoc = 3963;
 		rType = 0;
 		vrLen = 1213;
 		vrLoc = 1951;
@@ -401,7 +413,7 @@
 		fRef = 7F74079A119E5AC20089D73B /* kite_ast_function.cpp */;
 		name = "kite_ast_function.cpp: 71";
 		rLen = 0;
-		rLoc = 3948;
+		rLoc = 3963;
 		rType = 0;
 		vrLen = 1161;
 		vrLoc = 2007;
@@ -428,7 +440,7 @@
 		fRef = 7F74079A119E5AC20089D73B /* kite_ast_function.cpp */;
 		name = "kite_ast_function.cpp: 71";
 		rLen = 0;
-		rLoc = 3948;
+		rLoc = 3963;
 		rType = 0;
 		vrLen = 1161;
 		vrLoc = 2007;
@@ -449,7 +461,7 @@
 		fRef = 7F74079A119E5AC20089D73B /* kite_ast_function.cpp */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 96;
+		rLoc = 97;
 		rType = 1;
 	};
 	7FFE413911ACE4FE00C1965C /* PBXTextBookmark */ = {
@@ -457,7 +469,7 @@
 		fRef = 7F74079A119E5AC20089D73B /* kite_ast_function.cpp */;
 		name = "kite_ast_function.cpp: 94";
 		rLen = 0;
-		rLoc = 3934;
+		rLoc = 3949;
 		rType = 0;
 		vrLen = 522;
 		vrLoc = 3179;
@@ -478,7 +490,7 @@
 		fRef = 7F74079A119E5AC20089D73B /* kite_ast_function.cpp */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 73;
+		rLoc = 74;
 		rType = 1;
 	};
 	7FFE414611ACE56300C1965C /* PBXTextBookmark */ = {
@@ -486,7 +498,7 @@
 		fRef = 7F74079A119E5AC20089D73B /* kite_ast_function.cpp */;
 		name = "kite_ast_function.cpp: 72";
 		rLen = 0;
-		rLoc = 3244;
+		rLoc = 3259;
 		rType = 0;
 		vrLen = 677;
 		vrLoc = 2603;
@@ -496,7 +508,7 @@
 		fRef = 7F74079A119E5AC20089D73B /* kite_ast_function.cpp */;
 		name = "kite_ast_function.cpp: 72";
 		rLen = 0;
-		rLoc = 3244;
+		rLoc = 3259;
 		rType = 0;
 		vrLen = 677;
 		vrLoc = 2603;
@@ -507,7 +519,7 @@
 		fRef = 7F74079A119E5AC20089D73B /* kite_ast_function.cpp */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 90;
+		rLoc = 91;
 		rType = 1;
 	};
 	7FFE415611ACE5E700C1965C /* PBXTextBookmark */ = {
@@ -515,7 +527,7 @@
 		fRef = 7F74079A119E5AC20089D73B /* kite_ast_function.cpp */;
 		name = "kite_ast_function.cpp: 89";
 		rLen = 0;
-		rLoc = 3572;
+		rLoc = 3587;
 		rType = 0;
 		vrLen = 546;
 		vrLoc = 3293;
@@ -525,7 +537,7 @@
 		fRef = 7F74079A119E5AC20089D73B /* kite_ast_function.cpp */;
 		name = "kite_ast_function.cpp: 72";
 		rLen = 0;
-		rLoc = 3212;
+		rLoc = 3227;
 		rType = 0;
 		vrLen = 1361;
 		vrLoc = 1932;
@@ -605,7 +617,7 @@
 		fRef = 7F74079A119E5AC20089D73B /* kite_ast_function.cpp */;
 		name = "kite_ast_function.cpp: 40";
 		rLen = 0;
-		rLoc = 2050;
+		rLoc = 2064;
 		rType = 0;
 		vrLen = 1309;
 		vrLoc = 1410;
@@ -615,7 +627,7 @@
 		fRef = 7F74079A119E5AC20089D73B /* kite_ast_function.cpp */;
 		name = "kite_ast_function.cpp: 51";
 		rLen = 0;
-		rLoc = 2363;
+		rLoc = 2378;
 		rType = 0;
 		vrLen = 1301;
 		vrLoc = 1811;
@@ -625,7 +637,7 @@
 		fRef = 7F74079A119E5AC20089D73B /* kite_ast_function.cpp */;
 		name = "kite_ast_function.cpp: 91";
 		rLen = 0;
-		rLoc = 3572;
+		rLoc = 3587;
 		rType = 0;
 		vrLen = 533;
 		vrLoc = 3456;
@@ -635,10 +647,142 @@
 		fRef = 7F74079A119E5AC20089D73B /* kite_ast_function.cpp */;
 		name = "kite_ast_function.cpp: 51";
 		rLen = 0;
-		rLoc = 2363;
+		rLoc = 2378;
 		rType = 0;
 		vrLen = 1301;
 		vrLoc = 1811;
+	};
+	7FFE417511ACE8E800C1965C /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 7F74079A119E5AC20089D73B /* kite_ast_function.cpp */;
+		name = "kite_ast_function.cpp: 91";
+		rLen = 0;
+		rLoc = 3587;
+		rType = 0;
+		vrLen = 533;
+		vrLoc = 3457;
+	};
+	7FFE417811ACE93000C1965C /* kite_type_thread.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1194, 689}}";
+			sepNavSelRange = "{2120, 0}";
+			sepNavVisRange = "{665, 1524}";
+		};
+	};
+	7FFE417911ACE93000C1965C /* kite_type_thread.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1194, 637}}";
+			sepNavSelRange = "{2003, 0}";
+			sepNavVisRange = "{364, 1821}";
+		};
+	};
+	7FFE417F11ACEAB400C1965C /* XCBuildMessageTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "Cannot call member function 'const llvm::Type* kite::types::kite_thread_t::GetPointerType()' without object";
+		fRef = 7F74079A119E5AC20089D73B /* kite_ast_function.cpp */;
+		fallbackIsa = XCBuildMessageTextBookmark;
+		rLen = 1;
+		rLoc = 39;
+		rType = 1;
+	};
+	7FFE418011ACEAB400C1965C /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 7F74079A119E5AC20089D73B /* kite_ast_function.cpp */;
+		name = "kite_ast_function.cpp: 40";
+		rLen = 0;
+		rLoc = 1956;
+		rType = 0;
+		vrLen = 614;
+		vrLoc = 1488;
+	};
+	7FFE418311ACEAD200C1965C /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 7F74079A119E5AC20089D73B /* kite_ast_function.cpp */;
+		name = "kite_ast_function.cpp: 40";
+		rLen = 0;
+		rLoc = 1956;
+		rType = 0;
+		vrLen = 614;
+		vrLoc = 1488;
+	};
+	7FFE418411ACEAD200C1965C /* XCBuildMessageTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "'kite_thread_t' has not been declared";
+		fRef = 7FFE417911ACE93000C1965C /* kite_type_thread.cpp */;
+		fallbackIsa = XCBuildMessageTextBookmark;
+		rLen = 1;
+		rLoc = 35;
+		rType = 1;
+	};
+	7FFE418511ACEAD200C1965C /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 7FFE417911ACE93000C1965C /* kite_type_thread.cpp */;
+		name = "kite_type_thread.cpp: 35";
+		rLen = 0;
+		rLoc = 1819;
+		rType = 0;
+		vrLen = 515;
+		vrLoc = 1564;
+	};
+	7FFE419011ACEB1900C1965C /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 7FFE417911ACE93000C1965C /* kite_type_thread.cpp */;
+		name = "kite_type_thread.cpp: 35";
+		rLen = 0;
+		rLoc = 1819;
+		rType = 0;
+		vrLen = 555;
+		vrLoc = 1564;
+	};
+	7FFE419111ACEB2800C1965C /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 7F2C0696118FB70300E2610A /* kite_ast_base.h */;
+		name = "kite_ast_base.h: 34";
+		rLen = 179;
+		rLoc = 1797;
+		rType = 0;
+		vrLen = 1652;
+		vrLoc = 435;
+	};
+	7FFE419211ACEB2800C1965C /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 7F74079A119E5AC20089D73B /* kite_ast_function.cpp */;
+		name = "kite_ast_function.cpp: 40";
+		rLen = 0;
+		rLoc = 1956;
+		rType = 0;
+		vrLen = 1647;
+		vrLoc = 957;
+	};
+	7FFE419311ACEB2800C1965C /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 7FFE417811ACE93000C1965C /* kite_type_thread.h */;
+		name = "kite_type_thread.h: 48";
+		rLen = 0;
+		rLoc = 2120;
+		rType = 0;
+		vrLen = 1524;
+		vrLoc = 665;
+	};
+	7FFE419411ACEB2800C1965C /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 7FFE417911ACE93000C1965C /* kite_type_thread.cpp */;
+		name = "kite_type_thread.cpp: 36";
+		rLen = 0;
+		rLoc = 1820;
+		rType = 0;
+		vrLen = 1963;
+		vrLoc = 116;
+	};
+	7FFE419511ACEB2800C1965C /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 7FFE417911ACE93000C1965C /* kite_type_thread.cpp */;
+		name = "kite_type_thread.cpp: 40";
+		rLen = 0;
+		rLoc = 2003;
+		rType = 0;
+		vrLen = 1821;
+		vrLoc = 364;
 	};
 	8DD76F620486A84900D96B5E /* kite-llvm */ = {
 		activeExec = 0;

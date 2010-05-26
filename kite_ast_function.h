@@ -59,6 +59,8 @@ namespace kite
 			const char *_name;
 			std::vector<const Type*> _parameters;
 			std::vector<char*> _parameterNames;
+			
+			Value *codegen_single_pass(CompilerState *state, const Type *desiredReturnType, Type **actualReturnType);
 		};
 	};
 };

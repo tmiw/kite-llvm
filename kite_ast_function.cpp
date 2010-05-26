@@ -43,12 +43,10 @@ namespace kite
 			// empty
 		}
 		
-		Value *MethodValue::codegen(CompilerState *state)
+		Value *MethodValue::codegen_single_pass(CompilerState *state, const Type *desiredReturnType, Type **actualReturnType)
 		{
-			assert(state != NULL);
-			
 			Module *currentModule = state->current_module();
-			FunctionType *FT = FunctionType::get(Type::getDoubleTy(getGlobalContext()), _parameters, false);
+			FunctionType *FT = FunctionType::get(desiredReturnType, _parameters, false);
 			Function *F = Function::Create(FT, Function::ExternalLinkage, _name, currentModule);
 			
 			// TODO: redefinition check and exception if needed.
@@ -70,14 +68,33 @@ namespace kite
 			
 			if (Value *rv = this->iterate_all_instructions(state))
 			{
-				if (rv->getType()->isInteger())
+				// TODO: bad form! shouldn't need to const_cast our way out of bad code
+				*actualReturnType = const_cast<Type*>(rv->getType());
+				/*if (rv->getType()->isInteger())
 				{
 					rv = builder.CreateSIToFP(rv, Type::getDoubleTy(getGlobalContext()));
-				}
+				}*/
 				builder.CreateRet(rv);
 			}
 			
 			state->pop_symbol_stack();
+			return F;
+		}
+		
+		Value *MethodValue::codegen(CompilerState *state)
+		{
+			assert(state != NULL);
+			
+			Type *actualReturnType;
+			Function *F = static_cast<Function*>(codegen_single_pass(state, Type::getDoubleTy(getGlobalContext()), &actualReturnType));
+			
+			if (!actualReturnType->isFloatingPoint())
+			{
+				// Second pass, this time with the correct return type.
+				F->eraseFromParent();
+				F = static_cast<Function*>(codegen_single_pass(state, actualReturnType, &actualReturnType));
+			}
+			
 			verifyFunction(*F);
 			return F;
 		}

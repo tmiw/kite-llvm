@@ -34,9 +34,20 @@ int main (int argc, char * const argv[]) {
 	Module *mod = state->pop_module();
 	
 	ExecutionEngine *engine = EngineBuilder(mod).create();
-	void *fptr = engine->getPointerToFunction(static_cast<Function*>(v));
-	double (*FP)() = (double (*)())(intptr_t)fptr;
-	std::cout << "Evaluates to: " << (*FP)() << std::endl;
+	Function *f = static_cast<Function*>(v);
+	void *fptr = engine->getPointerToFunction(f);
+	
+	if (f->getReturnType()->isFloatingPoint())
+	{
+		double (*FP)() = (double (*)())(intptr_t)fptr;
+		std::cout << "Evaluates to: " << (*FP)() << std::endl;
+	}
+	else
+	{
+		int (*IP)() = (int (*)())(intptr_t)fptr;
+		std::cout << "Evaluates to: " << (*IP)() << std::endl;
+	}
+
 	mod->dump();
 	
     return 0;

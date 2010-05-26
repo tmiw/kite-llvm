@@ -35,7 +35,9 @@ namespace kite
 		MethodValue::MethodValue(const char *name)
 		: _name(name)
 		{
-			// empty
+			// First parameter is always a thread type.
+			_parameters.push_back(PointerType::getUnqual(Type::getInt32Ty(getGlobalContext())));
+			_parameterNames.push_back("thd");
 		}
 		
 		MethodValue::~MethodValue()
@@ -46,7 +48,7 @@ namespace kite
 		Value *MethodValue::codegen_single_pass(CompilerState *state, const Type *desiredReturnType, Type **actualReturnType)
 		{
 			Module *currentModule = state->current_module();
-			FunctionType *FT = FunctionType::get(desiredReturnType, _parameters, false);
+			FunctionType *FT = FunctionType::get(desiredReturnType, _parameters, true);
 			Function *F = Function::Create(FT, Function::ExternalLinkage, _name, currentModule);
 			
 			// TODO: redefinition check and exception if needed.

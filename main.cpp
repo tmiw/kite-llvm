@@ -39,13 +39,13 @@ int main (int argc, char * const argv[]) {
 	
 	if (f->getReturnType()->isFloatingPoint())
 	{
-		double (*FP)() = (double (*)())(intptr_t)fptr;
-		std::cout << "Evaluates to: " << (*FP)() << std::endl;
+		double (*FP)(int*,...) = (double (*)(int*,...))(intptr_t)fptr;
+		std::cout << "Evaluates to: " << (*FP)(NULL) << std::endl;
 	}
 	else
 	{
-		int (*IP)() = (int (*)())(intptr_t)fptr;
-		std::cout << "Evaluates to: " << (*IP)() << std::endl;
+		int (*IP)(int*,...) = (int (*)(int*,...))(intptr_t)fptr;
+		std::cout << "Evaluates to: " << (*IP)(NULL) << std::endl;
 	}
 
 	mod->dump();

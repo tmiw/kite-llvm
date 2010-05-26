@@ -229,8 +229,6 @@
 			<key>Layout</key>
 			<array>
 				<dict>
-					<key>BecomeActive</key>
-					<true/>
 					<key>ContentConfiguration</key>
 					<dict>
 						<key>PBXBottomSmartGroupGIDs</key>
@@ -274,7 +272,8 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>13</integer>
+									<integer>3</integer>
+									<integer>2</integer>
 									<integer>1</integer>
 									<integer>0</integer>
 								</array>
@@ -310,12 +309,14 @@
 					<key>Dock</key>
 					<array>
 						<dict>
+							<key>BecomeActive</key>
+							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
 								<string>1CE0B20306471E060097A5F4</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>main.cpp</string>
+								<string>kite_ast_function.cpp</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
@@ -323,11 +324,11 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>1CE0B20406471E060097A5F4</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>main.cpp</string>
+										<string>kite_ast_function.cpp</string>
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>7FFE415D11ACE61100C1965C</string>
+										<string>7FFE416E11ACE81200C1965C</string>
 										<key>history</key>
 										<array>
 											<string>7F2C0732118FC73D00E2610A</string>
@@ -340,10 +341,10 @@
 											<string>7F74086B119EA4C40089D73B</string>
 											<string>7F74086E11A60C5B0089D73B</string>
 											<string>7F74086F11A60C5B0089D73B</string>
-											<string>7FFE415911ACE61100C1965C</string>
-											<string>7FFE415A11ACE61100C1965C</string>
-											<string>7FFE415B11ACE61100C1965C</string>
-											<string>7FFE415C11ACE61100C1965C</string>
+											<string>7FFE416411ACE7FB00C1965C</string>
+											<string>7FFE416511ACE7FB00C1965C</string>
+											<string>7FFE416611ACE7FB00C1965C</string>
+											<string>7FFE416711ACE7FB00C1965C</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>

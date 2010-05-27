@@ -29,6 +29,10 @@
 #define KITE_TYPE_THREAD_H
 
 #include <pthread.h>
+#include <map>
+#include <stack>
+using namespace std;
+
 #include "llvm/DerivedTypes.h"
 #include "llvm/LLVMContext.h"
 #include "llvm/Module.h"
@@ -36,6 +40,11 @@
 #include "llvm/Support/IRBuilder.h"
 using namespace llvm;
 
+#ifndef __cplusplus
+struct kite_thread_t;
+#endif // !__cplusplus
+
+#ifdef __cplusplus
 namespace kite
 {
 	namespace types
@@ -43,11 +52,26 @@ namespace kite
 		struct kite_thread_t
 		{
 			pthread_t *thread_pointer;
+			map<const char*, stack<void*> > *runtime_stack;
+			
+			kite_thread_t() : runtime_stack(new map<const char*, stack<void*> >()) { }
 			
 			static const Type* GetStructureType();
 			static const Type* GetPointerType();
 		};
 	}
 }
+
+extern "C"
+{
+#endif // __cplusplus
+
+	void KitePushRuntimeValue(struct kite_thread_t *thd, const char *name, void *value);
+	void **KiteGetRuntimeValue(struct kite_thread_t *thd, const char *name);
+	void KitePopRuntimeValue(struct kite_thread_t *thd, const char *name);
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif // KITE_TYPE_THREAD_H

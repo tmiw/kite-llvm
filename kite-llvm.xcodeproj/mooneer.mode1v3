@@ -273,8 +273,8 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>4</integer>
-									<integer>2</integer>
+									<integer>10</integer>
+									<integer>5</integer>
 									<integer>1</integer>
 									<integer>0</integer>
 								</array>
@@ -317,7 +317,7 @@
 								<key>PBXProjectModuleGUID</key>
 								<string>1CE0B20306471E060097A5F4</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>kite_type_thread.cpp</string>
+								<string>kite_ast_function.h</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
@@ -325,15 +325,14 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>1CE0B20406471E060097A5F4</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>kite_type_thread.cpp</string>
+										<string>kite_ast_function.h</string>
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>7FFE419511ACEB2800C1965C</string>
+										<string>7FFE41D911AE695500C1965C</string>
 										<key>history</key>
 										<array>
 											<string>7F2C0732118FC73D00E2610A</string>
-											<string>7FD86EFC118FF34900F986F1</string>
 											<string>7F7407DB119E64000089D73B</string>
 											<string>7F740866119EA4C40089D73B</string>
 											<string>7F740867119EA4C40089D73B</string>
@@ -342,12 +341,15 @@
 											<string>7F74086E11A60C5B0089D73B</string>
 											<string>7F74086F11A60C5B0089D73B</string>
 											<string>7FFE416411ACE7FB00C1965C</string>
-											<string>7FFE416511ACE7FB00C1965C</string>
-											<string>7FFE416611ACE7FB00C1965C</string>
-											<string>7FFE419111ACEB2800C1965C</string>
-											<string>7FFE419211ACEB2800C1965C</string>
-											<string>7FFE419311ACEB2800C1965C</string>
-											<string>7FFE419411ACEB2800C1965C</string>
+											<string>7FFE41B811AE24EF00C1965C</string>
+											<string>7FFE41D111AE695500C1965C</string>
+											<string>7FFE41D211AE695500C1965C</string>
+											<string>7FFE41D311AE695500C1965C</string>
+											<string>7FFE41D411AE695500C1965C</string>
+											<string>7FFE41D511AE695500C1965C</string>
+											<string>7FFE41D611AE695500C1965C</string>
+											<string>7FFE41D711AE695500C1965C</string>
+											<string>7FFE41D811AE695500C1965C</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -569,14 +571,12 @@
 					<key>Dock</key>
 					<array>
 						<dict>
-							<key>BecomeActive</key>
-							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
 								<string>1CD0528F0623707200166675</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>kite_type_thread.cpp</string>
+								<string>kite_type_thread.h</string>
 								<key>StatusBarVisibility</key>
 								<true/>
 							</dict>
@@ -593,6 +593,8 @@
 							<string>282pt</string>
 						</dict>
 						<dict>
+							<key>BecomeActive</key>
+							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
@@ -645,7 +647,7 @@
 			<key>WindowToolGUID</key>
 			<string>7F2C0668118FAECB00E2610A</string>
 			<key>WindowToolIsVisible</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>FirstTimeWindowDisplayed</key>

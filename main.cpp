@@ -12,6 +12,7 @@
 #include "kite_ast_function.h"
 #include "kite_ast_const_base.h"
 #include "kite_ast_binaryop.h"
+#include "kite_ast_variable.h"
 
 using namespace kite::parse_tree;
 
@@ -21,9 +22,12 @@ int main (int argc, char * const argv[]) {
 	llvm_start_multithreaded();
 	
 	ConstantValue<int> *constant1 = new ConstantValue<int>(32);
-	ConstantValue<int> *constant2 = new ConstantValue<int>(10);
-	BinaryOperation *constant = new BinaryOperation(ADDITION, constant1, constant2);
+	//ConstantValue<int> *constant2 = new ConstantValue<int>(10);
+	VariableValue *var = new VariableValue("param");
+	
+	BinaryOperation *constant = new BinaryOperation(ADDITION, constant1, var);
 	MethodValue *method = new MethodValue("life_universe_everything");
+	method->push_parameter("param", Type::getInt32Ty(getGlobalContext()));
 	method->push_instruction(constant);
 	CompilerState *state = new CompilerState();
 	
@@ -40,12 +44,12 @@ int main (int argc, char * const argv[]) {
 	if (f->getReturnType()->isFloatingPoint())
 	{
 		double (*FP)(int*,...) = (double (*)(int*,...))(intptr_t)fptr;
-		std::cout << "Evaluates to: " << (*FP)(NULL) << std::endl;
+		std::cout << "Evaluates to: " << (*FP)(NULL, 10) << std::endl;
 	}
 	else
 	{
 		int (*IP)(int*,...) = (int (*)(int*,...))(intptr_t)fptr;
-		std::cout << "Evaluates to: " << (*IP)(NULL) << std::endl;
+		std::cout << "Evaluates to: " << (*IP)(NULL, 10) << std::endl;
 	}
 
 	mod->dump();

@@ -25,8 +25,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef KITE_AST_FUNCTION_H
-#define KITE_AST_FUNCTION_H
+#ifndef KITE_AST_VARIABLE_H
+#define KITE_AST_VARIABLE_H
 
 #include <assert.h>
 #include "kite_ast_base.h"
@@ -46,28 +46,17 @@ namespace kite
 	namespace parse_tree
 	{
 		/*
-		 * Kite abstract syntax tree -- method object.
+		 * Kite abstract syntax tree -- variable object.
 		 */
-		class MethodValue : public IAbstractTree, public MultipleChildTrees
+		class VariableValue : public IAbstractTree
 		{
 		public:
-			MethodValue(const char *name);
-			virtual ~MethodValue();
+			VariableValue(const char *name);
+			virtual ~VariableValue();
 			
 			virtual Value *codegen(CompilerState *state = NULL); /*! Generates bytecode for current point in tree. */
-			
-			inline void push_parameter(char* name, const Type *this_type)
-			{
-				_parameters.push_back(this_type);
-				_parameterNames.push_back(name);
-			}
-			
 		private:
 			const char *_name;
-			std::vector<const Type*> _parameters;
-			std::vector<char*> _parameterNames;
-			
-			Value *codegen_single_pass(CompilerState *state, const Type *desiredReturnType, Type **actualReturnType);
 		};
 	};
 };

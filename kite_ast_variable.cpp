@@ -25,61 +25,32 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef KITE_AST_FUNCTION_H
-#define KITE_AST_FUNCTION_H
-
-#include <assert.h>
 #include "kite_ast_base.h"
-
-// LLVM-related files.
-#ifdef __cplusplus
-#include "llvm/DerivedTypes.h"
-#include "llvm/LLVMContext.h"
-#include "llvm/Module.h"
-#include "llvm/Analysis/Verifier.h"
-#include "llvm/Support/IRBuilder.h"
-
-using namespace llvm;
+#include "kite_ast_variable.h"
 
 namespace kite
 {
 	namespace parse_tree
 	{
-		/*
-		 * Kite abstract syntax tree -- method object.
-		 */
-		class MethodValue : public IAbstractTree, public MultipleChildTrees
+		VariableValue:: VariableValue(const char *name)
+		: _name(name)
 		{
-		public:
-			MethodValue(const char *name);
-			virtual ~MethodValue();
+			// empty
+		}
+		
+		VariableValue::~VariableValue()
+		{
+			// empty
+		}
+		
+		Value *VariableValue::codegen(CompilerState *state)
+		{
+			assert(state != NULL);
 			
-			virtual Value *codegen(CompilerState *state = NULL); /*! Generates bytecode for current point in tree. */
-			
-			inline void push_parameter(char* name, const Type *this_type)
-			{
-				_parameters.push_back(this_type);
-				_parameterNames.push_back(name);
-			}
-			
-		private:
-			const char *_name;
-			std::vector<const Type*> _parameters;
-			std::vector<char*> _parameterNames;
-			
-			Value *codegen_single_pass(CompilerState *state, const Type *desiredReturnType, Type **actualReturnType);
-		};
-	};
-};
-
-extern "C"
-{
-#endif // __cplusplus
-	
-	//Value *GenerateCodeForTree(IAbstractTree *);
-	
-#ifdef __cplusplus
+			// find variable in state object
+			// TODO: dynamically define or find from this/stack
+			std::map<const char *, Value*> &this_stack = state->current_symbol_stack();
+			return this_stack[_name];
+		}
+	}
 }
-#endif // __cplusplus
-
-#endif // KITE_AST_FUNCTION_H

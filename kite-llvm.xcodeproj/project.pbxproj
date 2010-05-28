@@ -15,6 +15,7 @@
 		7F740854119EA10A0089D73B /* kite_ast_binaryop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7F740853119EA10A0089D73B /* kite_ast_binaryop.cpp */; };
 		7FFE417A11ACE93000C1965C /* kite_type_thread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7FFE417911ACE93000C1965C /* kite_type_thread.cpp */; };
 		7FFE41C511AE677F00C1965C /* kite_ast_variable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7FFE41C411AE677F00C1965C /* kite_ast_variable.cpp */; };
+		7FFE41E211AF81F800C1965C /* kite_type_object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7FFE41E111AF81F800C1965C /* kite_type_object.cpp */; };
 		8DD76F650486A84900D96B5E /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 08FB7796FE84155DC02AAC07 /* main.cpp */; settings = {ATTRIBUTES = (); }; };
 		8DD76F6A0486A84900D96B5E /* kite-llvm.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6859E8B029090EE04C91782 /* kite-llvm.1 */; };
 /* End PBXBuildFile section */
@@ -49,6 +50,8 @@
 		7FFE417911ACE93000C1965C /* kite_type_thread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = kite_type_thread.cpp; sourceTree = "<group>"; };
 		7FFE41C311AE677F00C1965C /* kite_ast_variable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kite_ast_variable.h; sourceTree = "<group>"; };
 		7FFE41C411AE677F00C1965C /* kite_ast_variable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = kite_ast_variable.cpp; sourceTree = "<group>"; };
+		7FFE41E011AF81F800C1965C /* kite_type_object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kite_type_object.h; sourceTree = "<group>"; };
+		7FFE41E111AF81F800C1965C /* kite_type_object.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = kite_type_object.cpp; sourceTree = "<group>"; };
 		8DD76F6C0486A84900D96B5E /* kite-llvm */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "kite-llvm"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C6859E8B029090EE04C91782 /* kite-llvm.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = "kite-llvm.1"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -117,6 +120,8 @@
 			children = (
 				7FFE417811ACE93000C1965C /* kite_type_thread.h */,
 				7FFE417911ACE93000C1965C /* kite_type_thread.cpp */,
+				7FFE41E011AF81F800C1965C /* kite_type_object.h */,
+				7FFE41E111AF81F800C1965C /* kite_type_object.cpp */,
 			);
 			name = Types;
 			sourceTree = "<group>";
@@ -181,6 +186,7 @@
 				7F740854119EA10A0089D73B /* kite_ast_binaryop.cpp in Sources */,
 				7FFE417A11ACE93000C1965C /* kite_type_thread.cpp in Sources */,
 				7FFE41C511AE677F00C1965C /* kite_ast_variable.cpp in Sources */,
+				7FFE41E211AF81F800C1965C /* kite_type_object.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

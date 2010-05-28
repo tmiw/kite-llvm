@@ -52,9 +52,9 @@ namespace kite
 		struct kite_thread_t
 		{
 			pthread_t *thread_pointer;
-			map<const char*, stack<void*> > *runtime_stack;
+			map<const char*, stack<void**> > *runtime_stack;
 			
-			kite_thread_t() : runtime_stack(new map<const char*, stack<void*> >()) { }
+			kite_thread_t() : runtime_stack(new map<const char*, stack<void**> >()) { }
 			
 			static const Type* GetStructureType();
 			static const Type* GetPointerType();
@@ -66,7 +66,7 @@ extern "C"
 {
 #endif // __cplusplus
 
-	void KitePushRuntimeValue(struct kite_thread_t *thd, const char *name, void *value);
+	void KitePushRuntimeValue(struct kite_thread_t *thd, const char *name, void **value);
 	void **KiteGetRuntimeValue(struct kite_thread_t *thd, const char *name);
 	void KitePopRuntimeValue(struct kite_thread_t *thd, const char *name);
 

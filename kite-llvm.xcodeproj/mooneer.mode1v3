@@ -273,8 +273,8 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>10</integer>
-									<integer>5</integer>
+									<integer>17</integer>
+									<integer>7</integer>
 									<integer>1</integer>
 									<integer>0</integer>
 								</array>
@@ -317,7 +317,7 @@
 								<key>PBXProjectModuleGUID</key>
 								<string>1CE0B20306471E060097A5F4</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>kite_ast_function.h</string>
+								<string>kite_ast_variable.cpp</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
@@ -325,31 +325,33 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>1CE0B20406471E060097A5F4</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>kite_ast_function.h</string>
+										<string>kite_ast_variable.cpp</string>
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>7FFE41D911AE695500C1965C</string>
+										<string>7FFE421411AF854E00C1965C</string>
 										<key>history</key>
 										<array>
 											<string>7F2C0732118FC73D00E2610A</string>
 											<string>7F7407DB119E64000089D73B</string>
 											<string>7F740866119EA4C40089D73B</string>
-											<string>7F740867119EA4C40089D73B</string>
 											<string>7F74086A119EA4C40089D73B</string>
 											<string>7F74086B119EA4C40089D73B</string>
 											<string>7F74086E11A60C5B0089D73B</string>
 											<string>7F74086F11A60C5B0089D73B</string>
 											<string>7FFE416411ACE7FB00C1965C</string>
 											<string>7FFE41B811AE24EF00C1965C</string>
-											<string>7FFE41D111AE695500C1965C</string>
-											<string>7FFE41D211AE695500C1965C</string>
-											<string>7FFE41D311AE695500C1965C</string>
-											<string>7FFE41D411AE695500C1965C</string>
-											<string>7FFE41D511AE695500C1965C</string>
-											<string>7FFE41D611AE695500C1965C</string>
 											<string>7FFE41D711AE695500C1965C</string>
-											<string>7FFE41D811AE695500C1965C</string>
+											<string>7FFE41F711AF840B00C1965C</string>
+											<string>7FFE41F811AF840B00C1965C</string>
+											<string>7FFE41FA11AF840B00C1965C</string>
+											<string>7FFE41FB11AF840B00C1965C</string>
+											<string>7FFE41FC11AF840B00C1965C</string>
+											<string>7FFE41FD11AF840B00C1965C</string>
+											<string>7FFE41FE11AF840B00C1965C</string>
+											<string>7FFE421111AF854E00C1965C</string>
+											<string>7FFE421211AF854E00C1965C</string>
+											<string>7FFE421311AF854E00C1965C</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -549,9 +551,9 @@
 	<array>
 		<string>7FFE415E11ACE61100C1965C</string>
 		<string>7FFE415F11ACE61100C1965C</string>
-		<string>1C78EAAD065D492600B07095</string>
 		<string>1CD10A99069EF8BA00B06720</string>
 		<string>7F2C0668118FAECB00E2610A</string>
+		<string>1C78EAAD065D492600B07095</string>
 		<string>/Users/mooneer/Desktop/misc/kite/interpreter/branches/kite-llvm/kite-llvm.xcodeproj</string>
 	</array>
 	<key>WindowString</key>
@@ -571,12 +573,14 @@
 					<key>Dock</key>
 					<array>
 						<dict>
+							<key>BecomeActive</key>
+							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
 								<string>1CD0528F0623707200166675</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>kite_type_thread.h</string>
+								<string>kite_ast_variable.cpp</string>
 								<key>StatusBarVisibility</key>
 								<true/>
 							</dict>
@@ -593,8 +597,6 @@
 							<string>282pt</string>
 						</dict>
 						<dict>
-							<key>BecomeActive</key>
-							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
@@ -647,7 +649,7 @@
 			<key>WindowToolGUID</key>
 			<string>7F2C0668118FAECB00E2610A</string>
 			<key>WindowToolIsVisible</key>
-			<true/>
+			<false/>
 		</dict>
 		<dict>
 			<key>FirstTimeWindowDisplayed</key>
@@ -936,7 +938,7 @@
 			<key>WindowToolGUID</key>
 			<string>1C78EAAD065D492600B07095</string>
 			<key>WindowToolIsVisible</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>Identifier</key>

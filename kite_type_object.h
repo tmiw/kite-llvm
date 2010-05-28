@@ -25,44 +25,28 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <vector>
-#include "kite_type_thread.h"
+#ifndef KITE_TYPE_OBJECT_H
+#define KITE_TYPE_OBJECT_H
 
-using namespace std;
-namespace kite
+#include "llvm/DerivedTypes.h"
+#include "llvm/LLVMContext.h"
+#include "llvm/Module.h"
+#include "llvm/Analysis/Verifier.h"
+#include "llvm/Support/IRBuilder.h"
+using namespace llvm;
+
+namespace kite 
 {
 	namespace types
 	{
-		const Type *kite_thread_t::GetStructureType()
+		struct kite_object_t
 		{
-			vector<const Type*> structureTypes;
+			int type_id;
 			
-			structureTypes.push_back(PointerType::getUnqual(Type::getVoidTy(getGlobalContext())));
-			structureTypes.push_back(PointerType::getUnqual(Type::getVoidTy(getGlobalContext())));
+			static const Type* GetStructureType();
+			static const Type* GetPointerType();
+		};
+	};
+};
 
-			return StructType::get(getGlobalContext(), structureTypes);
-		}
-
-		const Type *kite_thread_t::GetPointerType()
-		{
-			return PointerType::getUnqual(GetStructureType());
-		}
-	}
-}
-
-using namespace kite::types;
-
-void KitePushRuntimeValue(kite::types::kite_thread_t *thd, const char *name, void **value)
-{
-	(*thd->runtime_stack)[name].push(value);
-}
-
-void **KiteGetRuntimeValue(kite::types::kite_thread_t *thd, const char *name)
-{
-	return (*thd->runtime_stack)[name].top();
-}
-
-void KitePopRuntimeValue(kite::types::kite_thread_t *thd, const char *name)
-{
-	(*thd->runtime_stack)[name].pop();
-}
+#endif // KITE_TYPE_OBJECT_H

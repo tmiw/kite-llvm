@@ -27,6 +27,9 @@
 
 #include "kite_ast_base.h"
 #include "kite_ast_variable.h"
+#include "kite_type_object.h"
+
+using namespace kite::types;
 
 namespace kite
 {
@@ -48,9 +51,23 @@ namespace kite
 			assert(state != NULL);
 			
 			// find variable in state object
-			// TODO: dynamically define or find from this/stack
-			std::map<const char *, Value*> &this_stack = state->current_symbol_stack();
-			return this_stack[_name];
+			// TODO: find from this and add dynamic lookup from shadow stack.
+			for (std::vector<std::map<const char *, Value*> *>::reverse_iterator i = state->symbol_stack().rbegin(); i != state->symbol_stack().rend(); i++)
+			{
+				if ((*i)->count(_name) > 0)
+				{
+					return (*(*i))[_name];
+				}
+			}
+
+			// allocate new value in stack and initialize to null.
+			IRBuilder<> &builder = state->module_builder();
+			Value *result = builder.CreateAlloca(kite_object_t::GetPointerType());
+			std::map<const char *, Value*> &current_stack = state->current_symbol_stack();
+			
+			builder.CreateStore(ConstantPointerNull::get(static_cast<const PointerType*>(kite_object_t::GetPointerType())), result);
+			current_stack[_name] = result;
+			return current_stack[_name];
 		}
 	}
 }

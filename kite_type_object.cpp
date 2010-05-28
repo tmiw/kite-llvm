@@ -26,43 +26,26 @@
  ****************************************************************************/
 
 #include <vector>
-#include "kite_type_thread.h"
-
 using namespace std;
+
+#include "kite_type_object.h"
+
 namespace kite
 {
 	namespace types
 	{
-		const Type *kite_thread_t::GetStructureType()
+		const Type *kite_object_t::GetStructureType()
 		{
 			vector<const Type*> structureTypes;
 			
-			structureTypes.push_back(PointerType::getUnqual(Type::getVoidTy(getGlobalContext())));
-			structureTypes.push_back(PointerType::getUnqual(Type::getVoidTy(getGlobalContext())));
-
+			structureTypes.push_back(Type::getInt32Ty(getGlobalContext()));
+			
 			return StructType::get(getGlobalContext(), structureTypes);
 		}
-
-		const Type *kite_thread_t::GetPointerType()
+		
+		const Type *kite_object_t::GetPointerType()
 		{
 			return PointerType::getUnqual(GetStructureType());
 		}
 	}
-}
-
-using namespace kite::types;
-
-void KitePushRuntimeValue(kite::types::kite_thread_t *thd, const char *name, void **value)
-{
-	(*thd->runtime_stack)[name].push(value);
-}
-
-void **KiteGetRuntimeValue(kite::types::kite_thread_t *thd, const char *name)
-{
-	return (*thd->runtime_stack)[name].top();
-}
-
-void KitePopRuntimeValue(kite::types::kite_thread_t *thd, const char *name)
-{
-	(*thd->runtime_stack)[name].pop();
 }

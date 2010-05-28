@@ -87,6 +87,7 @@ namespace kite
 			
 			void push_symbol_stack();
 			inline std::map<const char *, Value*> &current_symbol_stack() { return *_symbolTableStack.back(); }
+			inline std::vector<std::map<const char *, Value*> *> &symbol_stack() { return _symbolTableStack; }
 			void pop_symbol_stack();
 			
 			void push_child_tree(IAbstractTree *tree);

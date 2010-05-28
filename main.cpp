@@ -28,6 +28,7 @@ int main (int argc, char * const argv[]) {
 	BinaryOperation *constant = new BinaryOperation(ADDITION, constant1, var);
 	MethodValue *method = new MethodValue("life_universe_everything");
 	method->push_parameter("param", Type::getInt32Ty(getGlobalContext()));
+	method->push_instruction(new VariableValue("p2"));
 	method->push_instruction(constant);
 	CompilerState *state = new CompilerState();
 	

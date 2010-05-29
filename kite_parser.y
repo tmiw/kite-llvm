@@ -399,7 +399,8 @@ run_catch_statement: RUN '[' input ']' CATCH '[' input ']'
 
 void dirty_yyerror(void *yyparse_param, char *str) 
 {
-    kite_compiler_t *comp = (kite_compiler_t*)yyget_extra(yyparse_param);
+	// TODO: process exceptions correctly
+    //kite_compiler_t *comp = (kite_compiler_t*)yyget_extra(yyparse_param);
 	fprintf(stderr, "Error encountered during compile: %s", str);
 	exit(-1);
 }

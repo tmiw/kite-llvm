@@ -73,10 +73,6 @@ namespace kite
 			{
 				// TODO: bad form! shouldn't need to const_cast our way out of bad code
 				*actualReturnType = const_cast<Type*>(rv->getType());
-				/*if (rv->getType()->isInteger())
-				{
-					rv = builder.CreateSIToFP(rv, Type::getDoubleTy(getGlobalContext()));
-				}*/
 				builder.CreateRet(rv);
 			}
 			

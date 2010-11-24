@@ -229,8 +229,6 @@
 			<key>Layout</key>
 			<array>
 				<dict>
-					<key>BecomeActive</key>
-					<true/>
 					<key>ContentConfiguration</key>
 					<dict>
 						<key>PBXBottomSmartGroupGIDs</key>
@@ -275,8 +273,10 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>25</integer>
-									<integer>24</integer>
+									<integer>9</integer>
+									<integer>2</integer>
+									<integer>1</integer>
+									<integer>0</integer>
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
@@ -310,12 +310,14 @@
 					<key>Dock</key>
 					<array>
 						<dict>
+							<key>BecomeActive</key>
+							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
 								<string>1CE0B20306471E060097A5F4</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>kite_ast_function.h</string>
+								<string>kite_type_registry.h</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
@@ -323,11 +325,11 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>1CE0B20406471E060097A5F4</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>kite_ast_function.h</string>
+										<string>kite_type_registry.h</string>
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>7FFE424411B111E700C1965C</string>
+										<string>7FFE426711C0E1FD00C1965C</string>
 										<key>history</key>
 										<array>
 											<string>7F2C0732118FC73D00E2610A</string>
@@ -340,16 +342,20 @@
 											<string>7FFE416411ACE7FB00C1965C</string>
 											<string>7FFE41B811AE24EF00C1965C</string>
 											<string>7FFE41F811AF840B00C1965C</string>
-											<string>7FFE41FA11AF840B00C1965C</string>
-											<string>7FFE41FB11AF840B00C1965C</string>
-											<string>7FFE41FC11AF840B00C1965C</string>
 											<string>7FFE41FE11AF840B00C1965C</string>
 											<string>7FFE421111AF854E00C1965C</string>
-											<string>7FFE421211AF854E00C1965C</string>
 											<string>7FFE422D11B1107100C1965C</string>
 											<string>7FFE422E11B1107100C1965C</string>
 											<string>7FFE422F11B1107100C1965C</string>
-											<string>7FFE423011B1107100C1965C</string>
+											<string>7FFE425E11C0E1FD00C1965C</string>
+											<string>7FFE425F11C0E1FD00C1965C</string>
+											<string>7FFE426011C0E1FD00C1965C</string>
+											<string>7FFE426111C0E1FD00C1965C</string>
+											<string>7FFE426211C0E1FD00C1965C</string>
+											<string>7FFE426311C0E1FD00C1965C</string>
+											<string>7FFE426411C0E1FD00C1965C</string>
+											<string>7FFE426511C0E1FD00C1965C</string>
+											<string>7FFE426611C0E1FD00C1965C</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -549,10 +555,10 @@
 	<array>
 		<string>7FFE415E11ACE61100C1965C</string>
 		<string>7FFE415F11ACE61100C1965C</string>
+		<string>1C78EAAD065D492600B07095</string>
 		<string>1CD10A99069EF8BA00B06720</string>
 		<string>7F2C0668118FAECB00E2610A</string>
 		<string>/Users/mooneer/Desktop/misc/kite/interpreter/branches/kite-llvm/kite-llvm.xcodeproj</string>
-		<string>1C78EAAD065D492600B07095</string>
 	</array>
 	<key>WindowString</key>
 	<string>20 163 1463 818 0 0 1680 1028 </string>
@@ -647,7 +653,7 @@
 			<key>WindowToolGUID</key>
 			<string>7F2C0668118FAECB00E2610A</string>
 			<key>WindowToolIsVisible</key>
-			<true/>
+			<false/>
 		</dict>
 		<dict>
 			<key>FirstTimeWindowDisplayed</key>

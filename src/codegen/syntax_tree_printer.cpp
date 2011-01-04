@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2010, Mooneer Salem
+ * Copyright (c) 2011, Mooneer Salem
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,49 +25,29 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "kite_ast_base.h"
-#include "kite_ast_variable.h"
-#include "kite_type_object.h"
-
-using namespace kite::types;
+#include <iostream>
+#include <boost/variant/apply_visitor.hpp>
+#include <boost/foreach.hpp>
+#include "syntax_tree_printer.h"
 
 namespace kite
 {
-	namespace parse_tree
-	{
-		VariableValue:: VariableValue(const char *name)
-		: _name(name)
-		{
-			// empty
-		}
-		
-		VariableValue::~VariableValue()
-		{
-			// empty
-		}
-		
-		Value *VariableValue::codegen(CompilerState *state)
-		{
-			assert(state != NULL);
-			
-			// find variable in state object
-			// TODO: find from this and add dynamic lookup from shadow stack.
-			for (std::vector<std::map<const char *, Value*> *>::reverse_iterator i = state->symbol_stack().rbegin(); i != state->symbol_stack().rend(); i++)
-			{
-				if ((*i)->count(_name) > 0)
-				{
-					return (*(*i))[_name];
-				}
-			}
-
-			// allocate new value in stack and initialize to null.
-			IRBuilder<> &builder = state->module_builder();
-			Value *result = builder.CreateAlloca(kite_object_t::GetPointerType());
-			std::map<const char *, Value*> &current_stack = state->current_symbol_stack();
-			
-			builder.CreateStore(ConstantPointerNull::get(static_cast<const PointerType*>(kite_object_t::GetPointerType())), result);
-			current_stack[_name] = result;
-			return current_stack[_name];
-		}
-	}
+    namespace codegen
+    {
+        std::string tab(int indent) { return std::string(indent, ' '); }
+        
+        syntax_tree_printer::syntax_tree_printer(int indent)
+            : indent(indent) { }
+        
+        void syntax_tree_printer::operator()(semantics::syntax_tree const &tree) const
+        {
+            std::cout << tab(indent) << "{op: " << tree.op << std::endl
+                      << tab(indent) << " children:" << std::endl;
+            BOOST_FOREACH(semantics::syntax_tree_node const &node, tree.children)
+            {
+                boost::apply_visitor(syntax_tree_node_printer(indent), node);
+            }
+            std::cout << tab(indent) << "}" << std::endl;
+        }
+    }
 }

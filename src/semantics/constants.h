@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2010, Mooneer Salem
+ * Copyright (c) 2011, Mooneer Salem
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,79 +24,60 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
-
-#ifndef KITE_AST_CONST_BASE_H
-#define KITE_AST_CONST_BASE_H
-
-#include <assert.h>
-#include "kite_ast_base.h"
-
-// LLVM-related files.
-#ifdef __cplusplus
-#include "llvm/DerivedTypes.h"
-#include "llvm/LLVMContext.h"
-#include "llvm/Module.h"
-#include "llvm/Analysis/Verifier.h"
-#include "llvm/Support/IRBuilder.h"
-
-using namespace llvm;
+ 
+#ifndef KITE_SEMANTICS__CONSTANTS_H
+#define KITE_SEMANTICS__CONSTANTS_H
 
 namespace kite
 {
-	namespace parse_tree
-	{
-		/*
-		 * Kite abstract syntax tree -- constant value.
-		 */
-		template<typename T>
-		class ConstantValue : public IAbstractTree
-		{
-		public:
-			ConstantValue(T value) /*! Creates new instance of the ConstantValue object. */
-			: _value(value)
-			{
-				// empty.
-			}
-			virtual ~ConstantValue() /*! Destroys instance of the ConstantValue object. */
-			{
-				// empty.
-			}
-		
-			virtual Value *codegen(CompilerState *state = NULL) /*! Generates bytecode for constant value. */
-			{
-				// By default, we don't know how to generate for whatever type
-				// the developer throws at us. Therefore, a simple assert(0) will
-				// exit the program here.
-				assert(0);
-				return NULL;
-			}
-		private:
-			T _value;
-		};
-	
-		template<>
-		inline Value *ConstantValue<int>::codegen(CompilerState *state)
-		{
-			return ConstantInt::get(getGlobalContext(), APInt(32, _value, true));
-		}
-		
-		template<>
-		inline Value *ConstantValue<double>::codegen(CompilerState *state)
-		{
-			return ConstantFP::get(getGlobalContext(), APFloat(_value));
-		}
-	};
-};
-
-extern "C"
-{
-#endif // __cplusplus
-	
-	IAbstractTreePtr GenerateConstantIntegerTreeNode(int);
-	IAbstractTreePtr GenerateConstantFloatTreeNode(double);
-	
-#ifdef __cplusplus
+    namespace semantics
+    {
+        enum builtin_types
+        {
+            INTEGER,
+            FLOAT,
+            BOOLEAN,
+            STRING,
+            OBJECT,
+        };
+        
+        enum code_operation
+        {
+            ITERATE,
+            CONST,
+            ADD,
+            SUBTRACT,
+            MULTIPLY,
+            DIVIDE,
+            MODULO,
+            LEFT_SHIFT,
+            RIGHT_SHIFT,
+            LESS_THAN,
+            LESS_OR_EQUALS,
+            GREATER_THAN,
+            GREATER_OR_EQUALS,
+            EQUALS,
+            NOT_EQUALS,
+            UNARY_PLUS,
+            UNARY_MINUS,
+            NOT,
+            OR,
+            XOR,
+            AND,
+            MAP,
+            REDUCE,
+            DEREF_FILTER,
+            DEREF_PROPERTY,
+            DEREF_METHOD,
+            DEREF_ARRAY,
+            DEREF_METHOD_RELATIVE_SELF, // xyz(...) without '|'.
+            VARIABLE,
+            ASSIGN,
+            WHILE,
+            UNTIL,
+            DECIDE,
+        };
+    }
 }
-#endif // __cplusplus
 
-#endif // KITE_AST_BASE_H
+#endif

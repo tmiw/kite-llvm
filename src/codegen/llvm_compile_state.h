@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2010, Mooneer Salem
+ * Copyright (c) 2011, Mooneer Salem
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,27 +25,45 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <vector>
-using namespace std;
+#ifndef KITE_CODEGEN__LLVM_COMPILE_STATE_H
+#define KITE_CODEGEN__LLVM_COMPILE_STATE_H
 
-#include "kite_type_object.h"
+#include <map>
+#include <vector>
+#include <llvm/DerivedTypes.h>
+#include <llvm/LLVMContext.h>
+#include <llvm/Module.h>
+#include <llvm/Analysis/Verifier.h>
+#include <llvm/Support/IRBuilder.h>
+using namespace llvm;
 
 namespace kite
 {
-	namespace types
-	{
-		const Type *kite_object_t::GetStructureType()
-		{
-			vector<const Type*> structureTypes;
-			
-			structureTypes.push_back(Type::getInt32Ty(getGlobalContext()));
-			
-			return StructType::get(getGlobalContext(), structureTypes);
-		}
-		
-		const Type *kite_object_t::GetPointerType()
-		{
-			return PointerType::getUnqual(GetStructureType());
-		}
-	}
+    namespace codegen
+    {
+        class llvm_compile_state
+        {
+        public:
+            llvm_compile_state();
+            virtual ~llvm_compile_state();
+            
+            void push_module(Module *module); /*! Pushes new module onto stack. */
+            inline Module *current_module() { return _moduleStack.back(); }
+            Module *pop_module(); /*! Pops module from top of stack. */
+            
+            inline IRBuilder<> &module_builder() { return _moduleBuilder; }
+            
+            void push_symbol_stack();
+            inline std::map<std::string, Value*> &current_symbol_stack() { return *_symbolTableStack.back(); }
+            inline std::vector<std::map<std::string, Value*> *> &symbol_stack() { return _symbolTableStack; }
+            void pop_symbol_stack();
+            
+        private:
+            std::vector<Module*> _moduleStack;
+            std::vector<std::map<std::string, Value*> *> _symbolTableStack;
+            IRBuilder<> _moduleBuilder;        
+        };
+    }
 }
+
+#endif

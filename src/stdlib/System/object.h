@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2010, Mooneer Salem
+ * Copyright (c) 2011, Mooneer Salem
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,47 +24,33 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
+ 
+#ifndef KITE_STDLIB__SYSTEM__OBJECT_H
+#define KITE_STDLIB__SYSTEM__OBJECT_H
 
-#ifndef KITE_TYPE_INFO_H
-#define KITE_TYPE_INFO_H
+#include <map>
+#include <semantics/constants.h>
 
-#include <vector>
-using namespace std;
-
-#include "llvm/DerivedTypes.h"
-#include "llvm/LLVMContext.h"
-#include "llvm/Module.h"
-#include "llvm/Analysis/Verifier.h"
-#include "llvm/Support/IRBuilder.h"
-using namespace llvm;
-
-namespace kite 
+namespace kite
 {
-	namespace types
-	{
-		// forward declaration
-		class KiteTypeRegistry;
-		
-		class KiteTypeInfo
-		{
-		public:
-			KiteTypeInfo(const char* className);
-			virtual ~KiteTypeInfo();
-
-			inline const char* className() { return _className; }
-			inline Module *moduleInfo() { return _llvmModuleInfo; }
-			inline void moduleInfo(Module *module) { _llvmModuleInfo = module; }
-			inline KiteTypeInfo *inheritsFrom() { return _inheritsFrom; }
-			inline void inheritsFrom(KiteTypeInfo *inheritsFrom) { _inheritsFrom = inheritsFrom; }
-		private:
-			const char* _className;
-			Module *_llvmModuleInfo;
-			KiteTypeInfo *_inheritsFrom;
-			int _classId;
-			
-			friend class KiteTypeRegistry;
-		};
-	}
+    namespace stdlib
+    {
+        // TODO
+        typedef std::pair<semantics::builtin_types, void*> function_semantics;
+        typedef std::map<std::string, function_semantics> object_method_map;
+        
+        namespace System
+        {
+            struct object
+            {
+                semantics::builtin_types type;
+                object *parent;
+                
+                object() : type(semantics::OBJECT), parent(NULL) { }
+                object(semantics::builtin_types type) : type(type), parent(NULL) { }
+            };
+        }
+    }
 }
 
-#endif // KITE_TYPE_INFO_H
+#endif

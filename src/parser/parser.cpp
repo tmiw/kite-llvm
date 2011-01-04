@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2010, Mooneer Salem
+ * Copyright (c) 2011, Mooneer Salem
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,28 +25,23 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef KITE_TYPE_OBJECT_H
-#define KITE_TYPE_OBJECT_H
+#include "grammar.h"
+#include "parser.h"
 
-#include "llvm/DerivedTypes.h"
-#include "llvm/LLVMContext.h"
-#include "llvm/Module.h"
-#include "llvm/Analysis/Verifier.h"
-#include "llvm/Support/IRBuilder.h"
-using namespace llvm;
-
-namespace kite 
+using namespace std;
+ 
+namespace kite
 {
-	namespace types
-	{
-		struct kite_object_t
-		{
-			int type_id;
-			
-			static const Type* GetStructureType();
-			static const Type* GetPointerType();
-		};
-	};
-};
+    namespace parser
+    {
+        bool kite_parser::parse(const std::string &code, semantics::syntax_tree &ast)
+        {
+            kite_grammar<std::string::const_iterator> grammar;
 
-#endif // KITE_TYPE_OBJECT_H
+            using boost::spirit::ascii::space;
+            string::const_iterator iter = code.begin();
+            string::const_iterator end = code.end();
+            return phrase_parse(iter, end, grammar, space, ast) && iter == end;
+        }
+    }
+}

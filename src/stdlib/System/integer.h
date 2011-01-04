@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2010, Mooneer Salem
+ * Copyright (c) 2011, Mooneer Salem
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,45 +24,39 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
+ 
+#ifndef KITE_STDLIB__SYSTEM__INTEGER_H
+#define KITE_STDLIB__SYSTEM__INTEGER_H
 
-#include <vector>
-#include "kite_type_thread.h"
+#include "object.h"
 
-using namespace std;
 namespace kite
 {
-	namespace types
-	{
-		const Type *kite_thread_t::GetStructureType()
-		{
-			vector<const Type*> structureTypes;
-			
-			structureTypes.push_back(PointerType::getUnqual(Type::getVoidTy(getGlobalContext())));
-			structureTypes.push_back(PointerType::getUnqual(Type::getVoidTy(getGlobalContext())));
-
-			return StructType::get(getGlobalContext(), structureTypes);
-		}
-
-		const Type *kite_thread_t::GetPointerType()
-		{
-			return PointerType::getUnqual(GetStructureType());
-		}
-	}
+    namespace stdlib
+    {
+        namespace System
+        {
+            struct integer : System::object
+            {
+                int val;
+                
+                integer() : System::object(semantics::INTEGER), val(0) { }
+                integer(int val) : System::object(semantics::INTEGER), val(val) { }
+                
+                static object_method_map method_map;
+                static bool to_boolean(int val);
+                static int to_integer(int val);
+                static double to_float(int val);
+                static int print(int val);
+            };
+        }
+    }
 }
 
-using namespace kite::types;
-
-void KitePushRuntimeValue(kite::types::kite_thread_t *thd, const char *name, void **value)
+extern "C"
 {
-	(*thd->runtime_stack)[name].push(value);
+    int System__integer__print__i(int val);
+    int System__integer__int__i(int val);
 }
 
-void **KiteGetRuntimeValue(kite::types::kite_thread_t *thd, const char *name)
-{
-	return (*thd->runtime_stack)[name].top();
-}
-
-void KitePopRuntimeValue(kite::types::kite_thread_t *thd, const char *name)
-{
-	(*thd->runtime_stack)[name].pop();
-}
+#endif

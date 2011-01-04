@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2010, Mooneer Salem
+ * Copyright (c) 2011, Mooneer Salem
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,31 +25,39 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef KITE_TYPE_REGISTRY_H
-#define KITE_TYPE_REGISTRY_H
-
-#include <map>
-#include <vector>
-using namespace std;
-
-#include "kite_type_info.h"
-
-namespace kite 
+#include <iostream>
+#include "syntax_tree_printer.h"
+ 
+namespace kite
 {
-	namespace types
-	{
-		class KiteTypeRegistry
-		{
-		public:
-			inline static KiteTypeInfo *get(const char* name) { return _mapByClassName[name]; }
-			inline static KiteTypeInfo *get(int id) { return _mapByClassId[id]; }
-			static void set(KiteTypeInfo *typeInfo);
-			
-		private:
-			static map<const char*, KiteTypeInfo*> _mapByClassName;
-			static vector<KiteTypeInfo*> _mapByClassId;
-		};
-	}
-}
+    namespace codegen
+    {        
+        syntax_tree_node_printer::syntax_tree_node_printer(int indent)
+            : indent(indent) { }
 
-#endif // KITE_TYPE_REGISTRY_H
+        void syntax_tree_node_printer::operator()(semantics::syntax_tree const& tree) const
+        {
+            syntax_tree_printer(indent+tabsize)(tree);
+        }
+
+        void syntax_tree_node_printer::operator()(int const& num) const
+        {
+            std::cout << tab(indent+tabsize) << "int: " << num << std::endl;
+        }
+
+        void syntax_tree_node_printer::operator()(double const& num) const
+        {
+            std::cout << tab(indent+tabsize) << "double: " << num << std::endl;
+        }
+        
+        void syntax_tree_node_printer::operator()(bool const& num) const
+        {
+            std::cout << tab(indent+tabsize) << "bool: " << num << std::endl;
+        }
+           
+        void syntax_tree_node_printer::operator()(std::string const& text) const
+        {
+            std::cout << tab(indent+tabsize) << "text: " << text << std::endl;
+        }
+    }
+}

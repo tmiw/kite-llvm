@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2010, Mooneer Salem
+ * Copyright (c) 2011, Mooneer Salem
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,50 +25,22 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef KITE_AST_VARIABLE_H
-#define KITE_AST_VARIABLE_H
+#ifndef KITE_PARSER__PARSER_H
+#define KITE_PARSER__PARSER_H
 
-#include <assert.h>
-#include "kite_ast_base.h"
-
-// LLVM-related files.
-#ifdef __cplusplus
-#include "llvm/DerivedTypes.h"
-#include "llvm/LLVMContext.h"
-#include "llvm/Module.h"
-#include "llvm/Analysis/Verifier.h"
-#include "llvm/Support/IRBuilder.h"
-
-using namespace llvm;
+#include <string>
+#include <semantics/syntax_tree.h>
 
 namespace kite
 {
-	namespace parse_tree
-	{
-		/*
-		 * Kite abstract syntax tree -- variable object.
-		 */
-		class VariableValue : public IAbstractTree
-		{
-		public:
-			VariableValue(const char *name);
-			virtual ~VariableValue();
-			
-			virtual Value *codegen(CompilerState *state = NULL); /*! Generates bytecode for current point in tree. */
-		private:
-			const char *_name;
-		};
-	};
-};
-
-extern "C"
-{
-#endif // __cplusplus
-	
-	//Value *GenerateCodeForTree(IAbstractTree *);
-	
-#ifdef __cplusplus
+    namespace parser
+    {
+        class kite_parser
+        {
+        public:
+            bool parse(const std::string &code, semantics::syntax_tree &ast);
+        };
+    }
 }
-#endif // __cplusplus
 
-#endif // KITE_AST_FUNCTION_H
+#endif

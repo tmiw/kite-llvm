@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2010, Mooneer Salem
+ * Copyright (c) 2011, Mooneer Salem
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,20 +25,37 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "kite_type_registry.h"
+#ifndef KITE_CODEGEN__SYNTAX_TREE_PRINTER_H
+#define KITE_CODEGEN__SYNTAX_TREE_PRINTER_H
+
+#include <semantics/syntax_tree.h>
 
 namespace kite
 {
-	namespace types
-	{
-		map<const char*, KiteTypeInfo*> KiteTypeRegistry::_mapByClassName;
-		vector<KiteTypeInfo*> KiteTypeRegistry::_mapByClassId;
-		
-		void KiteTypeRegistry::set(KiteTypeInfo *typeInfo)
-		{
-			_mapByClassName[typeInfo->className()] = typeInfo;
-			_mapByClassId.push_back(typeInfo);
-			typeInfo->_classId = _mapByClassId.size() - 1;
-		}
-	}
+    namespace codegen
+    {
+        const int tabsize = 4;
+        std::string tab(int indent);
+        
+        struct syntax_tree_printer
+        {
+            int indent;
+            syntax_tree_printer(int indent = 0);
+            void operator()(semantics::syntax_tree const &tree) const;
+        };
+        
+        struct syntax_tree_node_printer : boost::static_visitor<>
+        {
+            syntax_tree_node_printer(int indent = 0);
+            void operator()(semantics::syntax_tree const& tree) const;
+            void operator()(int const& num) const;
+            void operator()(double const& num) const;
+            void operator()(bool const& num) const;
+            void operator()(std::string const& text) const;
+            
+            int indent;
+        };
+    }
 }
+
+#endif

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2010, Mooneer Salem
+ * Copyright (c) 2011, Mooneer Salem
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,17 +24,34 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
+ 
+#ifndef KITE_SEMANTICS__SYNTAX_TREE_H
+#define KITE_SEMANTICS__SYNTAX_TREE_H
 
-#include "kite_ast_const_base.h"
+#include <vector>
+#include <string>
+#include <boost/variant/recursive_variant.hpp>
+#include "constants.h"
 
-using namespace kite::parse_tree;
-
-IAbstractTreePtr GenerateConstantIntegerTreeNode(int value)
+namespace kite
 {
-	return static_cast<IAbstractTreePtr>(new ConstantValue<int>(value));
+    namespace semantics
+    {
+        struct syntax_tree;
+        
+        typedef boost::variant<
+            boost::recursive_wrapper<syntax_tree>,
+            int,
+            double,
+            bool,
+            std::string> syntax_tree_node;
+        
+        struct syntax_tree
+        {
+            code_operation op;
+            std::vector<syntax_tree_node> children;
+        };
+    }
 }
 
-IAbstractTreePtr GenerateConstantFloatTreeNode(double value)
-{
-	return static_cast<IAbstractTreePtr>(new ConstantValue<double>(value));
-}
+#endif

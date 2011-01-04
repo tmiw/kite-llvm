@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2010, Mooneer Salem
+ * Copyright (c) 2011, Mooneer Salem
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,22 +24,46 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
-
-#include "kite_type_info.h"
+ 
+#include "llvm_compile_state.h"
 
 namespace kite
 {
-	namespace types
-	{
-		KiteTypeInfo::KiteTypeInfo(const char* className)
-		: _className(className)
-		{
-			// empty
-		}
-
-		KiteTypeInfo::~KiteTypeInfo()
-		{
-			// empty
-		}
-	}
+    namespace codegen
+    {
+        llvm_compile_state::llvm_compile_state()
+	    : _moduleBuilder(getGlobalContext())
+	    {
+	        // empty
+	    }
+	               
+	    llvm_compile_state::~llvm_compile_state()
+	    {
+	        // empty
+	    }
+	               
+	    Module *llvm_compile_state::pop_module()
+	    {
+	        Module *returnValue = _moduleStack.back();
+	        _moduleStack.pop_back();
+	        return returnValue;
+	    }
+	               
+        void llvm_compile_state::push_module(Module *module)
+	    {
+	        _moduleStack.push_back(module);
+	    }
+	               
+	    void llvm_compile_state::push_symbol_stack()
+	    {
+	        _symbolTableStack.push_back(new std::map<std::string, Value*>());
+	    }
+	               
+	    void llvm_compile_state::pop_symbol_stack()
+	    {
+	        std::map<std::string, Value*> *ptr = _symbolTableStack.back();
+	        delete ptr;
+	        _symbolTableStack.pop_back();
+	    }
+    }
 }

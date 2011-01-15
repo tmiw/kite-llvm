@@ -52,8 +52,11 @@ int main()
     llvm_start_multithreaded();
     
     semantics::syntax_tree ast;
-    string storage = "x = 0; while (x < 100) [ x = x + 1; decide [ (x < 10) [ (x - 100)|print; ] (true) [ x|print; ] ]]";
-    //x = 41|int; y = 1|int; (x + y)|print;";
+    string storage = "x = 0; while (x < 100) [ x = x + 1; decide [ (x < 10) [ (x - 100)|print; ], true [ x|print; ] ] ]";
+    //string storage = "x = 41|int; y = 1|int; (x + y)|print;";
+    //string storage = "x = 1; while (x > 0) [ x = x - 1; decide [ (x == 1) [ (x)|print; ], true [ 0|print; ] ] ]";
+    //string storage = "x = 1; (x)|print;";
+    //string storage = "(1 or 2 or 3)|print;";
     bool r = parser::kite_parser().parse(storage, ast);
     
     if (r)
@@ -85,6 +88,7 @@ int main()
         FunctionPassManager OurFPM(currentModule);
 
         ExecutionEngine *engine = EngineBuilder(currentModule).create();
+
         // Set up the optimizer pipeline.  Start with registering info about how the
         // target lays out data structures.
         OurFPM.add(new TargetData(*engine->getTargetData()));
@@ -101,7 +105,7 @@ int main()
 
         OurFPM.doInitialization();
         OurFPM.run(*F);
-        
+
         std::cout << "Dumping code..." << std::endl;
         currentModule->dump();
         std::cout << "Executing code..." << std::endl;

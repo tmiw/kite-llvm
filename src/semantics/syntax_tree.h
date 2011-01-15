@@ -28,7 +28,7 @@
 #ifndef KITE_SEMANTICS__SYNTAX_TREE_H
 #define KITE_SEMANTICS__SYNTAX_TREE_H
 
-#include <vector>
+#include <deque>
 #include <string>
 #include <boost/variant/recursive_variant.hpp>
 #include "constants.h"
@@ -49,7 +49,7 @@ namespace kite
         struct syntax_tree
         {
             code_operation op;
-            std::vector<syntax_tree_node> children;
+            std::deque<syntax_tree_node> children;
         };
     }
 }

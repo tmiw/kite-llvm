@@ -65,6 +65,11 @@ namespace kite
 
                 using phoenix::at_c;
                 using phoenix::push_back;
+                using phoenix::push_front;
+                using phoenix::begin;
+                using phoenix::end;
+                using phoenix::erase;
+                using phoenix::front;
                 
                 // Constants.
                 numeric_value = 
@@ -77,7 +82,12 @@ namespace kite
                     | identifier [ push_back(at_c<1>(_val), _1) ] [ at_c<0>(_val) = kite::semantics::VARIABLE ];
                       
                 identifier =
-                    (qi::lexeme[ (qi::alpha | '_') >> *(qi::alnum | '_') ]); // [ _val = _1 ];
+                    (qi::lexeme[ (qi::alpha | '_') >> *(qi::alnum | '_') ] 
+                        - lit("decide") 
+                        - lit("while") 
+                        - lit("until")
+                        - lit("true")
+                        - lit("false")); // [ _val = _1 ];
                 
                 // Math operations.
                 assign_statement =
@@ -87,60 +97,52 @@ namespace kite
                     | or_statement [ _val = _1 ];
                     
                 or_statement = 
-                    (   xor_statement [ push_back(at_c<1>(_val), _1) ]
-                     >> lit("or") [ at_c<0>(_val) = kite::semantics::OR ]
-                     >> or_statement [ push_back(at_c<1>(_val), _1) ])
-                    | xor_statement [ _val = _1 ];
-                
+                       xor_statement [ _val = _1 ]
+                    >> *(    lit("or")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::OR ]
+                          >> xor_statement [ push_back(at_c<1>(_val), _1) ]);
+                        
                 xor_statement = 
-                    (   and_statement [ push_back(at_c<1>(_val), _1) ]
-                     >> lit("xor") [ at_c<0>(_val) = kite::semantics::OR ]
-                     >> xor_statement [ push_back(at_c<1>(_val), _1) ])
-                    | and_statement [ _val = _1 ];
+                       and_statement [ _val = _1 ]
+                    >> *(    lit("xor")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::XOR ]
+                          >> and_statement [ push_back(at_c<1>(_val), _1) ]);
                 
                 and_statement = 
-                    (   comparison_equals_statement [ push_back(at_c<1>(_val), _1) ]
-                     >> lit("and") [ at_c<0>(_val) = kite::semantics::OR ]
-                     >> and_statement [ push_back(at_c<1>(_val), _1) ])
-                    | comparison_equals_statement [ _val = _1 ];
+                       comparison_equals_statement [ _val = _1 ]
+                    >> *(    lit("and")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::AND ]
+                          >> comparison_equals_statement [ push_back(at_c<1>(_val), _1) ]);
                      
                 comparison_equals_statement = 
-                    (  comparison_less_greater_statement [ push_back(at_c<1>(_val), _1) ]
-                    >> ((lit("==") [ at_c<0>(_val) = kite::semantics::EQUALS ]) |
-                        (lit("!=") [ at_c<0>(_val) = kite::semantics::NOT_EQUALS ]))
-                    >> comparison_equals_statement [ push_back(at_c<1>(_val), _1) ])
-                    | comparison_less_greater_statement [ _val = _1 ];
+                       comparison_less_greater_statement [ _val = _1 ]
+                    >> *(    (lit("==")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::EQUALS ] |
+                              lit("!=")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::NOT_EQUALS ])
+                          >> comparison_less_greater_statement [ push_back(at_c<1>(_val), _1) ]);
                     
                 comparison_less_greater_statement =
-                    (  bit_shift_statement [ push_back(at_c<1>(_val), _1) ]
-                    >> ((lit("<") [ at_c<0>(_val) = kite::semantics::LESS_THAN ]) |
-                        (lit("<=") [ at_c<0>(_val) = kite::semantics::LESS_OR_EQUALS ]) |
-                        (lit(">") [ at_c<0>(_val) = kite::semantics::GREATER_THAN ]) |
-                        (lit(">=") [ at_c<0>(_val) = kite::semantics::GREATER_OR_EQUALS ]))
-                    >> comparison_less_greater_statement [ push_back(at_c<1>(_val), _1) ])
-                    | bit_shift_statement [ _val = _1 ];
+                       bit_shift_statement [ _val = _1 ]
+                    >> *(    (lit("<")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::LESS_THAN ] |
+                              lit("<=")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::LESS_OR_EQUALS ] |
+                              lit(">")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::GREATER_THAN ] |
+                              lit(">=")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::GREATER_OR_EQUALS ])
+                          >> bit_shift_statement [ push_back(at_c<1>(_val), _1) ]);
                     
                 bit_shift_statement = 
-                    (  add_subtract_statement [ push_back(at_c<1>(_val), _1) ]
-                    >> ((lit(">>") [ at_c<0>(_val) = kite::semantics::RIGHT_SHIFT ]) |
-                        (lit("<<") [ at_c<0>(_val) = kite::semantics::LEFT_SHIFT ]))
-                    >> bit_shift_statement [ push_back(at_c<1>(_val), _1) ])
-                    | add_subtract_statement [ _val = _1 ];
+                       add_subtract_statement [ _val = _1 ]
+                    >> *(    (lit("<<")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::LEFT_SHIFT ] |
+                              lit(">>")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::RIGHT_SHIFT ])
+                          >> add_subtract_statement [ push_back(at_c<1>(_val), _1) ]);
                     
                 add_subtract_statement = 
-                    (  multiply_divide_statement [ push_back(at_c<1>(_val), _1) ]
-                    >> ((lit('+') [ at_c<0>(_val) = kite::semantics::ADD ]) |
-                        (lit('-') [ at_c<0>(_val) = kite::semantics::SUBTRACT ]))
-                    >> add_subtract_statement [ push_back(at_c<1>(_val), _1) ])
-                    | multiply_divide_statement [ _val = _1 ];
+                       multiply_divide_statement [ _val = _1 ]
+                    >> *(    (lit("+")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::ADD ] |
+                              lit("-")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::SUBTRACT ])
+                          >> multiply_divide_statement [ push_back(at_c<1>(_val), _1) ]);
     
                 multiply_divide_statement = 
-                    (    unary_statement [ push_back(at_c<1>(_val), _1) ]
-                      >> ((lit('*') [ at_c<0>(_val) = kite::semantics::MULTIPLY ]) |
-                          (lit('/') [ at_c<0>(_val) = kite::semantics::DIVIDE ]) |
-                          (lit('%') [ at_c<0>(_val) = kite::semantics::MODULO ]))
-                       >> multiply_divide_statement [ push_back(at_c<1>(_val), _1) ])
-                     | unary_statement [ _val = _1 ];
+                       unary_statement [ _val = _1 ]
+                    >> *(    (lit("*")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::MULTIPLY ] |
+                              lit("/")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::DIVIDE ] |
+                              lit("%")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::MODULO ])
+                          >> unary_statement [ push_back(at_c<1>(_val), _1) ]);
                 
                 unary_statement = 
                     ((lit('+') [ at_c<0>(_val) = kite::semantics::UNARY_PLUS ]) |
@@ -163,17 +165,17 @@ namespace kite
                 deref_method_statement =
                     lit('|') [ at_c<0>(_val) = kite::semantics::DEREF_METHOD ] >>
                     identifier [ push_back(at_c<1>(_val), _1) ] >>
-                    (!lit('(') | (lit('(') >> *(math_statement [ push_back(at_c<1>(_val), _1) ] % ',') >> lit(')')));
+                    -(lit('(') >> -(or_statement [ push_back(at_c<1>(_val), _1) ] % ',') >> lit(')'));
                 
                 deref_method_mandatory_params =
                     (identifier
                         [ push_back(at_c<1>(_val), _1) ] 
                         [ at_c<0>(_val) = kite::semantics::DEREF_METHOD_RELATIVE_SELF ])
-                    >> (lit('(') >> *(math_statement [ push_back(at_c<1>(_val), _1) ] % ',') >> lit(')'));
+                    >> (lit('(') >> -(or_statement [ push_back(at_c<1>(_val), _1) ] % ',') >> lit(')'));
                     
                 deref_array_statement =
                     lit('[') [ at_c<0>(_val) = kite::semantics::DEREF_ARRAY ] >>
-                    math_statement [ push_back(at_c<1>(_val), _1) ] >>
+                    or_statement [ push_back(at_c<1>(_val), _1) ] >>
                     lit(']');
                     
                 deref_types = 
@@ -186,16 +188,19 @@ namespace kite
                     >> *deref_types [ push_back(at_c<1>(_val), _1) ];
                             
                 deref_filter_statement =
-                      deref_filter_only_statement [ _val = _1 ]
+                      ((    grouping_statement 
+                              [ push_back(at_c<1>(_val), _1) ]
+                              [ at_c<0>(_val) = kite::semantics::DEREF_FILTER ])
+                              >> *deref_types [ push_back(at_c<1>(_val), _1) ])
                     | (deref_method_mandatory_params
                         [ push_back(at_c<1>(_val), _1) ]
                         [ at_c<0>(_val) = kite::semantics::DEREF_FILTER ])
-                      >> *deref_types [ push_back(at_c<1>(_val), _1) ]
-                    | grouping_statement [ _val = _1 ];
+                        >> *deref_types [ push_back(at_c<1>(_val), _1) ];
+                    /*| grouping_statement [ _val = _1 ];*/
                       
                 grouping_statement = 
-                      ( '(' >> add_subtract_statement [ _val = _1 ] >> ')' )
-                      | const_statement [ _val = _1 ];
+                      const_statement [ _val = _1 ]
+                    | ( '(' >> or_statement [ _val = _1 ] >> ')' );
 
                 // Statements.
                 math_statement = assign_statement [ _val = _1 ];
@@ -209,15 +214,49 @@ namespace kite
                 decide_statement = 
                        lit("decide") [ at_c<0>(_val) = kite::semantics::DECIDE ]
                     >> '['
-                    >> +(  '(' >> or_statement [ push_back(at_c<1>(_val), _1) ]
-                         >> ')' >> '[' >> start [ push_back(at_c<1>(_val), _1) ] >> ']')
+                    >>    ((
+                            (
+                              ('(' >> or_statement [ push_back(at_c<1>(_val), _1) ] >> ')') | 
+                              lit("true") [ push_back(at_c<1>(_val), true) ]
+                            )
+                    >>     '[' >> start [ push_back(at_c<1>(_val), _1) ] >> ']') % ',')
                     >> ']';
                 
                 statement = 
-                      (math_statement [ _val = _1 ] >> ';')
-                    | loop_statement [ _val = _1 ]
-                    | decide_statement [ _val = _1 ];
+                      loop_statement [ _val = _1 ]
+                    | decide_statement [ _val = _1 ]
+                    | (math_statement [ _val = _1 ] >> ';');
                 start = (*statement [ push_back(at_c<1>(_val), _1) ]) [ at_c<0>(_val) = kite::semantics::ITERATE ];
+                
+#ifdef BOOST_SPIRIT_DEBUG
+                BOOST_SPIRIT_DEBUG_NODE(start);
+                BOOST_SPIRIT_DEBUG_NODE(statement);
+                BOOST_SPIRIT_DEBUG_NODE(decide_statement);
+                BOOST_SPIRIT_DEBUG_NODE(loop_statement);
+                BOOST_SPIRIT_DEBUG_NODE(math_statement);
+                BOOST_SPIRIT_DEBUG_NODE(const_statement);
+                BOOST_SPIRIT_DEBUG_NODE(bit_shift_statement);
+                BOOST_SPIRIT_DEBUG_NODE(multiply_divide_statement);
+                BOOST_SPIRIT_DEBUG_NODE(add_subtract_statement);
+                BOOST_SPIRIT_DEBUG_NODE(comparison_equals_statement);
+                BOOST_SPIRIT_DEBUG_NODE(map_reduce_statement);
+                BOOST_SPIRIT_DEBUG_NODE(assign_statement);
+                BOOST_SPIRIT_DEBUG_NODE(or_statement);
+                BOOST_SPIRIT_DEBUG_NODE(xor_statement);
+                BOOST_SPIRIT_DEBUG_NODE(and_statement);
+                BOOST_SPIRIT_DEBUG_NODE(comparison_less_greater_statement);
+                BOOST_SPIRIT_DEBUG_NODE(unary_statement);
+                BOOST_SPIRIT_DEBUG_NODE(grouping_statement);
+                BOOST_SPIRIT_DEBUG_NODE(deref_filter_statement);
+                BOOST_SPIRIT_DEBUG_NODE(deref_filter_only_statement);
+                BOOST_SPIRIT_DEBUG_NODE(deref_types);
+                BOOST_SPIRIT_DEBUG_NODE(deref_property_statement);
+                BOOST_SPIRIT_DEBUG_NODE(deref_method_statement);
+                BOOST_SPIRIT_DEBUG_NODE(deref_method_mandatory_params);
+                BOOST_SPIRIT_DEBUG_NODE(deref_array_statement);
+                BOOST_SPIRIT_DEBUG_NODE(identifier);
+                BOOST_SPIRIT_DEBUG_NODE(numeric_value);
+#endif
             }
             
             qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> start;
@@ -254,7 +293,7 @@ namespace kite
 BOOST_FUSION_ADAPT_STRUCT(
     kite::semantics::syntax_tree,
     (kite::semantics::code_operation, op)
-    (std::vector<kite::semantics::syntax_tree_node>, children)
+    (std::deque<kite::semantics::syntax_tree_node>, children)
 )
 
 #endif

@@ -26,6 +26,8 @@
  ****************************************************************************/
 
 #include <iostream>
+#include <fstream>
+#include <unistd.h>
 #include <parser/parser.h>
 #include <codegen/syntax_tree_printer.h>
 #include <codegen/llvm_node_codegen.h>
@@ -46,26 +48,91 @@ using namespace llvm;
 using namespace kite;
 using namespace std;
 
-int main()
+void usage(char *app_name)
 {
+    printf("Usage: %s [-haodx] [file]\n", app_name);
+    printf("       -h: this message\n");
+    printf("       -a: output parse tree\n");
+    printf("       -o: optimize compiled code\n");
+    printf("       -d: dump compiled code to stdout\n");
+    printf("       -x: do not execute compiled code\n");
+    printf("     file: the Kite file to execute (default: standard input)\n");
+    exit(0);
+}
+
+int main(int argc, char **argv)
+{
+    int ch;
+    bool output_ast = false;
+    bool optimize_code = false;
+    bool dump_code = false;
+    bool inhibit_exec = false;
+    
+    while ((ch = getopt(argc, argv, "haodx")) != -1)
+    {
+        switch(ch)
+        {
+            case 'a':
+                output_ast = true;
+                break;
+            case 'o':
+                optimize_code = true;
+                break;
+            case 'd':
+                dump_code = true;
+                break;
+            case 'x':
+                inhibit_exec = true;
+                break;
+            case 'h':
+            default:
+                usage(argv[0]);
+        }
+    }
+    
+    argc -= optind;
+    argv += optind;
+         
     InitializeNativeTarget();
     llvm_start_multithreaded();
     
+    string storage = "";
+    char buf[1024];
     semantics::syntax_tree ast;
-    string storage = "x = 0; while (x < 100) [ x = x + 1; decide [ (x < 10) [ (x - 100)|print; ], true [ x|print; ] ] ]";
+    //string storage = "x = 0; while (x < 100) [ x = x + 1; decide [ (x < 10) [ (x - 100)|print; ], true [ x|print; ] ] ]";
     //string storage = "x = 41|int; y = 1|int; (x + y)|print;";
     //string storage = "x = 1; while (x > 0) [ x = x - 1; decide [ (x == 1) [ (x)|print; ], true [ 0|print; ] ] ]";
     //string storage = "x = 1; (x)|print;";
     //string storage = "(1 or 2 or 3)|print;";
+    
+    if (argc > 0)
+    {
+        std::ifstream handle(argv[0]);
+        while (!handle.eof())
+        {
+            handle.getline(buf, 1024);
+            storage += buf;
+        }
+        handle.close();
+    }
+    else
+    {
+        // Standard input.
+        while (!cin.eof())
+        {
+            cin.getline(buf, 1024);
+            storage += buf;
+        }
+    }
     bool r = parser::kite_parser().parse(storage, ast);
     
     if (r)
     {
-        std::cout << "-------------------------\n";
-        std::cout << "Parsing succeeded\n";
-        std::cout << "-------------------------\n";
-        codegen::syntax_tree_printer printer;
-        printer(ast);
+        if (output_ast)
+        {
+            codegen::syntax_tree_printer printer;
+            printer(ast);
+        }
         
         LLVMContext &context = getGlobalContext();
         codegen::llvm_compile_state state;
@@ -79,50 +146,46 @@ int main()
         builder.SetInsertPoint(BB);
 
         codegen::llvm_node_codegen cg(state);
-        
         cg(ast);
         builder.CreateRetVoid();
-        std::cout << "Verifying code..." << std::endl;
         verifyFunction(*F);
-        std::cout << "Optimizing code..." << std::endl;
-        FunctionPassManager OurFPM(currentModule);
 
         ExecutionEngine *engine = EngineBuilder(currentModule).create();
+        if (optimize_code)
+        {
+            FunctionPassManager OurFPM(currentModule);
+            
+            // Set up the optimizer pipeline.  Start with registering info about how the
+            // target lays out data structures.
+            OurFPM.add(new TargetData(*engine->getTargetData()));
+            // Provide basic AliasAnalysis support for GVN.
+            OurFPM.add(createBasicAliasAnalysisPass());
+            // Do simple "peephole" optimizations and bit-twiddling optzns.
+            OurFPM.add(createInstructionCombiningPass());
+            // Reassociate expressions.
+            OurFPM.add(createReassociatePass());
+            // Eliminate Common SubExpressions.
+            OurFPM.add(createGVNPass());
+            // Simplify the control flow graph (deleting unreachable blocks, etc).
+            OurFPM.add(createCFGSimplificationPass());
 
-        // Set up the optimizer pipeline.  Start with registering info about how the
-        // target lays out data structures.
-        OurFPM.add(new TargetData(*engine->getTargetData()));
-        // Provide basic AliasAnalysis support for GVN.
-        OurFPM.add(createBasicAliasAnalysisPass());
-        // Do simple "peephole" optimizations and bit-twiddling optzns.
-        OurFPM.add(createInstructionCombiningPass());
-        // Reassociate expressions.
-        OurFPM.add(createReassociatePass());
-        // Eliminate Common SubExpressions.
-        OurFPM.add(createGVNPass());
-        // Simplify the control flow graph (deleting unreachable blocks, etc).
-        OurFPM.add(createCFGSimplificationPass());
-
-        OurFPM.doInitialization();
-        OurFPM.run(*F);
-
-        std::cout << "Dumping code..." << std::endl;
-        currentModule->dump();
-        std::cout << "Executing code..." << std::endl;
-        void *fptr = engine->getPointerToFunction(F);
-        void(*FP)() = (void(*)())fptr;
-        (*FP)();
+            OurFPM.doInitialization();
+            OurFPM.run(*F);
+        }
+        
+        if (dump_code) currentModule->dump();
+        if (!inhibit_exec)
+        {
+            void *fptr = engine->getPointerToFunction(F);
+            void(*FP)() = (void(*)())fptr;
+            (*FP)();
+        }
         
         return 0;
     }
     else
     {
-        //std::string::const_iterator some = iter+30;
-        //std::string context(iter, (some>end)?end:some);
-        std::cout << "-------------------------\n";
         std::cout << "Parsing failed\n";
-        //std::cout << "stopped at: \": " << context << "...\"\n";
-        std::cout << "-------------------------\n";
         return 1;
     }
 }

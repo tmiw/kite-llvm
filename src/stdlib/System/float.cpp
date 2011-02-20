@@ -25,56 +25,66 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
  
-#ifndef KITE_STDLIB__SYSTEM__STRING_H
-#define KITE_STDLIB__SYSTEM__STRING_H
-
-#include "object.h"
-
+#include <iostream>
+#include <boost/assign.hpp>
+#include "float.h"
+using namespace boost::assign;
+ 
 namespace kite
 {
     namespace stdlib
     {
         namespace System
         {
-            struct string : System::object
+            object_method_map fpnum::method_map = map_list_of
+                ("bool__f", function_semantics(semantics::BOOLEAN, (void*)&fpnum::to_boolean))
+                ("int__f", function_semantics(semantics::INTEGER, (void*)&fpnum::to_integer))
+                ("float__f", function_semantics(semantics::FLOAT, (void*)&fpnum::to_float))
+                ("print__f", function_semantics(semantics::FLOAT, (void*)&fpnum::print));
+            
+            bool fpnum::to_boolean(double val)
             {
-                std::string string_val;
-                
-                string() : System::object(semantics::STRING), string_val("") { }
-                string(std::string val) : System::object(semantics::STRING), string_val(val) { }
-                
-                static object_method_map method_map;
-                static int asc(char* val);
-                static bool to_boolean(char* val);
-                static double to_float(char* val);
-                static int to_integer(char* val);
-                static int length(char* val);
-                static char* lower(char *val);
-                static char* ltrim(char *val);
-                static char* print(char *val);
-                static char* rtrim(char *val);
-                static char* str(char *val);
-                static char* trim(char *val);
-                static char* upper(char *val);
-            };
+                return val != 0.0f;
+            }
+            
+            int fpnum::to_integer(double val)
+            {
+                return (int)val;
+            }
+            
+            double fpnum::to_float(double val)
+            {
+                return val;
+            }
+            
+            double fpnum::print(double val)
+            {
+                std::cout << val << std::endl;
+                return val;
+            }
         }
     }
 }
 
 extern "C"
 {
-    int System__string__asc__s(char* val);
-    bool System__string__bool__s(char* val);
-    double System__string__float__s(char* val);
-    int System__string__int__s(char* val);
-    int System__string__length__s(char* val);
-    char* System__string__lower__s(char* val);
-    char* System__string__ltrim__s(char* val);
-    char* System__string__print__s(char* val);
-    char* System__string__rtrim__s(char* val);
-    char* System__string__str__s(char* val);
-    char* System__string__trim__s(char* val);
-    char* System__string__upper__s(char* val);
-}
+    double System__float__print__f(double val)
+    {
+        return kite::stdlib::System::fpnum::print(val);
+    }
+    
+    int System__float__int__f(double val)
+    {
+        return kite::stdlib::System::fpnum::to_integer(val);
+    }
 
-#endif
+    double System__float__float__f(double val)
+    {
+        return kite::stdlib::System::fpnum::to_float(val);
+    }
+        
+    bool System__float__bool__f(double val)
+    {
+        return kite::stdlib::System::fpnum::to_boolean(val);
+    }
+}

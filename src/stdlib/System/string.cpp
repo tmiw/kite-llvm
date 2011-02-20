@@ -37,19 +37,27 @@ namespace kite
         namespace System
         {
             object_method_map string::method_map = map_list_of
+                ("asc__s", function_semantics(semantics::INTEGER, (void*)&string::asc))
                 ("bool__s", function_semantics(semantics::BOOLEAN, (void*)&string::to_boolean))
-                ("int__s", function_semantics(semantics::INTEGER, (void*)&string::to_integer))
                 ("float__s", function_semantics(semantics::FLOAT, (void*)&string::to_float))
-                ("print__s", function_semantics(semantics::STRING, (void*)&string::print));
+                ("int__s", function_semantics(semantics::INTEGER, (void*)&string::to_integer))
+                ("length__s", function_semantics(semantics::INTEGER, (void*)&string::length))
+                ("lower__s", function_semantics(semantics::STRING, (void*)&string::lower))
+                ("ltrim__s", function_semantics(semantics::STRING, (void*)&string::ltrim))
+                ("print__s", function_semantics(semantics::STRING, (void*)&string::print))
+                ("rtrim__s", function_semantics(semantics::STRING, (void*)&string::rtrim))
+                ("str__s", function_semantics(semantics::STRING, (void*)&string::str))
+                ("trim__s", function_semantics(semantics::STRING, (void*)&string::trim))
+                ("upper__s", function_semantics(semantics::STRING, (void*)&string::upper));
+                
+            int string::asc(char* val)
+            {
+                return *val;
+            }
             
             bool string::to_boolean(char* val)
             {
-                return val != NULL;
-            }
-            
-            int string::to_integer(char* val)
-            {
-                return atoi(val);
+                return val != NULL && length(val) > 0;
             }
             
             double string::to_float(char* val)
@@ -57,10 +65,69 @@ namespace kite
                 return (double)atof(val);
             }
             
+            int string::to_integer(char* val)
+            {
+                return atoi(val);
+            }
+            
+            int string::length(char* val)
+            {
+                return strlen(val);
+            }
+            
+            char* string::lower(char *val)
+            {
+                char *ret = (char*)malloc(length(val) + 1);
+                for (char *tmp = ret; *val != 0; val++, tmp++)
+                {
+                    *tmp = tolower(*val);
+                }
+                return ret;
+            }
+            
+            char* string::ltrim(char *val)
+            {
+                while (isspace(*val)) { val++; }
+                
+                char *ret = (char*)malloc(length(val) + 1);
+                strcpy(ret, val);
+                return ret;
+            }
+            
             char* string::print(char *val)
             {
                 std::cout << val << std::endl;
                 return val;
+            }
+            
+            char* string::rtrim(char *val)
+            {
+                char *ret = (char*)calloc(1, strlen(val) + 1);
+                char *tmp = ret + strlen(val) - 1;
+                
+                strcpy(ret, val);
+                while (isspace(*tmp)) { *tmp = 0; tmp--; }
+                return ret;
+            }
+            
+            char* string::str(char *val)
+            {
+                return val;
+            }
+            
+            char* string::trim(char *val)
+            {
+                return ltrim(rtrim(val));
+            }
+            
+            char* string::upper(char *val)
+            {
+                char *ret = (char*)malloc(length(val) + 1);
+                for (char *tmp = ret; *val != 0; val++, tmp++)
+                {
+                    *tmp = toupper(*val);
+                }
+                return ret;
             }
         }
     }
@@ -68,13 +135,63 @@ namespace kite
 
 extern "C"
 {
-    char* System__string__print__s(char* val)
+    int System__string__asc__s(char* val)
     {
-        return kite::stdlib::System::string::print(val);
+        return kite::stdlib::System::string::asc(val);
+    }
+    
+    bool System__string__bool__s(char* val)
+    {
+        return kite::stdlib::System::string::to_boolean(val);
+    }
+    
+    double System__string__float__s(char* val)
+    {
+        return kite::stdlib::System::string::to_float(val);
     }
     
     int System__string__int__s(char* val)
     {
         return kite::stdlib::System::string::to_integer(val);
+    }
+    
+    int System__string__length__s(char* val)
+    {
+        return kite::stdlib::System::string::length(val);
+    }
+    
+    char* System__string__lower__s(char* val)
+    {
+        return kite::stdlib::System::string::lower(val);
+    }
+    
+    char* System__string__ltrim__s(char* val)
+    {
+        return kite::stdlib::System::string::ltrim(val);
+    }
+    
+    char* System__string__print__s(char* val)
+    {
+        return kite::stdlib::System::string::print(val);
+    }
+
+    char* System__string__rtrim__s(char* val)
+    {
+        return kite::stdlib::System::string::rtrim(val);
+    }
+    
+    char* System__string__str__s(char* val)
+    {
+        return kite::stdlib::System::string::str(val);
+    }
+    
+    char* System__string__trim__s(char* val)
+    {
+        return kite::stdlib::System::string::trim(val);
+    }
+    
+    char* System__string__upper__s(char* val)
+    {
+        return kite::stdlib::System::string::upper(val);
     }
 }

@@ -295,8 +295,9 @@ namespace kite
             std::string method_name = boost::get<std::string>(tree.children[0]);
             
             // TODO: parameters
-            method_name = type_to_method_prefix(type) + method_name + std::string("__") + type_to_code(type);
+            method_name += std::string("__") + type_to_code(type);
             function_semantics &semantics = method_map[method_name];
+            method_name = type_to_method_prefix(type) + method_name;
             
             std::vector<const Type*> args;
             args.push_back(kite_type_to_llvm_type(type));
@@ -470,6 +471,14 @@ namespace kite
                 case semantics::STRING:
                 {
                     return System::string::method_map;
+                }
+                case semantics::BOOLEAN:
+                {
+                    return System::boolean::method_map;
+                }
+                case semantics::FLOAT:
+                {
+                    return System::fpnum::method_map;
                 }
                 default:
                 {

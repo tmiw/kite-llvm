@@ -72,7 +72,7 @@ namespace kite
                 using phoenix::front;
                 
                 // Constants.
-                unesc_str = '"' >> *(unesc_char | qi::alnum | "\\x" >> qi::hex) >> '"';
+                unesc_str = '"' >> *(unesc_char | (char_ - "\\" - "\"") | "\\x" >> qi::hex) >> '"';
                 unesc_char.add("\\a", '\a')("\\b", '\b')("\\f", '\f')("\\n", '\n')
                               ("\\r", '\r')("\\t", '\t')("\\v", '\v')("\\\\", '\\')
                               ("\\\'", '\'')("\\\"", '\"');

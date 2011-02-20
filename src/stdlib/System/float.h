@@ -25,8 +25,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
  
-#ifndef KITE_STDLIB__SYSTEM__STRING_H
-#define KITE_STDLIB__SYSTEM__STRING_H
+#ifndef KITE_STDLIB__SYSTEM__FLOAT_H
+#define KITE_STDLIB__SYSTEM__FLOAT_H
 
 #include "object.h"
 
@@ -36,26 +36,18 @@ namespace kite
     {
         namespace System
         {
-            struct string : System::object
+            struct fpnum : System::object
             {
-                std::string string_val;
+                double val;
                 
-                string() : System::object(semantics::STRING), string_val("") { }
-                string(std::string val) : System::object(semantics::STRING), string_val(val) { }
+                fpnum() : System::object(semantics::FLOAT), val(0) { }
+                fpnum(int val) : System::object(semantics::FLOAT), val(val) { }
                 
                 static object_method_map method_map;
-                static int asc(char* val);
-                static bool to_boolean(char* val);
-                static double to_float(char* val);
-                static int to_integer(char* val);
-                static int length(char* val);
-                static char* lower(char *val);
-                static char* ltrim(char *val);
-                static char* print(char *val);
-                static char* rtrim(char *val);
-                static char* str(char *val);
-                static char* trim(char *val);
-                static char* upper(char *val);
+                static bool to_boolean(double val);
+                static int to_integer(double val);
+                static double to_float(double val);
+                static double print(double val);
             };
         }
     }
@@ -63,18 +55,10 @@ namespace kite
 
 extern "C"
 {
-    int System__string__asc__s(char* val);
-    bool System__string__bool__s(char* val);
-    double System__string__float__s(char* val);
-    int System__string__int__s(char* val);
-    int System__string__length__s(char* val);
-    char* System__string__lower__s(char* val);
-    char* System__string__ltrim__s(char* val);
-    char* System__string__print__s(char* val);
-    char* System__string__rtrim__s(char* val);
-    char* System__string__str__s(char* val);
-    char* System__string__trim__s(char* val);
-    char* System__string__upper__s(char* val);
+    double System__float__print__f(double val);
+    int System__float__int__f(double val);
+    double System__float__float__f(double val);
+    bool System__float__bool__f(double val);
 }
 
 #endif

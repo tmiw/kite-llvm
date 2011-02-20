@@ -30,6 +30,7 @@
 
 #include <semantics/syntax_tree.h>
 #include <stdlib/System/integer.h>
+#include <stdlib/System/string.h>
 #include "llvm_compile_state.h"
 using namespace kite::stdlib;
 

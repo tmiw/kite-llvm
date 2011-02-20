@@ -72,8 +72,12 @@ namespace kite
                 using phoenix::front;
                 
                 // Constants.
+                unesc_str = '"' >> *(unesc_char | qi::alnum | "\\x" >> qi::hex) >> '"';
+                unesc_char.add("\\a", '\a')("\\b", '\b')("\\f", '\f')("\\n", '\n')
+                              ("\\r", '\r')("\\t", '\t')("\\v", '\v')("\\\\", '\\')
+                              ("\\\'", '\'')("\\\"", '\"');
                 numeric_value = 
-                    (int_ | double_) [ _val = _1 ]
+                    (int_ | double_ | unesc_str) [ _val = _1 ]
                     | lit("true") [ _val = true ]
                     | lit("false") [ _val = false ];
                 
@@ -256,6 +260,7 @@ namespace kite
                 BOOST_SPIRIT_DEBUG_NODE(deref_array_statement);
                 BOOST_SPIRIT_DEBUG_NODE(identifier);
                 BOOST_SPIRIT_DEBUG_NODE(numeric_value);
+                BOOST_SPIRIT_DEBUG_NODE(unesc_str);
 #endif
             }
             
@@ -286,6 +291,8 @@ namespace kite
             qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> deref_array_statement;
             qi::rule<Iterator, std::string(), ascii::space_type> identifier;
             qi::rule<Iterator, semantics::syntax_tree_node(), ascii::space_type> numeric_value;
+            qi::rule<Iterator, std::string()> unesc_str;
+            qi::symbols<char const, char const> unesc_char;
         };
     }
 }

@@ -163,8 +163,7 @@ namespace kite
         
         Value *llvm_node_codegen::operator()(std::string const &val) const
         {
-            // TODO
-            return NULL;
+            return state.module_builder().CreateGlobalStringPtr(val.c_str());
         }
         
         Value *llvm_node_codegen::codegen_iterate_op(semantics::syntax_tree const &tree) const
@@ -442,9 +441,19 @@ namespace kite
             {
                 op_type = semantics::BOOLEAN;
             }
-            else
+            else if (
+                type->isPointerTy() && 
+                ((PointerType*)type)->isValidElementType(Type::getInt8Ty(getGlobalContext())) )
+            {
+                op_type = semantics::STRING;
+            }
+            else if (type->isDoubleTy())
             {
                 op_type = semantics::FLOAT;
+            }
+            else
+            {
+                op_type == semantics::OBJECT;
             }
             
             return op_type;
@@ -457,6 +466,10 @@ namespace kite
                 case semantics::INTEGER:
                 {
                     return System::integer::method_map;
+                }
+                case semantics::STRING:
+                {
+                    return System::string::method_map;
                 }
                 default:
                 {
@@ -485,6 +498,10 @@ namespace kite
                 {
                     return "o";
                 }
+                case semantics::STRING:
+                {
+                    return "s";
+                }
                 default:
                 {
                     // TODO
@@ -508,6 +525,10 @@ namespace kite
                 case semantics::BOOLEAN:
                 {
                     return Type::getInt1Ty(getGlobalContext());
+                }
+                case semantics::STRING:
+                {
+                    return PointerType::getUnqual(Type::getInt8Ty(getGlobalContext()));
                 }
 /*                case semantics::OBJECT:
                 {
@@ -540,6 +561,10 @@ namespace kite
                 case semantics::OBJECT:
                 {
                     return "System__object__";
+                }
+                case semantics::STRING:
+                {
+                    return "System__string__";
                 }
                 default:
                 {

@@ -2,6 +2,7 @@
 "A"|asc|print;
 "G"|bool|print; 
 ""|bool|print; 
+"ABCD"|charAt(2)|print;
 "5.67"|float|print; 
 "5"|int|print; 
 "0123456789"|length|print; 

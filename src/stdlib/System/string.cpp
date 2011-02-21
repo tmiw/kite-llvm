@@ -40,6 +40,7 @@ namespace kite
                 ("append__ss", function_semantics(semantics::STRING, (void*)&string::append))
                 ("asc__s", function_semantics(semantics::INTEGER, (void*)&string::asc))
                 ("bool__s", function_semantics(semantics::BOOLEAN, (void*)&string::to_boolean))
+                ("charAt__si", function_semantics(semantics::STRING, (void*)&string::charAt))
                 ("float__s", function_semantics(semantics::FLOAT, (void*)&string::to_float))
                 ("int__s", function_semantics(semantics::INTEGER, (void*)&string::to_integer))
                 ("length__s", function_semantics(semantics::INTEGER, (void*)&string::length))
@@ -67,6 +68,15 @@ namespace kite
             bool string::to_boolean(char* val)
             {
                 return val != NULL && length(val) > 0;
+            }
+            
+            char* string::charAt(char *val, int index)
+            {
+                // TODO: exception for invalid input
+                char *ret = (char*)malloc(2);
+                ret[0] = val[index];
+                ret[1] = 0;
+                return ret;
             }
             
             double string::to_float(char* val)
@@ -157,6 +167,11 @@ extern "C"
     bool System__string__bool__s(char* val)
     {
         return kite::stdlib::System::string::to_boolean(val);
+    }
+    
+    char* System__string__charAt__si(char* val, int rhs)
+    {
+        return kite::stdlib::System::string::charAt(val, rhs);
     }
     
     double System__string__float__s(char* val)

@@ -47,6 +47,7 @@ namespace kite
                 static int asc(char* val);
                 static char* append(char* val, char* rhs);
                 static bool to_boolean(char* val);
+                static char* charAt(char *val, int index);
                 static double to_float(char* val);
                 static int to_integer(char* val);
                 static int length(char* val);
@@ -67,6 +68,7 @@ extern "C"
     char* System__string__append__ss(char* val, char* rhs);
     int System__string__asc__s(char* val);
     bool System__string__bool__s(char* val);
+    char* System__string__charAt__si(char* val, int rhs);
     double System__string__float__s(char* val);
     int System__string__int__s(char* val);
     int System__string__length__s(char* val);

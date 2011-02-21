@@ -66,26 +66,3 @@ namespace kite
         }
     }
 }
-
-extern "C"
-{
-    int System__boolean__print__b(bool val)
-    {
-        return kite::stdlib::System::boolean::print(val);
-    }
-    
-    int System__boolean__int__b(bool val)
-    {
-        return kite::stdlib::System::boolean::to_integer(val);
-    }
-
-    double System__boolean__float__b(bool val)
-    {
-        return kite::stdlib::System::boolean::to_float(val);
-    }
-        
-    bool System__boolean__bool__b(bool val)
-    {
-        return kite::stdlib::System::boolean::to_boolean(val);
-    }
-}

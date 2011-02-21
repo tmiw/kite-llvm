@@ -307,22 +307,12 @@ namespace kite
                 parameterTypes.push_back(kite_type_to_llvm_type(get_type(param_val)));
             }
             function_semantics &semantics = method_map[method_name];
-            method_name = type_to_method_prefix(type) + method_name;
                 
             const FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics.first), parameterTypes, false);
-            //const PointerType *pt = PointerType::getUnqual(ft);
-            Function *f = /*state.current_module()->getFunction(method_name.c_str());*/
-                Function::Create(ft, GlobalValue::ExternalLinkage, method_name.c_str(), state.current_module());
-                
-            if (f->getName() != method_name)
-            {
-                f->eraseFromParent();
-                f = state.current_module()->getFunction(method_name);
-            }
-            
+            Value *fptrval = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) << 4, (uint64_t)semantics.second, true));
+            Value *fptr = state.module_builder().CreateIntToPtr(fptrval, PointerType::getUnqual(ft));
             prev = state.module_builder().CreateCall(
-                //ConstantInt::get(pt, (uint64_t)semantics.second),
-                f,
+                fptr,
                 parameters.begin(),
                 parameters.end()
             );

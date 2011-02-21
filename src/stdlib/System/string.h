@@ -63,22 +63,4 @@ namespace kite
     }
 }
 
-extern "C"
-{
-    char* System__string__append__ss(char* val, char* rhs);
-    int System__string__asc__s(char* val);
-    bool System__string__bool__s(char* val);
-    char* System__string__charAt__si(char* val, int rhs);
-    double System__string__float__s(char* val);
-    int System__string__int__s(char* val);
-    int System__string__length__s(char* val);
-    char* System__string__lower__s(char* val);
-    char* System__string__ltrim__s(char* val);
-    char* System__string__print__s(char* val);
-    char* System__string__rtrim__s(char* val);
-    char* System__string__str__s(char* val);
-    char* System__string__trim__s(char* val);
-    char* System__string__upper__s(char* val);
-}
-
 #endif

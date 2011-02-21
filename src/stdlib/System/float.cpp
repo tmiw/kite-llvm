@@ -65,26 +65,3 @@ namespace kite
         }
     }
 }
-
-extern "C"
-{
-    double System__float__print__f(double val)
-    {
-        return kite::stdlib::System::fpnum::print(val);
-    }
-    
-    int System__float__int__f(double val)
-    {
-        return kite::stdlib::System::fpnum::to_integer(val);
-    }
-
-    double System__float__float__f(double val)
-    {
-        return kite::stdlib::System::fpnum::to_float(val);
-    }
-        
-    bool System__float__bool__f(double val)
-    {
-        return kite::stdlib::System::fpnum::to_boolean(val);
-    }
-}

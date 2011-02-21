@@ -65,16 +65,3 @@ namespace kite
         }
     }
 }
-
-extern "C"
-{
-    int System__integer__print__i(int val)
-    {
-        return kite::stdlib::System::integer::print(val);
-    }
-    
-    int System__integer__int__i(int val)
-    {
-        return kite::stdlib::System::integer::to_integer(val);
-    }
-}

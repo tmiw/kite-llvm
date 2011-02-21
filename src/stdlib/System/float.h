@@ -53,12 +53,4 @@ namespace kite
     }
 }
 
-extern "C"
-{
-    double System__float__print__f(double val);
-    int System__float__int__f(double val);
-    double System__float__float__f(double val);
-    bool System__float__bool__f(double val);
-}
-
 #endif

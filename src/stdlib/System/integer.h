@@ -53,10 +53,4 @@ namespace kite
     }
 }
 
-extern "C"
-{
-    int System__integer__print__i(int val);
-    int System__integer__int__i(int val);
-}
-
 #endif

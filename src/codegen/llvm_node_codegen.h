@@ -91,7 +91,6 @@ namespace kite
             stdlib::object_method_map &get_method_map(semantics::builtin_types type) const;
             std::string type_to_code(semantics::builtin_types type) const;
             const Type *kite_type_to_llvm_type(semantics::builtin_types type) const;
-            std::string type_to_method_prefix(semantics::builtin_types type) const;
         };
     }
 }

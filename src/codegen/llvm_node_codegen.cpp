@@ -549,37 +549,5 @@ namespace kite
                 }
             }
         }
-        
-        std::string llvm_node_codegen::type_to_method_prefix(semantics::builtin_types type) const
-        {
-            switch(type)
-            {
-                case semantics::INTEGER:
-                {
-                    return "System__integer__";
-                }
-                case semantics::FLOAT:
-                {
-                    return "System__float__";
-                }
-                case semantics::BOOLEAN:
-                {
-                    return "System__boolean__";
-                }
-                case semantics::OBJECT:
-                {
-                    return "System__object__";
-                }
-                case semantics::STRING:
-                {
-                    return "System__string__";
-                }
-                default:
-                {
-                    // TODO
-                    return "";
-                }
-            }
-        }
     }
 }

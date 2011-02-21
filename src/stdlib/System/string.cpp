@@ -37,6 +37,7 @@ namespace kite
         namespace System
         {
             object_method_map string::method_map = map_list_of
+                ("append__ss", function_semantics(semantics::STRING, (void*)&string::append))
                 ("asc__s", function_semantics(semantics::INTEGER, (void*)&string::asc))
                 ("bool__s", function_semantics(semantics::BOOLEAN, (void*)&string::to_boolean))
                 ("float__s", function_semantics(semantics::FLOAT, (void*)&string::to_float))
@@ -53,6 +54,14 @@ namespace kite
             int string::asc(char* val)
             {
                 return *val;
+            }
+            
+            char* string::append(char* val, char *rhs)
+            {
+                char *ret = (char*)malloc(strlen(val) + strlen(rhs) + 1);
+                strcpy(ret, val);
+                strcat(ret, rhs);
+                return ret;
             }
             
             bool string::to_boolean(char* val)
@@ -135,6 +144,11 @@ namespace kite
 
 extern "C"
 {
+    char* System__string__append__ss(char* val, char *rhs)
+    {
+        return kite::stdlib::System::string::append(val, rhs);
+    }
+    
     int System__string__asc__s(char* val)
     {
         return kite::stdlib::System::string::asc(val);

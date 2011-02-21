@@ -293,16 +293,23 @@ namespace kite
             semantics::builtin_types type = get_type(prev);
             stdlib::object_method_map &method_map = get_method_map(type);
             std::string method_name = boost::get<std::string>(tree.children[0]);
+            std::vector<Value*> parameters;
+            std::vector<const Type*> parameterTypes;
             
-            // TODO: parameters
             method_name += std::string("__") + type_to_code(type);
+            parameters.push_back(prev);
+            parameterTypes.push_back(kite_type_to_llvm_type(type));
+            for (int i = 1; i < tree.children.size(); i++)
+            {
+                Value *param_val = boost::apply_visitor(llvm_node_codegen(state), tree.children[i]);
+                method_name += type_to_code(get_type(param_val));
+                parameters.push_back(param_val);
+                parameterTypes.push_back(kite_type_to_llvm_type(get_type(param_val)));
+            }
             function_semantics &semantics = method_map[method_name];
             method_name = type_to_method_prefix(type) + method_name;
-            
-            std::vector<const Type*> args;
-            args.push_back(kite_type_to_llvm_type(type));
-            
-            const FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics.first), args, false);
+                
+            const FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics.first), parameterTypes, false);
             //const PointerType *pt = PointerType::getUnqual(ft);
             Function *f = /*state.current_module()->getFunction(method_name.c_str());*/
                 Function::Create(ft, GlobalValue::ExternalLinkage, method_name.c_str(), state.current_module());
@@ -312,10 +319,12 @@ namespace kite
                 f->eraseFromParent();
                 f = state.current_module()->getFunction(method_name);
             }
+            
             prev = state.module_builder().CreateCall(
                 //ConstantInt::get(pt, (uint64_t)semantics.second),
                 f,
-                prev
+                parameters.begin(),
+                parameters.end()
             );
             return prev;
         }

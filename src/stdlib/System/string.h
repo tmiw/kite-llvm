@@ -45,6 +45,7 @@ namespace kite
                 
                 static object_method_map method_map;
                 static int asc(char* val);
+                static char* append(char* val, char* rhs);
                 static bool to_boolean(char* val);
                 static double to_float(char* val);
                 static int to_integer(char* val);
@@ -63,6 +64,7 @@ namespace kite
 
 extern "C"
 {
+    char* System__string__append__ss(char* val, char* rhs);
     int System__string__asc__s(char* val);
     bool System__string__bool__s(char* val);
     double System__string__float__s(char* val);

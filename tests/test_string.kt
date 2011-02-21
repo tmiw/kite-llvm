@@ -1,3 +1,4 @@
+"A"|append("B")|print;
 "A"|asc|print;
 "G"|bool|print; 
 ""|bool|print; 

@@ -172,10 +172,8 @@ namespace kite
                     -(lit('(') >> -(or_statement [ push_back(at_c<1>(_val), _1) ] % ',') >> lit(')'));
                 
                 deref_method_mandatory_params =
-                    (identifier
-                        [ push_back(at_c<1>(_val), _1) ] 
-                        [ at_c<0>(_val) = kite::semantics::DEREF_METHOD_RELATIVE_SELF ])
-                    >> (lit('(') >> -(or_statement [ push_back(at_c<1>(_val), _1) ] % ',') >> lit(')'));
+                    lit('(') [ at_c<0>(_val) = kite::semantics::DEREF_METHOD_RELATIVE_SELF ]
+                    >> -(or_statement [ push_back(at_c<1>(_val), _1) ] % ',') >> lit(')');
                     
                 deref_array_statement =
                     lit('[') [ at_c<0>(_val) = kite::semantics::DEREF_ARRAY ] >>
@@ -183,7 +181,7 @@ namespace kite
                     lit(']');
                     
                 deref_types = 
-                    (deref_property_statement | deref_method_statement | deref_array_statement ) [ _val = _1 ];
+                    (deref_property_statement | deref_method_statement | deref_array_statement | deref_method_mandatory_params) [ _val = _1 ];
                 
                 deref_filter_only_statement =
                     (    grouping_statement 
@@ -195,12 +193,7 @@ namespace kite
                       ((    grouping_statement 
                               [ push_back(at_c<1>(_val), _1) ]
                               [ at_c<0>(_val) = kite::semantics::DEREF_FILTER ])
-                              >> *deref_types [ push_back(at_c<1>(_val), _1) ])
-                    | (deref_method_mandatory_params
-                        [ push_back(at_c<1>(_val), _1) ]
-                        [ at_c<0>(_val) = kite::semantics::DEREF_FILTER ])
-                        >> *deref_types [ push_back(at_c<1>(_val), _1) ];
-                    /*| grouping_statement [ _val = _1 ];*/
+                              >> *deref_types [ push_back(at_c<1>(_val), _1) ]);
                       
                 grouping_statement = 
                       const_statement [ _val = _1 ]
@@ -225,10 +218,16 @@ namespace kite
                             )
                     >>     '[' >> start [ push_back(at_c<1>(_val), _1) ] >> ']') % ',')
                     >> ']';
-                
+                method_statement =
+                       lit("method") [ at_c<0>(_val) = kite::semantics::METHOD ]
+                    >> identifier [ push_back(at_c<1>(_val), _1) ]
+                    >> (lit('(') >> -(or_statement [ push_back(at_c<1>(_val), _1) ] % ',') >> lit(')'))
+                    >> '[' >> start >> ']';
+                    
                 statement = 
                       loop_statement [ _val = _1 ]
                     | decide_statement [ _val = _1 ]
+                    | method_statement [ _val = _1 ]
                     | (math_statement [ _val = _1 ] >> ';');
                 start = (*statement [ push_back(at_c<1>(_val), _1) ]) [ at_c<0>(_val) = kite::semantics::ITERATE ];
                 
@@ -238,6 +237,7 @@ namespace kite
                 BOOST_SPIRIT_DEBUG_NODE(decide_statement);
                 BOOST_SPIRIT_DEBUG_NODE(loop_statement);
                 BOOST_SPIRIT_DEBUG_NODE(math_statement);
+                BOOST_SPIRIT_DEBUG_NODE(method_statement);
                 BOOST_SPIRIT_DEBUG_NODE(const_statement);
                 BOOST_SPIRIT_DEBUG_NODE(bit_shift_statement);
                 BOOST_SPIRIT_DEBUG_NODE(multiply_divide_statement);
@@ -267,6 +267,7 @@ namespace kite
             qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> start;
             qi::rule<Iterator, semantics::syntax_tree_node(), ascii::space_type> statement;
             qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> math_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> method_statement;
             qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> loop_statement;
             qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> decide_statement;
             qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> const_statement;

@@ -76,6 +76,7 @@ namespace kite
             WHILE,
             UNTIL,
             DECIDE,
+            METHOD,
         };
     }
 }

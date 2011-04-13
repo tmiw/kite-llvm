@@ -141,6 +141,9 @@ namespace kite
                 case semantics::DECIDE:
                     ret = codegen_decide_op(tree);
                     break;
+                case semantics::METHOD:
+                    ret = codegen_method_op(tree);
+                    break;
             }
             
             return ret;
@@ -428,6 +431,46 @@ namespace kite
             return ConstantInt::get(getGlobalContext(), APInt(32, 0, true)); // TODO
         }
         
+        Value *llvm_node_codegen::codegen_method_op(semantics::syntax_tree const &tree) const
+        {
+            BasicBlock *currentBB = state.module_builder().GetInsertBlock();
+            std::string functionName = boost::get<std::string>(tree.children[0]);
+            std::vector<const Type*> argTypes;
+            
+            if (tree.children.size() > 2)
+            {
+                functionName += "__" + std::string(tree.children.size() - 2, 'o');
+                for (int i = 1; i < tree.children.size() - 1; i++)
+                {
+                    argTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
+                }
+            }
+            
+            Module *currentModule = state.current_module();
+            FunctionType *FT = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), argTypes, false);
+            Function *F = Function::Create(FT, Function::ExternalLinkage, functionName.c_str(), currentModule);
+            BasicBlock *BB = BasicBlock::Create(getGlobalContext(), "entry", F);
+            IRBuilder<> &builder = state.module_builder();
+            builder.SetInsertPoint(BB);
+            
+            state.push_symbol_stack();
+            int i = 1;
+            std::map<std::string, Value*> &symStack = state.current_symbol_stack();
+            for (Function::arg_iterator AI = F->arg_begin(); i < tree.children.size() - 1; i++, ++AI)
+            {
+                std::string name = boost::get<std::string>(tree.children[i]);
+                AI->setName(name.c_str());
+                symStack[name] = builder.CreateAlloca(kite_type_to_llvm_type(semantics::OBJECT));
+                builder.CreateStore(AI, symStack[name]);
+            }
+            Value *ret = boost::apply_visitor(llvm_node_codegen(state), tree.children[tree.children.size() - 1]);
+            state.pop_symbol_stack();
+            
+            builder.CreateRet(ret);
+            state.module_builder().SetInsertPoint(currentBB);
+            return ConstantInt::get(getGlobalContext(), APInt(32, 0, true)); // TODO
+        }
+        
         semantics::builtin_types llvm_node_codegen::get_type(Value *val) const
         {
             semantics::builtin_types op_type;
@@ -512,8 +555,7 @@ namespace kite
                 }
                 default:
                 {
-                    // TODO
-                    return "";
+                    assert(0);
                 }
             }
         }
@@ -538,14 +580,13 @@ namespace kite
                 {
                     return PointerType::getUnqual(Type::getInt8Ty(getGlobalContext()));
                 }
-/*                case semantics::OBJECT:
+                case semantics::OBJECT:
                 {
-                    return "o";
-                }*/
+                    return PointerType::getUnqual(Type::getVoidTy(getGlobalContext()));
+                }
                 default:
                 {
-                    // TODO
-                    return NULL;
+                    assert(0);
                 }
             }
         }

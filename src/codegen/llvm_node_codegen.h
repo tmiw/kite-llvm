@@ -82,6 +82,7 @@ namespace kite
             Value *codegen_assign_op(semantics::syntax_tree const &tree) const;
             Value *codegen_loop_op(semantics::syntax_tree const &tree) const;
             Value *codegen_decide_op(semantics::syntax_tree const &tree) const;
+            Value *codegen_method_op(semantics::syntax_tree const &tree) const;
             
             Value *codegen_deref_property_op(semantics::syntax_tree const &tree, Value *prev) const;
             Value *codegen_deref_method_op(semantics::syntax_tree const &tree, Value *prev) const;

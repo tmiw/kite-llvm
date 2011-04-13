@@ -172,7 +172,8 @@ namespace kite
                     -(lit('(') >> -(or_statement [ push_back(at_c<1>(_val), _1) ] % ',') >> lit(')'));
                 
                 deref_method_mandatory_params =
-                    lit('(') [ at_c<0>(_val) = kite::semantics::DEREF_METHOD_RELATIVE_SELF ]
+                       identifier [ push_back(at_c<1>(_val), _1) ]
+                    >> lit('(') [ at_c<0>(_val) = kite::semantics::DEREF_METHOD_RELATIVE_SELF ]
                     >> -(or_statement [ push_back(at_c<1>(_val), _1) ] % ',') >> lit(')');
                     
                 deref_array_statement =
@@ -181,7 +182,7 @@ namespace kite
                     lit(']');
                     
                 deref_types = 
-                    (deref_property_statement | deref_method_statement | deref_array_statement | deref_method_mandatory_params) [ _val = _1 ];
+                    (deref_property_statement | deref_method_statement | deref_array_statement) [ _val = _1 ];
                 
                 deref_filter_only_statement =
                     (    grouping_statement 
@@ -190,6 +191,11 @@ namespace kite
                     >> *deref_types [ push_back(at_c<1>(_val), _1) ];
                             
                 deref_filter_statement =
+                        (deref_method_mandatory_params 
+                             [ push_back(at_c<1>(_val), _1) ]
+                             [ at_c<0>(_val) = kite::semantics::DEREF_FILTER ]
+                      >> *deref_types [ push_back(at_c<1>(_val), _1) ])
+                      |
                       ((    grouping_statement 
                               [ push_back(at_c<1>(_val), _1) ]
                               [ at_c<0>(_val) = kite::semantics::DEREF_FILTER ])
@@ -221,8 +227,8 @@ namespace kite
                 method_statement =
                        lit("method") [ at_c<0>(_val) = kite::semantics::METHOD ]
                     >> identifier [ push_back(at_c<1>(_val), _1) ]
-                    >> (lit('(') >> -(or_statement [ push_back(at_c<1>(_val), _1) ] % ',') >> lit(')'))
-                    >> '[' >> start >> ']';
+                    >> (lit('(') >> -(identifier [ push_back(at_c<1>(_val), _1) ] % ',') >> lit(')'))
+                    >> '[' >> start [ push_back(at_c<1>(_val), _1) ] >> ']';
                     
                 statement = 
                       loop_statement [ _val = _1 ]

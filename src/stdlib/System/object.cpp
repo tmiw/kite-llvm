@@ -25,33 +25,18 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
  
-#ifndef KITE_STDLIB__SYSTEM__OBJECT_H
-#define KITE_STDLIB__SYSTEM__OBJECT_H
-
-#include <map>
-#include <semantics/constants.h>
-
+#include <iostream>
+#include <boost/assign.hpp>
+#include "object.h"
+using namespace boost::assign;
+ 
 namespace kite
 {
     namespace stdlib
     {
-        // TODO
-        typedef std::pair<semantics::builtin_types, void*> function_semantics;
-        typedef std::map<std::string, function_semantics> object_method_map;
-        
         namespace System
         {
-            struct object
-            {
-                semantics::builtin_types type;
-                object *parent;
-                static object_method_map method_map;
-                
-                object() : type(semantics::OBJECT), parent(NULL) { }
-                object(semantics::builtin_types type) : type(type), parent(NULL) { }
-            };
+            object_method_map object::method_map;
         }
     }
 }
-
-#endif

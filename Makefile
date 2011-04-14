@@ -7,7 +7,7 @@ LLVM_LIBS=`llvm-config --libs`
 OBJS=src/apps/kite.o src/codegen/llvm_compile_state.o src/codegen/llvm_node_codegen.o \
 	 src/codegen/syntax_tree_node_printer.o src/codegen/syntax_tree_printer.o \
 	 src/parser/parser.o src/stdlib/System/integer.o src/stdlib/System/string.o \
-	 src/stdlib/System/boolean.o src/stdlib/System/float.o
+	 src/stdlib/System/boolean.o src/stdlib/System/float.o src/stdlib/System/object.o
 
 .cpp.o: %.cpp
 	$(CC) -c -o $@ $(CPPFLAGS) $(INC) $(LLVM_CPPFLAGS) $<
@@ -109,7 +109,8 @@ src/apps/kite.o: /usr/include/c++/4.2.1/bits/stl_tree.h
 src/apps/kite.o: /usr/include/c++/4.2.1/bits/stl_map.h
 src/apps/kite.o: /usr/include/c++/4.2.1/bits/stl_multimap.h
 src/apps/kite.o: src/semantics/constants.h src/stdlib/System/string.h
-src/apps/kite.o: src/stdlib/System/boolean.h src/codegen/llvm_compile_state.h
+src/apps/kite.o: src/stdlib/System/boolean.h src/stdlib/System/float.h
+src/apps/kite.o: src/codegen/llvm_compile_state.h
 src/apps/kite.o: /usr/include/c++/4.2.1/vector
 src/apps/kite.o: /usr/include/c++/4.2.1/bits/stl_vector.h
 src/apps/kite.o: /usr/include/c++/4.2.1/bits/stl_bvector.h
@@ -169,22 +170,34 @@ src/codegen/llvm_compile_state.o: /usr/include/c++/4.2.1/bits/stl_uninitialized.
 src/codegen/llvm_compile_state.o: /usr/include/c++/4.2.1/bits/stl_vector.h
 src/codegen/llvm_compile_state.o: /usr/include/c++/4.2.1/bits/stl_bvector.h
 src/codegen/llvm_compile_state.o: /usr/include/c++/4.2.1/bits/vector.tcc
-src/codegen/llvm_node_codegen.o: src/codegen/llvm_node_codegen.h
-src/codegen/llvm_node_codegen.o: src/semantics/syntax_tree.h
-src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/deque
-src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/functexcept.h
-src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/exception_defines.h
-src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/stl_algobase.h
-src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/cstring
-src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/cstddef
-src/codegen/llvm_node_codegen.o: /usr/include/stddef.h /usr/include/_types.h
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/iostream
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/ostream
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/ios
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/iosfwd
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/cctype
+src/codegen/llvm_node_codegen.o: /usr/include/ctype.h /usr/include/runetype.h
+src/codegen/llvm_node_codegen.o: /usr/include/_types.h
 src/codegen/llvm_node_codegen.o: /usr/include/sys/_types.h
 src/codegen/llvm_node_codegen.o: /usr/include/sys/cdefs.h
 src/codegen/llvm_node_codegen.o: /usr/include/machine/_types.h
 src/codegen/llvm_node_codegen.o: /usr/include/i386/_types.h
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/stringfwd.h
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/postypes.h
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/cwchar
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/cstddef
+src/codegen/llvm_node_codegen.o: /usr/include/stddef.h
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/ctime
+src/codegen/llvm_node_codegen.o: /usr/include/time.h /usr/include/_structs.h
+src/codegen/llvm_node_codegen.o: /usr/include/sys/_structs.h
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/functexcept.h
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/exception_defines.h
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/exception
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/char_traits.h
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/cstring
 src/codegen/llvm_node_codegen.o: /usr/include/string.h
 src/codegen/llvm_node_codegen.o: /usr/include/secure/_string.h
 src/codegen/llvm_node_codegen.o: /usr/include/secure/_common.h
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/stl_algobase.h
 src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/climits
 src/codegen/llvm_node_codegen.o: /usr/include/limits.h
 src/codegen/llvm_node_codegen.o: /usr/include/machine/limits.h
@@ -192,15 +205,6 @@ src/codegen/llvm_node_codegen.o: /usr/include/i386/limits.h
 src/codegen/llvm_node_codegen.o: /usr/include/i386/_limits.h
 src/codegen/llvm_node_codegen.o: /usr/include/sys/syslimits.h
 src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/cstdlib
-src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/iosfwd
-src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/cctype
-src/codegen/llvm_node_codegen.o: /usr/include/ctype.h /usr/include/runetype.h
-src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/stringfwd.h
-src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/postypes.h
-src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/cwchar
-src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/ctime
-src/codegen/llvm_node_codegen.o: /usr/include/time.h /usr/include/_structs.h
-src/codegen/llvm_node_codegen.o: /usr/include/sys/_structs.h
 src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/stl_pair.h
 src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/cpp_type_traits.h
 src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/ext/type_traits.h
@@ -211,27 +215,48 @@ src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/stl_iterator_base_f
 src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/concept_check.h
 src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/stl_iterator.h
 src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/debug/debug.h
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/cstdio
+src/codegen/llvm_node_codegen.o: /usr/include/stdio.h
+src/codegen/llvm_node_codegen.o: /usr/include/secure/_stdio.h
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/localefwd.h
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/ios_base.h
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/ext/atomicity.h
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/locale_classes.h
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/string
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/memory
 src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/allocator.h
 src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/stl_construct.h
 src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/new
-src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/exception
 src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/stl_uninitialized.h
-src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/stl_deque.h
-src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/deque.tcc
-src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/string
-src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/char_traits.h
-src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/memory
 src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/stl_raw_storage_iter.h
 src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/limits
 src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/ostream_insert.h
 src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/stl_function.h
 src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/basic_string.h
-src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/ext/atomicity.h
 src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/algorithm
 src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/stl_algo.h
 src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/stl_heap.h
 src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/stl_tempbuf.h
 src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/basic_string.tcc
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/streambuf
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/streambuf.tcc
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/basic_ios.h
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/streambuf_iterator.h
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/locale_facets.h
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/cwctype
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/codecvt.h
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/basic_ios.tcc
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/ostream.tcc
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/locale
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/locale_facets.tcc
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/typeinfo
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/istream
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/istream.tcc
+src/codegen/llvm_node_codegen.o: src/codegen/llvm_node_codegen.h
+src/codegen/llvm_node_codegen.o: src/semantics/syntax_tree.h
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/deque
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/stl_deque.h
+src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/deque.tcc
 src/codegen/llvm_node_codegen.o: src/semantics/constants.h
 src/codegen/llvm_node_codegen.o: src/stdlib/System/integer.h
 src/codegen/llvm_node_codegen.o: src/stdlib/System/object.h
@@ -242,6 +267,7 @@ src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/stl_multimap.h
 src/codegen/llvm_node_codegen.o: src/semantics/constants.h
 src/codegen/llvm_node_codegen.o: src/stdlib/System/string.h
 src/codegen/llvm_node_codegen.o: src/stdlib/System/boolean.h
+src/codegen/llvm_node_codegen.o: src/stdlib/System/float.h
 src/codegen/llvm_node_codegen.o: src/codegen/llvm_compile_state.h
 src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/vector
 src/codegen/llvm_node_codegen.o: /usr/include/c++/4.2.1/bits/stl_vector.h
@@ -744,6 +770,92 @@ src/stdlib/System/integer.o: /usr/include/c++/4.2.1/bits/stl_tree.h
 src/stdlib/System/integer.o: /usr/include/c++/4.2.1/bits/stl_map.h
 src/stdlib/System/integer.o: /usr/include/c++/4.2.1/bits/stl_multimap.h
 src/stdlib/System/integer.o: src/semantics/constants.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/iostream
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/ostream
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/ios
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/iosfwd
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/cctype
+src/stdlib/System/object.o: /usr/include/ctype.h /usr/include/runetype.h
+src/stdlib/System/object.o: /usr/include/_types.h /usr/include/sys/_types.h
+src/stdlib/System/object.o: /usr/include/sys/cdefs.h
+src/stdlib/System/object.o: /usr/include/machine/_types.h
+src/stdlib/System/object.o: /usr/include/i386/_types.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/stringfwd.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/postypes.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/cwchar
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/cstddef
+src/stdlib/System/object.o: /usr/include/stddef.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/ctime /usr/include/time.h
+src/stdlib/System/object.o: /usr/include/_structs.h
+src/stdlib/System/object.o: /usr/include/sys/_structs.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/functexcept.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/exception_defines.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/exception
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/char_traits.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/cstring
+src/stdlib/System/object.o: /usr/include/string.h
+src/stdlib/System/object.o: /usr/include/secure/_string.h
+src/stdlib/System/object.o: /usr/include/secure/_common.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/stl_algobase.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/climits
+src/stdlib/System/object.o: /usr/include/limits.h
+src/stdlib/System/object.o: /usr/include/machine/limits.h
+src/stdlib/System/object.o: /usr/include/i386/limits.h
+src/stdlib/System/object.o: /usr/include/i386/_limits.h
+src/stdlib/System/object.o: /usr/include/sys/syslimits.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/cstdlib
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/stl_pair.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/cpp_type_traits.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/ext/type_traits.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/utility
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/stl_relops.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/stl_iterator_base_types.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/stl_iterator_base_funcs.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/concept_check.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/stl_iterator.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/debug/debug.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/cstdio
+src/stdlib/System/object.o: /usr/include/stdio.h /usr/include/secure/_stdio.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/localefwd.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/ios_base.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/ext/atomicity.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/locale_classes.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/string
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/memory
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/allocator.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/stl_construct.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/new
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/stl_uninitialized.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/stl_raw_storage_iter.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/limits
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/ostream_insert.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/stl_function.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/basic_string.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/algorithm
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/stl_algo.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/stl_heap.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/stl_tempbuf.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/basic_string.tcc
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/streambuf
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/streambuf.tcc
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/basic_ios.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/streambuf_iterator.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/locale_facets.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/cwctype
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/codecvt.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/basic_ios.tcc
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/ostream.tcc
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/locale
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/locale_facets.tcc
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/typeinfo
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/istream
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/istream.tcc
+src/stdlib/System/object.o: src/stdlib/System/object.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/map
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/stl_tree.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/stl_map.h
+src/stdlib/System/object.o: /usr/include/c++/4.2.1/bits/stl_multimap.h
+src/stdlib/System/object.o: src/semantics/constants.h
 src/stdlib/System/string.o: /usr/include/c++/4.2.1/iostream
 src/stdlib/System/string.o: /usr/include/c++/4.2.1/ostream
 src/stdlib/System/string.o: /usr/include/c++/4.2.1/ios

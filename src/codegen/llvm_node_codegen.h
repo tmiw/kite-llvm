@@ -86,12 +86,14 @@ namespace kite
             
             Value *codegen_deref_property_op(semantics::syntax_tree const &tree, Value *prev) const;
             Value *codegen_deref_method_op(semantics::syntax_tree const &tree, Value *prev) const;
+            Value *codegen_deref_method_relative_self_op(semantics::syntax_tree const &tree) const;
             Value *codegen_deref_array_op(semantics::syntax_tree const &tree, Value *prev) const;
             
             semantics::builtin_types get_type(Value *val) const;
             stdlib::object_method_map &get_method_map(semantics::builtin_types type) const;
             std::string type_to_code(semantics::builtin_types type) const;
             const Type *kite_type_to_llvm_type(semantics::builtin_types type) const;
+            Value *generate_llvm_method_call(Value *self, std::string name, std::vector<Value*> &params) const;
         };
     }
 }

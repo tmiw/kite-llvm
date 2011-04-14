@@ -145,10 +145,17 @@ int main(int argc, char **argv)
         IRBuilder<> &builder = state.module_builder();
         builder.SetInsertPoint(BB);
 
+        std::map<std::string, Value*> &sym_stack = state.current_symbol_stack();
+        // TODO
+        Type *ptrType = PointerType::getUnqual(Type::getVoidTy(getGlobalContext()));
+        sym_stack["this"] = builder.CreateAlloca(ptrType);
+        Value *intZero = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) << 4, 0, true));
+        Value *ptrZero = builder.CreateIntToPtr(intZero, ptrType);
+        builder.CreateStore(ptrZero, sym_stack["this"]);
         codegen::llvm_node_codegen cg(state);
         cg(ast);
         builder.CreateRetVoid();
-        verifyFunction(*F);
+        //verifyFunction(*F);
 
         ExecutionEngine *engine = EngineBuilder(currentModule).create();
         if (optimize_code)

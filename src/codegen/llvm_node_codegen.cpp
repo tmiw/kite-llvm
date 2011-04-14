@@ -144,6 +144,9 @@ namespace kite
                 case semantics::METHOD:
                     ret = codegen_method_op(tree);
                     break;
+                case semantics::DEREF_METHOD_RELATIVE_SELF:
+                    ret = codegen_deref_method_relative_self_op(tree);
+                    break;
             }
             
             return ret;
@@ -293,33 +296,34 @@ namespace kite
         
         Value *llvm_node_codegen::codegen_deref_method_op(semantics::syntax_tree const &tree, Value *prev) const
         {
-            semantics::builtin_types type = get_type(prev);
-            stdlib::object_method_map &method_map = get_method_map(type);
             std::string method_name = boost::get<std::string>(tree.children[0]);
             std::vector<Value*> parameters;
-            std::vector<const Type*> parameterTypes;
             
-            method_name += std::string("__") + type_to_code(type);
             parameters.push_back(prev);
-            parameterTypes.push_back(kite_type_to_llvm_type(type));
             for (int i = 1; i < tree.children.size(); i++)
             {
                 Value *param_val = boost::apply_visitor(llvm_node_codegen(state), tree.children[i]);
-                method_name += type_to_code(get_type(param_val));
                 parameters.push_back(param_val);
-                parameterTypes.push_back(kite_type_to_llvm_type(get_type(param_val)));
             }
-            function_semantics &semantics = method_map[method_name];
-                
-            const FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics.first), parameterTypes, false);
-            Value *fptrval = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) << 4, (uint64_t)semantics.second, true));
-            Value *fptr = state.module_builder().CreateIntToPtr(fptrval, PointerType::getUnqual(ft));
-            prev = state.module_builder().CreateCall(
-                fptr,
-                parameters.begin(),
-                parameters.end()
-            );
-            return prev;
+            
+            return generate_llvm_method_call(prev, method_name, parameters);
+        }
+        
+        Value *llvm_node_codegen::codegen_deref_method_relative_self_op(semantics::syntax_tree const &tree) const
+        {
+            std::string method_name = boost::get<std::string>(tree.children[0]);
+            std::vector<Value*> parameters;
+            std::map<std::string, Value*> &sym_stack = state.current_symbol_stack();
+            Value *self = state.module_builder().CreateLoad(sym_stack["this"]);
+            
+            parameters.push_back(self);
+            for (int i = 1; i < tree.children.size(); i++)
+            {
+                Value *param_val = boost::apply_visitor(llvm_node_codegen(state), tree.children[i]);
+                parameters.push_back(param_val);
+            }
+            
+            return generate_llvm_method_call(self, method_name, parameters);
         }
         
         Value *llvm_node_codegen::codegen_deref_array_op(semantics::syntax_tree const &tree, Value *prev) const
@@ -332,13 +336,14 @@ namespace kite
         {
             std::string var_name = boost::get<std::string>(tree.children[0]);
             std::map<std::string, Value*> &sym_stack = state.current_symbol_stack();
+            IRBuilder<> &builder = state.module_builder();
+            
             if (sym_stack.count(var_name) == 0)
             {
-                // TODO: default value.
-                //sym_stack[var_name] = ConstantInt::get(getGlobalContext(), APInt(32, 0, true));
-                sym_stack[var_name] = state.module_builder().CreateAlloca(kite_type_to_llvm_type(semantics::INTEGER));
+                sym_stack[var_name] = builder.CreateAlloca(kite_type_to_llvm_type(semantics::INTEGER));
+                builder.CreateStore(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)), sym_stack[var_name]);                
             }
-            return state.module_builder().CreateLoad(sym_stack[var_name]);
+            return builder.CreateLoad(sym_stack[var_name]);
         }
         
         Value *llvm_node_codegen::codegen_assign_op(semantics::syntax_tree const &tree) const
@@ -437,9 +442,11 @@ namespace kite
             std::string functionName = boost::get<std::string>(tree.children[0]);
             std::vector<const Type*> argTypes;
             
+            functionName += "__o";
+            argTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
             if (tree.children.size() > 2)
             {
-                functionName += "__" + std::string(tree.children.size() - 2, 'o');
+                functionName += std::string(tree.children.size() - 2, 'o');
                 for (int i = 1; i < tree.children.size() - 1; i++)
                 {
                     argTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
@@ -454,11 +461,19 @@ namespace kite
             builder.SetInsertPoint(BB);
             
             state.push_symbol_stack();
-            int i = 1;
+            int i = 0;
             std::map<std::string, Value*> &symStack = state.current_symbol_stack();
             for (Function::arg_iterator AI = F->arg_begin(); i < tree.children.size() - 1; i++, ++AI)
             {
-                std::string name = boost::get<std::string>(tree.children[i]);
+                std::string name;
+                if (i == 0)
+                {
+                    name = "this";
+                }
+                else
+                {
+                    name = boost::get<std::string>(tree.children[i]);
+                }
                 AI->setName(name.c_str());
                 symStack[name] = builder.CreateAlloca(kite_type_to_llvm_type(semantics::OBJECT));
                 builder.CreateStore(AI, symStack[name]);
@@ -469,6 +484,40 @@ namespace kite
             builder.CreateRet(ret);
             state.module_builder().SetInsertPoint(currentBB);
             return ConstantInt::get(getGlobalContext(), APInt(32, 0, true)); // TODO
+        }
+        
+        Value *llvm_node_codegen::generate_llvm_method_call(Value *self, std::string name, std::vector<Value*> &params) const
+        {
+            semantics::builtin_types type = get_type(self);
+            stdlib::object_method_map &method_map = get_method_map(type);
+            std::string method_name = name;
+            std::vector<const Type*> parameterTypes;
+
+            method_name += std::string("__");
+            for (int i = 0; i < params.size(); i++)
+            {
+                method_name += type_to_code(get_type(params[i]));
+                parameterTypes.push_back(kite_type_to_llvm_type(get_type(params[i])));
+            }
+            function_semantics &semantics = method_map[method_name];
+                
+            const FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics.first), parameterTypes, false);
+            Value *fptr;
+            if ((uint64_t)semantics.second != 0)
+            {
+                Value *fptrval = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) << 4, (uint64_t)semantics.second, true));
+                fptr = state.module_builder().CreateIntToPtr(fptrval, PointerType::getUnqual(ft));
+            }
+            else
+            {
+                fptr = state.current_module()->getFunction(method_name.c_str());
+            }
+            self = state.module_builder().CreateCall(
+                fptr,
+                params.begin(),
+                params.end()
+            );
+            return self;
         }
         
         semantics::builtin_types llvm_node_codegen::get_type(Value *val) const
@@ -484,9 +533,7 @@ namespace kite
             {
                 op_type = semantics::BOOLEAN;
             }
-            else if (
-                type->isPointerTy() && 
-                ((PointerType*)type)->isValidElementType(Type::getInt8Ty(getGlobalContext())) )
+            else if (type == Type::getInt8PtrTy(getGlobalContext()))
             {
                 op_type = semantics::STRING;
             }
@@ -496,7 +543,7 @@ namespace kite
             }
             else
             {
-                op_type == semantics::OBJECT;
+                op_type = semantics::OBJECT;
             }
             
             return op_type;
@@ -524,7 +571,7 @@ namespace kite
                 }
                 default:
                 {
-                    // TODO
+                    return System::object::method_map;
                 }
             }
         }

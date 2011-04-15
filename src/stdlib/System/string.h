@@ -58,6 +58,7 @@ namespace kite
                 static char* str(char *val);
                 static char* trim(char *val);
                 static char* upper(char *val);
+                static System::object *to_object(char *val);
             };
         }
     }

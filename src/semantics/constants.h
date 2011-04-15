@@ -39,6 +39,7 @@ namespace kite
             BOOLEAN,
             STRING,
             OBJECT,
+            METHOD_TY,
         };
         
         enum code_operation

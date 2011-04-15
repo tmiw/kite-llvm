@@ -40,7 +40,8 @@ namespace kite
                 ("bool__f", function_semantics(semantics::BOOLEAN, (void*)&fpnum::to_boolean))
                 ("int__f", function_semantics(semantics::INTEGER, (void*)&fpnum::to_integer))
                 ("float__f", function_semantics(semantics::FLOAT, (void*)&fpnum::to_float))
-                ("print__f", function_semantics(semantics::FLOAT, (void*)&fpnum::print));
+                ("print__f", function_semantics(semantics::FLOAT, (void*)&fpnum::print))
+                ("obj__f", function_semantics(semantics::OBJECT, (void*)&fpnum::to_object));
             
             bool fpnum::to_boolean(double val)
             {
@@ -61,6 +62,11 @@ namespace kite
             {
                 std::cout << val << std::endl;
                 return val;
+            }
+            
+            System::object *fpnum::to_object(double val)
+            {
+                return new fpnum(val);
             }
         }
     }

@@ -39,8 +39,11 @@ namespace kite
             object_method_map integer::method_map = map_list_of
                 ("bool__i", function_semantics(semantics::BOOLEAN, (void*)&integer::to_boolean))
                 ("int__i", function_semantics(semantics::INTEGER, (void*)&integer::to_integer))
+                ("int__o", function_semantics(semantics::INTEGER, (void*)&integer::to_integer_obj))
                 ("float__i", function_semantics(semantics::FLOAT, (void*)&integer::to_float))
-                ("print__i", function_semantics(semantics::INTEGER, (void*)&integer::print));
+                ("print__i", function_semantics(semantics::INTEGER, (void*)&integer::print))
+                ("print__o", function_semantics(semantics::OBJECT, (void*)&integer::print_obj))
+                ("obj__i", function_semantics(semantics::OBJECT, (void*)&integer::to_object));
             
             bool integer::to_boolean(int val)
             {
@@ -61,6 +64,24 @@ namespace kite
             {
                 std::cout << val << std::endl;
                 return val;
+            }
+            
+            System::object *integer::to_object(int val)
+            {
+                return new integer(val);
+            }
+            
+            System::object *integer::print_obj(System::object *val)
+            {
+                integer *integ = (integer*)val;
+                std::cout << integ->val << std::endl;
+                return val;
+            }
+            
+            int integer::to_integer_obj(System::object *val)
+            {
+                integer *integ = (integer*)val;
+                return integ->val;
             }
         }
     }

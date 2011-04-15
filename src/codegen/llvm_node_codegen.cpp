@@ -404,15 +404,19 @@ namespace kite
         
         Value *llvm_node_codegen::codegen_decide_op(semantics::syntax_tree const &tree) const
         {
-            BasicBlock *currentBB = state.module_builder().GetInsertBlock();
+            IRBuilder<> &builder = state.module_builder();
+            BasicBlock *currentBB = builder.GetInsertBlock();
             Function *currentFunc = currentBB->getParent();
             BasicBlock *endBB = BasicBlock::Create(getGlobalContext(), "decide_end", currentFunc);
             Value *condition = NULL;
             BasicBlock *condBB = BasicBlock::Create(getGlobalContext(), "decide_cond", currentFunc, endBB);
             BasicBlock *actionBB = NULL;
+            PHINode *PN = NULL;
+            std::vector<Value*> decideResults;
+            std::vector<BasicBlock*> decideBlocks;
             
-            state.module_builder().CreateBr(condBB);
-            state.module_builder().SetInsertPoint(condBB);
+            builder.CreateBr(condBB);
+            builder.SetInsertPoint(condBB);
             for(int i = 0; i < tree.children.size(); i++)
             {
                 condition = boost::apply_visitor(llvm_node_codegen(state), tree.children[i++]);
@@ -423,17 +427,35 @@ namespace kite
                 }
                 else
                 {
+                    decideResults.push_back(ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) << 3, (uint64_t)0, true)));
+                    decideBlocks.push_back(condBB);
                     condBB = endBB;
                 }
-                state.module_builder().CreateCondBr(condition, actionBB, condBB);
-                state.module_builder().SetInsertPoint(actionBB);
-                boost::apply_visitor(llvm_node_codegen(state), tree.children[i]);
-                state.module_builder().CreateBr(endBB);
-                state.module_builder().SetInsertPoint(condBB);
+                builder.CreateCondBr(condition, actionBB, condBB);
+                builder.SetInsertPoint(actionBB);
+                Value *result = boost::apply_visitor(llvm_node_codegen(state), tree.children[i]);
+                if (get_type(result) != semantics::OBJECT) 
+                {
+                    std::vector<Value*> emptyList;
+                    emptyList.push_back(result);
+                    result = generate_llvm_method_call(result, "obj", emptyList);
+                }
+                decideResults.push_back(result);
+                decideBlocks.push_back(actionBB);
+                builder.CreateBr(endBB);
+                builder.SetInsertPoint(condBB);
             }
             
-            state.module_builder().SetInsertPoint(endBB);
-            return ConstantInt::get(getGlobalContext(), APInt(32, 0, true)); // TODO
+            builder.SetInsertPoint(endBB);
+            PN = builder.CreatePHI(kite_type_to_llvm_type(semantics::OBJECT));
+            for (int index = 0; index < decideResults.size(); index++)
+            {
+                Value *val = decideResults[index];
+                BasicBlock *bb = decideBlocks[index];
+                PN->addIncoming(val, bb);
+            }
+            return PN;
+            //return ConstantInt::get(getGlobalContext(), APInt(32, 0, true)); // TODO
         }
         
         Value *llvm_node_codegen::codegen_method_op(semantics::syntax_tree const &tree) const
@@ -481,6 +503,12 @@ namespace kite
             Value *ret = boost::apply_visitor(llvm_node_codegen(state), tree.children[tree.children.size() - 1]);
             state.pop_symbol_stack();
             
+            if (get_type(ret) != semantics::OBJECT)
+            {
+                std::vector<Value*> params;
+                params.push_back(ret);
+                ret = generate_llvm_method_call(ret, "obj", params);
+            }
             builder.CreateRet(ret);
             state.module_builder().SetInsertPoint(currentBB);
             return ConstantInt::get(getGlobalContext(), APInt(32, 0, true)); // TODO
@@ -488,16 +516,19 @@ namespace kite
         
         Value *llvm_node_codegen::generate_llvm_method_call(Value *self, std::string name, std::vector<Value*> &params) const
         {
+            IRBuilder<> &builder = state.module_builder();
+            Module *module = state.current_module();
             semantics::builtin_types type = get_type(self);
             stdlib::object_method_map &method_map = get_method_map(type);
             std::string method_name = name;
             std::vector<const Type*> parameterTypes;
-
+            std::vector<Value*> paramsCopy(params);
+            
             method_name += std::string("__");
             for (int i = 0; i < params.size(); i++)
             {
-                method_name += type_to_code(get_type(params[i]));
-                parameterTypes.push_back(kite_type_to_llvm_type(get_type(params[i])));
+                method_name += type_to_code(get_type(paramsCopy[i]));
+                parameterTypes.push_back(kite_type_to_llvm_type(get_type(paramsCopy[i])));
             }
             function_semantics &semantics = method_map[method_name];
                 
@@ -505,22 +536,73 @@ namespace kite
             Value *fptr;
             if ((uint64_t)semantics.second != 0)
             {
-                Value *fptrval = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) << 4, (uint64_t)semantics.second, true));
-                fptr = state.module_builder().CreateIntToPtr(fptrval, PointerType::getUnqual(ft));
+                Value *fptrval = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) << 3, (uint64_t)semantics.second, true));
+                fptr = builder.CreateIntToPtr(fptrval, PointerType::getUnqual(ft));
             }
             else
             {
-                fptr = state.current_module()->getFunction(method_name.c_str());
+                int count = 0;
+                do 
+                {
+                    fptr = module->getFunction(method_name.c_str());
+                    if (fptr == NULL)
+                    {
+                        // Convert all parameters to object type.
+                        for (int i = 0; i < paramsCopy.size(); i++)
+                        {
+                            Value *v = paramsCopy[i];
+                            if (get_type(v) != semantics::OBJECT)
+                            {
+                                std::vector<Value*> castParams;
+                                castParams.push_back(v);
+                                paramsCopy[i] = generate_llvm_method_call(v, std::string("obj"), castParams);
+                            }
+                        }
+                        
+                        method_name = name + std::string("__");
+                        for (int i = 0; i < paramsCopy.size(); i++)
+                        {
+                            method_name += type_to_code(get_type(paramsCopy[i]));
+                        }
+                    }
+                } while (count++ <= 1);
+                
+                if (fptr == NULL)
+                {
+                    std::vector<const Type*> parameterTypesLookup;
+                    std::vector<Value*> paramValuesLookup;
+                    parameterTypesLookup.push_back(PointerType::getUnqual(Type::getInt32Ty(getGlobalContext())));
+                    parameterTypesLookup.push_back(kite_type_to_llvm_type(semantics::STRING));
+                    parameterTypesLookup.push_back(kite_type_to_llvm_type(semantics::INTEGER));
+                    const FunctionType *ftPtrLookup = FunctionType::get(parameterTypesLookup[0], parameterTypesLookup, false);
+                    Function *funPtrLookup = Function::Create(ftPtrLookup, Function::ExternalLinkage, "kite_find_funccall", module);
+                    if (funPtrLookup->getName() != "kite_find_funccall")
+                    {
+                        funPtrLookup->eraseFromParent();
+                        funPtrLookup = module->getFunction("kite_find_funccall");
+                    }
+                    paramValuesLookup.push_back(builder.CreateBitCast(self, PointerType::getUnqual(Type::getInt32Ty(getGlobalContext()))));
+                    paramValuesLookup.push_back(builder.CreateGlobalStringPtr(name.c_str()));
+                    paramValuesLookup.push_back(ConstantInt::get(getGlobalContext(), APInt(32, paramsCopy.size(), true)));
+                    fptr = builder.CreateBitCast(
+                        builder.CreateCall(
+                            funPtrLookup,
+                            paramValuesLookup.begin(),
+                            paramValuesLookup.end()
+                        ),
+                        PointerType::getUnqual(ft)
+                    );
+                }
             }
-            self = state.module_builder().CreateCall(
+            self = builder.CreateCall(
                 fptr,
-                params.begin(),
-                params.end()
+                paramsCopy.begin(),
+                paramsCopy.end()
             );
             return self;
         }
         
-        semantics::builtin_types llvm_node_codegen::get_type(Value *val) const
+        semantics::builtin_types llvm_node_codegen::get_type(Value *val)
         {
             semantics::builtin_types op_type;
             const Type *type = val->getType();
@@ -576,7 +658,7 @@ namespace kite
             }
         }
         
-        std::string llvm_node_codegen::type_to_code(semantics::builtin_types type) const
+        std::string llvm_node_codegen::type_to_code(semantics::builtin_types type)
         {
             switch(type)
             {
@@ -607,7 +689,7 @@ namespace kite
             }
         }
         
-        const Type *llvm_node_codegen::kite_type_to_llvm_type(semantics::builtin_types type) const
+        const Type *llvm_node_codegen::kite_type_to_llvm_type(semantics::builtin_types type)
         {
             switch(type)
             {
@@ -629,7 +711,14 @@ namespace kite
                 }
                 case semantics::OBJECT:
                 {
-                    return PointerType::getUnqual(Type::getVoidTy(getGlobalContext()));
+                    PATypeHolder StructTy = OpaqueType::get(getGlobalContext());
+                    std::vector<const Type*> Elts;
+                    Elts.push_back(Type::getInt32Ty(getGlobalContext()));
+                    Elts.push_back(PointerType::getUnqual(StructTy));
+                    StructType *newStructType = StructType::get(getGlobalContext(), Elts);
+                    cast<OpaqueType>(StructTy.get())->refineAbstractTypeTo(newStructType);
+                    newStructType = cast<StructType>(StructTy.get());
+                    return PointerType::getUnqual(newStructType);
                 }
                 default:
                 {

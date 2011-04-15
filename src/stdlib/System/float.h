@@ -41,13 +41,14 @@ namespace kite
                 double val;
                 
                 fpnum() : System::object(semantics::FLOAT), val(0) { }
-                fpnum(int val) : System::object(semantics::FLOAT), val(val) { }
+                fpnum(double val) : System::object(semantics::FLOAT), val(val) { }
                 
                 static object_method_map method_map;
                 static bool to_boolean(double val);
                 static int to_integer(double val);
                 static double to_float(double val);
                 static double print(double val);
+                static System::object *to_object(double val);
             };
         }
     }

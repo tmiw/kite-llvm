@@ -28,6 +28,11 @@
 #include <iostream>
 #include <boost/assign.hpp>
 #include "object.h"
+#include "string.h"
+#include "integer.h"
+#include "float.h"
+#include "boolean.h"
+
 using namespace boost::assign;
  
 namespace kite
@@ -38,5 +43,31 @@ namespace kite
         {
             object_method_map object::method_map;
         }
+    }
+}
+
+int *kite_find_funccall(int *obj, char *name, int numargs)
+{
+    kite::stdlib::System::object *object = (kite::stdlib::System::object*)obj;
+    std::string method_name = std::string(name) + "__";
+    
+    for (int i = 0; i < numargs; i++)
+    {
+        method_name += "o";
+    }
+    
+    switch(object->type)
+    {
+        case kite::semantics::STRING:
+            return (int*)kite::stdlib::System::string::method_map[method_name].second;
+        case kite::semantics::INTEGER:
+            return (int*)kite::stdlib::System::integer::method_map[method_name].second;
+        case kite::semantics::FLOAT:
+            return (int*)kite::stdlib::System::fpnum::method_map[method_name].second;
+        case kite::semantics::BOOLEAN:
+            return (int*)kite::stdlib::System::boolean::method_map[method_name].second;
+        default:
+            // TODO
+            assert(0);
     }
 }

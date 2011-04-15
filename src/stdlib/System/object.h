@@ -54,4 +54,9 @@ namespace kite
     }
 }
 
+extern "C"
+{
+    int *kite_find_funccall(int *obj, char *name, int numargs);
+}
+
 #endif

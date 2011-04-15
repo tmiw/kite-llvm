@@ -48,6 +48,9 @@ namespace kite
                 static int to_integer(int val);
                 static double to_float(int val);
                 static int print(int val);
+                static System::object *print_obj(System::object *val);
+                static System::object *to_object(int val);
+                static int to_integer_obj(System::object *val);
             };
         }
     }

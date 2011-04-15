@@ -47,6 +47,7 @@ namespace kite
                 static bool to_boolean(bool val);
                 static int to_integer(bool val);
                 static double to_float(bool val);
+                static System::object *to_object(bool val);
                 static int print(bool val);
             };
         }

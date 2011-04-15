@@ -40,7 +40,8 @@ namespace kite
                 ("bool__b", function_semantics(semantics::BOOLEAN, (void*)&boolean::to_boolean))
                 ("int__b", function_semantics(semantics::INTEGER, (void*)&boolean::to_integer))
                 ("float__b", function_semantics(semantics::FLOAT, (void*)&boolean::to_float))
-                ("print__b", function_semantics(semantics::BOOLEAN, (void*)&boolean::print));
+                ("print__b", function_semantics(semantics::BOOLEAN, (void*)&boolean::print))
+                ("obj__b", function_semantics(semantics::OBJECT, (void*)&boolean::to_object));
             
             bool boolean::to_boolean(bool val)
             {
@@ -62,6 +63,11 @@ namespace kite
                 if (val) std::cout << "true" << std::endl;
                 else std::cout << "false" << std::endl;
                 return val;
+            }
+            
+            System::object *boolean::to_object(bool val)
+            {
+                return new boolean(val);
             }
         }
     }

@@ -147,15 +147,15 @@ int main(int argc, char **argv)
 
         std::map<std::string, Value*> &sym_stack = state.current_symbol_stack();
         // TODO
-        Type *ptrType = PointerType::getUnqual(Type::getVoidTy(getGlobalContext()));
+        const Type *ptrType = codegen::llvm_node_codegen::kite_type_to_llvm_type(semantics::OBJECT);
         sym_stack["this"] = builder.CreateAlloca(ptrType);
-        Value *intZero = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) << 4, 0, true));
+        Value *intZero = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) << 3, 0, true));
         Value *ptrZero = builder.CreateIntToPtr(intZero, ptrType);
         builder.CreateStore(ptrZero, sym_stack["this"]);
         codegen::llvm_node_codegen cg(state);
         cg(ast);
         builder.CreateRetVoid();
-        //verifyFunction(*F);
+        verifyFunction(*F);
 
         ExecutionEngine *engine = EngineBuilder(currentModule).create();
         if (optimize_code)
@@ -181,6 +181,7 @@ int main(int argc, char **argv)
         }
         
         if (dump_code) currentModule->dump();
+                
         if (!inhibit_exec)
         {
             void *fptr = engine->getPointerToFunction(F);

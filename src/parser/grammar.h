@@ -231,10 +231,10 @@ namespace kite
                     >> '[' >> start [ push_back(at_c<1>(_val), _1) ] >> ']';
                     
                 statement = 
-                      loop_statement [ _val = _1 ]
+                    ( loop_statement [ _val = _1 ]
                     | decide_statement [ _val = _1 ]
                     | method_statement [ _val = _1 ]
-                    | (math_statement [ _val = _1 ] >> ';');
+                    | math_statement [ _val = _1 ]) >> ';';
                 start = (*statement [ push_back(at_c<1>(_val), _1) ]) [ at_c<0>(_val) = kite::semantics::ITERATE ];
                 
 #ifdef BOOST_SPIRIT_DEBUG

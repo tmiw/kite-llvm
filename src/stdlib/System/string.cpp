@@ -50,7 +50,8 @@ namespace kite
                 ("rtrim__s", function_semantics(semantics::STRING, (void*)&string::rtrim))
                 ("str__s", function_semantics(semantics::STRING, (void*)&string::str))
                 ("trim__s", function_semantics(semantics::STRING, (void*)&string::trim))
-                ("upper__s", function_semantics(semantics::STRING, (void*)&string::upper));
+                ("upper__s", function_semantics(semantics::STRING, (void*)&string::upper))
+                ("obj__s", function_semantics(semantics::OBJECT, (void*)&string::to_object));
                 
             int string::asc(char* val)
             {
@@ -147,6 +148,11 @@ namespace kite
                     *tmp = toupper(*val);
                 }
                 return ret;
+            }
+            
+            System::object *string::to_object(char *val)
+            {
+                return new string(val);
             }
         }
     }

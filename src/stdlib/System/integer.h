@@ -56,4 +56,9 @@ namespace kite
     }
 }
 
+extern "C"
+{
+    kite::stdlib::System::object *System__integer__obj__i(int val);
+    int System__integer__print__i(int val);
+}
 #endif

@@ -44,6 +44,7 @@
 #include <llvm/Target/TargetData.h>
 #include <llvm/Target/TargetSelect.h>
 #include <llvm/Transforms/Scalar.h>
+#include <llvm/Support/raw_ostream.h>
 using namespace llvm;
 using namespace kite;
 using namespace std;
@@ -105,15 +106,34 @@ int main(int argc, char **argv)
     //string storage = "x = 1; (x)|print;";
     //string storage = "(1 or 2 or 3)|print;";
     
+    bool bypass_parse = false;
+    std::string fileNameCompiled;
     if (argc > 0)
     {
-        std::ifstream handle(argv[0]);
-        while (!handle.eof())
+        struct stat compiledSt;
+        struct stat rawSt;
+        std::string fileName = argv[0];
+        fileNameCompiled = std::string(argv[0]) + std::string("o");
+        
+        if (stat(fileNameCompiled.c_str(), &compiledSt) == 0)
         {
-            handle.getline(buf, 1024);
-            storage += buf;
+            stat(fileName.c_str(), &rawSt);
+            if (rawSt.st_mtime <= compiledSt.st_mtime)
+            {
+                bypass_parse = true;
+            }
         }
-        handle.close();
+        
+        if (bypass_parse == false)
+        {
+            std::ifstream handle(argv[0]);
+            while (!handle.eof())
+            {
+                handle.getline(buf, 1024);
+                storage += buf;
+            }
+            handle.close();
+        }
     }
     else
     {
@@ -124,60 +144,83 @@ int main(int argc, char **argv)
             storage += buf;
         }
     }
-    bool r = parser::kite_parser().parse(storage, ast);
+    bool r;
     
+    if (bypass_parse == false) 
+        r = parser::kite_parser().parse(storage, ast);
+    else
+        r = bypass_parse;
+        
     if (r)
     {
-        if (output_ast)
+        if (output_ast && !bypass_parse)
         {
             codegen::syntax_tree_printer printer;
             printer(ast);
         }
         
+        Module *currentModule;
         LLVMContext &context = getGlobalContext();
-        codegen::llvm_compile_state state;
-        state.push_symbol_stack();
-        state.push_module(new Module("test_module", context));
-        Module *currentModule = state.current_module();
-        FunctionType *FT = FunctionType::get(Type::getVoidTy(context), false);
-        Function *F = Function::Create(FT, Function::ExternalLinkage, "begin", currentModule);
-        BasicBlock *BB = BasicBlock::Create(getGlobalContext(), "entry", F);
-        IRBuilder<> &builder = state.module_builder();
-        builder.SetInsertPoint(BB);
-
-        std::map<std::string, Value*> &sym_stack = state.current_symbol_stack();
-        // TODO
-        const Type *ptrType = codegen::llvm_node_codegen::kite_type_to_llvm_type(semantics::OBJECT);
-        sym_stack["this"] = builder.CreateAlloca(ptrType);
-        Value *intZero = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) << 3, 0, true));
-        Value *ptrZero = builder.CreateIntToPtr(intZero, ptrType);
-        builder.CreateStore(ptrZero, sym_stack["this"]);
-        codegen::llvm_node_codegen cg(state);
-        cg(ast);
-        builder.CreateRetVoid();
-        verifyFunction(*F);
-
-        ExecutionEngine *engine = EngineBuilder(currentModule).create();
-        if (optimize_code)
+        ExecutionEngine *engine;
+        Function *F;
+        if (bypass_parse == false)
         {
-            FunctionPassManager OurFPM(currentModule);
-            
-            // Set up the optimizer pipeline.  Start with registering info about how the
-            // target lays out data structures.
-            OurFPM.add(new TargetData(*engine->getTargetData()));
-            // Provide basic AliasAnalysis support for GVN.
-            OurFPM.add(createBasicAliasAnalysisPass());
-            // Do simple "peephole" optimizations and bit-twiddling optzns.
-            OurFPM.add(createInstructionCombiningPass());
-            // Reassociate expressions.
-            OurFPM.add(createReassociatePass());
-            // Eliminate Common SubExpressions.
-            OurFPM.add(createGVNPass());
-            // Simplify the control flow graph (deleting unreachable blocks, etc).
-            OurFPM.add(createCFGSimplificationPass());
+            codegen::llvm_compile_state state;
+            state.push_symbol_stack();
+            state.push_module(new Module("test_module", context));
+            currentModule = state.current_module();
+            FunctionType *FT = FunctionType::get(Type::getVoidTy(context), false);
+            F = Function::Create(FT, Function::ExternalLinkage, "begin", currentModule);
+            BasicBlock *BB = BasicBlock::Create(getGlobalContext(), "entry", F);
+            IRBuilder<> &builder = state.module_builder();
+            builder.SetInsertPoint(BB);
 
-            OurFPM.doInitialization();
-            OurFPM.run(*F);
+            std::map<std::string, Value*> &sym_stack = state.current_symbol_stack();
+            // TODO
+            const Type *ptrType = codegen::llvm_node_codegen::kite_type_to_llvm_type(semantics::OBJECT);
+            sym_stack["this"] = builder.CreateAlloca(ptrType);
+            Value *intZero = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) << 3, 0, true));
+            Value *ptrZero = builder.CreateIntToPtr(intZero, ptrType);
+            builder.CreateStore(ptrZero, sym_stack["this"]);
+            codegen::llvm_node_codegen cg(state);
+            cg(ast);
+            builder.CreateRetVoid();
+            verifyFunction(*F);
+
+            engine = EngineBuilder(currentModule).create();
+            if (optimize_code)
+            {
+                FunctionPassManager OurFPM(currentModule);
+            
+                // Set up the optimizer pipeline.  Start with registering info about how the
+                // target lays out data structures.
+                OurFPM.add(new TargetData(*engine->getTargetData()));
+                // Provide basic AliasAnalysis support for GVN.
+                OurFPM.add(createBasicAliasAnalysisPass());
+                // Do simple "peephole" optimizations and bit-twiddling optzns.
+                OurFPM.add(createInstructionCombiningPass());
+                // Reassociate expressions.
+                OurFPM.add(createReassociatePass());
+                // Eliminate Common SubExpressions.
+                OurFPM.add(createGVNPass());
+                // Simplify the control flow graph (deleting unreachable blocks, etc).
+                OurFPM.add(createCFGSimplificationPass());
+
+                OurFPM.doInitialization();
+                OurFPM.run(*F);
+            }
+            
+            std::string errorInfo;
+            raw_fd_ostream os(fileNameCompiled.c_str(), errorInfo);
+            WriteBitcodeToFile(currentModule, os);
+            os.close();
+        }
+        else
+        {
+            std::string error;
+            currentModule = ParseBitcodeFile(MemoryBuffer::getFile(fileNameCompiled.c_str()), context, &error);
+            engine = EngineBuilder(currentModule).create();
+            F = engine->FindFunctionNamed("begin");
         }
         
         if (dump_code) currentModule->dump();

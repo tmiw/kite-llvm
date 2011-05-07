@@ -1,5 +1,5 @@
 CC=g++
-CPPFLAGS=-g 
+CPPFLAGS=-g -O2
 INC=-Isrc/ -I/opt/local/include
 LLVM_CPPFLAGS=`llvm-config --cppflags`
 LLVM_LDFLAGS=`llvm-config --ldflags`

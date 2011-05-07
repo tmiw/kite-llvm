@@ -70,6 +70,7 @@ namespace kite
             static std::string type_to_code(semantics::builtin_types type);
             static semantics::builtin_types get_type(Value *val);
             static const Type *kite_type_to_llvm_type(semantics::builtin_types type);
+            static std::string kite_type_to_function_prefix(semantics::builtin_types type);
         private:
             llvm_compile_state &state;
             

@@ -536,8 +536,20 @@ namespace kite
             Value *fptr;
             if ((uint64_t)semantics.second != 0)
             {
-                Value *fptrval = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) << 3, (uint64_t)semantics.second, true));
-                fptr = builder.CreateIntToPtr(fptrval, PointerType::getUnqual(ft));
+                std::string prefixedMethod = kite_type_to_function_prefix(type) + method_name;
+                Function *funPtrLookup = Function::Create(ft, Function::ExternalLinkage, prefixedMethod.c_str(), module);
+                if (funPtrLookup->getName() != prefixedMethod.c_str())
+                {
+                    funPtrLookup->eraseFromParent();
+                    funPtrLookup = module->getFunction(prefixedMethod.c_str());
+                }
+                fptr = funPtrLookup;
+                /*fptr = module->getFunction(prefixedMethod.c_str());
+                if (fptr == NULL)
+                {
+                    Value *fptrval = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) << 3, (uint64_t)semantics.second, true));
+                    fptr = builder.CreateIntToPtr(fptrval, PointerType::getUnqual(ft));
+                }*/
             }
             else
             {
@@ -725,6 +737,45 @@ namespace kite
                     assert(0);
                 }
             }
+        }
+        
+        std::string llvm_node_codegen::kite_type_to_function_prefix(semantics::builtin_types type)
+        {
+            std::string returnValue;
+            
+            switch(type)
+            {
+                case semantics::INTEGER:
+                {
+                    returnValue = "System__integer__";
+                    break;
+                }
+                case semantics::FLOAT:
+                {
+                    returnValue = "System__float__";
+                    break;
+                }
+                case semantics::BOOLEAN:
+                {
+                    returnValue = "System__boolean__";
+                    break;
+                }
+                case semantics::STRING:
+                {
+                    returnValue = "System__string__";
+                    break;
+                }
+                case semantics::OBJECT:
+                {
+                    break;
+                }
+                default:
+                {
+                    assert(0);
+                }
+            }
+        
+            return returnValue;
         }
     }
 }

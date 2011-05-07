@@ -86,3 +86,13 @@ namespace kite
         }
     }
 }
+
+kite::stdlib::System::object *System__integer__obj__i(int val)
+{
+    return kite::stdlib::System::integer::to_object(val);
+}
+
+int System__integer__print__i(int val)
+{
+    return kite::stdlib::System::integer::print(val);
+}

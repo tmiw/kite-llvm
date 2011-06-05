@@ -37,37 +37,62 @@ namespace kite
         namespace System
         {
             object_method_map fpnum::method_map = map_list_of
-                ("bool__f", function_semantics(semantics::BOOLEAN, (void*)&fpnum::to_boolean))
-                ("int__f", function_semantics(semantics::INTEGER, (void*)&fpnum::to_integer))
-                ("float__f", function_semantics(semantics::FLOAT, (void*)&fpnum::to_float))
-                ("print__f", function_semantics(semantics::FLOAT, (void*)&fpnum::print))
-                ("obj__f", function_semantics(semantics::OBJECT, (void*)&fpnum::to_object));
+                ("bool__f", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_FLOAT_METHOD_NAME(bool__f))))
+                ("int__f", function_semantics(semantics::INTEGER, (void*)&(PREFIX_FLOAT_METHOD_NAME(int__f))))
+                ("float__f", function_semantics(semantics::FLOAT, (void*)&(PREFIX_FLOAT_METHOD_NAME(float__f))))
+                ("print__f", function_semantics(semantics::FLOAT, (void*)&(PREFIX_FLOAT_METHOD_NAME(print__f))))
+                ("obj__f", function_semantics(semantics::OBJECT, (void*)&(PREFIX_FLOAT_METHOD_NAME(obj__f))));
             
-            bool fpnum::to_boolean(double val)
+            bool fpnum::to_boolean()
             {
-                return val != 0.0f;
+                return PREFIX_FLOAT_METHOD_NAME(bool__f)(val);
             }
             
-            int fpnum::to_integer(double val)
+            int fpnum::to_integer()
             {
-                return (int)val;
+                return PREFIX_FLOAT_METHOD_NAME(int__f)(val);
             }
             
-            double fpnum::to_float(double val)
+            double fpnum::to_float()
             {
-                return val;
+                return PREFIX_FLOAT_METHOD_NAME(float__f)(val);
             }
             
-            double fpnum::print(double val)
+            double fpnum::print()
             {
-                std::cout << val << std::endl;
-                return val;
+                return PREFIX_FLOAT_METHOD_NAME(print__f)(val);
             }
             
-            System::object *fpnum::to_object(double val)
+            System::object *fpnum::to_object()
             {
-                return new fpnum(val);
+                return (System::object*)PREFIX_FLOAT_METHOD_NAME(obj__f)(val);
             }
         }
     }
+}
+
+bool PREFIX_FLOAT_METHOD_NAME(bool__f)(double val)
+{
+    return val != 0.0f;
+}
+
+int PREFIX_FLOAT_METHOD_NAME(int__f)(double val)
+{
+    return (int)val;
+}
+
+double PREFIX_FLOAT_METHOD_NAME(float__f)(double val)
+{
+    return val;
+}
+
+double PREFIX_FLOAT_METHOD_NAME(print__f)(double val)
+{
+    std::cout << val << std::endl;
+    return val;
+}
+
+void *PREFIX_FLOAT_METHOD_NAME(obj__f)(double val)
+{
+    return (void*)(new kite::stdlib::System::fpnum(val));
 }

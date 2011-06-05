@@ -37,38 +37,63 @@ namespace kite
         namespace System
         {
             object_method_map boolean::method_map = map_list_of
-                ("bool__b", function_semantics(semantics::BOOLEAN, (void*)&boolean::to_boolean))
-                ("int__b", function_semantics(semantics::INTEGER, (void*)&boolean::to_integer))
-                ("float__b", function_semantics(semantics::FLOAT, (void*)&boolean::to_float))
-                ("print__b", function_semantics(semantics::BOOLEAN, (void*)&boolean::print))
-                ("obj__b", function_semantics(semantics::OBJECT, (void*)&boolean::to_object));
+                ("bool__b", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(bool__b))))
+                ("int__b", function_semantics(semantics::INTEGER, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(int__b))))
+                ("float__b", function_semantics(semantics::FLOAT, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(float__b))))
+                ("print__b", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(print__b))))
+                ("obj__b", function_semantics(semantics::OBJECT, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(obj__b))));
             
-            bool boolean::to_boolean(bool val)
+            bool boolean::to_boolean()
             {
-                return val;
+                return PREFIX_BOOLEAN_METHOD_NAME(bool__b)(val);
             }
             
-            int boolean::to_integer(bool val)
+            int boolean::to_integer()
             {
-                return (int)val;
+                return PREFIX_BOOLEAN_METHOD_NAME(int__b)(val);
             }
             
-            double boolean::to_float(bool val)
+            double boolean::to_float()
             {
-                return (double)val;
+                return PREFIX_BOOLEAN_METHOD_NAME(float__b)(val);
             }
             
-            int boolean::print(bool val)
+            bool boolean::print()
             {
-                if (val) std::cout << "true" << std::endl;
-                else std::cout << "false" << std::endl;
-                return val;
+                return PREFIX_BOOLEAN_METHOD_NAME(print__b)(val);
             }
             
-            System::object *boolean::to_object(bool val)
+            System::object *boolean::to_object()
             {
-                return new boolean(val);
+                return (System::object*)PREFIX_BOOLEAN_METHOD_NAME(obj__b)(val);
             }
         }
     }
+}
+
+bool PREFIX_BOOLEAN_METHOD_NAME(bool__b)(bool val)
+{
+    return val;
+}
+
+int PREFIX_BOOLEAN_METHOD_NAME(int__b)(bool val)
+{
+    return (int)val;
+}
+
+double PREFIX_BOOLEAN_METHOD_NAME(float__b)(bool val)
+{
+    return (double)val;
+}
+
+bool PREFIX_BOOLEAN_METHOD_NAME(print__b)(bool val)
+{
+    if (val) std::cout << "true" << std::endl;
+    else std::cout << "false" << std::endl;
+    return val;
+}
+
+void *PREFIX_BOOLEAN_METHOD_NAME(obj__b)(bool val)
+{
+    return (void*)(new kite::stdlib::System::boolean(val));
 }

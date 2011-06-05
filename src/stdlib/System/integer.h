@@ -30,6 +30,10 @@
 
 #include "object.h"
 
+#define INTEGER_METHOD_PREFIX System__integer__
+#define PREFIX_INTEGER_METHOD_NAME(name) System__integer__ ## name
+#define INTEGER_METHOD_PREFIX_AS_STRING "System__integer__"
+
 namespace kite
 {
     namespace stdlib
@@ -44,13 +48,11 @@ namespace kite
                 integer(int val) : System::object(semantics::INTEGER), val(val) { }
                 
                 static object_method_map method_map;
-                static bool to_boolean(int val);
-                static int to_integer(int val);
-                static double to_float(int val);
-                static int print(int val);
-                static System::object *print_obj(System::object *val);
-                static System::object *to_object(int val);
-                static int to_integer_obj(System::object *val);
+                bool to_boolean();
+                int to_integer();
+                double to_float();
+                int print();
+                System::object *to_object();
             };
         }
     }
@@ -58,7 +60,11 @@ namespace kite
 
 extern "C"
 {
-    kite::stdlib::System::object *System__integer__obj__i(int val);
-    int System__integer__print__i(int val);
+    bool PREFIX_INTEGER_METHOD_NAME(bool__i)(int val);
+    int PREFIX_INTEGER_METHOD_NAME(int__i)(int val);
+    double PREFIX_INTEGER_METHOD_NAME(float__i)(int val);
+    int PREFIX_INTEGER_METHOD_NAME(print__i)(int val);
+    void *PREFIX_INTEGER_METHOD_NAME(obj__i)(int val);
 }
+
 #endif

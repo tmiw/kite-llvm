@@ -30,6 +30,10 @@
 
 #include "object.h"
 
+#define FLOAT_METHOD_PREFIX System__float__
+#define PREFIX_FLOAT_METHOD_NAME(name) System__float__ ## name
+#define FLOAT_METHOD_PREFIX_AS_STRING "System__float__"
+
 namespace kite
 {
     namespace stdlib
@@ -44,14 +48,23 @@ namespace kite
                 fpnum(double val) : System::object(semantics::FLOAT), val(val) { }
                 
                 static object_method_map method_map;
-                static bool to_boolean(double val);
-                static int to_integer(double val);
-                static double to_float(double val);
-                static double print(double val);
-                static System::object *to_object(double val);
+                bool to_boolean();
+                int to_integer();
+                double to_float();
+                double print();
+                System::object *to_object();
             };
         }
     }
+}
+
+extern "C"
+{
+    bool PREFIX_FLOAT_METHOD_NAME(bool__f)(double val);
+    int PREFIX_FLOAT_METHOD_NAME(int__f)(double val);
+    double PREFIX_FLOAT_METHOD_NAME(float__f)(double val);
+    double PREFIX_FLOAT_METHOD_NAME(print__f)(double val);
+    void *PREFIX_FLOAT_METHOD_NAME(obj__f)(double val);
 }
 
 #endif

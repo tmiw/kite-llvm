@@ -30,6 +30,10 @@
 
 #include "object.h"
 
+#define BOOLEAN_METHOD_PREFIX System__boolean__
+#define PREFIX_BOOLEAN_METHOD_NAME(name) System__boolean__ ## name
+#define BOOLEAN_METHOD_PREFIX_AS_STRING "System__boolean__"
+
 namespace kite
 {
     namespace stdlib
@@ -44,14 +48,23 @@ namespace kite
                 boolean(bool val) : System::object(semantics::BOOLEAN), val(val) { }
                 
                 static object_method_map method_map;
-                static bool to_boolean(bool val);
-                static int to_integer(bool val);
-                static double to_float(bool val);
-                static System::object *to_object(bool val);
-                static int print(bool val);
+                bool to_boolean();
+                int to_integer();
+                double to_float();
+                System::object *to_object();
+                bool print();
             };
         }
     }
+}
+
+extern "C"
+{
+    bool PREFIX_BOOLEAN_METHOD_NAME(bool__b)(bool val);
+    int PREFIX_BOOLEAN_METHOD_NAME(int__b)(bool val);
+    double PREFIX_BOOLEAN_METHOD_NAME(float__b)(bool val);
+    bool PREFIX_BOOLEAN_METHOD_NAME(print__b)(bool val);
+    void *PREFIX_BOOLEAN_METHOD_NAME(obj__b)(bool val);
 }
 
 #endif

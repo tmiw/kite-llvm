@@ -747,22 +747,22 @@ namespace kite
             {
                 case semantics::INTEGER:
                 {
-                    returnValue = "System__integer__";
+                    returnValue = INTEGER_METHOD_PREFIX_AS_STRING;
                     break;
                 }
                 case semantics::FLOAT:
                 {
-                    returnValue = "System__float__";
+                    returnValue = FLOAT_METHOD_PREFIX_AS_STRING;
                     break;
                 }
                 case semantics::BOOLEAN:
                 {
-                    returnValue = "System__boolean__";
+                    returnValue = BOOLEAN_METHOD_PREFIX_AS_STRING;
                     break;
                 }
                 case semantics::STRING:
                 {
-                    returnValue = "System__string__";
+                    returnValue = STRING_METHOD_PREFIX_AS_STRING;
                     break;
                 }
                 case semantics::OBJECT:

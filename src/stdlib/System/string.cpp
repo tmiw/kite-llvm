@@ -37,123 +37,199 @@ namespace kite
         namespace System
         {
             object_method_map string::method_map = map_list_of
-                ("append__ss", function_semantics(semantics::STRING, (void*)&string::append))
-                ("asc__s", function_semantics(semantics::INTEGER, (void*)&string::asc))
-                ("bool__s", function_semantics(semantics::BOOLEAN, (void*)&string::to_boolean))
-                ("charAt__si", function_semantics(semantics::STRING, (void*)&string::charAt))
-                ("float__s", function_semantics(semantics::FLOAT, (void*)&string::to_float))
-                ("int__s", function_semantics(semantics::INTEGER, (void*)&string::to_integer))
-                ("length__s", function_semantics(semantics::INTEGER, (void*)&string::length))
-                ("lower__s", function_semantics(semantics::STRING, (void*)&string::lower))
-                ("ltrim__s", function_semantics(semantics::STRING, (void*)&string::ltrim))
-                ("print__s", function_semantics(semantics::STRING, (void*)&string::print))
-                ("rtrim__s", function_semantics(semantics::STRING, (void*)&string::rtrim))
-                ("str__s", function_semantics(semantics::STRING, (void*)&string::str))
-                ("trim__s", function_semantics(semantics::STRING, (void*)&string::trim))
-                ("upper__s", function_semantics(semantics::STRING, (void*)&string::upper))
-                ("obj__s", function_semantics(semantics::OBJECT, (void*)&string::to_object));
+                ("append__ss", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(append__ss))))
+                ("asc__s", function_semantics(semantics::INTEGER, (void*)&(PREFIX_STRING_METHOD_NAME(asc__s))))
+                ("bool__s", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_STRING_METHOD_NAME(bool__s))))
+                ("charAt__si", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(charAt__si))))
+                ("float__s", function_semantics(semantics::FLOAT, (void*)&(PREFIX_STRING_METHOD_NAME(float__s))))
+                ("int__s", function_semantics(semantics::INTEGER, (void*)&(PREFIX_STRING_METHOD_NAME(int__s))))
+                ("length__s", function_semantics(semantics::INTEGER, (void*)&(PREFIX_STRING_METHOD_NAME(length__s))))
+                ("lower__s", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(lower__s))))
+                ("ltrim__s", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(ltrim__s))))
+                ("print__s", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(print__s))))
+                ("rtrim__s", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(rtrim__s))))
+                ("str__s", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(str__s))))
+                ("trim__s", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(trim__s))))
+                ("upper__s", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(upper__s))))
+                ("obj__s", function_semantics(semantics::OBJECT, (void*)&(PREFIX_STRING_METHOD_NAME(obj__s))));
                 
-            int string::asc(char* val)
+            int string::asc()
             {
-                return *val;
+                return PREFIX_STRING_METHOD_NAME(asc__s)(string_val.c_str());
             }
             
-            char* string::append(char* val, char *rhs)
+            char* string::append(char *rhs)
             {
-                char *ret = (char*)malloc(strlen(val) + strlen(rhs) + 1);
-                strcpy(ret, val);
-                strcat(ret, rhs);
-                return ret;
+                return PREFIX_STRING_METHOD_NAME(append__ss)(string_val.c_str(), rhs);
             }
             
-            bool string::to_boolean(char* val)
+            bool string::to_boolean()
             {
-                return val != NULL && length(val) > 0;
+                return PREFIX_STRING_METHOD_NAME(bool__s)(string_val.c_str());
             }
             
-            char* string::charAt(char *val, int index)
+            char* string::charAt(int index)
             {
-                // TODO: exception for invalid input
-                char *ret = (char*)malloc(2);
-                ret[0] = val[index];
-                ret[1] = 0;
-                return ret;
+                return PREFIX_STRING_METHOD_NAME(charAt__si)(string_val.c_str(), index);
             }
             
-            double string::to_float(char* val)
+            double string::to_float()
             {
-                return (double)atof(val);
+                return PREFIX_STRING_METHOD_NAME(float__s)(string_val.c_str());
             }
             
-            int string::to_integer(char* val)
+            int string::to_integer()
             {
-                return atoi(val);
+                return PREFIX_STRING_METHOD_NAME(int__s)(string_val.c_str());
             }
             
-            int string::length(char* val)
+            int string::length()
             {
-                return strlen(val);
+                return PREFIX_STRING_METHOD_NAME(length__s)(string_val.c_str());
             }
             
-            char* string::lower(char *val)
+            char* string::lower()
             {
-                char *ret = (char*)malloc(length(val) + 1);
-                for (char *tmp = ret; *val != 0; val++, tmp++)
-                {
-                    *tmp = tolower(*val);
-                }
-                return ret;
+                return PREFIX_STRING_METHOD_NAME(lower__s)(string_val.c_str());
             }
             
-            char* string::ltrim(char *val)
+            char* string::ltrim()
             {
-                while (isspace(*val)) { val++; }
-                
-                char *ret = (char*)malloc(length(val) + 1);
-                strcpy(ret, val);
-                return ret;
+                return PREFIX_STRING_METHOD_NAME(ltrim__s)(string_val.c_str());
             }
             
-            char* string::print(char *val)
+            char* string::print()
             {
-                std::cout << val << std::endl;
-                return val;
+                return PREFIX_STRING_METHOD_NAME(print__s)(string_val.c_str());
             }
             
-            char* string::rtrim(char *val)
+            char* string::rtrim()
             {
-                char *ret = (char*)calloc(1, strlen(val) + 1);
-                char *tmp = ret + strlen(val) - 1;
-                
-                strcpy(ret, val);
-                while (isspace(*tmp)) { *tmp = 0; tmp--; }
-                return ret;
+                return PREFIX_STRING_METHOD_NAME(rtrim__s)(string_val.c_str());
             }
             
-            char* string::str(char *val)
+            char* string::str()
             {
-                return val;
+                return PREFIX_STRING_METHOD_NAME(str__s)(string_val.c_str());
             }
             
-            char* string::trim(char *val)
+            char* string::trim()
             {
-                return ltrim(rtrim(val));
+                return PREFIX_STRING_METHOD_NAME(trim__s)(string_val.c_str());
             }
             
-            char* string::upper(char *val)
+            char* string::upper()
             {
-                char *ret = (char*)malloc(length(val) + 1);
-                for (char *tmp = ret; *val != 0; val++, tmp++)
-                {
-                    *tmp = toupper(*val);
-                }
-                return ret;
+                return PREFIX_STRING_METHOD_NAME(upper__s)(string_val.c_str());
             }
             
-            System::object *string::to_object(char *val)
+            System::object *string::to_object()
             {
-                return new string(val);
+                return (System::object*)(PREFIX_STRING_METHOD_NAME(obj__s)(string_val.c_str()));
             }
         }
     }
+}
+
+int PREFIX_STRING_METHOD_NAME(asc__s)(const char *val)
+{
+    return *val;
+}
+
+char* PREFIX_STRING_METHOD_NAME(append__ss)(const char* val, char* rhs)
+{
+    char *ret = (char*)malloc(strlen(val) + strlen(rhs) + 1);
+    strcpy(ret, val);
+    strcat(ret, rhs);
+    return ret;
+}
+
+bool PREFIX_STRING_METHOD_NAME(bool__s)(const char* val)
+{
+    return val != NULL && strlen(val) > 0;
+}
+
+char* PREFIX_STRING_METHOD_NAME(charAt__si)(const char *val, int index)
+{
+    // TODO: exception for invalid input
+    char *ret = (char*)malloc(2);
+    ret[0] = val[index];
+    ret[1] = 0;
+    return ret;
+}
+
+double PREFIX_STRING_METHOD_NAME(float__s)(const char* val)
+{
+    return (double)atof(val);
+}
+
+int PREFIX_STRING_METHOD_NAME(int__s)(const char* val)
+{
+    return atoi(val);
+}
+
+int PREFIX_STRING_METHOD_NAME(length__s)(const char* val)
+{
+    return strlen(val);
+}
+
+char* PREFIX_STRING_METHOD_NAME(lower__s)(const char *val)
+{
+    char *ret = (char*)malloc(strlen(val) + 1);
+    for (char *tmp = ret; *val != 0; val++, tmp++)
+    {
+        *tmp = tolower(*val);
+    }
+    return ret;
+}
+
+char* PREFIX_STRING_METHOD_NAME(ltrim__s)(const char *val)
+{
+    while (isspace(*val)) { val++; }
+    
+    char *ret = (char*)malloc(strlen(val) + 1);
+    strcpy(ret, val);
+    return ret;
+}
+
+void* PREFIX_STRING_METHOD_NAME(obj__s)(const char *val)
+{
+    return (void*)(new kite::stdlib::System::string(val));
+}
+
+char* PREFIX_STRING_METHOD_NAME(print__s)(const char *val)
+{
+    std::cout << val << std::endl;
+    return const_cast<char*>(val);
+}
+
+char* PREFIX_STRING_METHOD_NAME(rtrim__s)(const char *val)
+{
+    char *ret = (char*)calloc(1, strlen(val) + 1);
+    char *tmp = ret + strlen(val) - 1;
+    
+    strcpy(ret, val);
+    while (isspace(*tmp)) { *tmp = 0; tmp--; }
+    return ret;
+}
+
+char* PREFIX_STRING_METHOD_NAME(str__s)(const char *val)
+{
+    return const_cast<char*>(val);
+}
+
+char* PREFIX_STRING_METHOD_NAME(trim__s)(const char *val)
+{
+    char *rtrimmed_str = PREFIX_STRING_METHOD_NAME(rtrim__s)(val);
+    return PREFIX_STRING_METHOD_NAME(ltrim__s)(rtrimmed_str);
+}
+
+char* PREFIX_STRING_METHOD_NAME(upper__s)(const char *val)
+{
+    char *ret = (char*)malloc(strlen(val) + 1);
+    for (char *tmp = ret; *val != 0; val++, tmp++)
+    {
+        *tmp = toupper(*val);
+    }
+    return ret;
 }

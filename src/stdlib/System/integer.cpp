@@ -37,62 +37,62 @@ namespace kite
         namespace System
         {
             object_method_map integer::method_map = map_list_of
-                ("bool__i", function_semantics(semantics::BOOLEAN, (void*)&integer::to_boolean))
-                ("int__i", function_semantics(semantics::INTEGER, (void*)&integer::to_integer))
-                ("int__o", function_semantics(semantics::INTEGER, (void*)&integer::to_integer_obj))
-                ("float__i", function_semantics(semantics::FLOAT, (void*)&integer::to_float))
-                ("print__i", function_semantics(semantics::INTEGER, (void*)&integer::print))
-                ("print__o", function_semantics(semantics::OBJECT, (void*)&integer::print_obj))
-                ("obj__i", function_semantics(semantics::OBJECT, (void*)&integer::to_object));
+                ("bool__i", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_INTEGER_METHOD_NAME(bool__i))))
+                ("int__i", function_semantics(semantics::INTEGER, (void*)&(PREFIX_INTEGER_METHOD_NAME(int__i))))
+                ("float__i", function_semantics(semantics::FLOAT, (void*)&(PREFIX_INTEGER_METHOD_NAME(float__i))))
+                ("print__i", function_semantics(semantics::INTEGER, (void*)&(PREFIX_INTEGER_METHOD_NAME(print__i))))
+                ("obj__i", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(obj__i))));
             
-            bool integer::to_boolean(int val)
+            bool integer::to_boolean()
             {
-                return val > 0;
+                return PREFIX_INTEGER_METHOD_NAME(bool__i)(val);
             }
             
-            int integer::to_integer(int val)
+            int integer::to_integer()
             {
-                return val;
+                return PREFIX_INTEGER_METHOD_NAME(int__i)(val);
             }
             
-            double integer::to_float(int val)
+            double integer::to_float()
             {
-                return (double)val;
+                return PREFIX_INTEGER_METHOD_NAME(float__i)(val);
             }
             
-            int integer::print(int val)
+            int integer::print()
             {
-                std::cout << val << std::endl;
-                return val;
+                return PREFIX_INTEGER_METHOD_NAME(print__i)(val);
             }
             
-            System::object *integer::to_object(int val)
+            System::object *integer::to_object()
             {
-                return new integer(val);
-            }
-            
-            System::object *integer::print_obj(System::object *val)
-            {
-                integer *integ = (integer*)val;
-                std::cout << integ->val << std::endl;
-                return val;
-            }
-            
-            int integer::to_integer_obj(System::object *val)
-            {
-                integer *integ = (integer*)val;
-                return integ->val;
+                return (System::object*)PREFIX_INTEGER_METHOD_NAME(obj__i)(val);
             }
         }
     }
 }
 
-kite::stdlib::System::object *System__integer__obj__i(int val)
+bool PREFIX_INTEGER_METHOD_NAME(bool__i)(int val)
 {
-    return kite::stdlib::System::integer::to_object(val);
+    return val != 0;
 }
 
-int System__integer__print__i(int val)
+int PREFIX_INTEGER_METHOD_NAME(int__i)(int val)
 {
-    return kite::stdlib::System::integer::print(val);
+    return val;
+}
+
+double PREFIX_INTEGER_METHOD_NAME(float__i)(int val)
+{
+    return (double)val;
+}
+
+int PREFIX_INTEGER_METHOD_NAME(print__i)(int val)
+{
+    std::cout << val << std::endl;
+    return val;
+}
+
+void *PREFIX_INTEGER_METHOD_NAME(obj__i)(int val)
+{
+    return (void*)(new kite::stdlib::System::integer(val));
 }

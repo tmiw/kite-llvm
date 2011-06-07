@@ -13,6 +13,8 @@ PREREQUISITES:
 
 BUILDING:
 ---------
+$ vim Makefile
+[modify paths as appropriate]
 $ make
 [wait several minutes]
 $ 

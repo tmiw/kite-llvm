@@ -32,6 +32,8 @@
 #include "integer.h"
 #include "float.h"
 #include "boolean.h"
+#include "method.h"
+#include "dynamic_object.h"
 
 using namespace boost::assign;
  
@@ -46,9 +48,11 @@ namespace kite
     }
 }
 
+using namespace kite::stdlib;
+
 int *kite_find_funccall(int *obj, char *name, int numargs)
 {
-    kite::stdlib::System::object *object = (kite::stdlib::System::object*)obj;
+    System::object *obj_class = (System::object*)obj;
     std::string method_name = std::string(name) + "__";
     
     for (int i = 0; i < numargs; i++)
@@ -56,18 +60,62 @@ int *kite_find_funccall(int *obj, char *name, int numargs)
         method_name += "o";
     }
     
-    switch(object->type)
+    if (obj_class->type != kite::semantics::OBJECT)
     {
-        case kite::semantics::STRING:
-            return (int*)kite::stdlib::System::string::method_map[method_name].second;
-        case kite::semantics::INTEGER:
-            return (int*)kite::stdlib::System::integer::method_map[method_name].second;
-        case kite::semantics::FLOAT:
-            return (int*)kite::stdlib::System::fpnum::method_map[method_name].second;
-        case kite::semantics::BOOLEAN:
-            return (int*)kite::stdlib::System::boolean::method_map[method_name].second;
-        default:
+        object_method_map *method_map;
+        switch(obj_class->type)
+        {
+            case kite::semantics::STRING:
+                method_map = &System::string::method_map;
+                break;
+            case kite::semantics::INTEGER:
+                method_map = &System::integer::method_map;
+                break;
+            case kite::semantics::FLOAT:
+                method_map = &System::fpnum::method_map;
+                break;
+            case kite::semantics::BOOLEAN:
+                method_map = &System::boolean::method_map;
+                break;
+            default:
+                assert(0);
+        }
+        
+        object_method_map::iterator iter = method_map->find(method_name);
+        if (iter != method_map->end())
+        {
+            return (int*)((*iter).second.second);
+        }
+        else
+        {
             // TODO
             assert(0);
+        }
+    }
+    else
+    {
+        System::dynamic_object *dyn_object = (System::dynamic_object*)obj;
+        do
+        {
+            System::property_map::iterator item = dyn_object->properties.find(name);
+            if (item != dyn_object->properties.end())
+            {
+                System::object *method_obj = (*item).second;
+                if (method_obj->type == kite::semantics::METHOD_TY)
+                {
+                    System::method *met = (System::method*)method_obj;
+                    return (int*)met->method_ptr;
+                }
+                else
+                {
+                    // TODO
+                    assert(0);
+                }
+            }
+            dyn_object = (System::dynamic_object*)dyn_object->parent;
+        } while (dyn_object != NULL);
+        
+        // TODO
+        assert(0);
     }
 }

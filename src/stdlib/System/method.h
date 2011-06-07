@@ -25,37 +25,29 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
  
-#ifndef KITE_STDLIB__SYSTEM__OBJECT_H
-#define KITE_STDLIB__SYSTEM__OBJECT_H
+#ifndef KITE_STDLIB__SYSTEM__METHOD_H
+#define KITE_STDLIB__SYSTEM__METHOD_H
 
-#include <map>
-#include <semantics/constants.h>
+#include "object.h"
 
 namespace kite
 {
     namespace stdlib
     {
-        // TODO
-        typedef std::pair<semantics::builtin_types, void*> function_semantics;
-        typedef std::map<std::string, function_semantics> object_method_map;
-        
         namespace System
         {
-            struct object
+            struct method : System::object
             {
-                semantics::builtin_types type;
-                static object_method_map method_map;
+                void *method_ptr;
                 
-                object() : type(semantics::OBJECT) { }
-                object(semantics::builtin_types type) : type(type) { }
+                method(void *ptr) :
+                    System::object(semantics::METHOD_TY), method_ptr(ptr) 
+                {
+                     // empty
+                }
             };
         }
     }
-}
-
-extern "C"
-{
-    int *kite_find_funccall(int *obj, char *name, int numargs);
 }
 
 #endif

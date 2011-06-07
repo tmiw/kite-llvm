@@ -1,0 +1,19 @@
+This repository contains the current source code for the Kite LLVM "port"
+(more like a total rewrite). I hope to avoid many of the mistakes I made
+when I wrote the code that would later become the 1.0 release.
+
+Right now, enough of Kite has been implemented to allow for the execution
+of simple scripts (see the examples/ and tests/ folders for details). This
+version is definitely not nearly ready for prime time. You have been warned.
+
+PREREQUISITES:
+--------------
+* LLVM (install the development packages your distro provides)
+* Boost Spirit (for parsing)
+
+BUILDING:
+---------
+$ make
+[wait several minutes]
+$ 
+

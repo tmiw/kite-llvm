@@ -31,7 +31,7 @@ namespace kite
                       >> identifier [ push_back(at_c<1>(_val), _1) ]
                                     [ at_c<0>(_val) = kite::semantics::DEREF_FILTER ]
                       >> *deref_property_statement [ push_back(at_c<1>(_val), _1) ]) [ push_back(at_c<1>(_val), _1) ]
-                >> '[' >> -start [ push_back(at_c<1>(_val), _1) ] >> ']';
+                >> '[' >> start [ push_back(at_c<1>(_val), _1) ] >> ']';
         }
         
         //kite_grammar<std::string::const_iterator> class_grammar;

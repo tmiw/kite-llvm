@@ -31,6 +31,6 @@ namespace kite
                 | or_statement [ _val = _1 ];
         }
         
-        kite_grammar<std::string::const_iterator> assign_grammar;
+        //kite_grammar<std::string::const_iterator> assign_grammar;
     }
 }

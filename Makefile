@@ -6,11 +6,9 @@ LLVM_LDFLAGS=`llvm-config --ldflags`
 LLVM_LIBS=`llvm-config --libs`
 OBJS=src/apps/kite.o src/codegen/llvm_compile_state.o src/codegen/llvm_node_codegen.o \
 	 src/codegen/syntax_tree_node_printer.o src/codegen/syntax_tree_printer.o \
-	 src/parser/constants.o src/parser/assignment.o src/parser/bitwise.o \
-	 src/parser/comparison.o src/parser/math.o src/parser/map_reduce.o src/parser/deref.o \
-	 src/parser/grouping.o src/parser/loop.o src/parser/decide.o src/parser/method.o src/parser/classes.o \
-	 src/parser/statement.o src/parser/parser.o src/stdlib/System/integer.o src/stdlib/System/string.o \
+	 src/parser/parser.o src/stdlib/System/integer.o src/stdlib/System/string.o \
 	 src/stdlib/System/boolean.o src/stdlib/System/float.o src/stdlib/System/object.o
+MAKEDEP_INC=-I/usr/include/c++/4.2.1
 
 .cpp.o: %.cpp
 	$(CC) -c -o $@ $(CPPFLAGS) $(INC) $(LLVM_CPPFLAGS) $<
@@ -18,7 +16,7 @@ OBJS=src/apps/kite.o src/codegen/llvm_compile_state.o src/codegen/llvm_node_code
 all: kite
 
 depend:
-	makedepend `find src -name '*.cpp'` -Isrc/ -I/usr/include/c++/4.2.1
+	makedepend `find src -name '*.cpp'` -Isrc/ $(MAKEDEP_INC)
 
 clean:
 	rm -rf `find ./ -name '*.o'` `find ./ -name 'kite'`
@@ -1175,6 +1173,13 @@ src/parser/parser.o: /usr/include/c++/4.2.1/bits/stl_heap.h
 src/parser/parser.o: /usr/include/c++/4.2.1/bits/stl_tempbuf.h
 src/parser/parser.o: /usr/include/c++/4.2.1/bits/basic_string.tcc
 src/parser/parser.o: src/semantics/constants.h src/parser/parser.h
+src/parser/parser.o: src/parser/assignment.cpp src/parser/bitwise.cpp
+src/parser/parser.o: src/parser/classes.cpp src/parser/comparison.cpp
+src/parser/parser.o: src/parser/constants.cpp src/parser/decide.cpp
+src/parser/parser.o: src/parser/deref.cpp src/parser/grouping.cpp
+src/parser/parser.o: src/parser/loop.cpp src/parser/map_reduce.cpp
+src/parser/parser.o: src/parser/math.cpp src/parser/method.cpp
+src/parser/parser.o: src/parser/statement.cpp
 src/parser/statement.o: src/parser/grammar.h src/semantics/syntax_tree.h
 src/parser/statement.o: /usr/include/c++/4.2.1/deque
 src/parser/statement.o: /usr/include/c++/4.2.1/bits/functexcept.h

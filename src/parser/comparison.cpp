@@ -39,6 +39,6 @@ namespace kite
                       >> bit_shift_statement [ push_back(at_c<1>(_val), _1) ]);
         }
         
-        kite_grammar<std::string::const_iterator> comparison_grammar;
+        //kite_grammar<std::string::const_iterator> comparison_grammar;
     }
 }

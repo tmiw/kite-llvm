@@ -33,6 +33,6 @@ namespace kite
                 >> ']';
         }
         
-        kite_grammar<std::string::const_iterator> loop_grammar;
+        //kite_grammar<std::string::const_iterator> loop_grammar;
     }
 }

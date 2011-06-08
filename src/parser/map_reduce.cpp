@@ -32,6 +32,6 @@ namespace kite
                 | deref_filter_statement [ _val = _1 ];
         }
         
-        kite_grammar<std::string::const_iterator> map_reduce_grammar;
+        //kite_grammar<std::string::const_iterator> map_reduce_grammar;
     }
 }

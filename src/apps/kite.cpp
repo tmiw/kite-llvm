@@ -211,9 +211,12 @@ int main(int argc, char **argv)
             }
             
             std::string errorInfo;
-            raw_fd_ostream os(fileNameCompiled.c_str(), errorInfo);
-            WriteBitcodeToFile(currentModule, os);
-            os.close();
+            if (fileNameCompiled.size() > 0)
+            {
+                raw_fd_ostream os(fileNameCompiled.c_str(), errorInfo);
+                WriteBitcodeToFile(currentModule, os);
+                os.close();
+            }
         }
         else
         {

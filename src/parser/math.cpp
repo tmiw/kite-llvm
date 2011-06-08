@@ -51,6 +51,6 @@ namespace kite
                 | map_reduce_statement [ _val = _1 ];
         }
         
-        kite_grammar<std::string::const_iterator> math_grammar;
+        //kite_grammar<std::string::const_iterator> math_grammar;
     }
 }

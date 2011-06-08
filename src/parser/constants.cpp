@@ -46,6 +46,6 @@ namespace kite
                     - lit("false")); // [ _val = _1 ];
         }
         
-        kite_grammar<std::string::const_iterator> constants_grammar;
+        //kite_grammar<std::string::const_iterator> constants_grammar;
     }
 }

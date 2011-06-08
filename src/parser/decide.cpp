@@ -36,6 +36,6 @@ namespace kite
                 >> ']';
         }
         
-        kite_grammar<std::string::const_iterator> decide_grammar;
+        //kite_grammar<std::string::const_iterator> decide_grammar;
     }
 }

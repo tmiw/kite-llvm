@@ -31,6 +31,6 @@ namespace kite
                 >> '[' >> start [ push_back(at_c<1>(_val), _1) ] >> ']';
         }
         
-        kite_grammar<std::string::const_iterator> method_grammar;
+        //kite_grammar<std::string::const_iterator> method_grammar;
     }
 }

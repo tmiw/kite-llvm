@@ -8,14 +8,15 @@ version is definitely not nearly ready for prime time. You have been warned.
 
 PREREQUISITES:
 --------------
-* LLVM >= 2.8 (install the development packages your distro provides)
-* C++ compiler (tested on g++ 4.2.1 on OSX)
+* LLVM == 2.8 (install the development packages your distro provides)
+* C++ compiler (tested on g++ 4.2.1 on OSX, 4.5.3 on Debian)
 * Boost Spirit (for parsing)
 
 BUILDING:
 ---------
 $ vim Makefile
 [modify paths as appropriate]
+$ make depend
 $ make
 [wait several minutes]
 $ 

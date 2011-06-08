@@ -28,6 +28,7 @@
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
+#include <sys/stat.h>
 #include <parser/parser.h>
 #include <codegen/syntax_tree_printer.h>
 #include <codegen/llvm_node_codegen.h>

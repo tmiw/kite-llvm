@@ -78,6 +78,7 @@ namespace kite
             UNTIL,
             DECIDE,
             METHOD,
+            CLASS,
         };
     }
 }

@@ -16,6 +16,7 @@ namespace kite
                 ( loop_statement 
                 | decide_statement 
                 | method_statement 
+                //| class_statement
                 | math_statement ) [ _val = _1 ] >> ';';
             start = (*statement [ push_back(at_c<1>(_val), _1) ]) [ at_c<0>(_val) = kite::semantics::ITERATE ];
         }

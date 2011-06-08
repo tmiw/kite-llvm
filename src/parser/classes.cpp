@@ -4,7 +4,7 @@ namespace kite
 {
     namespace parser
     {
-        /*template<typename T>
+        template<typename T>
         void kite_grammar<T>::initialize_class_rules()
         {
             using qi::lit;
@@ -34,6 +34,6 @@ namespace kite
                 >> '[' >> start [ push_back(at_c<1>(_val), _1) ] >> ']';
         }
         
-        kite_grammar<std::string::const_iterator> class_grammar;*/
+        kite_grammar<std::string::const_iterator> class_grammar;
     }
 }

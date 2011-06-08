@@ -8,8 +8,8 @@ OBJS=src/apps/kite.o src/codegen/llvm_compile_state.o src/codegen/llvm_node_code
 	 src/codegen/syntax_tree_node_printer.o src/codegen/syntax_tree_printer.o \
 	 src/parser/constants.o src/parser/assignment.o src/parser/bitwise.o \
 	 src/parser/comparison.o src/parser/math.o src/parser/map_reduce.o src/parser/deref.o \
-	 src/parser/loop.o src/parser/decide.o src/parser/method.o src/parser/grouping.o src/parser/statement.o \
-	 src/parser/parser.o src/stdlib/System/integer.o src/stdlib/System/string.o \
+	 src/parser/grouping.o src/parser/loop.o src/parser/decide.o src/parser/method.o src/parser/classes.o \
+	 src/parser/statement.o src/parser/parser.o src/stdlib/System/integer.o src/stdlib/System/string.o \
 	 src/stdlib/System/boolean.o src/stdlib/System/float.o src/stdlib/System/object.o
 
 .cpp.o: %.cpp
@@ -24,7 +24,7 @@ clean:
 	rm -rf `find ./ -name '*.o'` `find ./ -name 'kite'`
 
 kite: $(OBJS)
-	$(CC) $(CPPFLAGS) $(LLVM_LDFLAGS) $(LLVM_LIBS) -o kite `find ./ -name '*.o'`
+	$(CC) $(CPPFLAGS) $(LLVM_LDFLAGS) $(LLVM_LIBS) -o kite $(OBJS)
 
 # DO NOT DELETE
 
@@ -548,6 +548,63 @@ src/parser/bitwise.o: /usr/include/c++/4.2.1/bits/stl_heap.h
 src/parser/bitwise.o: /usr/include/c++/4.2.1/bits/stl_tempbuf.h
 src/parser/bitwise.o: /usr/include/c++/4.2.1/bits/basic_string.tcc
 src/parser/bitwise.o: src/semantics/constants.h
+src/parser/classes.o: src/parser/grammar.h src/semantics/syntax_tree.h
+src/parser/classes.o: /usr/include/c++/4.2.1/deque
+src/parser/classes.o: /usr/include/c++/4.2.1/bits/functexcept.h
+src/parser/classes.o: /usr/include/c++/4.2.1/exception_defines.h
+src/parser/classes.o: /usr/include/c++/4.2.1/bits/stl_algobase.h
+src/parser/classes.o: /usr/include/c++/4.2.1/cstring
+src/parser/classes.o: /usr/include/c++/4.2.1/cstddef /usr/include/stddef.h
+src/parser/classes.o: /usr/include/_types.h /usr/include/sys/_types.h
+src/parser/classes.o: /usr/include/sys/cdefs.h /usr/include/machine/_types.h
+src/parser/classes.o: /usr/include/i386/_types.h /usr/include/string.h
+src/parser/classes.o: /usr/include/secure/_string.h
+src/parser/classes.o: /usr/include/secure/_common.h
+src/parser/classes.o: /usr/include/c++/4.2.1/climits /usr/include/limits.h
+src/parser/classes.o: /usr/include/machine/limits.h
+src/parser/classes.o: /usr/include/i386/limits.h /usr/include/i386/_limits.h
+src/parser/classes.o: /usr/include/sys/syslimits.h
+src/parser/classes.o: /usr/include/c++/4.2.1/cstdlib
+src/parser/classes.o: /usr/include/c++/4.2.1/iosfwd
+src/parser/classes.o: /usr/include/c++/4.2.1/cctype /usr/include/ctype.h
+src/parser/classes.o: /usr/include/runetype.h
+src/parser/classes.o: /usr/include/c++/4.2.1/bits/stringfwd.h
+src/parser/classes.o: /usr/include/c++/4.2.1/bits/postypes.h
+src/parser/classes.o: /usr/include/c++/4.2.1/cwchar
+src/parser/classes.o: /usr/include/c++/4.2.1/ctime /usr/include/time.h
+src/parser/classes.o: /usr/include/_structs.h /usr/include/sys/_structs.h
+src/parser/classes.o: /usr/include/c++/4.2.1/bits/stl_pair.h
+src/parser/classes.o: /usr/include/c++/4.2.1/bits/cpp_type_traits.h
+src/parser/classes.o: /usr/include/c++/4.2.1/ext/type_traits.h
+src/parser/classes.o: /usr/include/c++/4.2.1/utility
+src/parser/classes.o: /usr/include/c++/4.2.1/bits/stl_relops.h
+src/parser/classes.o: /usr/include/c++/4.2.1/bits/stl_iterator_base_types.h
+src/parser/classes.o: /usr/include/c++/4.2.1/bits/stl_iterator_base_funcs.h
+src/parser/classes.o: /usr/include/c++/4.2.1/bits/concept_check.h
+src/parser/classes.o: /usr/include/c++/4.2.1/bits/stl_iterator.h
+src/parser/classes.o: /usr/include/c++/4.2.1/debug/debug.h
+src/parser/classes.o: /usr/include/c++/4.2.1/bits/allocator.h
+src/parser/classes.o: /usr/include/c++/4.2.1/bits/stl_construct.h
+src/parser/classes.o: /usr/include/c++/4.2.1/new
+src/parser/classes.o: /usr/include/c++/4.2.1/exception
+src/parser/classes.o: /usr/include/c++/4.2.1/bits/stl_uninitialized.h
+src/parser/classes.o: /usr/include/c++/4.2.1/bits/stl_deque.h
+src/parser/classes.o: /usr/include/c++/4.2.1/bits/deque.tcc
+src/parser/classes.o: /usr/include/c++/4.2.1/string
+src/parser/classes.o: /usr/include/c++/4.2.1/bits/char_traits.h
+src/parser/classes.o: /usr/include/c++/4.2.1/memory
+src/parser/classes.o: /usr/include/c++/4.2.1/bits/stl_raw_storage_iter.h
+src/parser/classes.o: /usr/include/c++/4.2.1/limits
+src/parser/classes.o: /usr/include/c++/4.2.1/bits/ostream_insert.h
+src/parser/classes.o: /usr/include/c++/4.2.1/bits/stl_function.h
+src/parser/classes.o: /usr/include/c++/4.2.1/bits/basic_string.h
+src/parser/classes.o: /usr/include/c++/4.2.1/ext/atomicity.h
+src/parser/classes.o: /usr/include/c++/4.2.1/algorithm
+src/parser/classes.o: /usr/include/c++/4.2.1/bits/stl_algo.h
+src/parser/classes.o: /usr/include/c++/4.2.1/bits/stl_heap.h
+src/parser/classes.o: /usr/include/c++/4.2.1/bits/stl_tempbuf.h
+src/parser/classes.o: /usr/include/c++/4.2.1/bits/basic_string.tcc
+src/parser/classes.o: src/semantics/constants.h
 src/parser/comparison.o: src/parser/grammar.h src/semantics/syntax_tree.h
 src/parser/comparison.o: /usr/include/c++/4.2.1/deque
 src/parser/comparison.o: /usr/include/c++/4.2.1/bits/functexcept.h
@@ -1527,6 +1584,8 @@ src/stdlib/System/object.o: src/semantics/constants.h
 src/stdlib/System/object.o: src/stdlib/System/integer.h
 src/stdlib/System/object.o: src/stdlib/System/float.h
 src/stdlib/System/object.o: src/stdlib/System/boolean.h
+src/stdlib/System/object.o: src/stdlib/System/method.h
+src/stdlib/System/object.o: src/stdlib/System/dynamic_object.h
 src/stdlib/System/string.o: /usr/include/c++/4.2.1/iostream
 src/stdlib/System/string.o: /usr/include/c++/4.2.1/ostream
 src/stdlib/System/string.o: /usr/include/c++/4.2.1/ios

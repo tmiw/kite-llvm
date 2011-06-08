@@ -70,6 +70,7 @@ namespace kite
                 initialize_loop_rules();
                 initialize_decide_rules();
                 initialize_method_rules();
+                initialize_class_rules();
                 initialize_statement_rules();
             }
             
@@ -77,6 +78,7 @@ namespace kite
             qi::rule<Iterator, semantics::syntax_tree_node(), ascii::space_type> statement;
             qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> math_statement;
             qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> method_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> class_statement;
             qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> loop_statement;
             qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> decide_statement;
             qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> const_statement;
@@ -116,6 +118,7 @@ namespace kite
             void initialize_loop_rules();
             void initialize_decide_rules();
             void initialize_method_rules();
+            void initialize_class_rules();
             void initialize_statement_rules();
         };
     }

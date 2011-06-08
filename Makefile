@@ -19,8 +19,11 @@ all: kite
 depend:
 	makedepend `find src -name '*.cpp'` -Y -Isrc/ >/dev/null 2>&1
 
-clean:
-	rm -rf `find ./ -name '*.o'` `find ./ -name 'kite'`
+clean: clean-cache
+	rm -rf Makefile.bak `find ./ -name '*.o'` `find ./ -name 'kite'`
+
+clean-cache:
+	rm -rf `find ./ -name '*.kto'`
 
 kite: $(OBJS)
 	$(CC) $(CPPFLAGS) $(LDFLAGS) -o kite $(OBJS) $(LLVM_LDFLAGS) $(LLVM_LIBS)

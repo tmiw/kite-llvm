@@ -43,7 +43,12 @@ namespace kite
     {
         namespace System
         {
-            object_method_map object::method_map;
+            object_method_map object::method_map = map_list_of
+                ("bool__o", function_semantics(semantics::BOOLEAN, (void*)0))
+                ("int__o", function_semantics(semantics::INTEGER, (void*)0))
+                ("float__o", function_semantics(semantics::FLOAT, (void*)0))
+                ("print__o", function_semantics(semantics::OBJECT, (void*)0))
+                ("obj__o", function_semantics(semantics::OBJECT, (void*)0));
         }
     }
 }

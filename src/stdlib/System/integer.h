@@ -65,6 +65,11 @@ extern "C"
     double PREFIX_INTEGER_METHOD_NAME(float__i)(int val);
     int PREFIX_INTEGER_METHOD_NAME(print__i)(int val);
     void *PREFIX_INTEGER_METHOD_NAME(obj__i)(int val);
+    bool PREFIX_INTEGER_METHOD_NAME(bool__o)(void *val);
+    int PREFIX_INTEGER_METHOD_NAME(int__o)(void *val);
+    double PREFIX_INTEGER_METHOD_NAME(float__o)(void *val);
+    void *PREFIX_INTEGER_METHOD_NAME(print__o)(void *val);
+    void *PREFIX_INTEGER_METHOD_NAME(obj__o)(void *val);
 }
 
 #endif

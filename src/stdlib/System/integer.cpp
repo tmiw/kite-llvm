@@ -38,10 +38,15 @@ namespace kite
         {
             object_method_map integer::method_map = map_list_of
                 ("bool__i", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_INTEGER_METHOD_NAME(bool__i))))
+                ("bool__o", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_INTEGER_METHOD_NAME(bool__o))))
                 ("int__i", function_semantics(semantics::INTEGER, (void*)&(PREFIX_INTEGER_METHOD_NAME(int__i))))
+                ("int__o", function_semantics(semantics::INTEGER, (void*)&(PREFIX_INTEGER_METHOD_NAME(int__o))))
                 ("float__i", function_semantics(semantics::FLOAT, (void*)&(PREFIX_INTEGER_METHOD_NAME(float__i))))
+                ("float__o", function_semantics(semantics::FLOAT, (void*)&(PREFIX_INTEGER_METHOD_NAME(float__o))))
                 ("print__i", function_semantics(semantics::INTEGER, (void*)&(PREFIX_INTEGER_METHOD_NAME(print__i))))
-                ("obj__i", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(obj__i))));
+                ("print__o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(print__o))))
+                ("obj__i", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(obj__i))))
+                ("obj__o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(obj__o))));
             
             bool integer::to_boolean()
             {
@@ -71,9 +76,16 @@ namespace kite
     }
 }
 
+using namespace kite::stdlib;
+
 bool PREFIX_INTEGER_METHOD_NAME(bool__i)(int val)
 {
     return val != 0;
+}
+
+bool PREFIX_INTEGER_METHOD_NAME(bool__o)(void *val)
+{
+    return PREFIX_INTEGER_METHOD_NAME(bool__i)(((System::integer*)val)->val);
 }
 
 int PREFIX_INTEGER_METHOD_NAME(int__i)(int val)
@@ -81,9 +93,19 @@ int PREFIX_INTEGER_METHOD_NAME(int__i)(int val)
     return val;
 }
 
+int PREFIX_INTEGER_METHOD_NAME(int__o)(void *val)
+{
+    return PREFIX_INTEGER_METHOD_NAME(int__i)(((System::integer*)val)->val);
+}
+
 double PREFIX_INTEGER_METHOD_NAME(float__i)(int val)
 {
     return (double)val;
+}
+
+double PREFIX_INTEGER_METHOD_NAME(float__o)(void *val)
+{
+    return PREFIX_INTEGER_METHOD_NAME(float__i)(((System::integer*)val)->val);
 }
 
 int PREFIX_INTEGER_METHOD_NAME(print__i)(int val)
@@ -92,7 +114,19 @@ int PREFIX_INTEGER_METHOD_NAME(print__i)(int val)
     return val;
 }
 
+void *PREFIX_INTEGER_METHOD_NAME(print__o)(void *val)
+{
+    PREFIX_INTEGER_METHOD_NAME(print__i)(((System::integer*)val)->val);
+    return val;
+}
+
 void *PREFIX_INTEGER_METHOD_NAME(obj__i)(int val)
 {
     return (void*)(new kite::stdlib::System::integer(val));
 }
+
+void *PREFIX_INTEGER_METHOD_NAME(obj__o)(void *val)
+{
+    return val;
+}
+

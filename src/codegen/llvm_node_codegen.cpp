@@ -723,14 +723,15 @@ namespace kite
                 }
                 case semantics::OBJECT:
                 {
-                    PATypeHolder StructTy = OpaqueType::get(getGlobalContext());
+                    /*PATypeHolder StructTy = OpaqueType::get(getGlobalContext());
                     std::vector<const Type*> Elts;
                     Elts.push_back(Type::getInt32Ty(getGlobalContext()));
                     Elts.push_back(PointerType::getUnqual(StructTy));
                     StructType *newStructType = StructType::get(getGlobalContext(), Elts);
                     cast<OpaqueType>(StructTy.get())->refineAbstractTypeTo(newStructType);
                     newStructType = cast<StructType>(StructTy.get());
-                    return PointerType::getUnqual(newStructType);
+                    return PointerType::getUnqual(newStructType);*/
+                    return PointerType::getUnqual(Type::getInt32Ty(getGlobalContext()));
                 }
                 default:
                 {

@@ -57,8 +57,13 @@ namespace kite
             inline std::map<std::string, Value*> &current_symbol_stack() { return *_symbolTableStack.back(); }
             inline std::vector<std::map<std::string, Value*> *> &symbol_stack() { return _symbolTableStack; }
             void pop_symbol_stack();
-            
+           
+            void push_namespace_stack(std::string name) { _namespaceStack.push_back(name); }
+            void pop_namespace_stack() { _namespaceStack.pop_back(); }
+            std::string identifier_prefix();
+ 
         private:
+            std::vector<std::string> _namespaceStack;
             std::vector<Module*> _moduleStack;
             std::vector<std::map<std::string, Value*> *> _symbolTableStack;
             IRBuilder<> _moduleBuilder;        

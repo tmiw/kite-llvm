@@ -147,6 +147,9 @@ namespace kite
                 case semantics::DEREF_METHOD_RELATIVE_SELF:
                     ret = codegen_deref_method_relative_self_op(tree);
                     break;
+                case semantics::CLASS:
+                    ret = codegen_class_op(tree);
+                    break;
             }
             
             return ret;
@@ -460,16 +463,34 @@ namespace kite
         
         Value *llvm_node_codegen::codegen_method_op(semantics::syntax_tree const &tree) const
         {
-            BasicBlock *currentBB = state.module_builder().GetInsertBlock();
+            int numargs = tree.children.size() - 2;
             std::string functionName = boost::get<std::string>(tree.children[0]);
+            std::vector<std::string> argnames;
+
+            if (numargs < 0) numargs = 0;
+            for (int i = 1; i < tree.children.size() - 1; i++)
+            {
+                argnames.push_back(boost::get<std::string>(tree.children[i]));
+            }
+        
+            semantics::syntax_tree &body = const_cast<semantics::syntax_tree&>(boost::get<semantics::syntax_tree>(tree.children[tree.children.size() - 1]));
+            return generate_llvm_method(functionName, argnames, body);
+        }
+
+        Value *llvm_node_codegen::generate_llvm_method(std::string name, std::vector<std::string> &argnames, semantics::syntax_tree &body) const
+        {
+            BasicBlock *currentBB = state.module_builder().GetInsertBlock();
             std::vector<const Type*> argTypes;
-            
+            std::string functionName = state.identifier_prefix() + name;
+            int numargs = argnames.size();
+
             functionName += "__o";
             argTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
-            if (tree.children.size() > 2)
+            
+            if (numargs > 0)
             {
-                functionName += std::string(tree.children.size() - 2, 'o');
-                for (int i = 1; i < tree.children.size() - 1; i++)
+                functionName += std::string(numargs, 'o');
+                for (int i = 0; i < numargs; i++)
                 {
                     argTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
                 }
@@ -485,7 +506,7 @@ namespace kite
             state.push_symbol_stack();
             int i = 0;
             std::map<std::string, Value*> &symStack = state.current_symbol_stack();
-            for (Function::arg_iterator AI = F->arg_begin(); i < tree.children.size() - 1; i++, ++AI)
+            for (Function::arg_iterator AI = F->arg_begin(); i < numargs + 1; i++, ++AI)
             {
                 std::string name;
                 if (i == 0)
@@ -494,13 +515,13 @@ namespace kite
                 }
                 else
                 {
-                    name = boost::get<std::string>(tree.children[i]);
+                    name = argnames[i - 1];
                 }
                 AI->setName(name.c_str());
                 symStack[name] = builder.CreateAlloca(kite_type_to_llvm_type(semantics::OBJECT));
                 builder.CreateStore(AI, symStack[name]);
             }
-            Value *ret = boost::apply_visitor(llvm_node_codegen(state), tree.children[tree.children.size() - 1]);
+            Value *ret = llvm_node_codegen(state)(body);
             state.pop_symbol_stack();
             
             if (get_type(ret) != semantics::OBJECT)
@@ -511,7 +532,7 @@ namespace kite
             }
             builder.CreateRet(ret);
             state.module_builder().SetInsertPoint(currentBB);
-            return ConstantInt::get(getGlobalContext(), APInt(32, 0, true)); // TODO
+            return F;
         }
         
         Value *llvm_node_codegen::generate_llvm_method_call(Value *self, std::string name, std::vector<Value*> &params) const
@@ -605,6 +626,7 @@ namespace kite
                         PointerType::getUnqual(ft)
                     );
                 }
+            
             }
             self = builder.CreateCall(
                 fptr,
@@ -614,6 +636,36 @@ namespace kite
             return self;
         }
         
+        Value *llvm_node_codegen::codegen_class_op(semantics::syntax_tree const &tree) const
+        {
+            // TODO: child class
+            Value *ret;
+            Module *module = state.current_module();
+            IRBuilder<> &builder = state.module_builder();
+            BasicBlock *currentBlock = builder.GetInsertBlock();
+
+            state.push_namespace_stack(boost::get<std::string>(tree.children[0]));
+            semantics::syntax_tree &body = const_cast<semantics::syntax_tree&>(boost::get<semantics::syntax_tree>(tree.children[tree.children.size() - 1]));
+            std::vector<std::string> args;
+            ret = generate_llvm_method(std::string("__static_init__"), args, body);
+            state.pop_namespace_stack();
+
+            // Initialize dynamic_object that will store the class and insert
+            // LLVM code to call __static_init__ on this object.
+            std::vector<const Type*> parameterTypes;
+            const FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), parameterTypes, false);
+            Function *funPtr = Function::Create(ft, Function::ExternalLinkage, "kite_dynamic_object_alloc", module);
+            if (funPtr->getName() != "kite_dynamic_object_alloc")
+            {
+                funPtr->eraseFromParent();
+                funPtr = module->getFunction("kite_dynamic_object_alloc");
+            }
+            Value *obj = builder.CreateCall(funPtr);
+            builder.CreateCall(ret, obj);
+ 
+            return ret;
+        }
+
         semantics::builtin_types llvm_node_codegen::get_type(Value *val)
         {
             semantics::builtin_types op_type;

@@ -1,5 +1,6 @@
 CC=g++
-CPPFLAGS=-g -O2
+CPPFLAGS=-g 
+#-O2
 LDFLAGS=-rdynamic
 INC=-Isrc/ -I/opt/local/include
 LLVM_CONFIG=llvm-config-2.8
@@ -9,7 +10,8 @@ LLVM_LIBS=`$(LLVM_CONFIG) --libs`
 OBJS=src/apps/kite.o src/codegen/llvm_compile_state.o src/codegen/llvm_node_codegen.o \
 	 src/codegen/syntax_tree_node_printer.o src/codegen/syntax_tree_printer.o \
 	 src/parser/parser.o src/stdlib/System/integer.o src/stdlib/System/string.o \
-	 src/stdlib/System/boolean.o src/stdlib/System/float.o src/stdlib/System/object.o
+	 src/stdlib/System/boolean.o src/stdlib/System/float.o src/stdlib/System/object.o \
+         src/stdlib/System/dynamic_object.o
 
 .cpp.o: %.cpp
 	$(CC) -c -o $@ $(CPPFLAGS) $(INC) $(LLVM_CPPFLAGS) $<
@@ -102,6 +104,10 @@ src/stdlib/System/object.o: src/stdlib/System/float.h
 src/stdlib/System/object.o: src/stdlib/System/boolean.h
 src/stdlib/System/object.o: src/stdlib/System/method.h
 src/stdlib/System/object.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/dynamic_object.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/dynamic_object.o: src/semantics/constants.h
+src/stdlib/System/dynamic_object.o: src/stdlib/System/object.h
+src/stdlib/System/dynamic_object.o: src/stdlib/System/method.h
 src/stdlib/System/float.o: src/stdlib/System/float.h
 src/stdlib/System/float.o: src/stdlib/System/object.h
 src/stdlib/System/float.o: src/semantics/constants.h

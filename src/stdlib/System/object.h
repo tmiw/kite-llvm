@@ -28,6 +28,7 @@
 #ifndef KITE_STDLIB__SYSTEM__OBJECT_H
 #define KITE_STDLIB__SYSTEM__OBJECT_H
 
+#include <string>
 #include <map>
 #include <semantics/constants.h>
 

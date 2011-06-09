@@ -65,5 +65,18 @@ namespace kite
 	        delete ptr;
 	        _symbolTableStack.pop_back();
 	    }
+
+        std::string llvm_compile_state::identifier_prefix()
+        {
+            std::string ret;
+            std::vector<std::string>::reverse_iterator i = _namespaceStack.rbegin();
+
+            for (; i != _namespaceStack.rend(); i++)
+            {
+                ret += (*i);
+                ret += "__";
+            }
+            return ret;
+        }
     }
 }

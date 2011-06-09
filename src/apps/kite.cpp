@@ -32,6 +32,7 @@
 #include <parser/parser.h>
 #include <codegen/syntax_tree_printer.h>
 #include <codegen/llvm_node_codegen.h>
+#include <stdlib/System/dynamic_object.h>
 #include <llvm/LLVMContext.h>
 #include <llvm/Target/TargetSelect.h>
 #include <llvm/Bitcode/ReaderWriter.h>
@@ -180,9 +181,9 @@ int main(int argc, char **argv)
             // TODO
             const Type *ptrType = codegen::llvm_node_codegen::kite_type_to_llvm_type(semantics::OBJECT);
             sym_stack["this"] = builder.CreateAlloca(ptrType);
-            Value *intZero = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) << 3, 0, true));
-            Value *ptrZero = builder.CreateIntToPtr(intZero, ptrType);
-            builder.CreateStore(ptrZero, sym_stack["this"]);
+            Value *intObj = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) << 3, (uint64_t)kite_dynamic_object_alloc(), true));
+            Value *ptrObj = builder.CreateIntToPtr(intObj, ptrType);
+            builder.CreateStore(ptrObj, sym_stack["this"]);
             codegen::llvm_node_codegen cg(state);
             cg(ast);
             builder.CreateRetVoid();

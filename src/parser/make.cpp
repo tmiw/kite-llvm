@@ -5,7 +5,7 @@ namespace kite
     namespace parser
     {
         template<typename T>
-        void kite_grammar<T>::initialize_class_rules()
+        void kite_grammar<T>::initialize_make_rules()
         {
             using qi::lit;
             using qi::lexeme;
@@ -24,14 +24,12 @@ namespace kite
             using phoenix::erase;
             using phoenix::front;
             
-            class_statement =
-                   lit("class") [ at_c<0>(_val) = kite::semantics::CLASS ]
-                >> identifier [ push_back(at_c<1>(_val), _1) ]
-                >> -(    lit("from") 
-                      >> deref_filter_only_statement [ push_back(at_c<1>(_val), _1) ])
-                >> '[' >> start [ push_back(at_c<1>(_val), _1) ] >> ']';
+            make_statement =
+                   lit("make") [ at_c<0>(_val) = kite::semantics::MAKE ]
+                >> deref_filter_only_statement [ push_back(at_c<1>(_val), _1) ] 
+                >> (lit('(') >> -(or_statement [ push_back(at_c<1>(_val), _1) ] % ',') >> lit(')'));
         }
         
-        //kite_grammar<std::string::const_iterator> class_grammar;
+        //kite_grammar<std::string::const_iterator> constants_grammar;
     }
 }

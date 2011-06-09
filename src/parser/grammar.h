@@ -56,6 +56,7 @@ namespace kite
             {
                 // Constants.
                 initialize_const_rules();
+                initialize_make_rules();
                 
                 // Math operations.
                 initialize_assign_rules();
@@ -101,6 +102,7 @@ namespace kite
             qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> deref_method_statement;
             qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> deref_method_mandatory_params;
             qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> deref_array_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> make_statement;
             qi::rule<Iterator, std::string(), ascii::space_type> identifier;
             qi::rule<Iterator, semantics::syntax_tree_node(), ascii::space_type> numeric_value;
             qi::rule<Iterator, std::string()> unesc_str;
@@ -108,6 +110,7 @@ namespace kite
         
         private:
             void initialize_const_rules();
+            void initialize_make_rules();
             void initialize_assign_rules();
             void initialize_bitwise_rules();
             void initialize_comparison_rules();

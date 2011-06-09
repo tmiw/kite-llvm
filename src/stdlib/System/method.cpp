@@ -24,39 +24,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
- 
-#ifndef KITE_STDLIB__SYSTEM__DYNAMIC_OBJECT_H
-#define KITE_STDLIB__SYSTEM__DYNAMIC_OBJECT_H
 
-#include <map>
-#include <semantics/constants.h>
-#include "object.h"
 #include "method.h"
 
-namespace kite
-{
-    namespace stdlib
-    {
-        namespace System
-        {
-            typedef std::map<std::string, object*> property_map;
-            struct dynamic_object : object
-            {
-                object *parent;
-                property_map properties;
-                
-                dynamic_object() : object(semantics::OBJECT), parent(NULL) { }
-                dynamic_object(object *p) : object(semantics::OBJECT), parent(p) { }
-            };
-        }
-    }
-}
+using namespace kite::stdlib;
 
-extern "C"
+void *kite_method_alloc(void *method_ptr)
 {
-    void *kite_dynamic_object_alloc();
-    void kite_dynamic_object_set_parent(void *object, void *parent);
-    void **kite_dynamic_object_get_property(void *object, char *name);
+    System::method *method = new System::method(method_ptr);
+    return (void*)method;
 }
-
-#endif

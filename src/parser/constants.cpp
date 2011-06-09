@@ -35,14 +35,16 @@ namespace kite
             
             const_statement = 
                   numeric_value [ push_back(at_c<1>(_val), _1) ] [ at_c<0>(_val) = kite::semantics::CONST ]
-                | identifier [ push_back(at_c<1>(_val), _1) ] [ at_c<0>(_val) = kite::semantics::VARIABLE ];
-                  
+                | identifier [ push_back(at_c<1>(_val), _1) ] [ at_c<0>(_val) = kite::semantics::VARIABLE ]
+                | make_statement [ _val = _1 ];
+            
             identifier =
                 (qi::lexeme[ (qi::alpha | '_') >> *(qi::alnum | '_') ] 
                     - lit("decide") 
                     - lit("while") 
                     - lit("until")
                     - lit("true")
+                    - lit("make")
                     - lit("false")); // [ _val = _1 ];
         }
         

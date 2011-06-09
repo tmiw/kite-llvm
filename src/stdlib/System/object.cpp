@@ -102,7 +102,7 @@ int *kite_find_funccall(int *obj, char *name, int numargs)
         System::dynamic_object *dyn_object = (System::dynamic_object*)obj;
         do
         {
-            System::property_map::iterator item = dyn_object->properties.find(name);
+            System::property_map::iterator item = dyn_object->properties.find(method_name);
             if (item != dyn_object->properties.end())
             {
                 System::object *method_obj = (*item).second;

@@ -79,6 +79,7 @@ namespace kite
             DECIDE,
             METHOD,
             CLASS,
+            MAKE,
         };
     }
 }

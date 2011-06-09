@@ -33,3 +33,18 @@ void *kite_dynamic_object_alloc()
 {
     return (void*)(new System::dynamic_object());
 }
+
+void kite_dynamic_object_set_parent(void *object, void *parent)
+{
+    ((System::dynamic_object*)object)->parent = (System::object*)parent;
+}
+
+void **kite_dynamic_object_get_property(void *object, char *name)
+{
+    System::dynamic_object *castedObj = (System::dynamic_object*)object;
+    if (castedObj->properties.find(name) == castedObj->properties.end())
+    {
+        castedObj->properties[name] = NULL;
+    }
+    return (void**)&castedObj->properties[name];
+}

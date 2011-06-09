@@ -50,4 +50,9 @@ namespace kite
     }
 }
 
+extern "C"
+{
+    void *kite_method_alloc(void *method_ptr);
+}
+
 #endif

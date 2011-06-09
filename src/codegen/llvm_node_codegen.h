@@ -67,6 +67,8 @@ namespace kite
             // For deref_filter
             Value *operator()(llvm_node_codegen_params &param) const;
             
+            Value *generate_llvm_method(std::string name, std::vector<std::string> &argnames, semantics::syntax_tree &body) const;
+
             static std::string type_to_code(semantics::builtin_types type);
             static semantics::builtin_types get_type(Value *val);
             static const Type *kite_type_to_llvm_type(semantics::builtin_types type);
@@ -99,7 +101,6 @@ namespace kite
             
             stdlib::object_method_map &get_method_map(semantics::builtin_types type) const;
             Value *generate_llvm_method_call(Value *self, std::string name, std::vector<Value*> &params) const;
-            Value *generate_llvm_method(std::string name, std::vector<std::string> &argnames, semantics::syntax_tree &body) const;
             Value *generate_llvm_dynamic_object_alloc() const;
             void generate_llvm_dynamic_object_set_parent(Value *obj, Value *parent) const;
             Value *generate_llvm_dynamic_object_get_property(Value *obj, std::string name) const;

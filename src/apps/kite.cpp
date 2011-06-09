@@ -168,25 +168,12 @@ int main(int argc, char **argv)
         if (bypass_parse == false)
         {
             codegen::llvm_compile_state state;
-            state.push_symbol_stack();
-            state.push_module(new Module("test_module", context));
+            state.push_module(new Module("__root_module", context));
             currentModule = state.current_module();
-            FunctionType *FT = FunctionType::get(Type::getVoidTy(context), false);
-            F = Function::Create(FT, Function::ExternalLinkage, "begin", currentModule);
-            BasicBlock *BB = BasicBlock::Create(getGlobalContext(), "entry", F);
-            IRBuilder<> &builder = state.module_builder();
-            builder.SetInsertPoint(BB);
 
-            std::map<std::string, Value*> &sym_stack = state.current_symbol_stack();
-            // TODO
-            const Type *ptrType = codegen::llvm_node_codegen::kite_type_to_llvm_type(semantics::OBJECT);
-            sym_stack["this"] = builder.CreateAlloca(ptrType);
-            Value *intObj = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) << 3, (uint64_t)kite_dynamic_object_alloc(), true));
-            Value *ptrObj = builder.CreateIntToPtr(intObj, ptrType);
-            builder.CreateStore(ptrObj, sym_stack["this"]);
             codegen::llvm_node_codegen cg(state);
-            cg(ast);
-            builder.CreateRetVoid();
+            std::vector<std::string> argNames;
+            F = (Function*)cg.generate_llvm_method("__static_init__", argNames, ast);
             verifyFunction(*F);
 
             engine = EngineBuilder(currentModule).create();
@@ -225,7 +212,7 @@ int main(int argc, char **argv)
             std::string error;
             currentModule = ParseBitcodeFile(MemoryBuffer::getFile(fileNameCompiled.c_str()), context, &error);
             engine = EngineBuilder(currentModule).create();
-            F = engine->FindFunctionNamed("begin");
+            F = engine->FindFunctionNamed("__static_init____o");
         }
         
         if (dump_code) currentModule->dump();
@@ -233,8 +220,8 @@ int main(int argc, char **argv)
         if (!inhibit_exec)
         {
             void *fptr = engine->getPointerToFunction(F);
-            void(*FP)() = (void(*)())fptr;
-            (*FP)();
+            void(*FP)(void*) = (void(*)(void*))fptr;
+            (*FP)((void*)kite_dynamic_object_alloc());
         }
         
         return 0;

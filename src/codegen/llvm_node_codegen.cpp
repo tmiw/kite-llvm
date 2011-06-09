@@ -555,7 +555,7 @@ namespace kite
                 ret = generate_llvm_method_call(ret, "obj", params);
             }
             builder.CreateRet(ret);
-            state.module_builder().SetInsertPoint(currentBB);
+            if (currentBB) state.module_builder().SetInsertPoint(currentBB);
             return F;
         }
         

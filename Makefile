@@ -21,6 +21,9 @@ all: kite
 depend:
 	makedepend `find src -name '*.cpp'` -Y -Isrc/ >/dev/null 2>&1
 
+test: all clean-cache
+	sh run-tests.sh
+
 clean: clean-cache
 	rm -rf Makefile.bak `find ./ -name '*.o'` `find ./ -name 'kite'`
 

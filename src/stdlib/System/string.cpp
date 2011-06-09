@@ -176,10 +176,12 @@ int PREFIX_STRING_METHOD_NAME(length__s)(const char* val)
 char* PREFIX_STRING_METHOD_NAME(lower__s)(const char *val)
 {
     char *ret = (char*)malloc(strlen(val) + 1);
-    for (char *tmp = ret; *val != 0; val++, tmp++)
+    char *tmp = ret;
+    for ( ; *val != 0; val++, tmp++)
     {
         *tmp = tolower(*val);
     }
+    *tmp = 0;
     return ret;
 }
 
@@ -227,9 +229,11 @@ char* PREFIX_STRING_METHOD_NAME(trim__s)(const char *val)
 char* PREFIX_STRING_METHOD_NAME(upper__s)(const char *val)
 {
     char *ret = (char*)malloc(strlen(val) + 1);
-    for (char *tmp = ret; *val != 0; val++, tmp++)
+    char *tmp = ret;
+    for ( ; *val != 0; val++, tmp++)
     {
         *tmp = toupper(*val);
     }
+    *tmp = 0;
     return ret;
 }

@@ -40,6 +40,26 @@ namespace kite
         typedef Value *(IRBuilder<>::*IRBuilderFPtr)(Value*,Value*,const Twine&);
         typedef std::pair<semantics::code_operation, semantics::builtin_types> CodeOperationKey;
         typedef std::map<CodeOperationKey, IRBuilderFPtr> CodeOperationMap;
+        typedef std::map<semantics::code_operation, std::string> OperatorMethodsMap;
+
+        static OperatorMethodsMap operator_map = map_list_of
+            (semantics::ADD, "__op_plus__")
+            (semantics::SUBTRACT, "__op_minus__")
+            (semantics::MULTIPLY, "__op_multiply__")
+            (semantics::DIVIDE, "__op_divide__")
+            (semantics::MODULO, "__op_mod__")
+            (semantics::LEFT_SHIFT, "__op_lshift__")
+            (semantics::RIGHT_SHIFT, "__op_rshift__")
+            (semantics::LESS_THAN, "__op_lt__")
+            (semantics::GREATER_THAN, "__op_gt__")
+            (semantics::LESS_OR_EQUALS, "__op_leq__")
+            (semantics::GREATER_OR_EQUALS, "__op_geq__")
+            (semantics::EQUALS, "__op_equals__")
+            (semantics::NOT_EQUALS, "__op_lt__")
+            (semantics::AND, "__op_and__")
+            (semantics::OR, "__op_or__")
+            (semantics::XOR, "__op_xor__");
+
         static CodeOperationMap codegen_map = map_list_of
             (CodeOperationKey(semantics::ADD, semantics::INTEGER), &IRBuilder<>::CreateAdd)
             (CodeOperationKey(semantics::ADD, semantics::FLOAT), &IRBuilder<>::CreateFAdd)
@@ -199,13 +219,42 @@ namespace kite
         {
             Value *lhs = boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
             Value *rhs = boost::apply_visitor(llvm_node_codegen(state), tree.children[1]);
-            
-            // TODO
-            assert(lhs->getType() == rhs->getType());
-            semantics::builtin_types op_type = get_type(lhs);
-            IRBuilderFPtr ptr = codegen_map[CodeOperationKey(tree.op, op_type)];
-            assert(ptr != NULL);
-            return (state.module_builder().*ptr)(lhs, rhs, "");
+            Value *ret = NULL;
+            const Type *lhs_type = lhs->getType();
+            const Type *rhs_type = rhs->getType();
+ 
+            if (lhs_type == rhs_type && lhs_type != kite_type_to_llvm_type(semantics::OBJECT))
+            {
+                semantics::builtin_types op_type = get_type(lhs);
+                IRBuilderFPtr ptr = codegen_map[CodeOperationKey(tree.op, op_type)];
+                if (ptr != NULL)
+                {
+                    ret = (state.module_builder().*ptr)(lhs, rhs, "");
+                }
+            }
+
+            if (ret == NULL)
+            {
+                // Use method call to perform operation.
+                std::vector<Value*> params;
+                if (lhs_type != kite_type_to_llvm_type(semantics::OBJECT))
+                {
+                    params.push_back(lhs);
+                    lhs = generate_llvm_method_call(lhs, "obj", params);
+                    params.clear();
+                }
+                if (rhs_type != kite_type_to_llvm_type(semantics::OBJECT))
+                {
+                    params.push_back(rhs);
+                    rhs = generate_llvm_method_call(lhs, "obj", params);
+                    params.clear();
+                }
+                params.push_back(lhs);
+                params.push_back(rhs);
+                ret = generate_llvm_method_call(lhs, operator_map[tree.op], params);
+            }
+
+            return ret;
         }
         
         Value *llvm_node_codegen::codegen_unary_plus_op(semantics::syntax_tree const &tree) const
@@ -583,9 +632,19 @@ namespace kite
                 method_name += type_to_code(get_type(paramsCopy[i]));
                 parameterTypes.push_back(kite_type_to_llvm_type(get_type(paramsCopy[i])));
             }
-            function_semantics &semantics = method_map[method_name];
-                
-            const FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics.first), parameterTypes, false);
+
+            function_semantics semantics;
+            Type *tmpType;
+            if (method_map.find(method_name) == method_map.end())
+            {
+                tmpType = const_cast<Type*>(kite_type_to_llvm_type(semantics::OBJECT));
+            }
+            else
+            {
+                semantics = method_map[method_name];
+                tmpType = const_cast<Type*>(kite_type_to_llvm_type(semantics.first));
+            }
+            const FunctionType *ft = FunctionType::get(tmpType, parameterTypes, false);
             Value *fptr;
             if ((uint64_t)semantics.second != 0)
             {

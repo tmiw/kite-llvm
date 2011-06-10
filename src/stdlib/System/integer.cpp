@@ -28,6 +28,7 @@
 #include <iostream>
 #include <boost/assign.hpp>
 #include "integer.h"
+#include "boolean.h"
 using namespace boost::assign;
  
 namespace kite
@@ -37,6 +38,7 @@ namespace kite
         namespace System
         {
             object_method_map integer::method_map = map_list_of
+                ("__op_lt____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_lt____oo))))
                 ("bool__i", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_INTEGER_METHOD_NAME(bool__i))))
                 ("bool__o", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_INTEGER_METHOD_NAME(bool__o))))
                 ("int__i", function_semantics(semantics::INTEGER, (void*)&(PREFIX_INTEGER_METHOD_NAME(int__i))))
@@ -77,6 +79,16 @@ namespace kite
 }
 
 using namespace kite::stdlib;
+
+void *PREFIX_INTEGER_METHOD_NAME(__op_lt____oo)(void *lhs, void *rhs)
+{
+    System::integer *leftObject = (System::integer*)lhs;
+    System::integer *rightObject = (System::integer*)rhs;
+
+    // TODO
+    assert(leftObject->type == rightObject->type);
+    return (void*)(new System::boolean(leftObject->val < rightObject->val));
+}
 
 bool PREFIX_INTEGER_METHOD_NAME(bool__i)(int val)
 {

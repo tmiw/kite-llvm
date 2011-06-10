@@ -70,6 +70,8 @@ extern "C"
     double PREFIX_INTEGER_METHOD_NAME(float__o)(void *val);
     void *PREFIX_INTEGER_METHOD_NAME(print__o)(void *val);
     void *PREFIX_INTEGER_METHOD_NAME(obj__o)(void *val);
+
+    void *PREFIX_INTEGER_METHOD_NAME(__op_lt____oo)(void *lhs, void *rhs);
 }
 
 #endif

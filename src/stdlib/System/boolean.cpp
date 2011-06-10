@@ -41,6 +41,7 @@ namespace kite
                 ("int__b", function_semantics(semantics::INTEGER, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(int__b))))
                 ("float__b", function_semantics(semantics::FLOAT, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(float__b))))
                 ("print__b", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(print__b))))
+                ("print__o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(print__o))))
                 ("obj__b", function_semantics(semantics::OBJECT, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(obj__b))));
             
             bool boolean::to_boolean()
@@ -71,6 +72,8 @@ namespace kite
     }
 }
 
+using namespace kite::stdlib;
+
 bool PREFIX_BOOLEAN_METHOD_NAME(bool__b)(bool val)
 {
     return val;
@@ -89,6 +92,15 @@ double PREFIX_BOOLEAN_METHOD_NAME(float__b)(bool val)
 bool PREFIX_BOOLEAN_METHOD_NAME(print__b)(bool val)
 {
     if (val) std::cout << "true" << std::endl;
+    else std::cout << "false" << std::endl;
+    return val;
+}
+
+void *PREFIX_BOOLEAN_METHOD_NAME(print__o)(void *val)
+{
+    System::boolean *objVal = (System::boolean*)val;
+
+    if (objVal->val) std::cout << "true" << std::endl;
     else std::cout << "false" << std::endl;
     return val;
 }

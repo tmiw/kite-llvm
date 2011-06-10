@@ -11,7 +11,7 @@ OBJS=src/apps/kite.o src/codegen/llvm_compile_state.o src/codegen/llvm_node_code
 	 src/codegen/syntax_tree_node_printer.o src/codegen/syntax_tree_printer.o \
 	 src/parser/parser.o src/stdlib/System/integer.o src/stdlib/System/string.o \
 	 src/stdlib/System/boolean.o src/stdlib/System/float.o src/stdlib/System/object.o \
-     src/stdlib/System/dynamic_object.o src/stdlib/System/method.o
+     src/stdlib/System/dynamic_object.o src/stdlib/System/method.o src/stdlib/language/kite.o
 
 .cpp.o: %.cpp
 	$(CC) -c -o $@ $(CPPFLAGS) $(INC) $(LLVM_CPPFLAGS) $<
@@ -35,14 +35,14 @@ kite: clean-cache $(OBJS)
 
 # DO NOT DELETE
 
+src/apps/kite.o: src/stdlib/language/kite.h
+src/apps/kite.o: src/stdlib/System/dynamic_object.h src/semantics/constants.h
+src/apps/kite.o: src/stdlib/System/object.h src/stdlib/System/method.h
 src/apps/kite.o: src/parser/parser.h src/semantics/syntax_tree.h
 src/apps/kite.o: src/semantics/constants.h src/codegen/syntax_tree_printer.h
 src/apps/kite.o: src/codegen/llvm_node_codegen.h src/stdlib/System/integer.h
-src/apps/kite.o: src/stdlib/System/object.h src/semantics/constants.h
 src/apps/kite.o: src/stdlib/System/string.h src/stdlib/System/boolean.h
 src/apps/kite.o: src/stdlib/System/float.h src/codegen/llvm_compile_state.h
-src/apps/kite.o: src/stdlib/System/dynamic_object.h
-src/apps/kite.o: src/stdlib/System/method.h
 src/codegen/llvm_compile_state.o: src/codegen/llvm_compile_state.h
 src/codegen/llvm_node_codegen.o: src/codegen/llvm_node_codegen.h
 src/codegen/llvm_node_codegen.o: src/semantics/syntax_tree.h
@@ -97,6 +97,20 @@ src/parser/parser.o: src/parser/math.cpp src/parser/method.cpp
 src/parser/parser.o: src/parser/statement.cpp src/parser/make.cpp
 src/parser/statement.o: src/parser/grammar.h src/semantics/syntax_tree.h
 src/parser/statement.o: src/semantics/constants.h
+src/stdlib/language/kite.o: src/stdlib/language/kite.h
+src/stdlib/language/kite.o: src/stdlib/System/dynamic_object.h
+src/stdlib/language/kite.o: src/semantics/constants.h
+src/stdlib/language/kite.o: src/stdlib/System/object.h
+src/stdlib/language/kite.o: src/stdlib/System/method.h src/parser/parser.h
+src/stdlib/language/kite.o: src/semantics/syntax_tree.h
+src/stdlib/language/kite.o: src/semantics/constants.h
+src/stdlib/language/kite.o: src/codegen/syntax_tree_printer.h
+src/stdlib/language/kite.o: src/codegen/llvm_node_codegen.h
+src/stdlib/language/kite.o: src/stdlib/System/integer.h
+src/stdlib/language/kite.o: src/stdlib/System/string.h
+src/stdlib/language/kite.o: src/stdlib/System/boolean.h
+src/stdlib/language/kite.o: src/stdlib/System/float.h
+src/stdlib/language/kite.o: src/codegen/llvm_compile_state.h
 src/stdlib/System/boolean.o: src/stdlib/System/boolean.h
 src/stdlib/System/boolean.o: src/stdlib/System/object.h
 src/stdlib/System/boolean.o: src/semantics/constants.h
@@ -110,6 +124,7 @@ src/stdlib/System/float.o: src/semantics/constants.h
 src/stdlib/System/integer.o: src/stdlib/System/integer.h
 src/stdlib/System/integer.o: src/stdlib/System/object.h
 src/stdlib/System/integer.o: src/semantics/constants.h
+src/stdlib/System/integer.o: src/stdlib/System/boolean.h
 src/stdlib/System/method.o: src/stdlib/System/method.h
 src/stdlib/System/method.o: src/stdlib/System/object.h
 src/stdlib/System/method.o: src/semantics/constants.h

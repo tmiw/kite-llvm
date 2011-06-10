@@ -55,9 +55,12 @@ namespace kite
             (semantics::LESS_OR_EQUALS, "__op_leq__")
             (semantics::GREATER_OR_EQUALS, "__op_geq__")
             (semantics::EQUALS, "__op_equals__")
-            (semantics::NOT_EQUALS, "__op_lt__")
+            (semantics::NOT_EQUALS, "__op_nequals__")
             (semantics::AND, "__op_and__")
             (semantics::OR, "__op_or__")
+            (semantics::NOT, "__op_not__")
+            (semantics::UNARY_PLUS, "__op_unplus__")
+            (semantics::UNARY_MINUS, "__op_unminus__")
             (semantics::XOR, "__op_xor__");
 
         static CodeOperationMap codegen_map = map_list_of

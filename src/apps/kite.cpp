@@ -28,11 +28,12 @@
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
+#include <stdlib/language/kite.h>
 #include <sys/stat.h>
 #include <parser/parser.h>
+#include <stdlib/System/dynamic_object.h>
 #include <codegen/syntax_tree_printer.h>
 #include <codegen/llvm_node_codegen.h>
-#include <stdlib/System/dynamic_object.h>
 #include <llvm/LLVMContext.h>
 #include <llvm/Target/TargetSelect.h>
 #include <llvm/Bitcode/ReaderWriter.h>
@@ -50,6 +51,7 @@
 using namespace llvm;
 using namespace kite;
 using namespace std;
+using namespace kite::stdlib;
 
 void usage(char *app_name)
 {
@@ -96,17 +98,11 @@ int main(int argc, char **argv)
     argc -= optind;
     argv += optind;
          
-    InitializeNativeTarget();
-    llvm_start_multithreaded();
+    language::kite::InitializeRuntimeSystem();
     
     string storage = "";
     char buf[1024];
     semantics::syntax_tree ast;
-    //string storage = "x = 0; while (x < 100) [ x = x + 1; decide [ (x < 10) [ (x - 100)|print; ], true [ x|print; ] ] ]";
-    //string storage = "x = 41|int; y = 1|int; (x + y)|print;";
-    //string storage = "x = 1; while (x > 0) [ x = x - 1; decide [ (x == 1) [ (x)|print; ], true [ 0|print; ] ] ]";
-    //string storage = "x = 1; (x)|print;";
-    //string storage = "(1 or 2 or 3)|print;";
     
     bool bypass_parse = false;
     std::string fileNameCompiled;

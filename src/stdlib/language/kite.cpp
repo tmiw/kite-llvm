@@ -29,6 +29,7 @@
 
 #include <parser/parser.h>
 #include <stdlib/System/dynamic_object.h>
+#include <stdlib/System/exceptions/exception.h>
 #include <codegen/syntax_tree_printer.h>
 #include <codegen/llvm_node_codegen.h>
 #include <llvm/LLVMContext.h>
@@ -58,7 +59,9 @@ namespace kite
                 codegen::llvm_compile_state kite::state;
                 ExecutionEngine *kite::execution_engine = NULL;
                 bool kite::enable_optimizer = false;
-
+                std::vector<jmp_buf*> kite::exception_stack;
+                System::dynamic_object *kite::last_exception = NULL;
+                
                 void kite::InitializeRuntimeSystem()
                 {
                     InitializeNativeTarget();
@@ -68,6 +71,14 @@ namespace kite
                     root_object = new System::dynamic_object();
                     state.push_module(current_module);
                     execution_engine = EngineBuilder(current_module).create();
+                    
+                    // TODO
+                    System::dynamic_object *system_obj = new System::dynamic_object();
+                    System::dynamic_object *exceptions_obj = new System::dynamic_object();
+                    root_object->properties["System"] = system_obj;
+                    system_obj->properties["exceptions"] = exceptions_obj;
+                    exceptions_obj->properties["exception"] = &System::exceptions::exception::class_object;
+                    System::exceptions::exception::InitializeClass();
                 }
 
                 System::object *kite::ExecuteCode(syntax_tree &ast)
@@ -103,6 +114,7 @@ namespace kite
                         FPM.run(*function);
                     }
 
+                    //current_module->dump();
                     void *fptr = execution_engine->getPointerToFunction(function);
                     System::object *(*FP)(System::object *) = (System::object*(*)(System::object*))fptr;
                     return (*FP)(context);

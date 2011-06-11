@@ -30,6 +30,7 @@
 #include <stdlib/language/kite.h>
 #include <stdlib/language/kite/syntax_tree.h>
 #include <stdlib/System/dynamic_object.h>
+#include <stdlib/System/exceptions/exception.h>
 using namespace kite;
 using namespace std;
 using namespace kite::stdlib;
@@ -89,9 +90,14 @@ int main(int argc, char **argv)
             }
             else
             {
-                System::object *retValue = language::kite::kite::ExecuteCode(ast);
-                cout << "---> ";
-                retValue->print();
+                KITE_EXCEPTION_RUN
+                    System::object *retValue = language::kite::kite::ExecuteCode(ast);
+                    cout << "---> ";
+                    retValue->print();
+                KITE_EXCEPTION_CATCH
+                    cout << "Exception thrown: ";
+                    language::kite::kite::last_exception->properties["message"]->print();
+                KITE_EXCEPTION_END
             }
         }
     }

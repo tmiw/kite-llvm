@@ -25,6 +25,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include <setjmp.h>
 #include <boost/foreach.hpp>
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/get.hpp>
@@ -175,6 +176,9 @@ namespace kite
                     break;
                 case semantics::MAKE:
                     ret = codegen_make_op(tree);
+                    break;
+                case semantics::RUN_CATCH:
+                    ret = codegen_run_catch_op(tree);
                     break;
             }
             
@@ -524,6 +528,90 @@ namespace kite
             //return ConstantInt::get(getGlobalContext(), APInt(32, 0, true)); // TODO
         }
         
+        Value *llvm_node_codegen::codegen_run_catch_op(semantics::syntax_tree const &tree) const
+        {
+            Module *module = state.current_module();
+            IRBuilder<> &builder = state.module_builder();
+            BasicBlock *currentBB = builder.GetInsertBlock();
+            Function *currentFunc = currentBB->getParent();
+            BasicBlock *run_block = BasicBlock::Create(getGlobalContext(), "run_block", currentFunc);
+            BasicBlock *catch_block = BasicBlock::Create(getGlobalContext(), "catch_block", currentFunc);
+            BasicBlock *end_block = BasicBlock::Create(getGlobalContext(), "end_block", currentFunc);
+            
+            // Create jump point
+            //Value *default_val = ConstantInt::get(Type::getInt32Ty(getGlobalContext()), 0); // TODO
+            
+            Value *jmpbuf = builder.CreateAlloca(Type::getInt8Ty(getGlobalContext()), ConstantInt::get(Type::getInt32Ty(getGlobalContext()), sizeof(jmp_buf)));
+            std::vector<const Type*> setjmp_params;
+            setjmp_params.push_back(jmpbuf->getType());
+            const FunctionType *setjmp_type = FunctionType::get(Type::getInt32Ty(getGlobalContext()), setjmp_params, false);
+            Function *setjmp_fun = Function::Create(setjmp_type, Function::ExternalLinkage, "setjmp", module);
+            if (setjmp_fun->getName() != "setjmp")
+            {
+                setjmp_fun->eraseFromParent();
+                setjmp_fun = module->getFunction("setjmp");
+            }
+            Value *setjmp_ret = builder.CreateCall(setjmp_fun, jmpbuf);
+            Value *setjmp_jumped = builder.CreateICmpEQ(setjmp_ret, ConstantInt::get(Type::getInt32Ty(getGlobalContext()), 1));
+            builder.CreateCondBr(setjmp_jumped, catch_block, run_block);
+            
+            // Create run block
+            builder.SetInsertPoint(run_block);
+            const FunctionType *pushjmp_type = FunctionType::get(Type::getVoidTy(getGlobalContext()), setjmp_params, false);
+            Function *pushjmp_fun = Function::Create(pushjmp_type, Function::ExternalLinkage, "kite_exception_stack_push", module);
+            if (pushjmp_fun->getName() != "kite_exception_stack_push")
+            {
+                pushjmp_fun->eraseFromParent();
+                pushjmp_fun = module->getFunction("kite_exception_stack_push");
+            }
+            builder.CreateCall(pushjmp_fun, jmpbuf);
+            Value *run_ret = boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
+            std::vector<Value*> runRetList;
+            runRetList.push_back(run_ret);
+            run_ret = generate_llvm_method_call(run_ret, "obj", runRetList);
+            builder.CreateBr(end_block);
+            
+            // Create catch block
+            builder.SetInsertPoint(catch_block);
+            std::map<std::string, Value*> &sym_stack = state.current_symbol_stack();
+            std::vector<const Type*> get_exc_params;
+            const FunctionType *get_exc_type = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), get_exc_params, false);
+            Function *get_exc_fun = Function::Create(get_exc_type, Function::ExternalLinkage, "kite_exception_get", module);
+            if (get_exc_fun->getName() != "kite_exception_get")
+            {
+                get_exc_fun->eraseFromParent();
+                get_exc_fun = module->getFunction("kite_exception_get");
+            }
+            sym_stack["__exc"] = builder.CreateAlloca(kite_type_to_llvm_type(semantics::OBJECT));
+            builder.CreateStore(builder.CreateCall(get_exc_fun), sym_stack["__exc"]);
+            Value *catch_ret = boost::apply_visitor(llvm_node_codegen(state), tree.children[1]);
+            std::vector<Value*> catchRetList;
+            catchRetList.push_back(catch_ret);
+            catch_ret = generate_llvm_method_call(catch_ret, "obj", catchRetList);
+            builder.CreateBr(end_block);
+            sym_stack.erase("__exc");
+            
+            // Create cleanup block
+            builder.SetInsertPoint(end_block);
+            PHINode *phi = builder.CreatePHI(kite_type_to_llvm_type(semantics::OBJECT));
+            phi->addIncoming(run_ret, run_block);
+            phi->addIncoming(catch_ret, catch_block);
+            //phi->addIncoming(default_val, currentBB);
+            builder.SetInsertPoint(end_block);
+            std::vector<const Type*> pop_exc_params;
+            const FunctionType *pop_exc_type = FunctionType::get(Type::getVoidTy(getGlobalContext()), pop_exc_params, false);
+            Function *pop_exc_fun = Function::Create(pop_exc_type, Function::ExternalLinkage, "kite_exception_stack_pop", module);
+            if (pop_exc_fun->getName() != "kite_exception_stack_pop")
+            {
+                pop_exc_fun->eraseFromParent();
+                pop_exc_fun = module->getFunction("kite_exception_stack_pop");
+            }
+            builder.CreateCall(pop_exc_fun);
+            
+            // Return result.
+            return phi;
+        }
+        
         Value *llvm_node_codegen::codegen_method_op(semantics::syntax_tree const &tree) const
         {
             IRBuilder<> &builder = state.module_builder();
@@ -779,6 +867,7 @@ namespace kite
             {
                 params.push_back(boost::apply_visitor(llvm_node_codegen(state), tree.children[i]));
             }
+            
             generate_llvm_method_call(obj, "__init__", params);
             return obj;
         }
@@ -816,6 +905,12 @@ namespace kite
                 funPtr->eraseFromParent();
                 funPtr = module->getFunction("kite_dynamic_object_set_parent");
             }
+            
+            if (parent->getType() == PointerType::getUnqual(parameterTypes[0]))
+            {
+                parent = builder.CreateLoad(parent);
+            }
+            
             builder.CreateCall2(funPtr, obj, parent);
         }
         
@@ -852,6 +947,11 @@ namespace kite
             {
                 funPtr->eraseFromParent();
                 funPtr = module->getFunction("kite_dynamic_object_get_property");
+            }
+            
+            if (obj->getType() == PointerType::getUnqual(parameterTypes[0]))
+            {
+                obj = builder.CreateLoad(obj);
             }
             return builder.CreateCall2(funPtr, obj, builder.CreateGlobalStringPtr(name.c_str()));
         }

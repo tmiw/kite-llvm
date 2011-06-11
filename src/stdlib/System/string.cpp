@@ -47,12 +47,14 @@ namespace kite
                 ("lower__s", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(lower__s))))
                 ("ltrim__s", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(ltrim__s))))
                 ("print__s", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(print__s))))
+                ("print__o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_STRING_METHOD_NAME(print__o))))
                 ("rtrim__s", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(rtrim__s))))
                 ("str__s", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(str__s))))
                 ("trim__s", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(trim__s))))
                 ("upper__s", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(upper__s))))
-                ("obj__s", function_semantics(semantics::OBJECT, (void*)&(PREFIX_STRING_METHOD_NAME(obj__s))));
-                
+                ("obj__s", function_semantics(semantics::OBJECT, (void*)&(PREFIX_STRING_METHOD_NAME(obj__s))))
+                ("obj__o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_STRING_METHOD_NAME(obj__o))));
+                                
             int string::asc()
             {
                 return PREFIX_STRING_METHOD_NAME(asc__s)(string_val.c_str());
@@ -131,6 +133,8 @@ namespace kite
     }
 }
 
+using namespace kite::stdlib;
+
 int PREFIX_STRING_METHOD_NAME(asc__s)(const char *val)
 {
     return *val;
@@ -199,10 +203,22 @@ void* PREFIX_STRING_METHOD_NAME(obj__s)(const char *val)
     return (void*)(new kite::stdlib::System::string(val));
 }
 
+void* PREFIX_STRING_METHOD_NAME(obj__o)(void *val)
+{
+    return val;
+}
+
 char* PREFIX_STRING_METHOD_NAME(print__s)(const char *val)
 {
     std::cout << val << std::endl;
     return const_cast<char*>(val);
+}
+
+void* PREFIX_STRING_METHOD_NAME(print__o)(void *val)
+{
+    System::string *stringObj = (System::string*)val;
+    std::cout << stringObj->string_val << std::endl;
+    return val;
 }
 
 char* PREFIX_STRING_METHOD_NAME(rtrim__s)(const char *val)

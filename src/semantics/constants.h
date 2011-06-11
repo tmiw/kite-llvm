@@ -80,6 +80,7 @@ namespace kite
             METHOD,
             CLASS,
             MAKE,
+            RUN_CATCH,
         };
     }
 }

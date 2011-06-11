@@ -45,6 +45,8 @@ namespace kite
                     - lit("until")
                     - lit("true")
                     - lit("make")
+                    - lit("run")
+                    - lit("catch")
                     - lit("false")); // [ _val = _1 ];
         }
         

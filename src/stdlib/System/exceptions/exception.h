@@ -25,51 +25,68 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
  
-#ifndef KITE_STDLIB__LANGUAGE__KITE_H
-#define KITE_STDLIB__LANGUAGE__KITE_H
+#ifndef KITE_STDLIB__SYSTEM__EXCEPTIONS__EXCEPTION_H
+#define KITE_STDLIB__SYSTEM__EXCEPTIONS__EXCEPTION_H
 
 #include <setjmp.h>
-#include <map>
+#include <string>
 #include <stdlib/System/dynamic_object.h>
-#include <codegen/llvm_compile_state.h>
-#include <stdlib/language/kite/syntax_tree.h>
-
-namespace llvm
-{
-    class Module;
-    class ExecutionEngine;
-}
+#include <stdlib/System/string.h>
 
 namespace kite
 {
     namespace stdlib
     {
-        namespace language
+        namespace System
         {
-            namespace kite
+            namespace exceptions
             {
-                struct kite : System::dynamic_object
+                struct exception : System::dynamic_object
                 {
-                    static System::dynamic_object *root() { return root_object; }
-
-                    static void InitializeRuntimeSystem();
-                    static System::object *ExecuteCode(syntax_tree &ast, System::object *context);
-                    static System::object *ExecuteCode(syntax_tree &ast);
-                    static void DumpCompiledCode();
-
-                    static bool enable_optimizer;
-                    static std::vector<jmp_buf*> exception_stack;
-                    static System::dynamic_object *last_exception;
+                    static System::dynamic_object class_object;
                     
-                    private:
-                        static llvm::Module *current_module;
-                        static System::dynamic_object *root_object;
-                        static codegen::llvm_compile_state state;
-                        static ExecutionEngine *execution_engine;
+                    exception(std::string message = "Exception thrown")
+                        : System::dynamic_object(&class_object) 
+                    {
+                        initialize();
+                    }
+                        
+                    void throw_exception();
+                    void initialize(std::string message = "Exception thrown")
+                    {
+                        properties["message"] = new System::string(message);
+                    }
+                    
+                    static void InitializeClass();
                 };
             }
         }
     }
+}
+
+#define KITE_EXCEPTION_RUN \
+    { \
+        jmp_buf __exc_buf; \
+        if (setjmp(__exc_buf) == 0) \
+        { \
+            kite_exception_stack_push(&__exc_buf);
+#define KITE_EXCEPTION_CATCH \
+        } \
+        else \
+        { 
+#define KITE_EXCEPTION_END \
+        } \
+        kite_exception_stack_pop(); \
+    }
+#define KITE_EXCEPTION_RETURN(val) kite_exception_stack_pop(); return val
+
+extern "C"
+{
+    void kite_exception_stack_push(jmp_buf *);
+    void kite_exception_stack_pop();
+    void *kite_exception_get();
+    void *kite_exception_throw(void *exc);
+    void *kite_exception_init(void *exc);
 }
 
 #endif

@@ -72,6 +72,7 @@ namespace kite
                 initialize_decide_rules();
                 initialize_method_rules();
                 initialize_class_rules();
+                initialize_exception_rules();
                 initialize_statement_rules();
             }
             
@@ -103,6 +104,7 @@ namespace kite
             qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> deref_method_mandatory_params;
             qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> deref_array_statement;
             qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> make_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> exception_statement;
             qi::rule<Iterator, std::string(), ascii::space_type> identifier;
             qi::rule<Iterator, semantics::syntax_tree_node(), ascii::space_type> numeric_value;
             qi::rule<Iterator, std::string()> unesc_str;
@@ -122,6 +124,7 @@ namespace kite
             void initialize_decide_rules();
             void initialize_method_rules();
             void initialize_class_rules();
+            void initialize_exception_rules();
             void initialize_statement_rules();
         };
     }

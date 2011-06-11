@@ -24,52 +24,75 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
- 
-#ifndef KITE_STDLIB__LANGUAGE__KITE_H
-#define KITE_STDLIB__LANGUAGE__KITE_H
 
-#include <setjmp.h>
-#include <map>
-#include <stdlib/System/dynamic_object.h>
-#include <codegen/llvm_compile_state.h>
-#include <stdlib/language/kite/syntax_tree.h>
-
-namespace llvm
-{
-    class Module;
-    class ExecutionEngine;
-}
+#include <stdlib/language/kite.h> 
+#include "exception.h"
 
 namespace kite
 {
     namespace stdlib
     {
-        namespace language
+        namespace System
         {
-            namespace kite
+            namespace exceptions
             {
-                struct kite : System::dynamic_object
+                System::dynamic_object exception::class_object;
+                
+                void exception::throw_exception()
                 {
-                    static System::dynamic_object *root() { return root_object; }
-
-                    static void InitializeRuntimeSystem();
-                    static System::object *ExecuteCode(syntax_tree &ast, System::object *context);
-                    static System::object *ExecuteCode(syntax_tree &ast);
-                    static void DumpCompiledCode();
-
-                    static bool enable_optimizer;
-                    static std::vector<jmp_buf*> exception_stack;
-                    static System::dynamic_object *last_exception;
-                    
-                    private:
-                        static llvm::Module *current_module;
-                        static System::dynamic_object *root_object;
-                        static codegen::llvm_compile_state state;
-                        static ExecutionEngine *execution_engine;
-                };
+                    if (language::kite::kite::exception_stack.size() > 0)
+                    {
+                        language::kite::kite::last_exception = this;
+                        longjmp(*language::kite::kite::exception_stack.back(), 1);
+                    }
+                    else
+                    {
+                        // TODO
+                        properties["message"]->print();
+                        exit(-1);
+                    }
+                }
+                
+                void exception::InitializeClass()
+                {
+                    class_object.properties["throw__o"] =
+                        new System::method((void*)kite_exception_throw);
+                    class_object.properties["__init____o"] =
+                        new System::method((void*)kite_exception_init);
+                }
             }
         }
     }
 }
 
-#endif
+using namespace kite::stdlib;
+
+void *kite_exception_get()
+{
+    return (void*)language::kite::kite::last_exception;
+}
+
+void *kite_exception_init(void *exc)
+{
+    System::exceptions::exception *exception = (System::exceptions::exception*)exc;
+    exception->initialize();
+    return exc;
+}
+
+void *kite_exception_throw(void *exc)
+{
+    System::exceptions::exception *exception = (System::exceptions::exception*)exc;
+    exception->throw_exception();
+    return NULL;
+}
+
+void kite_exception_stack_push(jmp_buf *buf)
+{
+    language::kite::kite::exception_stack.push_back(buf);
+}
+
+void kite_exception_stack_pop()
+{
+    language::kite::kite::exception_stack.pop_back();
+    language::kite::kite::last_exception = NULL;
+}

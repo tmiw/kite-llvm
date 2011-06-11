@@ -44,6 +44,7 @@
 #include "method.cpp"
 #include "statement.cpp"
 #include "make.cpp"
+#include "exceptions.cpp"
 
 using namespace std;
  

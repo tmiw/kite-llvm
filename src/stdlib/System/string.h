@@ -80,6 +80,8 @@ extern "C"
     char* PREFIX_STRING_METHOD_NAME(lower__s)(const char *val);
     char* PREFIX_STRING_METHOD_NAME(ltrim__s)(const char *val);
     void* PREFIX_STRING_METHOD_NAME(obj__s)(const char *val);
+    void* PREFIX_STRING_METHOD_NAME(obj__o)(void *val);
+    void* PREFIX_STRING_METHOD_NAME(print__o)(void *val);
     char* PREFIX_STRING_METHOD_NAME(print__s)(const char *val);
     char* PREFIX_STRING_METHOD_NAME(rtrim__s)(const char *val);
     char* PREFIX_STRING_METHOD_NAME(str__s)(const char *val);

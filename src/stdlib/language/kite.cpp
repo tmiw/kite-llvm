@@ -27,16 +27,13 @@
 
 #include "kite.h"
 
-#include <sys/stat.h>
 #include <parser/parser.h>
 #include <stdlib/System/dynamic_object.h>
 #include <codegen/syntax_tree_printer.h>
 #include <codegen/llvm_node_codegen.h>
 #include <llvm/LLVMContext.h>
 #include <llvm/Target/TargetSelect.h>
-#include <llvm/Bitcode/ReaderWriter.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
-//#include <llvm/ModuleProvider.h>
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/ExecutionEngine/JIT.h>
 #include <llvm/PassManager.h>
@@ -54,11 +51,85 @@ namespace kite
     {
         namespace language
         {
-            void kite::InitializeRuntimeSystem()
+            namespace kite
             {
-                InitializeNativeTarget();
-                llvm_start_multithreaded();
+                Module *kite::current_module = NULL;
+                System::dynamic_object *kite::root_object = NULL;
+                codegen::llvm_compile_state kite::state;
+                ExecutionEngine *kite::execution_engine = NULL;
+                bool kite::enable_optimizer = false;
+
+                void kite::InitializeRuntimeSystem()
+                {
+                    InitializeNativeTarget();
+                    llvm_start_multithreaded();
+
+                    current_module = new Module("__root_module", getGlobalContext());
+                    root_object = new System::dynamic_object();
+                    state.push_module(current_module);
+                    execution_engine = EngineBuilder(current_module).create();
+                }
+
+                System::object *kite::ExecuteCode(syntax_tree &ast)
+                {
+                    return ExecuteCode(ast, root_object);
+                }
+
+                System::object *kite::ExecuteCode(syntax_tree &ast, System::object *context)
+                {
+                    codegen::llvm_node_codegen cg(state);
+                    std::vector<std::string> argNames;
+                    Function *function = (Function*)cg.generate_llvm_method("__static_init__", argNames, ast.ast);
+
+                    if (enable_optimizer)
+                    {
+                        FunctionPassManager FPM(current_module);
+
+                        // Set up the optimizer pipeline.  Start with registering info about how the
+                        // target lays out data structures.
+                        FPM.add(new TargetData(*execution_engine->getTargetData()));
+                        // Provide basic AliasAnalysis support for GVN.
+                        FPM.add(createBasicAliasAnalysisPass());
+                        // Do simple "peephole" optimizations and bit-twiddling optzns.
+                        FPM.add(createInstructionCombiningPass());
+                        // Reassociate expressions.
+                        FPM.add(createReassociatePass());
+                        // Eliminate Common SubExpressions.
+                        FPM.add(createGVNPass());
+                        // Simplify the control flow graph (deleting unreachable blocks, etc).
+                        FPM.add(createCFGSimplificationPass());
+
+                        FPM.doInitialization();
+                        FPM.run(*function);
+                    }
+
+                    void *fptr = execution_engine->getPointerToFunction(function);
+                    System::object *(*FP)(System::object *) = (System::object*(*)(System::object*))fptr;
+                    return (*FP)(context);
+                }
+
+                void kite::DumpCompiledCode()
+                {
+                    current_module->dump();
+                }
             }
         }
     }
 }
+
+#if 0
+            // bitcode caching disabled for now.
+            if (fileNameCompiled.size() > 0)
+            {
+                raw_fd_ostream os(fileNameCompiled.c_str(), errorInfo);
+                WriteBitcodeToFile(currentModule, os);
+                os.close();
+            }
+
+            {
+                std::string error;
+                currentModule = ParseBitcodeFile(MemoryBuffer::getFile(fileNameCompiled.c_str()), context, &error);
+                engine = EngineBuilder(currentModule).create();
+                F = engine->FindFunctionNamed("__static_init____o");
+            }
+#endif

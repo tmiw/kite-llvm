@@ -25,28 +25,52 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <iostream>
-#include "method.h"
+#include "syntax_tree.h"
 
-using namespace kite::stdlib;
+#include <fstream>
+#include <parser/parser.h>
+#include <stdlib/System/dynamic_object.h>
+#include <codegen/syntax_tree_printer.h>
 
 namespace kite
 {
-     namespace stdlib
-     {
-        namespace System
+    namespace stdlib
+    {
+        namespace language
         {
-            System::method *method::print()
+            namespace kite
             {
-                std::cout << "method" << std::endl;
-                return this;
+                bool syntax_tree::from_file(std::string file)
+                {
+                    std::ifstream stream(file.c_str());
+                    return from_stream(stream);
+                }
+
+                bool syntax_tree::from_stream(std::istream &stream)
+                {
+                    char buf[1024];
+                    std::string storage;
+
+                    while (!stream.eof())
+                    {
+                        stream.getline(buf, 1024);
+                        storage += buf;
+                    }
+
+                    return from_string(storage);
+                }
+
+                bool syntax_tree::from_string(std::string &code)
+                {
+                    return parser::kite_parser().parse(code, ast);
+                }
+
+                void syntax_tree::print()
+                {
+                    codegen::syntax_tree_printer printer;
+                    printer(ast);
+                }
             }
         }
     }
-}
-
-void *kite_method_alloc(void *method_ptr)
-{
-    System::method *method = new System::method(method_ptr);
-    return (void*)method;
 }

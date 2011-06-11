@@ -417,16 +417,8 @@ namespace kite
                 {
                     if (lhs->getType() != rhs->getType())
                     {
-                        //if (lhs->getType() != kite_type_to_llvm_type(semantics::OBJECT))
-                        //{
-                            sym_stack[i->first] = state.module_builder().CreateAlloca(rhs->getType());
-                            ptr = sym_stack[i->first];
-                        /*}
-                        else
-                        {
-                            std::vector<Value*> params;
-                            rhs = generate_llvm_method_call(rhs, "obj", params);
-                        }*/
+                        sym_stack[i->first] = state.module_builder().CreateAlloca(rhs->getType());
+                        ptr = sym_stack[i->first];
                     }
                     state.module_builder().CreateStore(rhs, ptr);
                     return rhs;
@@ -435,6 +427,12 @@ namespace kite
             
             // Else, just a simple store into a property.
             // TODO
+            if (rhs->getType() != kite_type_to_llvm_type(semantics::OBJECT))
+            {
+                std::vector<Value*> params;
+                params.push_back(rhs);
+                rhs = generate_llvm_method_call(rhs, "obj", params);
+            }
             state.module_builder().CreateStore(rhs, lhs);
             return rhs;
         }
@@ -600,7 +598,11 @@ namespace kite
             Value *ret = llvm_node_codegen(state)(body);
             state.pop_symbol_stack();
             
-            if (get_type(ret) != semantics::OBJECT)
+            if (ret->getType() == PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)))
+            {
+                ret = builder.CreateLoad(ret);
+            }
+            else if (get_type(ret) != semantics::OBJECT)
             {
                 std::vector<Value*> params;
                 params.push_back(ret);

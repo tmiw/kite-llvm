@@ -26,27 +26,75 @@
  ****************************************************************************/
 
 #include <iostream>
-#include "method.h"
-
+#include <cstdio>
+#include <stdlib/language/kite.h>
+#include <stdlib/language/kite/syntax_tree.h>
+#include <stdlib/System/dynamic_object.h>
+using namespace kite;
+using namespace std;
 using namespace kite::stdlib;
 
-namespace kite
+void usage(char *app_name)
 {
-     namespace stdlib
-     {
-        namespace System
+    printf("Usage: %s [-hd]\n", app_name);
+    printf("       -h: this message\n");
+    printf("       -o: optimize compiled code\n");
+    exit(0);
+}
+
+int main(int argc, char **argv)
+{
+    int ch;
+    bool optimize_code = false;
+    
+    while ((ch = getopt(argc, argv, "ho")) != -1)
+    {
+        switch(ch)
         {
-            System::method *method::print()
+            case 'o':
+                optimize_code = true;
+                break;
+            case 'h':
+            default:
+                usage(argv[0]);
+        }
+    }
+    
+    argc -= optind;
+    argv += optind;
+         
+    language::kite::kite::InitializeRuntimeSystem();
+    language::kite::kite::enable_optimizer = optimize_code;
+
+    cout << "Interactive Kite console" << endl;
+    
+    while(!cin.eof())
+    {
+        char buf[1024];
+        string code;
+
+        cout << "ikt> ";
+        cin.getline(buf, 1024);
+        code = buf;
+
+        if (code.size() > 0)
+        {
+            bool r;
+            language::kite::syntax_tree ast; 
+            r = ast.from_string(code);
+
+            if (!r)
             {
-                std::cout << "method" << std::endl;
-                return this;
+                cout << "Parse failed!" << endl;
+            }
+            else
+            {
+                System::object *retValue = language::kite::kite::ExecuteCode(ast);
+                cout << "---> ";
+                retValue->print();
             }
         }
     }
-}
 
-void *kite_method_alloc(void *method_ptr)
-{
-    System::method *method = new System::method(method_ptr);
-    return (void*)method;
+    return 0;
 }

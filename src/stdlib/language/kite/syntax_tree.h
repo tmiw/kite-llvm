@@ -24,29 +24,34 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
+ 
+#ifndef KITE_STDLIB__LANGUAGE__KITE__SYNTAX_TREE_H
+#define KITE_STDLIB__LANGUAGE__KITE__SYNTAX_TREE_H
 
 #include <iostream>
-#include "method.h"
-
-using namespace kite::stdlib;
+#include <stdlib/System/dynamic_object.h>
+#include <semantics/syntax_tree.h>
 
 namespace kite
 {
-     namespace stdlib
-     {
-        namespace System
+    namespace stdlib
+    {
+        namespace language
         {
-            System::method *method::print()
+            namespace kite
             {
-                std::cout << "method" << std::endl;
-                return this;
+                struct syntax_tree : System::dynamic_object
+                {
+                    semantics::syntax_tree ast;
+
+                    bool from_file(std::string file);
+                    bool from_stream(std::istream &stream);
+                    bool from_string(std::string &code);
+                    void print();
+                };
             }
         }
     }
 }
 
-void *kite_method_alloc(void *method_ptr)
-{
-    System::method *method = new System::method(method_ptr);
-    return (void*)method;
-}
+#endif

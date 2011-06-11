@@ -55,6 +55,32 @@ namespace kite
 
 using namespace kite::stdlib;
 
+void System::object::print()
+{
+    switch(type)
+    {
+        case semantics::INTEGER:
+            ((integer*)this)->print();
+            break;
+        case semantics::FLOAT:
+            ((fpnum*)this)->print();
+            break;
+        case semantics::BOOLEAN:
+            ((boolean*)this)->print();
+            break;
+        case semantics::STRING:
+            ((string*)this)->print();
+            break;
+        case semantics::METHOD_TY:
+            ((method*)this)->print();
+            break;
+        default:
+            std::cout << "object" << std::endl;
+            break;
+
+    }
+}
+
 int *kite_find_funccall(int *obj, char *name, int numargs)
 {
     System::object *obj_class = (System::object*)obj;

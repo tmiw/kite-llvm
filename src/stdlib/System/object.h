@@ -49,6 +49,8 @@ namespace kite
                 
                 object() : type(semantics::OBJECT) { }
                 object(semantics::builtin_types type) : type(type) { }
+
+                void print();
             };
         }
     }

@@ -45,6 +45,8 @@ namespace kite
                 {
                      // empty
                 }
+
+                method *print();
             };
         }
     }

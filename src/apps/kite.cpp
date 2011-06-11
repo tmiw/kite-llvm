@@ -26,41 +26,21 @@
  ****************************************************************************/
 
 #include <iostream>
-#include <fstream>
-#include <unistd.h>
+#include <cstdio>
 #include <stdlib/language/kite.h>
-#include <sys/stat.h>
-#include <parser/parser.h>
+#include <stdlib/language/kite/syntax_tree.h>
 #include <stdlib/System/dynamic_object.h>
-#include <codegen/syntax_tree_printer.h>
-#include <codegen/llvm_node_codegen.h>
-#include <llvm/LLVMContext.h>
-#include <llvm/Target/TargetSelect.h>
-#include <llvm/Bitcode/ReaderWriter.h>
-#include <llvm/ExecutionEngine/ExecutionEngine.h>
-//#include <llvm/ModuleProvider.h>
-#include <llvm/Support/MemoryBuffer.h>
-#include <llvm/ExecutionEngine/JIT.h>
-#include <llvm/PassManager.h>
-#include <llvm/Analysis/Verifier.h>
-#include <llvm/Analysis/Passes.h>
-#include <llvm/Target/TargetData.h>
-#include <llvm/Target/TargetSelect.h>
-#include <llvm/Transforms/Scalar.h>
-#include <llvm/Support/raw_ostream.h>
-using namespace llvm;
 using namespace kite;
 using namespace std;
 using namespace kite::stdlib;
 
 void usage(char *app_name)
 {
-    printf("Usage: %s [-haodx] [file]\n", app_name);
+    printf("Usage: %s [-haod] [file]\n", app_name);
     printf("       -h: this message\n");
     printf("       -a: output parse tree\n");
     printf("       -o: optimize compiled code\n");
     printf("       -d: dump compiled code to stdout\n");
-    printf("       -x: do not execute compiled code\n");
     printf("     file: the Kite file to execute (default: standard input)\n");
     exit(0);
 }
@@ -71,9 +51,8 @@ int main(int argc, char **argv)
     bool output_ast = false;
     bool optimize_code = false;
     bool dump_code = false;
-    bool inhibit_exec = false;
     
-    while ((ch = getopt(argc, argv, "haodx")) != -1)
+    while ((ch = getopt(argc, argv, "haod")) != -1)
     {
         switch(ch)
         {
@@ -86,9 +65,6 @@ int main(int argc, char **argv)
             case 'd':
                 dump_code = true;
                 break;
-            case 'x':
-                inhibit_exec = true;
-                break;
             case 'h':
             default:
                 usage(argv[0]);
@@ -98,128 +74,25 @@ int main(int argc, char **argv)
     argc -= optind;
     argv += optind;
          
-    language::kite::InitializeRuntimeSystem();
-    
-    string storage = "";
-    char buf[1024];
-    semantics::syntax_tree ast;
-    
-    bool bypass_parse = false;
-    std::string fileNameCompiled;
-    if (argc > 0)
-    {
-        struct stat compiledSt;
-        struct stat rawSt;
-        std::string fileName = argv[0];
-        fileNameCompiled = std::string(argv[0]) + std::string("o");
-        
-        if (stat(fileNameCompiled.c_str(), &compiledSt) == 0)
-        {
-            stat(fileName.c_str(), &rawSt);
-            if (rawSt.st_mtime <= compiledSt.st_mtime)
-            {
-                bypass_parse = true;
-            }
-        }
-        
-        if (bypass_parse == false)
-        {
-            std::ifstream handle(argv[0]);
-            while (!handle.eof())
-            {
-                handle.getline(buf, 1024);
-                storage += buf;
-            }
-            handle.close();
-        }
-    }
-    else
-    {
-        // Standard input.
-        while (!cin.eof())
-        {
-            cin.getline(buf, 1024);
-            storage += buf;
-        }
-    }
+    language::kite::kite::InitializeRuntimeSystem();
+    language::kite::kite::enable_optimizer = optimize_code;
+
     bool r;
+    language::kite::syntax_tree ast; 
     
-    if (bypass_parse == false) 
-        r = parser::kite_parser().parse(storage, ast);
-    else
-        r = bypass_parse;
-        
+    if (argc > 0) r = ast.from_file(argv[0]);
+    else r = ast.from_stream(cin);
+
     if (r)
     {
-        if (output_ast && !bypass_parse)
+        if (output_ast)
         {
-            codegen::syntax_tree_printer printer;
-            printer(ast);
+            ast.print();
         }
         
-        Module *currentModule;
-        LLVMContext &context = getGlobalContext();
-        ExecutionEngine *engine;
-        Function *F;
-        if (bypass_parse == false)
-        {
-            codegen::llvm_compile_state state;
-            state.push_module(new Module("__root_module", context));
-            currentModule = state.current_module();
+        language::kite::kite::ExecuteCode(ast); 
+        if (dump_code) language::kite::kite::DumpCompiledCode();
 
-            codegen::llvm_node_codegen cg(state);
-            std::vector<std::string> argNames;
-            F = (Function*)cg.generate_llvm_method("__static_init__", argNames, ast);
-            verifyFunction(*F);
-
-            engine = EngineBuilder(currentModule).create();
-            if (optimize_code)
-            {
-                FunctionPassManager OurFPM(currentModule);
-            
-                // Set up the optimizer pipeline.  Start with registering info about how the
-                // target lays out data structures.
-                OurFPM.add(new TargetData(*engine->getTargetData()));
-                // Provide basic AliasAnalysis support for GVN.
-                OurFPM.add(createBasicAliasAnalysisPass());
-                // Do simple "peephole" optimizations and bit-twiddling optzns.
-                OurFPM.add(createInstructionCombiningPass());
-                // Reassociate expressions.
-                OurFPM.add(createReassociatePass());
-                // Eliminate Common SubExpressions.
-                OurFPM.add(createGVNPass());
-                // Simplify the control flow graph (deleting unreachable blocks, etc).
-                OurFPM.add(createCFGSimplificationPass());
-
-                OurFPM.doInitialization();
-                OurFPM.run(*F);
-            }
-            
-            std::string errorInfo;
-            if (fileNameCompiled.size() > 0)
-            {
-                raw_fd_ostream os(fileNameCompiled.c_str(), errorInfo);
-                WriteBitcodeToFile(currentModule, os);
-                os.close();
-            }
-        }
-        else
-        {
-            std::string error;
-            currentModule = ParseBitcodeFile(MemoryBuffer::getFile(fileNameCompiled.c_str()), context, &error);
-            engine = EngineBuilder(currentModule).create();
-            F = engine->FindFunctionNamed("__static_init____o");
-        }
-        
-        if (dump_code) currentModule->dump();
-                
-        if (!inhibit_exec)
-        {
-            void *fptr = engine->getPointerToFunction(F);
-            void(*FP)(void*) = (void(*)(void*))fptr;
-            (*FP)((void*)kite_dynamic_object_alloc());
-        }
-        
         return 0;
     }
     else

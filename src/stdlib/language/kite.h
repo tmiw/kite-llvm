@@ -29,6 +29,14 @@
 #define KITE_STDLIB__LANGUAGE__KITE_H
 
 #include <stdlib/System/dynamic_object.h>
+#include <codegen/llvm_compile_state.h>
+#include <stdlib/language/kite/syntax_tree.h>
+
+namespace llvm
+{
+    class Module;
+    class ExecutionEngine;
+}
 
 namespace kite
 {
@@ -36,10 +44,26 @@ namespace kite
     {
         namespace language
         {
-            struct kite : System::dynamic_object
+            namespace kite
             {
-                static void InitializeRuntimeSystem();
-            };
+                struct kite : System::dynamic_object
+                {
+                    static System::dynamic_object *root() { return root_object; }
+
+                    static void InitializeRuntimeSystem();
+                    static System::object *ExecuteCode(syntax_tree &ast, System::object *context);
+                    static System::object *ExecuteCode(syntax_tree &ast);
+                    static void DumpCompiledCode();
+
+                    static bool enable_optimizer;
+
+                    private:
+                        static llvm::Module *current_module;
+                        static System::dynamic_object *root_object;
+                        static codegen::llvm_compile_state state;
+                        static ExecutionEngine *execution_engine;
+                };
+            }
         }
     }
 }

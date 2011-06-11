@@ -22,6 +22,19 @@ $ make
 $ make test
 $ 
 
+USAGE:
+------
+$ ./kite
+"hello world"|print;
+^D
+hello world
+$ ./ikt
+Interactive Kite console
+ikt> "hello world"|print;
+---> hello world
+ikt> ^D
+$
+
 MORE INFO:
 ----------
 http://www.kite-language.org/

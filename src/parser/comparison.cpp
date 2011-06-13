@@ -4,8 +4,8 @@ namespace kite
 {
     namespace parser
     {
-        template<typename T>
-        void kite_grammar<T>::initialize_comparison_rules()
+        template<typename T, typename U>
+        void kite_grammar<T, U>::initialize_comparison_rules()
         {
             using qi::lit;
             using qi::lexeme;
@@ -28,15 +28,16 @@ namespace kite
                    comparison_less_greater_statement [ _val = _1 ]
                 >> *(    (lit("==")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::EQUALS ] |
                           lit("!=")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::NOT_EQUALS ])
-                      >> comparison_less_greater_statement [ push_back(at_c<1>(_val), _1) ]);
+                      > comparison_less_greater_statement [ push_back(at_c<1>(_val), _1) ]);
                 
             comparison_less_greater_statement =
                    bit_shift_statement [ _val = _1 ]
-                >> *(    (lit("<")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::LESS_THAN ] |
+                >> *((
                           lit("<=")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::LESS_OR_EQUALS ] |
-                          lit(">")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::GREATER_THAN ] |
-                          lit(">=")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::GREATER_OR_EQUALS ])
-                      >> bit_shift_statement [ push_back(at_c<1>(_val), _1) ]);
+                          lit(">=")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::GREATER_OR_EQUALS ] |
+                          lit("<")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::LESS_THAN ] |
+                          lit(">")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::GREATER_THAN ])
+                      > bit_shift_statement [ push_back(at_c<1>(_val), _1) ]);
         }
         
         //kite_grammar<std::string::const_iterator> comparison_grammar;

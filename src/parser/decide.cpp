@@ -4,8 +4,8 @@ namespace kite
 {
     namespace parser
     {
-        template<typename T>
-        void kite_grammar<T>::initialize_decide_rules()
+        template<typename T, typename U>
+        void kite_grammar<T, U>::initialize_decide_rules()
         {
             using qi::lit;
             using qi::lexeme;
@@ -26,13 +26,13 @@ namespace kite
             
             decide_statement = 
                    lit("decide") [ at_c<0>(_val) = kite::semantics::DECIDE ]
-                >> '['
+                > '['
                 >>    ((
                         (
                           ('(' >> or_statement [ push_back(at_c<1>(_val), _1) ] >> ')') | 
                           lit("true") [ push_back(at_c<1>(_val), true) ]
                         )
-                >>     '[' >> start [ push_back(at_c<1>(_val), _1) ] >> ']') % ',')
+                >     '[' > start [ push_back(at_c<1>(_val), _1) ] >> ']') % ',')
                 >> ']';
         }
         

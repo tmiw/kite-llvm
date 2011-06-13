@@ -46,20 +46,52 @@
 #include "make.cpp"
 #include "exceptions.cpp"
 
+// for extended parse error messages
+#include <boost/spirit/include/support_multi_pass.hpp>
+#include <boost/spirit/include/classic_position_iterator.hpp>
+#include <iomanip>
+namespace classic = boost::spirit::classic;
+
 using namespace std;
  
 namespace kite
 {
     namespace parser
     {
-        bool kite_parser::parse(const std::string &code, semantics::syntax_tree &ast)
+        bool kite_parser::parse(std::istream &stream, semantics::syntax_tree &ast)
         {
-            kite_grammar<std::string::const_iterator> grammar;
-
             using boost::spirit::ascii::space;
-            string::const_iterator iter = code.begin();
-            string::const_iterator end = code.end();
-            return phrase_parse(iter, end, grammar, space, ast) && iter == end;
+            using boost::spirit::multi_pass;
+
+            std::istreambuf_iterator<char> stream_iter(stream);
+
+            typedef multi_pass<std::istreambuf_iterator<char> > forward_iterator_type;
+            forward_iterator_type fwd_begin =
+                boost::spirit::make_default_multi_pass(stream_iter);
+            forward_iterator_type fwd_end;
+
+            // wrap forward iterator with position iterator, to record the position
+            typedef classic::position_iterator2<forward_iterator_type> pos_iterator_type;
+            pos_iterator_type position_begin(fwd_begin, fwd_end, "(stdin)"); // TODO
+            pos_iterator_type position_end;
+
+#define KITE_SKIP_RULE space | ('#' >> *(ascii::char_ - qi::eol) >> qi::eol)
+            kite_grammar<pos_iterator_type, BOOST_TYPEOF(KITE_SKIP_RULE)> grammar;
+            try
+            {
+                bool r = phrase_parse(position_begin, position_end, grammar, KITE_SKIP_RULE, ast);
+                return r && position_begin == position_end;
+            }
+            catch (const qi::expectation_failure<pos_iterator_type> &e)
+            {
+                const classic::file_position_base<std::string>& pos =
+    e.first.get_position();
+                cerr << "parse error at file " << pos.file
+                     << "line " << pos.line << " column " << pos.column << std::endl
+                     << "'" << e.first.get_currentline() << "'" << std::endl
+                     << std::setw(pos.column) << " " << "^- here";
+                return false;
+            }
         }
     }
 }

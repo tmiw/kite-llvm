@@ -4,8 +4,8 @@ namespace kite
 {
     namespace parser
     {
-        template<typename T>
-        void kite_grammar<T>::initialize_deref_rules()
+        template<typename T, typename U>
+        void kite_grammar<T, U>::initialize_deref_rules()
         {
             using qi::lit;
             using qi::lexeme;
@@ -25,11 +25,11 @@ namespace kite
             using phoenix::front;
             
             deref_property_statement =
-                lit('.') [ at_c<0>(_val) = kite::semantics::DEREF_PROPERTY ] >>
+                lit('.') [ at_c<0>(_val) = kite::semantics::DEREF_PROPERTY ] >
                 identifier [ push_back(at_c<1>(_val), _1) ];
             
             deref_method_statement =
-                lit('|') [ at_c<0>(_val) = kite::semantics::DEREF_METHOD ] >>
+                lit('|') [ at_c<0>(_val) = kite::semantics::DEREF_METHOD ] >
                 identifier [ push_back(at_c<1>(_val), _1) ] >>
                 -(lit('(') >> -(or_statement [ push_back(at_c<1>(_val), _1) ] % ',') >> lit(')'));
             

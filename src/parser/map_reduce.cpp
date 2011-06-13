@@ -4,8 +4,8 @@ namespace kite
 {
     namespace parser
     {
-        template<typename T>
-        void kite_grammar<T>::initialize_map_reduce_rules()
+        template<typename T, typename U>
+        void kite_grammar<T, U>::initialize_map_reduce_rules()
         {
             using qi::lit;
             using qi::lexeme;
@@ -28,7 +28,7 @@ namespace kite
                 (    deref_filter_statement [ push_back(at_c<1>(_val), _1) ]
                   >> ((lit("<|") [ at_c<0>(_val) = kite::semantics::REDUCE ]) |
                       (lit("<-") [ at_c<0>(_val) = kite::semantics::MAP ]))
-                  >> deref_filter_statement [ push_back(at_c<1>(_val), _1) ])
+                  > deref_filter_statement [ push_back(at_c<1>(_val), _1) ])
                 | deref_filter_statement [ _val = _1 ];
         }
         

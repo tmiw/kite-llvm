@@ -28,7 +28,7 @@
 #ifndef KITE_PARSER__PARSER_H
 #define KITE_PARSER__PARSER_H
 
-#include <string>
+#include <iostream>
 #include <semantics/syntax_tree.h>
 
 namespace kite
@@ -38,7 +38,7 @@ namespace kite
         class kite_parser
         {
         public:
-            bool parse(const std::string &code, semantics::syntax_tree &ast);
+            bool parse(std::istream &stream, semantics::syntax_tree &ast);
         };
     }
 }

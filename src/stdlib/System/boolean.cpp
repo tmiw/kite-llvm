@@ -37,6 +37,7 @@ namespace kite
         namespace System
         {
             object_method_map boolean::method_map = map_list_of
+                ("__op_not____o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(__op_not____o))))
                 ("bool__b", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(bool__b))))
                 ("int__b", function_semantics(semantics::INTEGER, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(int__b))))
                 ("float__b", function_semantics(semantics::FLOAT, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(float__b))))
@@ -107,5 +108,11 @@ void *PREFIX_BOOLEAN_METHOD_NAME(print__o)(void *val)
 
 void *PREFIX_BOOLEAN_METHOD_NAME(obj__b)(bool val)
 {
-    return (void*)(new kite::stdlib::System::boolean(val));
+    return (void*)(new System::boolean(val));
+}
+
+void *PREFIX_BOOLEAN_METHOD_NAME(__op_not____o)(void *val)
+{
+    System::boolean *objVal = (System::boolean*)val;
+    return (void*)(new System::boolean(!objVal->val));
 }

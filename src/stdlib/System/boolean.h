@@ -60,6 +60,7 @@ namespace kite
 
 extern "C"
 {
+    void *PREFIX_BOOLEAN_METHOD_NAME(__op_not____o)(void *val);
     bool PREFIX_BOOLEAN_METHOD_NAME(bool__b)(bool val);
     int PREFIX_BOOLEAN_METHOD_NAME(int__b)(bool val);
     double PREFIX_BOOLEAN_METHOD_NAME(float__b)(bool val);

@@ -37,6 +37,7 @@ namespace kite
         namespace System
         {
             object_method_map fpnum::method_map = map_list_of
+                ("__op_not____o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_FLOAT_METHOD_NAME(__op_not____o))))
                 ("bool__f", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_FLOAT_METHOD_NAME(bool__f))))
                 ("int__f", function_semantics(semantics::INTEGER, (void*)&(PREFIX_FLOAT_METHOD_NAME(int__f))))
                 ("float__f", function_semantics(semantics::FLOAT, (void*)&(PREFIX_FLOAT_METHOD_NAME(float__f))))
@@ -71,6 +72,8 @@ namespace kite
     }
 }
 
+using namespace kite::stdlib;
+
 bool PREFIX_FLOAT_METHOD_NAME(bool__f)(double val)
 {
     return val != 0.0f;
@@ -94,5 +97,20 @@ double PREFIX_FLOAT_METHOD_NAME(print__f)(double val)
 
 void *PREFIX_FLOAT_METHOD_NAME(obj__f)(double val)
 {
-    return (void*)(new kite::stdlib::System::fpnum(val));
+    return (void*)(new System::fpnum(val));
+}
+
+void *PREFIX_FLOAT_METHOD_NAME(__op_not____o)(void *rhs)
+{
+    System::fpnum *rhsFloat = (System::fpnum*)rhs;
+    System::fpnum *ret;
+    if (rhsFloat->val == 0.0f)
+    {
+        ret = new System::fpnum(1.0f);
+    }
+    else
+    {
+        ret = new System::fpnum(0.0f);
+    }
+    return (void*)ret;
 }

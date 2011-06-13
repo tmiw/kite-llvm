@@ -266,7 +266,17 @@ namespace kite
         
         Value *llvm_node_codegen::codegen_unary_plus_op(semantics::syntax_tree const &tree) const
         {
-            return boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
+            Value *rhs = boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
+            switch(get_type(rhs))
+            {
+                case semantics::INTEGER:
+                case semantics::FLOAT:
+                    return rhs;
+                default:
+                    std::vector<Value*> params;
+                    params.push_back(rhs);
+                    return generate_llvm_method_call(rhs, operator_map[tree.op], params);
+            }
         }
         
         Value *llvm_node_codegen::codegen_unary_minus_op(semantics::syntax_tree const &tree) const
@@ -280,10 +290,16 @@ namespace kite
                 lhs = ConstantInt::get(getGlobalContext(), APInt(32, 0, true));
                 lhs = state.module_builder().CreateSub(lhs, rhs);
             }
-            else
+            else if (op_type == semantics::FLOAT)
             {
                 lhs = ConstantFP::get(getGlobalContext(), APFloat(0.0));
                 lhs = state.module_builder().CreateFSub(lhs, rhs);
+            }
+            else
+            {
+                std::vector<Value*> params;
+                params.push_back(rhs);
+                return generate_llvm_method_call(rhs, operator_map[tree.op], params);
             }
             
             return lhs;
@@ -292,7 +308,16 @@ namespace kite
         Value *llvm_node_codegen::codegen_not_op(semantics::syntax_tree const &tree) const
         {
             Value *rhs = boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
-            return state.module_builder().CreateNot(rhs);
+            switch(get_type(rhs))
+            {
+                case semantics::INTEGER:
+                case semantics::BOOLEAN:
+                    return state.module_builder().CreateNot(rhs);
+                default:
+                    std::vector<Value*> params;
+                    params.push_back(rhs);
+                    return generate_llvm_method_call(rhs, operator_map[tree.op], params);
+            }
         }
         
         Value *llvm_node_codegen::codegen_map_op(semantics::syntax_tree const &tree) const

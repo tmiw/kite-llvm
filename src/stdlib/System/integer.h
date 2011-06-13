@@ -72,6 +72,9 @@ extern "C"
     void *PREFIX_INTEGER_METHOD_NAME(obj__o)(void *val);
 
     void *PREFIX_INTEGER_METHOD_NAME(__op_lt____oo)(void *lhs, void *rhs);
+    void *PREFIX_INTEGER_METHOD_NAME(__op_not____o)(void *rhs);
+    void *PREFIX_INTEGER_METHOD_NAME(__op_unminus____o)(void *rhs);
+    void *PREFIX_INTEGER_METHOD_NAME(__op_unplus____o)(void *rhs);
 }
 
 #endif

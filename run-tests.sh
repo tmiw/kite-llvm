@@ -3,7 +3,7 @@
 num_pass=0
 num_fail=0
 
-for i in `find ./tests -name '*.kt' -print`; do
+for i in `find ./tests -name '*.kt' -print | sort`; do
     OUT_EXTENSION=".out"
     OUT_POSTFIX=":"
     /bin/echo -n "$i$OUT_POSTFIX "

@@ -39,6 +39,9 @@ namespace kite
         {
             object_method_map integer::method_map = map_list_of
                 ("__op_lt____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_lt____oo))))
+                ("__op_not____o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_not____o))))
+                ("__op_unminus____o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_unminus____o))))
+                ("__op_unplus____o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_unplus____o))))
                 ("bool__i", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_INTEGER_METHOD_NAME(bool__i))))
                 ("bool__o", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_INTEGER_METHOD_NAME(bool__o))))
                 ("int__i", function_semantics(semantics::INTEGER, (void*)&(PREFIX_INTEGER_METHOD_NAME(int__i))))
@@ -140,5 +143,23 @@ void *PREFIX_INTEGER_METHOD_NAME(obj__i)(int val)
 void *PREFIX_INTEGER_METHOD_NAME(obj__o)(void *val)
 {
     return val;
+}
+
+void *PREFIX_INTEGER_METHOD_NAME(__op_not____o)(void *rhs)
+{
+    System::integer *rhsInt = (System::integer*)rhs;
+    return (void*)(new kite::stdlib::System::integer(~rhsInt->val));
+}
+
+void *PREFIX_INTEGER_METHOD_NAME(__op_unminus____o)(void *rhs)
+{
+    System::integer *rhsInt = (System::integer*)rhs;
+    return (void*)(new kite::stdlib::System::integer(-rhsInt->val));
+}
+
+void *PREFIX_INTEGER_METHOD_NAME(__op_unplus____o)(void *rhs)
+{
+    System::integer *rhsInt = (System::integer*)rhs;
+    return (void*)(new kite::stdlib::System::integer(rhsInt->val));
 }
 

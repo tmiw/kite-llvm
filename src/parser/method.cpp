@@ -4,8 +4,8 @@ namespace kite
 {
     namespace parser
     {
-        template<typename T>
-        void kite_grammar<T>::initialize_method_rules()
+        template<typename T, typename U>
+        void kite_grammar<T, U>::initialize_method_rules()
         {
             using qi::lit;
             using qi::lexeme;
@@ -26,9 +26,9 @@ namespace kite
             
             method_statement =
                    lit("method") [ at_c<0>(_val) = kite::semantics::METHOD ]
-                >> identifier [ push_back(at_c<1>(_val), _1) ]
+                > identifier [ push_back(at_c<1>(_val), _1) ]
                 >> (lit('(') >> -(identifier [ push_back(at_c<1>(_val), _1) ] % ',') >> lit(')'))
-                >> '[' >> start [ push_back(at_c<1>(_val), _1) ] >> ']';
+                > '[' >> start [ push_back(at_c<1>(_val), _1) ] >> ']';
         }
         
         //kite_grammar<std::string::const_iterator> method_grammar;

@@ -27,6 +27,7 @@
 
 #include "syntax_tree.h"
 
+#include <sstream>
 #include <fstream>
 #include <parser/parser.h>
 #include <stdlib/System/dynamic_object.h>
@@ -48,21 +49,13 @@ namespace kite
 
                 bool syntax_tree::from_stream(std::istream &stream)
                 {
-                    char buf[1024];
-                    std::string storage;
-
-                    while (!stream.eof())
-                    {
-                        stream.getline(buf, 1024);
-                        storage += buf;
-                    }
-
-                    return from_string(storage);
+                    return parser::kite_parser().parse(stream, ast);
                 }
 
                 bool syntax_tree::from_string(std::string &code)
                 {
-                    return parser::kite_parser().parse(code, ast);
+                    std::istringstream stream(code.c_str());
+                    return from_stream(stream);
                 }
 
                 void syntax_tree::print()

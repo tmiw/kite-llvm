@@ -48,9 +48,9 @@ namespace kite
         namespace ascii = boost::spirit::ascii;
         namespace semantics = kite::semantics;
         
-        template<typename Iterator>
+        template<typename Iterator, typename SkipType>
         struct kite_grammar
-            : qi::grammar<Iterator, semantics::syntax_tree(), ascii::space_type>
+            : qi::grammar<Iterator, semantics::syntax_tree(), SkipType>
         {
             kite_grammar() : kite_grammar::base_type(start)
             {
@@ -76,37 +76,37 @@ namespace kite
                 initialize_statement_rules();
             }
             
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> start;
-            qi::rule<Iterator, semantics::syntax_tree_node(), ascii::space_type> statement;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> math_statement;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> method_statement;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> class_statement;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> loop_statement;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> decide_statement;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> const_statement;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> bit_shift_statement;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> multiply_divide_statement;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> add_subtract_statement;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> comparison_equals_statement;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> map_reduce_statement;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> assign_statement;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> or_statement;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> xor_statement;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> and_statement;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> comparison_less_greater_statement;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> unary_statement;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> grouping_statement;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> deref_filter_statement;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> deref_filter_only_statement;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> deref_types;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> deref_property_statement;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> deref_method_statement;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> deref_method_mandatory_params;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> deref_array_statement;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> make_statement;
-            qi::rule<Iterator, semantics::syntax_tree(), ascii::space_type> exception_statement;
-            qi::rule<Iterator, std::string(), ascii::space_type> identifier;
-            qi::rule<Iterator, semantics::syntax_tree_node(), ascii::space_type> numeric_value;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> start;
+            qi::rule<Iterator, semantics::syntax_tree_node(), SkipType> statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> math_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> method_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> class_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> loop_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> decide_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> const_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> bit_shift_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> multiply_divide_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> add_subtract_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> comparison_equals_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> map_reduce_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> assign_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> or_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> xor_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> and_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> comparison_less_greater_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> unary_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> grouping_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> deref_filter_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> deref_filter_only_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> deref_types;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> deref_property_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> deref_method_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> deref_method_mandatory_params;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> deref_array_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> make_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> exception_statement;
+            qi::rule<Iterator, std::string(), SkipType> identifier;
+            qi::rule<Iterator, semantics::syntax_tree_node(), SkipType> numeric_value;
             qi::rule<Iterator, std::string()> unesc_str;
             qi::symbols<char const, char const> unesc_char;
         

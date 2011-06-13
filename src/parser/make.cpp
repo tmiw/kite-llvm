@@ -4,8 +4,8 @@ namespace kite
 {
     namespace parser
     {
-        template<typename T>
-        void kite_grammar<T>::initialize_make_rules()
+        template<typename T, typename U>
+        void kite_grammar<T, U>::initialize_make_rules()
         {
             using qi::lit;
             using qi::lexeme;

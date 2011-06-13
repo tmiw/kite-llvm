@@ -45,6 +45,7 @@
 #include "statement.cpp"
 #include "make.cpp"
 #include "exceptions.cpp"
+#include "constructor.cpp"
 
 // for extended parse error messages
 #include <boost/spirit/include/support_multi_pass.hpp>
@@ -89,7 +90,7 @@ namespace kite
                 cerr << "parse error at file " << pos.file
                      << " line " << pos.line << " column " << pos.column << std::endl
                      << "'" << e.first.get_currentline() << "'" << std::endl
-                     << std::setw(pos.column) << " " << "^- here";
+                     << std::setw(pos.column) << " " << "^- here" << std::endl;
                 return false;
             }
         }

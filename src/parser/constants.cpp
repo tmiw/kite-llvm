@@ -47,6 +47,9 @@ namespace kite
                     - lit("make")
                     - lit("run")
                     - lit("catch")
+                    - lit("method")
+                    - lit("operator")
+                    - lit("construct")
                     - lit("false")); // [ _val = _1 ];
         }
         

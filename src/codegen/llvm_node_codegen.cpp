@@ -62,7 +62,8 @@ namespace kite
             (semantics::NOT, "__op_not__")
             (semantics::UNARY_PLUS, "__op_unplus__")
             (semantics::UNARY_MINUS, "__op_unminus__")
-            (semantics::XOR, "__op_xor__");
+            (semantics::XOR, "__op_xor__")
+            (semantics::CONSTRUCTOR, "__init__");
 
         static CodeOperationMap codegen_map = map_list_of
             (CodeOperationKey(semantics::ADD, semantics::INTEGER), &IRBuilder<>::CreateAdd)
@@ -179,6 +180,9 @@ namespace kite
                     break;
                 case semantics::RUN_CATCH:
                     ret = codegen_run_catch_op(tree);
+                    break;
+                case semantics::CONSTRUCTOR:
+                    ret = codegen_constructor_op(tree);
                     break;
             }
             
@@ -319,7 +323,7 @@ namespace kite
                     return generate_llvm_method_call(rhs, operator_map[tree.op], params);
             }
         }
-        
+
         Value *llvm_node_codegen::codegen_map_op(semantics::syntax_tree const &tree) const
         {
             // TODO
@@ -636,7 +640,36 @@ namespace kite
             // Return result.
             return phi;
         }
+
+        Value *llvm_node_codegen::codegen_constructor_op(semantics::syntax_tree const &tree) const
+        {
+            // TODO: refactor
+            IRBuilder<> &builder = state.module_builder();
+            int numargs = tree.children.size();
+            std::vector<std::string> argnames;
+            std::string functionName = operator_map[tree.op];
+            for (int i = 0; i < tree.children.size() - 1; i++)
+            {
+                argnames.push_back(boost::get<std::string>(tree.children[i]));
+            }
         
+            semantics::syntax_tree &body = const_cast<semantics::syntax_tree&>(boost::get<semantics::syntax_tree>(tree.children[tree.children.size() - 1]));
+            Value *method = generate_llvm_method(functionName, argnames, body);
+            
+            Value *method_obj = generate_llvm_method_alloc(method);
+            Value *property = builder.CreateLoad(state.current_symbol_stack()["this"]);
+            functionName += "__";
+            for (int i = 0; i < numargs; i++)
+            {
+               functionName += "o";
+            }
+            Value *prop_entry = generate_llvm_dynamic_object_get_property(property, functionName);
+            builder.CreateStore(method_obj, prop_entry);
+            
+            state.current_symbol_stack()[functionName] = prop_entry;
+            return method;
+        }
+
         Value *llvm_node_codegen::codegen_method_op(semantics::syntax_tree const &tree) const
         {
             IRBuilder<> &builder = state.module_builder();
@@ -893,7 +926,7 @@ namespace kite
                 params.push_back(boost::apply_visitor(llvm_node_codegen(state), tree.children[i]));
             }
             
-            generate_llvm_method_call(obj, "__init__", params);
+            generate_llvm_method_call(obj, operator_map[semantics::CONSTRUCTOR], params);
             return obj;
         }
         

@@ -46,5 +46,6 @@ void **kite_dynamic_object_get_property(void *object, char *name)
     {
         castedObj->properties[name] = NULL;
     }
-    return (void**)&castedObj->properties[name];
+    void **ret = (void**)&castedObj->properties[name];
+    return ret;
 }

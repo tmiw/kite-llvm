@@ -49,6 +49,36 @@ namespace kite
                 ("float__o", function_semantics(semantics::FLOAT, (void*)0))
                 ("print__o", function_semantics(semantics::OBJECT, (void*)0))
                 ("obj__o", function_semantics(semantics::OBJECT, (void*)0));
+
+            void object::finalizer_setup()
+            {
+                // Taken from gc_cpp.h. This seems to be to take into account
+                // operator[] new.
+                GC_finalization_proc proc = (GC_finalization_proc)cleanup;
+                GC_finalization_proc oldProc;
+                void* oldData;
+                void* base = GC_base( (void *) this );
+                if ( base != 0 )
+                {
+                    GC_register_finalizer_ignore_self( base, proc, (void*) ((char*) this - (char*) base), &oldProc, &oldData );
+
+                    if ( oldProc != 0 )
+                    {
+                        GC_register_finalizer_ignore_self( base, oldProc, oldData, 0, 0 );
+                    }
+                }
+            }
+
+            void object::cleanup( void* obj, void* displ )
+            {
+                System::object *real_this = (System::object*)((char*) obj + (ptrdiff_t) displ);
+                if (real_this->type == semantics::OBJECT) // only do destruction for non-trivial objects
+                {
+                    void *(*deinit_method)(void *) = (void*(*)(void*))kite_find_funccall((int*)real_this, "__destruct__", 1);
+                    if (deinit_method != NULL) (*deinit_method)((void*)real_this);    
+                }
+                GC_register_finalizer_ignore_self( GC_base(real_this), 0, 0, 0, 0 );
+            }
         }
     }
 }
@@ -120,6 +150,7 @@ int *kite_find_funccall(int *obj, char *name, int numargs)
         else
         {
             // TODO
+            std::cout << "ERR: built-in method not found" << std::endl;
             assert(0);
         }
     }
@@ -140,6 +171,7 @@ int *kite_find_funccall(int *obj, char *name, int numargs)
                 else
                 {
                     // TODO
+                    std::cout << "ERR: non-method found" << std::endl;
                     assert(0);
                 }
             }
@@ -148,5 +180,6 @@ int *kite_find_funccall(int *obj, char *name, int numargs)
         
         // TODO
         assert(0);
+        return NULL;
     }
 }

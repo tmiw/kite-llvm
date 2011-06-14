@@ -28,6 +28,7 @@
 #ifndef KITE_STDLIB__SYSTEM__OBJECT_H
 #define KITE_STDLIB__SYSTEM__OBJECT_H
 
+#include <gc.h>
 #include <string>
 #include <map>
 #include <semantics/constants.h>
@@ -51,6 +52,17 @@ namespace kite
                 object(semantics::builtin_types type) : type(type) { }
 
                 void print();
+
+                // For Boehm GC. Not using gc_cleanup to avoid the memory
+                // penalty that virtual methods cause.
+                void finalizer_setup();
+                static void cleanup( void* obj, void* displ );
+                inline void* operator new (std::size_t size)
+                {
+                    System::object *obj = (System::object*)GC_MALLOC(size);
+                    obj->finalizer_setup();
+                    return (void*)obj;
+                }
             };
         }
     }

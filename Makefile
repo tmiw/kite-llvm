@@ -1,12 +1,14 @@
 CC=g++
-CPPFLAGS=-g 
+CPPFLAGS=-g
 #-O2
 LDFLAGS=-rdynamic
 INC=-Isrc/ -I/opt/local/include
-LLVM_CONFIG=llvm-config
+LLVM_CONFIG=llvm-config-2.8
 LLVM_CPPFLAGS=`$(LLVM_CONFIG) --cppflags`
 LLVM_LDFLAGS=`$(LLVM_CONFIG) --ldflags`
 LLVM_LIBS=`$(LLVM_CONFIG) --libs` 
+GC_LIBS=-lgc
+GC_LDFLAGS=-L/usr/lib
 COMMON_OBJS=src/codegen/llvm_compile_state.o src/codegen/llvm_node_codegen.o \
 	 src/codegen/syntax_tree_node_printer.o src/codegen/syntax_tree_printer.o \
 	 src/parser/parser.o src/stdlib/System/integer.o src/stdlib/System/string.o \
@@ -31,10 +33,10 @@ clean:
 	rm -rf Makefile.bak `find ./ -name '*.o'` `find ./ -type f -name 'kite'` `find ./ -type f -name 'ikt'`
 
 kite: $(KITE_OBJS)
-	$(CC) $(CPPFLAGS) $(LDFLAGS) -o kite $(KITE_OBJS) $(LLVM_LDFLAGS) $(LLVM_LIBS)
+	$(CC) $(CPPFLAGS) $(LDFLAGS) -o kite $(KITE_OBJS) $(LLVM_LDFLAGS) $(LLVM_LIBS) $(GC_LDFLAGS) $(GC_LIBS)
 
 ikt: $(IKT_OBJS)
-	$(CC) $(CPPFLAGS) $(LDFLAGS) -o ikt $(IKT_OBJS) $(LLVM_LDFLAGS) $(LLVM_LIBS)
+	$(CC) $(CPPFLAGS) $(LDFLAGS) -o ikt $(IKT_OBJS) $(LLVM_LDFLAGS) $(LLVM_LIBS) $(GC_LDFLAGS) $(GC_LIBS)
 
 # DO NOT DELETE
 

@@ -44,6 +44,7 @@
 #include <llvm/Target/TargetSelect.h>
 #include <llvm/Transforms/Scalar.h>
 #include <llvm/Support/raw_ostream.h>
+#include <llvm/Target/TargetOptions.h>
 using namespace llvm;
 
 namespace kite
@@ -66,6 +67,7 @@ namespace kite
                 {
                     InitializeNativeTarget();
                     llvm_start_multithreaded();
+                    llvm::JITEmitDebugInfo = true; // for not-weird stack traces in gdb
 
                     current_module = new Module("__root_module", getGlobalContext());
                     root_object = new System::dynamic_object();

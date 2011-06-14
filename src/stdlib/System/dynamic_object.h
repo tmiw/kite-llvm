@@ -32,6 +32,7 @@
 #include <semantics/constants.h>
 #include "object.h"
 #include "method.h"
+#include <gc/gc_allocator.h>
 
 namespace kite
 {
@@ -39,7 +40,9 @@ namespace kite
     {
         namespace System
         {
-            typedef std::map<std::string, object*> property_map;
+            typedef gc_allocator<std::pair<const std::string, object*> > map_allocator;
+            typedef std::less<std::string> map_compare;
+            typedef std::map<std::string, object*, map_compare, map_allocator> property_map;
             struct dynamic_object : object
             {
                 object *parent;

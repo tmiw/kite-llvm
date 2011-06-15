@@ -64,7 +64,8 @@ namespace kite
             (semantics::UNARY_MINUS, "__op_unminus__")
             (semantics::XOR, "__op_xor__")
             (semantics::CONSTRUCTOR, "__init__")
-            (semantics::DESTRUCTOR, "__destruct__");
+            (semantics::DESTRUCTOR, "__destruct__")
+            (semantics::DEREF_ARRAY, "__op_deref_array__");
 
         static CodeOperationMap codegen_map = map_list_of
             (CodeOperationKey(semantics::ADD, semantics::INTEGER), &IRBuilder<>::CreateAdd)
@@ -423,8 +424,13 @@ namespace kite
         
         Value *llvm_node_codegen::codegen_deref_array_op(semantics::syntax_tree const &tree, Value *prev) const
         {
-            // TODO
-            return prev;
+            std::vector<Value*> parameters;
+            
+            parameters.push_back(prev);
+            Value *index_val = boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
+            parameters.push_back(index_val);
+            
+            return generate_llvm_method_call(prev, operator_map[tree.op], parameters);
         }
         
         Value *llvm_node_codegen::codegen_variable_op(semantics::syntax_tree const &tree) const
@@ -713,7 +719,8 @@ namespace kite
             Value *method_obj = generate_llvm_method_alloc(method);
             Value *property = builder.CreateLoad(state.current_symbol_stack()["this"]);
             functionName += "__";
-            functionName += std::string("o", tree.children.size() + 1);
+            for (int i = 0; i <= numargs; i++)
+                functionName += "o";
             Value *prop_entry = generate_llvm_dynamic_object_get_property(property, functionName);
             builder.CreateStore(method_obj, prop_entry);
             

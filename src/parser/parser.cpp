@@ -46,6 +46,7 @@
 #include "make.cpp"
 #include "exceptions.cpp"
 #include "constructor.cpp"
+#include "destructor.cpp"
 
 // for extended parse error messages
 #include <boost/spirit/include/support_multi_pass.hpp>

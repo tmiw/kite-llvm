@@ -3,7 +3,7 @@ CPPFLAGS=-g
 #-O2
 LDFLAGS=-rdynamic
 INC=-Isrc/ -I/opt/local/include
-LLVM_CONFIG=llvm-config-2.8
+LLVM_CONFIG=llvm-config
 LLVM_CPPFLAGS=`$(LLVM_CONFIG) --cppflags`
 LLVM_LDFLAGS=`$(LLVM_CONFIG) --ldflags`
 LLVM_LIBS=`$(LLVM_CONFIG) --libs` 

@@ -82,6 +82,7 @@ namespace kite
             MAKE,
             RUN_CATCH,
             CONSTRUCTOR,
+            DESTRUCTOR,
         };
     }
 }

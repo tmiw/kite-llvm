@@ -74,6 +74,7 @@ namespace kite
                 initialize_class_rules();
                 initialize_exception_rules();
                 initialize_constructor_rules();
+                initialize_destructor_rules();
                 initialize_statement_rules();
             }
             
@@ -107,6 +108,7 @@ namespace kite
             qi::rule<Iterator, semantics::syntax_tree(), SkipType> make_statement;
             qi::rule<Iterator, semantics::syntax_tree(), SkipType> exception_statement;
             qi::rule<Iterator, semantics::syntax_tree(), SkipType> constructor_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> destructor_statement;
             qi::rule<Iterator, std::string(), SkipType> identifier;
             qi::rule<Iterator, semantics::syntax_tree_node(), SkipType> numeric_value;
             qi::rule<Iterator, std::string()> unesc_str;
@@ -128,6 +130,7 @@ namespace kite
             void initialize_class_rules();
             void initialize_exception_rules();
             void initialize_constructor_rules();
+            void initialize_destructor_rules();
             void initialize_statement_rules();
         };
     }

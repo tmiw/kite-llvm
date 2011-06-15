@@ -69,6 +69,7 @@ namespace kite
                     llvm_start_multithreaded();
                     llvm::JITEmitDebugInfo = true; // for not-weird stack traces in gdb
 
+                    GC_init();
                     current_module = new Module("__root_module", getGlobalContext());
                     root_object = new System::dynamic_object();
                     state.push_module(current_module);

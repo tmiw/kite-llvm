@@ -63,7 +63,8 @@ namespace kite
             (semantics::UNARY_PLUS, "__op_unplus__")
             (semantics::UNARY_MINUS, "__op_unminus__")
             (semantics::XOR, "__op_xor__")
-            (semantics::CONSTRUCTOR, "__init__");
+            (semantics::CONSTRUCTOR, "__init__")
+            (semantics::DESTRUCTOR, "__destruct__");
 
         static CodeOperationMap codegen_map = map_list_of
             (CodeOperationKey(semantics::ADD, semantics::INTEGER), &IRBuilder<>::CreateAdd)
@@ -183,6 +184,9 @@ namespace kite
                     break;
                 case semantics::CONSTRUCTOR:
                     ret = codegen_constructor_op(tree);
+                    break;
+                case semantics::DESTRUCTOR:
+                    ret = codegen_destructor_op(tree);
                     break;
             }
             
@@ -670,6 +674,26 @@ namespace kite
             return method;
         }
 
+        Value *llvm_node_codegen::codegen_destructor_op(semantics::syntax_tree const &tree) const
+        {
+            // TODO: refactor
+            IRBuilder<> &builder = state.module_builder();
+            std::vector<std::string> argnames;
+            std::string functionName = operator_map[tree.op];
+        
+            semantics::syntax_tree &body = const_cast<semantics::syntax_tree&>(boost::get<semantics::syntax_tree>(tree.children[0]));
+            Value *method = generate_llvm_method(functionName, argnames, body);
+            
+            Value *method_obj = generate_llvm_method_alloc(method);
+            Value *property = builder.CreateLoad(state.current_symbol_stack()["this"]);
+            functionName += "__o";
+            Value *prop_entry = generate_llvm_dynamic_object_get_property(property, functionName);
+            builder.CreateStore(method_obj, prop_entry);
+            
+            state.current_symbol_stack()[functionName] = prop_entry;
+            return method;
+        }
+        
         Value *llvm_node_codegen::codegen_method_op(semantics::syntax_tree const &tree) const
         {
             IRBuilder<> &builder = state.module_builder();

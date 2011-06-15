@@ -24,8 +24,9 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
- 
+
 #include <iostream>
+#include <sstream>
 #include <boost/assign.hpp>
 #include "object.h"
 #include "string.h"
@@ -34,6 +35,8 @@
 #include "boolean.h"
 #include "method.h"
 #include "dynamic_object.h"
+#include "exceptions/NotImplemented.h"
+#include "exceptions/InvalidArgument.h"
 
 using namespace boost::assign;
  
@@ -115,6 +118,7 @@ int *kite_find_funccall(int *obj, char *name, int numargs)
 {
     System::object *obj_class = (System::object*)obj;
     std::string method_name = std::string(name) + "__";
+    System::dynamic_object *dyn_object = NULL;
     
     for (int i = 0; i < numargs; i++)
     {
@@ -149,14 +153,12 @@ int *kite_find_funccall(int *obj, char *name, int numargs)
         }
         else
         {
-            // TODO
-            std::cout << "ERR: built-in method not found" << std::endl;
-            assert(0);
+            goto failed_to_find_method;
         }
     }
     else
     {
-        System::dynamic_object *dyn_object = (System::dynamic_object*)obj;
+        dyn_object = (System::dynamic_object*)obj;
         do
         {
             System::property_map::iterator item = dyn_object->properties.find(method_name);
@@ -170,16 +172,22 @@ int *kite_find_funccall(int *obj, char *name, int numargs)
                 }
                 else
                 {
-                    // TODO
-                    std::cout << "ERR: non-method found" << std::endl;
-                    assert(0);
+                    std::ostringstream ss;
+                    ss << name << " is not callable.";
+                    System::exceptions::InvalidArgument *exception = new System::exceptions::InvalidArgument(ss.str());
+                    exception->throw_exception();
                 }
             }
             dyn_object = (System::dynamic_object*)dyn_object->parent;
         } while (dyn_object != NULL);
         
         // TODO
-        assert(0);
+failed_to_find_method:
+        std::ostringstream ss;
+        ss << "Could not find method " << name << " that takes " << numargs << " argument(s).";
+        System::exceptions::NotImplemented *exception = new System::exceptions::NotImplemented(ss.str());
+        exception->throw_exception();
+        
         return NULL;
     }
 }

@@ -25,13 +25,10 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
  
-#ifndef KITE_STDLIB__SYSTEM__EXCEPTIONS__EXCEPTION_H
-#define KITE_STDLIB__SYSTEM__EXCEPTIONS__EXCEPTION_H
+#ifndef KITE_STDLIB__SYSTEM__EXCEPTIONS__NOT_IMPLEMENTED_H
+#define KITE_STDLIB__SYSTEM__EXCEPTIONS__NOT_IMPLEMENTED_H
 
-#include <setjmp.h>
-#include <string>
-#include <stdlib/System/dynamic_object.h>
-#include <stdlib/System/string.h>
+#include "exception.h"
 
 namespace kite
 {
@@ -41,52 +38,21 @@ namespace kite
         {
             namespace exceptions
             {
-                struct exception : System::dynamic_object
+                struct NotImplemented : exception
                 {
                     static System::dynamic_object class_object;
                     
-                    exception(std::string message = "Exception thrown")
-                        : System::dynamic_object(&class_object) 
+                    NotImplemented(std::string message = "Method not implemented")
+                        : exception(message)
                     {
-                        initialize(message);
+                        parent = &class_object;
                     }
-                        
-                    void throw_exception();
-                    void initialize(std::string message = "Exception thrown")
-                    {
-                        properties["message"] = new System::string(message);
-                    }
-                    
+
                     static void InitializeClass();
                 };
             }
         }
     }
-}
-
-#define KITE_EXCEPTION_RUN \
-    { \
-        jmp_buf __exc_buf; \
-        if (setjmp(__exc_buf) == 0) \
-        { \
-            kite_exception_stack_push(&__exc_buf);
-#define KITE_EXCEPTION_CATCH \
-        } \
-        else \
-        { 
-#define KITE_EXCEPTION_END \
-        } \
-        kite_exception_stack_pop(); \
-    }
-#define KITE_EXCEPTION_RETURN(val) kite_exception_stack_pop(); return val
-
-extern "C"
-{
-    void kite_exception_stack_push(jmp_buf *);
-    void kite_exception_stack_pop();
-    void *kite_exception_get();
-    void *kite_exception_throw(void *exc);
-    void *kite_exception_init(void *exc);
 }
 
 #endif

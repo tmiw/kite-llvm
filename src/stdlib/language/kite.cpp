@@ -30,6 +30,8 @@
 #include <parser/parser.h>
 #include <stdlib/System/dynamic_object.h>
 #include <stdlib/System/exceptions/exception.h>
+#include <stdlib/System/exceptions/NotImplemented.h>
+#include <stdlib/System/exceptions/InvalidArgument.h>
 #include <codegen/syntax_tree_printer.h>
 #include <codegen/llvm_node_codegen.h>
 #include <llvm/LLVMContext.h>
@@ -81,7 +83,11 @@ namespace kite
                     root_object->properties["System"] = system_obj;
                     system_obj->properties["exceptions"] = exceptions_obj;
                     exceptions_obj->properties["exception"] = &System::exceptions::exception::class_object;
+                    exceptions_obj->properties["NotImplemented"] = &System::exceptions::NotImplemented::class_object;
+                    exceptions_obj->properties["InvalidArgument"] = &System::exceptions::InvalidArgument::class_object;
                     System::exceptions::exception::InitializeClass();
+                    System::exceptions::NotImplemented::InitializeClass();
+                    System::exceptions::InvalidArgument::InitializeClass();
                 }
 
                 System::object *kite::ExecuteCode(syntax_tree &ast)

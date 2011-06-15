@@ -65,7 +65,9 @@ namespace kite
             (semantics::XOR, "__op_xor__")
             (semantics::CONSTRUCTOR, "__init__")
             (semantics::DESTRUCTOR, "__destruct__")
-            (semantics::DEREF_ARRAY, "__op_deref_array__");
+            (semantics::DEREF_ARRAY, "__op_deref_array__")
+            (semantics::MAP, "__op_map__")
+            (semantics::REDUCE, "__op_reduce__");
 
         static CodeOperationMap codegen_map = map_list_of
             (CodeOperationKey(semantics::ADD, semantics::INTEGER), &IRBuilder<>::CreateAdd)
@@ -331,14 +333,24 @@ namespace kite
 
         Value *llvm_node_codegen::codegen_map_op(semantics::syntax_tree const &tree) const
         {
-            // TODO
-            return NULL;
+            return codegen_mapreduce_op(tree);
         }
         
         Value *llvm_node_codegen::codegen_reduce_op(semantics::syntax_tree const &tree) const
         {
-            // TODO
-            return NULL;
+            return codegen_mapreduce_op(tree);
+        }
+        
+        Value *llvm_node_codegen::codegen_mapreduce_op(semantics::syntax_tree const &tree) const
+        {
+            std::vector<Value*> parameters;
+            
+            Value *list_val = boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
+            Value *method_val = boost::apply_visitor(llvm_node_codegen(state), tree.children[1]);
+            parameters.push_back(list_val);
+            parameters.push_back(method_val);
+            
+            return generate_llvm_method_call(list_val, operator_map[tree.op], parameters);
         }
         
         Value *llvm_node_codegen::codegen_deref_filter_op(semantics::syntax_tree const &tree) const

@@ -27,6 +27,7 @@
 
 #include <sstream>
 #include <execinfo.h>
+#include <dlfcn.h>
 #include <stdlib/language/kite.h> 
 #include "exception.h"
 
@@ -44,18 +45,16 @@ namespace kite
                 {
                     #define NUM_TRACE 32
                     void *buf[NUM_TRACE];
-                    char **syms;
                     
                     // TODO
-                    backtrace(buf, NUM_TRACE);
-                    syms = backtrace_symbols(buf, NUM_TRACE);
+                    int num_traces = backtrace(buf, NUM_TRACE);
                     std::ostringstream ss;
-                    for (int i = 0; i < NUM_TRACE; i++)
+                    for (int i = 0; i < num_traces; i++)
                     {
-                        if (!syms[i] || !*syms[i]) break;
-                        ss << syms[i] << std::endl;
+                        Dl_info sym_info;
+                        dladdr(buf[i], &sym_info);
+                        ss << sym_info.dli_sname << "(" << sym_info.dli_fbase << ")" << std::endl;
                     }
-                    free(syms);
                     properties["trace"] = new System::string(ss.str().c_str());
                     
                     if (language::kite::kite::exception_stack.size() > 0)

@@ -45,8 +45,17 @@ namespace kite
     }
 }
 
-void *kite_method_alloc(void *method_ptr)
+void *kite_method_alloc(void *method_ptr, int args)
 {
     System::method *method = new System::method(method_ptr);
+    method->num_args = args;
+    method->this_ptr = NULL;
     return (void*)method;
+}
+
+void *kite_method_verify_semantics(void *method, int args)
+{
+    System::method *methodObj = (System::method*)method;
+    // TODO: verify type and args.
+    return methodObj->method_ptr;
 }

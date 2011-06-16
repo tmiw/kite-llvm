@@ -109,6 +109,8 @@ namespace kite
             void generate_llvm_dynamic_object_set_parent(Value *obj, Value *parent) const;
             Value *generate_llvm_dynamic_object_get_property(Value *obj, std::string name) const;
             Value *generate_llvm_method_alloc(Value *method) const;
+
+            const Type *get_method_type();
         };
     }
 }

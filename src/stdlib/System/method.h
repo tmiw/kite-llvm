@@ -39,7 +39,9 @@ namespace kite
             struct method : System::object
             {
                 void *method_ptr;
-                
+                System::object *this_ptr;
+                int num_args;
+
                 method(void *ptr) :
                     System::object(semantics::METHOD_TY), method_ptr(ptr) 
                 {
@@ -54,7 +56,8 @@ namespace kite
 
 extern "C"
 {
-    void *kite_method_alloc(void *method_ptr);
+    void *kite_method_alloc(void *method_ptr, int args);
+    void *kite_method_verify_semantics(void *method, int args);
 }
 
 #endif

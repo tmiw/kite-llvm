@@ -54,7 +54,7 @@ namespace kite
                     void throw_exception();
                     void initialize(std::string message = "Exception thrown")
                     {
-                        properties["message"] = new System::string(message);
+                        properties["message"] = new System::string(message.c_str());
                     }
                     
                     static void InitializeClass();

@@ -25,6 +25,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include <sstream>
+#include <execinfo.h>
 #include <stdlib/language/kite.h> 
 #include "exception.h"
 
@@ -40,6 +42,22 @@ namespace kite
                 
                 void exception::throw_exception()
                 {
+                    #define NUM_TRACE 32
+                    void *buf[NUM_TRACE];
+                    char **syms;
+                    
+                    // TODO
+                    backtrace(buf, NUM_TRACE);
+                    syms = backtrace_symbols(buf, NUM_TRACE);
+                    std::ostringstream ss;
+                    for (int i = 0; i < NUM_TRACE; i++)
+                    {
+                        if (!syms[i] || !*syms[i]) break;
+                        ss << syms[i] << std::endl;
+                    }
+                    free(syms);
+                    properties["trace"] = new System::string(ss.str().c_str());
+                    
                     if (language::kite::kite::exception_stack.size() > 0)
                     {
                         language::kite::kite::last_exception = this;
@@ -49,6 +67,7 @@ namespace kite
                     {
                         // TODO
                         properties["message"]->print();
+                        properties["trace"]->print();
                         exit(-1);
                     }
                 }

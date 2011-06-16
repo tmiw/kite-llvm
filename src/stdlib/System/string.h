@@ -28,6 +28,7 @@
 #ifndef KITE_STDLIB__SYSTEM__STRING_H
 #define KITE_STDLIB__SYSTEM__STRING_H
 
+#include <gc/gc_allocator.h>
 #include "object.h"
 
 #define STRING_METHOD_PREFIX System__string__
@@ -40,12 +41,14 @@ namespace kite
     {
         namespace System
         {
+            typedef std::basic_string<char, std::char_traits<char>, gc_allocator<char> > string_type;
+            
             struct string : System::object
             {
-                std::string string_val;
+                string_type string_val;
                 
                 string() : System::object(semantics::STRING), string_val("") { }
-                string(std::string val) : System::object(semantics::STRING), string_val(val) { }
+                string(string_type val) : System::object(semantics::STRING), string_val(val) { }
                 
                 static object_method_map method_map;
                 int asc();

@@ -43,11 +43,24 @@ void kite_dynamic_object_set_parent(void *object, void *parent)
 void **kite_dynamic_object_get_property(void *object, char *name)
 {
     System::dynamic_object *castedObj = (System::dynamic_object*)object;
-    if (castedObj->properties.find(name) == castedObj->properties.end())
+    System::dynamic_object *cur = castedObj;
+    void **ret = NULL;
+    do
+    {
+        if (cur->properties.find(name) != cur->properties.end())
+        {
+            ret = (void**)&cur->properties[name];
+            break;
+        }
+        cur = (System::dynamic_object*)cur->parent;
+    } while (cur);
+    
+    if (!ret)
     {
         castedObj->properties[name] = NULL;
+        ret = (void**)&castedObj->properties[name];
     }
-    void **ret = (void**)&castedObj->properties[name];
+    
     return ret;
 }
 

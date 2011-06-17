@@ -567,6 +567,8 @@ namespace kite
             std::string var_name = boost::get<std::string>(tree.children[0]);
             std::map<std::string, Value*> &sym_stack = state.current_symbol_stack();
             IRBuilder<> &builder = state.module_builder();
+            BasicBlock *currentBB = builder.GetInsertBlock();
+            Function *currentFunc = currentBB->getParent();
             
             if (var_name == "__root")
             {
@@ -576,8 +578,35 @@ namespace kite
             {
                 if (sym_stack.count(var_name) == 0)
                 {
-                    sym_stack[var_name] = builder.CreateAlloca(kite_type_to_llvm_type(semantics::INTEGER));
-                    builder.CreateStore(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)), sym_stack[var_name]);
+                    BasicBlock *sym_block = BasicBlock::Create(getGlobalContext(), "varcreate", currentFunc);
+                    builder.CreateBr(sym_block);
+                    
+                    builder.SetInsertPoint(sym_block);
+                    // TODO: do not autocreate var in this/__root if it doesn't exist.
+                    // The method level version will be used until the end of this method,
+                    // and then other methods in the class may end up using the one in
+                    // the instance instead of another method-level var.
+                    Value *getProp = generate_llvm_dynamic_object_get_property(sym_stack["this"], var_name);
+                    Value *propValue = builder.CreateLoad(getProp);
+                    
+                    BasicBlock *has_var = BasicBlock::Create(getGlobalContext(), "varnotexists", currentFunc);
+                    BasicBlock *end_var = BasicBlock::Create(getGlobalContext(), "varend", currentFunc);
+                    Value *zeroInt = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) * 8, 0, true));
+                    Value *zeroPtr = builder.CreateBitCast(zeroInt, propValue->getType());
+                    Value *cmpValue = builder.CreateICmpEQ(propValue, zeroPtr);
+                    builder.CreateCondBr(cmpValue, has_var, end_var);
+                    
+                    builder.SetInsertPoint(has_var);
+                    // TODO: check __root too.
+                    Value *createVar = builder.CreateAlloca(kite_type_to_llvm_type(semantics::OBJECT));
+                    builder.CreateStore(zeroPtr, createVar);
+                    builder.CreateBr(end_var);
+                    
+                    builder.SetInsertPoint(end_var);
+                    PHINode *phi = builder.CreatePHI(PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)));
+                    phi->addIncoming(getProp, sym_block);
+                    phi->addIncoming(createVar, has_var);
+                    sym_stack[var_name] = phi;
                 }
                 return builder.CreateLoad(sym_stack[var_name]);
             }

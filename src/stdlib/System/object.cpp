@@ -191,3 +191,24 @@ failed_to_find_method:
         return NULL;
     }
 }
+
+bool kite_object_isof(void *lhs, void *rhs, bool type)
+{
+    System::dynamic_object *lhsObj = (System::dynamic_object*)lhs;
+    System::dynamic_object *rhsObj = (System::dynamic_object*)rhs;
+    bool ret = false;
+    
+    do
+    {
+        // TODO: handle built-in types.
+        if (lhsObj->parent == rhsObj)
+        {
+            ret = true;
+            break;
+        }
+        
+        lhsObj = (System::dynamic_object*)lhsObj->parent;
+    } while (type && lhsObj);
+    
+    return ret;
+}

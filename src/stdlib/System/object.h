@@ -71,6 +71,7 @@ namespace kite
 extern "C"
 {
     int *kite_find_funccall(int *obj, char *name, int numargs);
+    bool kite_object_isof(void *lhs, void *rhs, bool type);
 }
 
 #endif

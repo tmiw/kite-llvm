@@ -83,6 +83,8 @@ namespace kite
             RUN_CATCH,
             CONSTRUCTOR,
             DESTRUCTOR,
+            IS_CLASS,
+            ISOF_CLASS,
         };
     }
 }

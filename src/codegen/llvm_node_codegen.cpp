@@ -191,6 +191,10 @@ namespace kite
                 case semantics::DESTRUCTOR:
                     ret = codegen_destructor_op(tree);
                     break;
+                case semantics::IS_CLASS:
+                case semantics::ISOF_CLASS:
+                    ret = codegen_isof_op(tree);
+                    break;
             }
             
             return ret;
@@ -329,6 +333,71 @@ namespace kite
                     params.push_back(rhs);
                     return generate_llvm_method_call(rhs, operator_map[tree.op], params);
             }
+        }
+        
+        Value *llvm_node_codegen::codegen_isof_op(semantics::syntax_tree const &tree) const
+        {
+            IRBuilder<> &builder = state.module_builder();
+            Module *module = state.current_module();
+            Value *lhs = boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
+            Value *rhs = boost::apply_visitor(llvm_node_codegen(state), tree.children[1]);
+            Value *type = NULL;
+            
+            const Type *lhsType = lhs->getType();
+            if (lhsType == PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)) ||
+                (lhsType != kite_type_to_llvm_type(semantics::OBJECT) && isa<PointerType>(lhsType)))
+            {
+                lhs = builder.CreateLoad(lhs);
+            }
+            const Type *rhsType = rhs->getType();
+            if (rhsType == PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)) ||
+                (rhsType != kite_type_to_llvm_type(semantics::OBJECT) && isa<PointerType>(rhsType)))
+            {
+                rhs = builder.CreateLoad(rhs);
+            }
+            
+            if (tree.op == semantics::IS_CLASS)
+            {
+                type = ConstantInt::get(getGlobalContext(), APInt(1, 0, true));
+            }
+            else
+            {
+                type = ConstantInt::get(getGlobalContext(), APInt(1, 1, true));
+            }
+            
+            std::vector<const Type*> parameterTypes;
+            std::vector<Value*> paramValues;
+            parameterTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
+            parameterTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
+            parameterTypes.push_back(kite_type_to_llvm_type(semantics::BOOLEAN));
+            const FunctionType *ftPtrLookup = FunctionType::get(parameterTypes[2], parameterTypes, false);
+            Function *funPtrLookup = Function::Create(ftPtrLookup, Function::ExternalLinkage, "kite_object_isof", module);
+            if (funPtrLookup->getName() != "kite_object_isof")
+            {  
+                funPtrLookup->eraseFromParent();
+                funPtrLookup = module->getFunction("kite_object_isof");
+            }
+            
+            std::vector<Value*> params;
+            if (lhs->getType() != kite_type_to_llvm_type(semantics::OBJECT))
+            {
+                params.push_back(lhs);
+                lhs = generate_llvm_method_call(lhs, "obj", params);
+            }
+            paramValues.push_back(lhs);
+            if (rhs->getType() != kite_type_to_llvm_type(semantics::OBJECT))
+            {
+                params.clear();
+                params.push_back(rhs);
+                rhs = generate_llvm_method_call(rhs, "obj", params);
+            }
+            paramValues.push_back(rhs);
+            paramValues.push_back(type);
+            return builder.CreateCall(
+                funPtrLookup,
+                paramValues.begin(),
+                paramValues.end()
+            );
         }
 
         Value *llvm_node_codegen::codegen_map_op(semantics::syntax_tree const &tree) const

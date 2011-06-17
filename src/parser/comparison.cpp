@@ -27,7 +27,9 @@ namespace kite
             comparison_equals_statement = 
                    comparison_less_greater_statement [ _val = _1 ]
                 >> *(    (lit("==")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::EQUALS ] |
-                          lit("!=")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::NOT_EQUALS ])
+                          lit("!=")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::NOT_EQUALS ] |
+                          lit("isof")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::ISOF_CLASS ] |
+                          lit("is")  [ push_front(at_c<1>(_val), _val) ] [ erase(at_c<1>(_val), begin(at_c<1>(_val)) + 1, end(at_c<1>(_val))) ] [ at_c<0>(_val) = kite::semantics::IS_CLASS ])
                       > comparison_less_greater_statement [ push_back(at_c<1>(_val), _1) ]);
                 
             comparison_less_greater_statement =

@@ -60,10 +60,10 @@ namespace kite
                     static bool enable_optimizer;
                     static std::vector<jmp_buf*> exception_stack;
                     static System::dynamic_object *last_exception;
-                    
+
+                    static System::dynamic_object *root_object;                    
                     private:
                         static llvm::Module *current_module;
-                        static System::dynamic_object *root_object;
                         static codegen::llvm_compile_state state;
                         static ExecutionEngine *execution_engine;
                 };

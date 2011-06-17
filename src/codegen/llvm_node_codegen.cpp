@@ -568,12 +568,19 @@ namespace kite
             std::map<std::string, Value*> &sym_stack = state.current_symbol_stack();
             IRBuilder<> &builder = state.module_builder();
             
-            if (sym_stack.count(var_name) == 0)
+            if (var_name == "__root")
             {
-                sym_stack[var_name] = builder.CreateAlloca(kite_type_to_llvm_type(semantics::INTEGER));
-                builder.CreateStore(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)), sym_stack[var_name]);
+                return generate_llvm_dynamic_object_get_root();
             }
-            return builder.CreateLoad(sym_stack[var_name]);
+            else
+            {
+                if (sym_stack.count(var_name) == 0)
+                {
+                    sym_stack[var_name] = builder.CreateAlloca(kite_type_to_llvm_type(semantics::INTEGER));
+                    builder.CreateStore(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)), sym_stack[var_name]);
+                }
+                return builder.CreateLoad(sym_stack[var_name]);
+            }
         }
         
         Value *llvm_node_codegen::codegen_assign_op(semantics::syntax_tree const &tree) const
@@ -1185,6 +1192,23 @@ namespace kite
                 obj = builder.CreateLoad(obj);
             }
             return builder.CreateCall2(funPtr, obj, builder.CreateGlobalStringPtr(name.c_str()));
+        }
+        
+        Value *llvm_node_codegen::generate_llvm_dynamic_object_get_root() const
+        {
+            Module *module = state.current_module();
+            IRBuilder<> &builder = state.module_builder();
+            
+            std::vector<const Type*> parameterTypes;
+            const FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), parameterTypes, false);
+            Function *funPtr = Function::Create(ft, Function::ExternalLinkage, "kite_dynamic_object_get_root", module);
+            if (funPtr->getName() != "kite_dynamic_object_get_root")
+            {
+                funPtr->eraseFromParent();
+                funPtr = module->getFunction("kite_dynamic_object_get_root");
+            }
+            
+            return builder.CreateCall(funPtr);
         }
         
         semantics::builtin_types llvm_node_codegen::get_type(Value *val)

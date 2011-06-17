@@ -60,6 +60,7 @@ extern "C"
     void *kite_dynamic_object_alloc();
     void kite_dynamic_object_set_parent(void *object, void *parent);
     void **kite_dynamic_object_get_property(void *object, char *name);
+    void *kite_dynamic_object_get_root();
 }
 
 #endif

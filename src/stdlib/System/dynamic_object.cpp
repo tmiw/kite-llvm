@@ -26,6 +26,7 @@
  ****************************************************************************/
 
 #include "dynamic_object.h"
+#include "../language/kite.h"
 
 using namespace kite::stdlib;
 
@@ -48,4 +49,9 @@ void **kite_dynamic_object_get_property(void *object, char *name)
     }
     void **ret = (void**)&castedObj->properties[name];
     return ret;
+}
+
+void *kite_dynamic_object_get_root()
+{
+    return language::kite::kite::root_object;
 }

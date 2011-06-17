@@ -847,13 +847,24 @@ namespace kite
             
             Value *method_obj = generate_llvm_method_alloc(method);
             Value *property = builder.CreateLoad(state.current_symbol_stack()["this"]);
-            functionName += "__";
-            for (int i = 0; i <= numargs; i++)
-                functionName += "o";
-            Value *prop_entry = generate_llvm_dynamic_object_get_property(property, functionName);
-            builder.CreateStore(method_obj, prop_entry);
             
-            state.current_symbol_stack()[functionName] = prop_entry;
+            if (functionName != "__AnonMethod")
+            {
+                functionName += "__";
+                for (int i = 0; i <= numargs; i++)
+                    functionName += "o";
+                Value *prop_entry = generate_llvm_dynamic_object_get_property(property, functionName);
+                builder.CreateStore(method_obj, prop_entry);
+                state.current_symbol_stack()[functionName] = prop_entry;
+            }
+            else
+            {
+                Value *method_casted = builder.CreateBitCast(method_obj, get_method_type());
+                Value *this_loc = builder.CreateStructGEP(method_casted, 2);
+                builder.CreateStore(property, this_loc);
+                return method_obj;
+            }
+            
             return method;
         }
 
@@ -1205,14 +1216,14 @@ namespace kite
             return op_type;
         }
         
-        const Type *llvm_node_codegen::get_method_type()
+        const Type *llvm_node_codegen::get_method_type() const
         {
             std::vector<const Type*> struct_types;
             struct_types.push_back(kite_type_to_llvm_type(semantics::INTEGER));
             struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT));
             struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT));
             struct_types.push_back(kite_type_to_llvm_type(semantics::INTEGER));
-            return StructType::get(getGlobalContext(), struct_types);
+            return PointerType::getUnqual(StructType::get(getGlobalContext(), struct_types));
         }
 
         stdlib::object_method_map &llvm_node_codegen::get_method_map(semantics::builtin_types type) const

@@ -29,7 +29,7 @@ namespace kite
                           ("\\r", '\r')("\\t", '\t')("\\v", '\v')("\\\\", '\\')
                           ("\\\'", '\'')("\\\"", '\"');
             numeric_value = 
-                (int_ | double_ | unesc_str) [ _val = _1 ]
+                (int_ | double_ | unesc_str | anon_method_statement) [ _val = _1 ]
                 | lit("true") [ _val = true ]
                 | lit("false") [ _val = false ];
             

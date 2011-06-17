@@ -29,6 +29,11 @@ namespace kite
                 > identifier [ push_back(at_c<1>(_val), _1) ]
                 >> (lit('(') >> -(identifier [ push_back(at_c<1>(_val), _1) ] % ',') >> lit(')'))
                 > '[' >> start [ push_back(at_c<1>(_val), _1) ] >> ']';
+            
+            anon_method_statement =
+                   lit("method") [ at_c<0>(_val) = kite::semantics::METHOD ] [ push_back(at_c<1>(_val), std::string("__AnonMethod")) ]
+                >> (lit('(') >> -(identifier [ push_back(at_c<1>(_val), _1) ] % ',') >> lit(')'))
+                > '[' >> start [ push_back(at_c<1>(_val), _1) ] >> ']';
         }
         
         //kite_grammar<std::string::const_iterator> method_grammar;

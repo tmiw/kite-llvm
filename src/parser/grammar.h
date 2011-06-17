@@ -82,6 +82,7 @@ namespace kite
             qi::rule<Iterator, semantics::syntax_tree_node(), SkipType> statement;
             qi::rule<Iterator, semantics::syntax_tree(), SkipType> math_statement;
             qi::rule<Iterator, semantics::syntax_tree(), SkipType> method_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> anon_method_statement;
             qi::rule<Iterator, semantics::syntax_tree(), SkipType> class_statement;
             qi::rule<Iterator, semantics::syntax_tree(), SkipType> loop_statement;
             qi::rule<Iterator, semantics::syntax_tree(), SkipType> decide_statement;

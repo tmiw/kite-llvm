@@ -30,6 +30,7 @@
 
 // HACK: random files are somehow being ignored by g++/ld, so there goes the
 // use of multiple .cpp files to try to reduce compile time due to Boost.
+#if 0
 #include "assignment.cpp"
 #include "bitwise.cpp"
 #include "classes.cpp"
@@ -47,12 +48,7 @@
 #include "exceptions.cpp"
 #include "constructor.cpp"
 #include "destructor.cpp"
-
-// for extended parse error messages
-#include <boost/spirit/include/support_multi_pass.hpp>
-#include <boost/spirit/include/classic_position_iterator.hpp>
-#include <iomanip>
-namespace classic = boost::spirit::classic;
+#endif
 
 using namespace std;
  
@@ -67,17 +63,14 @@ namespace kite
 
             std::istreambuf_iterator<char> stream_iter(stream);
 
-            typedef multi_pass<std::istreambuf_iterator<char> > forward_iterator_type;
             forward_iterator_type fwd_begin =
                 boost::spirit::make_default_multi_pass(stream_iter);
             forward_iterator_type fwd_end;
 
             // wrap forward iterator with position iterator, to record the position
-            typedef classic::position_iterator2<forward_iterator_type> pos_iterator_type;
             pos_iterator_type position_begin(fwd_begin, fwd_end, "(stdin)"); // TODO
             pos_iterator_type position_end;
 
-#define KITE_SKIP_RULE space | ('#' >> *(ascii::char_ - qi::eol) >> qi::eol)
             kite_grammar<pos_iterator_type, BOOST_TYPEOF(KITE_SKIP_RULE)> grammar;
             try
             {

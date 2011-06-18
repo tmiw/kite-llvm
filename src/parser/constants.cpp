@@ -55,6 +55,6 @@ namespace kite
                     - lit("false")); // [ _val = _1 ];
         }
         
-        //kite_grammar<std::string::const_iterator> constants_grammar;
+        kite_grammar<pos_iterator_type, BOOST_TYPEOF(KITE_SKIP_RULE)> constants_grammar;
     }
 }

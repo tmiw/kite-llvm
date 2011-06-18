@@ -38,6 +38,19 @@
 #include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 
+using boost::spirit::ascii::space;
+
+// for extended parse error messages
+#include <boost/spirit/include/support_multi_pass.hpp>
+#include <boost/spirit/include/classic_position_iterator.hpp>
+#include <iomanip>
+namespace classic = boost::spirit::classic;
+using boost::spirit::multi_pass;
+typedef multi_pass<std::istreambuf_iterator<char> > forward_iterator_type;
+typedef classic::position_iterator2<forward_iterator_type> pos_iterator_type;
+
+#define KITE_SKIP_RULE space | ('#' >> *(ascii::char_ - qi::eol) >> qi::eol)
+
 namespace kite
 {
     namespace parser

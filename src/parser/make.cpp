@@ -30,6 +30,6 @@ namespace kite
                 >> (lit('(') >> -(or_statement [ push_back(at_c<1>(_val), _1) ] % ',') >> lit(')'));
         }
         
-        //kite_grammar<std::string::const_iterator> constants_grammar;
+        kite_grammar<pos_iterator_type, BOOST_TYPEOF(KITE_SKIP_RULE)> make_grammar;
     }
 }

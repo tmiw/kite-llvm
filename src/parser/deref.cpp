@@ -64,6 +64,6 @@ namespace kite
                           >> *deref_types [ push_back(at_c<1>(_val), _1) ]);
         }
         
-        //kite_grammar<std::string::const_iterator> deref_grammar;
+        kite_grammar<pos_iterator_type, BOOST_TYPEOF(KITE_SKIP_RULE)> deref_grammar;
     }
 }

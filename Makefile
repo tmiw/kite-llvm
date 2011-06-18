@@ -11,11 +11,18 @@ GC_LIBS=-lgc
 GC_LDFLAGS=-L/usr/lib
 COMMON_OBJS=src/codegen/llvm_compile_state.o src/codegen/llvm_node_codegen.o \
 	 src/codegen/syntax_tree_node_printer.o src/codegen/syntax_tree_printer.o \
-	 src/parser/parser.o src/stdlib/System/integer.o src/stdlib/System/string.o \
+	 src/stdlib/System/integer.o src/stdlib/System/string.o \
 	 src/stdlib/System/boolean.o src/stdlib/System/float.o src/stdlib/System/object.o \
 	 src/stdlib/System/dynamic_object.o src/stdlib/System/method.o src/stdlib/language/kite.o \
 	 src/stdlib/language/kite/syntax_tree.o src/stdlib/System/exceptions/exception.o \
-	 src/stdlib/System/exceptions/NotImplemented.o src/stdlib/System/exceptions/InvalidArgument.o
+	 src/stdlib/System/exceptions/NotImplemented.o src/stdlib/System/exceptions/InvalidArgument.o \
+	 src/parser/constants.o src/parser/make.o src/parser/assignment.o src/parser/bitwise.o \
+	 src/parser/comparison.o src/parser/math.o src/parser/map_reduce.o src/parser/classes.o  \
+	 src/parser/decide.o src/parser/deref.o src/parser/grouping.o \
+	 src/parser/loop.o src/parser/method.o \
+	 src/parser/statement.o src/parser/exceptions.o src/parser/constructor.o \
+	 src/parser/destructor.o src/parser/parser.o 
+
 KITE_OBJS=src/apps/kite.o $(COMMON_OBJS)
 IKT_OBJS=src/apps/ikt.o $(COMMON_OBJS)
 
@@ -31,7 +38,7 @@ test: all
 	sh run-tests.sh
 
 clean: 
-	rm -rf Makefile.bak `find ./ -name '*.o'` `find ./ -type f -name 'kite'` `find ./ -type f -name 'ikt'`
+	rm -rf Makefile.bak `find ./ -name '*.o'` kite ikt
 
 kite: $(KITE_OBJS)
 	$(CC) $(CPPFLAGS) $(LDFLAGS) -o kite $(KITE_OBJS) $(LLVM_LDFLAGS) $(LLVM_LIBS) $(GC_LDFLAGS) $(GC_LIBS)
@@ -105,15 +112,6 @@ src/parser/method.o: src/parser/grammar.h src/semantics/syntax_tree.h
 src/parser/method.o: src/semantics/constants.h
 src/parser/parser.o: src/parser/grammar.h src/semantics/syntax_tree.h
 src/parser/parser.o: src/semantics/constants.h src/parser/parser.h
-src/parser/parser.o: src/parser/assignment.cpp src/parser/bitwise.cpp
-src/parser/parser.o: src/parser/classes.cpp src/parser/comparison.cpp
-src/parser/parser.o: src/parser/constants.cpp src/parser/decide.cpp
-src/parser/parser.o: src/parser/deref.cpp src/parser/grouping.cpp
-src/parser/parser.o: src/parser/loop.cpp src/parser/map_reduce.cpp
-src/parser/parser.o: src/parser/math.cpp src/parser/method.cpp
-src/parser/parser.o: src/parser/statement.cpp src/parser/make.cpp
-src/parser/parser.o: src/parser/exceptions.cpp src/parser/constructor.cpp
-src/parser/parser.o: src/parser/destructor.cpp
 src/parser/statement.o: src/parser/grammar.h src/semantics/syntax_tree.h
 src/parser/statement.o: src/semantics/constants.h
 src/stdlib/language/kite/syntax_tree.o: src/stdlib/language/kite/syntax_tree.h
@@ -136,6 +134,9 @@ src/stdlib/language/kite.o: src/semantics/syntax_tree.h
 src/stdlib/language/kite.o: src/semantics/constants.h src/parser/parser.h
 src/stdlib/language/kite.o: src/stdlib/System/exceptions/exception.h
 src/stdlib/language/kite.o: src/stdlib/System/string.h
+src/stdlib/language/kite.o: src/stdlib/System/exceptions/NotImplemented.h
+src/stdlib/language/kite.o: src/stdlib/System/exceptions/exception.h
+src/stdlib/language/kite.o: src/stdlib/System/exceptions/InvalidArgument.h
 src/stdlib/language/kite.o: src/codegen/syntax_tree_printer.h
 src/stdlib/language/kite.o: src/codegen/llvm_node_codegen.h
 src/stdlib/language/kite.o: src/stdlib/System/integer.h
@@ -149,6 +150,13 @@ src/stdlib/System/dynamic_object.o: src/stdlib/System/dynamic_object.h
 src/stdlib/System/dynamic_object.o: src/semantics/constants.h
 src/stdlib/System/dynamic_object.o: src/stdlib/System/object.h
 src/stdlib/System/dynamic_object.o: src/stdlib/System/method.h
+src/stdlib/System/dynamic_object.o: src/stdlib/System/string.h
+src/stdlib/System/dynamic_object.o: src/stdlib/language/kite.h
+src/stdlib/System/dynamic_object.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/dynamic_object.o: src/codegen/llvm_compile_state.h
+src/stdlib/System/dynamic_object.o: src/stdlib/language/kite/syntax_tree.h
+src/stdlib/System/dynamic_object.o: src/semantics/syntax_tree.h
+src/stdlib/System/dynamic_object.o: src/semantics/constants.h
 src/stdlib/System/exceptions/exception.o: src/stdlib/language/kite.h
 src/stdlib/System/exceptions/exception.o: src/stdlib/System/dynamic_object.h
 src/stdlib/System/exceptions/exception.o: src/semantics/constants.h
@@ -159,14 +167,10 @@ src/stdlib/System/exceptions/exception.o: src/stdlib/language/kite/syntax_tree.h
 src/stdlib/System/exceptions/exception.o: src/semantics/syntax_tree.h
 src/stdlib/System/exceptions/exception.o: src/semantics/constants.h
 src/stdlib/System/exceptions/exception.o: src/stdlib/System/exceptions/exception.h
-src/stdlib/System/exceptions/exception.o: src/stdlib/System/string.h
+src/stdlib/System/exceptions/InvalidArgument.o: src/stdlib/System/exceptions/InvalidArgument.h
+src/stdlib/System/exceptions/InvalidArgument.o: src/stdlib/System/exceptions/exception.h
 src/stdlib/System/exceptions/NotImplemented.o: src/stdlib/System/exceptions/NotImplemented.h
 src/stdlib/System/exceptions/NotImplemented.o: src/stdlib/System/exceptions/exception.h
-src/stdlib/System/exceptions/NotImplemented.o: src/stdlib/System/dynamic_object.h
-src/stdlib/System/exceptions/NotImplemented.o: src/semantics/constants.h
-src/stdlib/System/exceptions/NotImplemented.o: src/stdlib/System/object.h
-src/stdlib/System/exceptions/NotImplemented.o: src/stdlib/System/method.h
-src/stdlib/System/exceptions/NotImplemented.o: src/stdlib/System/string.h
 src/stdlib/System/float.o: src/stdlib/System/float.h
 src/stdlib/System/float.o: src/stdlib/System/object.h
 src/stdlib/System/float.o: src/semantics/constants.h
@@ -187,8 +191,7 @@ src/stdlib/System/object.o: src/stdlib/System/method.h
 src/stdlib/System/object.o: src/stdlib/System/dynamic_object.h
 src/stdlib/System/object.o: src/stdlib/System/exceptions/NotImplemented.h
 src/stdlib/System/object.o: src/stdlib/System/exceptions/exception.h
-src/stdlib/System/object.o: src/stdlib/System/dynamic_object.h
-src/stdlib/System/object.o: src/stdlib/System/string.h
+src/stdlib/System/object.o: src/stdlib/System/exceptions/InvalidArgument.h
 src/stdlib/System/string.o: src/stdlib/System/string.h
 src/stdlib/System/string.o: src/stdlib/System/object.h
 src/stdlib/System/string.o: src/semantics/constants.h

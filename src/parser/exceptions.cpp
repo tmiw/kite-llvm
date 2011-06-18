@@ -35,6 +35,6 @@ namespace kite
                 >> ']';
         }
         
-        //kite_grammar<std::string::const_iterator> class_grammar;
+        kite_grammar<pos_iterator_type, BOOST_TYPEOF(KITE_SKIP_RULE)> exceptions_grammar;
     }
 }

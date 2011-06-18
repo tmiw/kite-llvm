@@ -29,6 +29,6 @@ namespace kite
                 | ( '(' >> or_statement [ _val = _1 ] >> ')' );
         }
         
-        //kite_grammar<std::string::const_iterator> grouping_grammar;
+        kite_grammar<pos_iterator_type, BOOST_TYPEOF(KITE_SKIP_RULE)> grouping_grammar;
     }
 }

@@ -442,6 +442,7 @@ namespace kite
                 }
             }
             
+            state.overrideOverloadedProperties(false);
             return lhs;
         }
         
@@ -475,6 +476,8 @@ namespace kite
         {
             std::string method_name = boost::get<std::string>(tree.children[0]);
             std::vector<Value*> parameters;
+            std::map<std::string, Value*> &sym_stack = state.current_symbol_stack();
+            IRBuilder<> &builder = state.module_builder();
             
             parameters.push_back(prev);
             for (int i = 1; i < tree.children.size(); i++)
@@ -483,6 +486,11 @@ namespace kite
                 parameters.push_back(param_val);
             }
             
+            if (state.overrideOverloadedProperties())
+            {
+                state.overrideOverloadedProperties(false);
+                parameters[0] = builder.CreateLoad(sym_stack["this"]);
+            }
             return generate_llvm_method_call(prev, method_name, parameters);
         }
         
@@ -573,6 +581,18 @@ namespace kite
             if (var_name == "__root")
             {
                 return generate_llvm_dynamic_object_get_root();
+            }
+            else if (var_name == "base")
+            {
+                state.overrideOverloadedProperties(true);
+                Value *this_obj = builder.CreateLoad(sym_stack["this"]);
+                this_obj = builder.CreateBitCast(this_obj, get_object_type());
+                this_obj = builder.CreateStructGEP(this_obj, 1);
+                this_obj = builder.CreateLoad(this_obj);
+                this_obj = builder.CreateBitCast(this_obj, get_object_type());
+                this_obj = builder.CreateStructGEP(this_obj, 1);
+                this_obj = builder.CreateLoad(this_obj);
+                return this_obj;
             }
             else
             {
@@ -838,7 +858,7 @@ namespace kite
             {
                functionName += "o";
             }
-            Value *prop_entry = generate_llvm_dynamic_object_get_property(property, functionName);
+            Value *prop_entry = generate_llvm_dynamic_object_get_property(property, functionName, true);
             builder.CreateStore(method_obj, prop_entry);
             
             state.current_symbol_stack()[functionName] = prop_entry;
@@ -889,7 +909,7 @@ namespace kite
                 functionName += "__";
                 for (int i = 0; i <= numargs; i++)
                     functionName += "o";
-                Value *prop_entry = generate_llvm_dynamic_object_get_property(property, functionName);
+                Value *prop_entry = generate_llvm_dynamic_object_get_property(property, functionName, true);
                 builder.CreateStore(method_obj, prop_entry);
                 state.current_symbol_stack()[functionName] = prop_entry;
             }
@@ -1199,7 +1219,7 @@ namespace kite
             return builder.CreateCall2(funPtr, builder.CreateBitCast(method, kite_type_to_llvm_type(semantics::OBJECT)), ConstantInt::get(kite_type_to_llvm_type(semantics::INTEGER), num_args));
         }
         
-        Value *llvm_node_codegen::generate_llvm_dynamic_object_get_property(Value *obj, std::string name) const
+        Value *llvm_node_codegen::generate_llvm_dynamic_object_get_property(Value *obj, std::string name, bool set) const
         {
             Module *module = state.current_module();
             IRBuilder<> &builder = state.module_builder();
@@ -1207,6 +1227,7 @@ namespace kite
             std::vector<const Type*> parameterTypes;
             parameterTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
             parameterTypes.push_back(kite_type_to_llvm_type(semantics::STRING));
+            parameterTypes.push_back(kite_type_to_llvm_type(semantics::BOOLEAN));
             
             const FunctionType *ft = FunctionType::get(PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)), parameterTypes, false);
             Function *funPtr = Function::Create(ft, Function::ExternalLinkage, "kite_dynamic_object_get_property", module);
@@ -1220,7 +1241,7 @@ namespace kite
             {
                 obj = builder.CreateLoad(obj);
             }
-            return builder.CreateCall2(funPtr, obj, builder.CreateGlobalStringPtr(name.c_str()));
+            return builder.CreateCall3(funPtr, obj, builder.CreateGlobalStringPtr(name.c_str()), ConstantInt::get(kite_type_to_llvm_type(semantics::BOOLEAN), set));
         }
         
         Value *llvm_node_codegen::generate_llvm_dynamic_object_get_root() const
@@ -1269,6 +1290,15 @@ namespace kite
             return op_type;
         }
         
+        const Type *llvm_node_codegen::get_object_type() const
+        {
+            std::vector<const Type*> struct_types;
+            struct_types.push_back(Type::getIntNTy(getGlobalContext(), sizeof(semantics::builtin_types) * 8));
+            struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT));
+            struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT)); // placeholder
+            return PointerType::getUnqual(StructType::get(getGlobalContext(), struct_types));
+        }
+
         const Type *llvm_node_codegen::get_method_type() const
         {
             std::vector<const Type*> struct_types;

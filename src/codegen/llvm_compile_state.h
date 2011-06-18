@@ -61,12 +61,16 @@ namespace kite
             void push_namespace_stack(std::string name) { _namespaceStack.push_back(name); }
             void pop_namespace_stack() { _namespaceStack.pop_back(); }
             std::string identifier_prefix();
- 
+
+            inline bool overrideOverloadedProperties() { return _overrideOverloadedProperties; }
+            void overrideOverloadedProperties(bool val) { _overrideOverloadedProperties = val; }
+
         private:
             std::vector<std::string> _namespaceStack;
             std::vector<Module*> _moduleStack;
             std::vector<std::map<std::string, Value*> *> _symbolTableStack;
-            IRBuilder<> _moduleBuilder;        
+            IRBuilder<> _moduleBuilder;
+            bool _overrideOverloadedProperties;
         };
     }
 }

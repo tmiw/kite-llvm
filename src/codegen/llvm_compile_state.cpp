@@ -32,7 +32,7 @@ namespace kite
     namespace codegen
     {
         llvm_compile_state::llvm_compile_state()
-	    : _moduleBuilder(getGlobalContext())
+	    : _moduleBuilder(getGlobalContext()), _overrideOverloadedProperties(false)
 	    {
 	        // empty
 	    }

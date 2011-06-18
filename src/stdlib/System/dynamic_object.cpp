@@ -26,6 +26,7 @@
  ****************************************************************************/
 
 #include "dynamic_object.h"
+#include "string.h"
 #include "../language/kite.h"
 
 using namespace kite::stdlib;
@@ -38,6 +39,11 @@ void *kite_dynamic_object_alloc()
 void kite_dynamic_object_set_parent(void *object, void *parent)
 {
     ((System::dynamic_object*)object)->parent = (System::object*)parent;
+}
+
+void kite_dynamic_object_set_name(void *object, char *name)
+{
+    ((System::dynamic_object*)object)->properties["__name"] = new System::string(name);
 }
 
 void **kite_dynamic_object_get_property(void *object, char *name, bool set)

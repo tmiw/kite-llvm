@@ -95,8 +95,12 @@ int main(int argc, char **argv)
                     cout << "---> ";
                     retValue->print();
                 KITE_EXCEPTION_CATCH
-                    cout << "Exception thrown: ";
-                    language::kite::kite::last_exception->properties["message"]->print();
+                    System::exceptions::exception *exc = 
+                        (System::exceptions::exception *)language::kite::kite::last_exception;
+                    System::dynamic_object *real_exc_class = (System::dynamic_object*)exc->parent;
+                    std::cout << ((System::string*)real_exc_class->properties["__name"])->string_val << ": ";
+                    exc->properties["message"]->print();
+                    exc->properties["trace"]->print();
                 KITE_EXCEPTION_END
             }
         }

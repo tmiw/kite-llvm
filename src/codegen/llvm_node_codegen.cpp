@@ -1116,7 +1116,6 @@ namespace kite
             semantics::syntax_tree &body = const_cast<semantics::syntax_tree&>(boost::get<semantics::syntax_tree>(tree.children[tree.children.size() - 1]));
             std::vector<std::string> args;
             ret = generate_llvm_method(std::string("__static_init__"), args, body);
-            state.pop_namespace_stack();
 
             // Initialize dynamic_object that will store the class and insert
             // LLVM code to call __static_init__ on this object.
@@ -1129,6 +1128,9 @@ namespace kite
             }
             builder.CreateCall(ret, obj);
             
+            generate_llvm_dynamic_object_set_name(obj);
+            state.pop_namespace_stack();
+                        
             Value *property = builder.CreateLoad(state.current_symbol_stack()["this"]);
             Value *prop_entry = generate_llvm_dynamic_object_get_property(property, className);
             builder.CreateStore(obj, prop_entry);
@@ -1197,6 +1199,28 @@ namespace kite
             }
             
             builder.CreateCall2(funPtr, obj, parent);
+        }
+        
+        void llvm_node_codegen::generate_llvm_dynamic_object_set_name(Value *obj) const
+        {
+            Module *module = state.current_module();
+            IRBuilder<> &builder = state.module_builder();
+            
+            std::vector<const Type*> parameterTypes;
+            parameterTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
+            parameterTypes.push_back(kite_type_to_llvm_type(semantics::STRING));
+            
+            const FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), parameterTypes, false);
+            Function *funPtr = Function::Create(ft, Function::ExternalLinkage, "kite_dynamic_object_set_name", module);
+            if (funPtr->getName() != "kite_dynamic_object_set_name")
+            {
+                funPtr->eraseFromParent();
+                funPtr = module->getFunction("kite_dynamic_object_set_name");
+            }
+            
+            // Form full class name.
+            std::string fullName = state.full_class_name();
+            builder.CreateCall2(funPtr, obj, builder.CreateGlobalStringPtr(fullName.c_str()));
         }
         
         Value *llvm_node_codegen::generate_llvm_method_alloc(Value *method) const

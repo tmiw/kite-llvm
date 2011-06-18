@@ -65,6 +65,8 @@ namespace kite
                     else
                     {
                         // TODO
+                        System::dynamic_object *real_exc_class = (System::dynamic_object*)this->parent;
+                        std::cout << ((System::string*)real_exc_class->properties["__name"])->string_val << ": ";
                         properties["message"]->print();
                         properties["trace"]->print();
                         exit(-1);
@@ -77,6 +79,7 @@ namespace kite
                         new System::method((void*)kite_exception_throw);
                     class_object.properties["__init____o"] =
                         new System::method((void*)kite_exception_init);
+                    class_object.properties["__name"] = new System::string("System.exceptions.exception");
                 }
             }
         }

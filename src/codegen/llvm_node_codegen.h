@@ -108,6 +108,7 @@ namespace kite
             Value *generate_llvm_method_call(Value *self, std::string name, std::vector<Value*> &params) const;
             Value *generate_llvm_dynamic_object_alloc() const;
             void generate_llvm_dynamic_object_set_parent(Value *obj, Value *parent) const;
+            void generate_llvm_dynamic_object_set_name(Value *obj) const;
             Value *generate_llvm_dynamic_object_get_property(Value *obj, std::string name, bool set = false) const;
             Value *generate_llvm_method_alloc(Value *method) const;
             Value *generate_llvm_dynamic_object_get_root() const;

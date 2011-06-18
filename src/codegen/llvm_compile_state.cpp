@@ -66,17 +66,30 @@ namespace kite
 	        _symbolTableStack.pop_back();
 	    }
 
-        std::string llvm_compile_state::identifier_prefix()
+        std::string llvm_compile_state::identifier_prefix() const
         {
             std::string ret;
-            std::vector<std::string>::reverse_iterator i = _namespaceStack.rbegin();
+            std::vector<std::string>::const_iterator i = _namespaceStack.begin();
 
-            for (; i != _namespaceStack.rend(); i++)
+            for (; i != _namespaceStack.end(); i++)
             {
                 ret += (*i);
                 ret += "__";
             }
             return ret;
+        }
+        
+        std::string llvm_compile_state::full_class_name() const
+        {
+            std::string ret;
+            std::vector<std::string>::const_iterator i = _namespaceStack.begin();
+
+            for (; i != _namespaceStack.end(); i++)
+            {
+                ret += (*i);
+                ret += ".";
+            }
+            return ret.erase(ret.size() - 1, 1);
         }
     }
 }

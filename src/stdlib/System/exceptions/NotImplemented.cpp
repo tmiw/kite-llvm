@@ -40,6 +40,7 @@ namespace kite
                 void NotImplemented::InitializeClass()
                 {
                     class_object.parent = &exception::class_object;
+                    class_object.properties["__name"] = new System::string("System.exceptions.NotImplemented");
                     // TODO
                     //class_object.properties["__init____o"] =
                     //    new System::method((void*)kite_exception_init);

@@ -42,6 +42,7 @@ namespace kite
                 ("int__f", function_semantics(semantics::INTEGER, (void*)&(PREFIX_FLOAT_METHOD_NAME(int__f))))
                 ("float__f", function_semantics(semantics::FLOAT, (void*)&(PREFIX_FLOAT_METHOD_NAME(float__f))))
                 ("print__f", function_semantics(semantics::FLOAT, (void*)&(PREFIX_FLOAT_METHOD_NAME(print__f))))
+                ("print__o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_FLOAT_METHOD_NAME(print__o))))
                 ("obj__f", function_semantics(semantics::OBJECT, (void*)&(PREFIX_FLOAT_METHOD_NAME(obj__f))));
             
             bool fpnum::to_boolean()
@@ -93,6 +94,13 @@ double PREFIX_FLOAT_METHOD_NAME(print__f)(double val)
 {
     std::cout << val << std::endl;
     return val;
+}
+
+void *PREFIX_FLOAT_METHOD_NAME(print__o)(void *obj)
+{
+    System::fpnum *val = (System::fpnum*)obj;
+    std::cout << val->val << std::endl;
+    return obj;
 }
 
 void *PREFIX_FLOAT_METHOD_NAME(obj__f)(double val)

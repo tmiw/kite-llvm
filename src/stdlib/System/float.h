@@ -64,6 +64,7 @@ extern "C"
     int PREFIX_FLOAT_METHOD_NAME(int__f)(double val);
     double PREFIX_FLOAT_METHOD_NAME(float__f)(double val);
     double PREFIX_FLOAT_METHOD_NAME(print__f)(double val);
+    void *PREFIX_FLOAT_METHOD_NAME(print__o)(void *obj);
     void *PREFIX_FLOAT_METHOD_NAME(obj__f)(double val);
     void *PREFIX_FLOAT_METHOD_NAME(__op_not____o)(void *rhs);
 }

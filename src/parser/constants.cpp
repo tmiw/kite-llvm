@@ -13,6 +13,8 @@ namespace kite
             using ascii::char_;
             using qi::int_;
             using qi::double_;
+            using qi::real_parser;
+            using qi::strict_real_policies;
             using ascii::string;
             using namespace qi::labels;
 
@@ -29,7 +31,7 @@ namespace kite
                           ("\\r", '\r')("\\t", '\t')("\\v", '\v')("\\\\", '\\')
                           ("\\\'", '\'')("\\\"", '\"');
             numeric_value = 
-                (int_ | double_ | unesc_str | anon_method_statement) [ _val = _1 ]
+                (real_parser<double, strict_real_policies<double> >() | int_ | unesc_str | anon_method_statement) [ _val = _1 ]
                 | lit("true") [ _val = true ]
                 | lit("false") [ _val = false ];
             

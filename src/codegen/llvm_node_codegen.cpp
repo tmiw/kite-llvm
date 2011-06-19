@@ -249,6 +249,8 @@ namespace kite
  
             if (lhs_type == rhs_type && lhs_type != kite_type_to_llvm_type(semantics::OBJECT))
             {
+                // TODO: divide by zero handling
+                // TODO: short circuiting
                 semantics::builtin_types op_type = get_type(lhs);
                 IRBuilderFPtr ptr = codegen_map[CodeOperationKey(tree.op, op_type)];
                 if (ptr != NULL)

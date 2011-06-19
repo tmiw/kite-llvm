@@ -177,7 +177,7 @@ void *PREFIX_INTEGER_METHOD_NAME(__op_equals____oo)(void *lhs, void *rhs)
     System::integer *lhsInt = (System::integer*)lhs;
     System::integer *rhsInt = (System::integer*)rhs;
     verify_integer_type(lhsInt, rhsInt);
-    return (void*)(new kite::stdlib::System::integer(lhsInt->val == rhsInt->val));
+    return (void*)(new kite::stdlib::System::boolean(lhsInt->val == rhsInt->val));
 }
 
 void *PREFIX_INTEGER_METHOD_NAME(__op_nequals____oo)(void *lhs, void *rhs)
@@ -185,7 +185,7 @@ void *PREFIX_INTEGER_METHOD_NAME(__op_nequals____oo)(void *lhs, void *rhs)
     System::integer *lhsInt = (System::integer*)lhs;
     System::integer *rhsInt = (System::integer*)rhs;
     verify_integer_type(lhsInt, rhsInt);
-    return (void*)(new kite::stdlib::System::integer(lhsInt->val != rhsInt->val));
+    return (void*)(new kite::stdlib::System::boolean(lhsInt->val != rhsInt->val));
 }
 
 void *PREFIX_INTEGER_METHOD_NAME(__op_lt____oo)(void *lhs, void *rhs)
@@ -225,7 +225,7 @@ void *PREFIX_INTEGER_METHOD_NAME(__op_and____oo)(void *lhs, void *rhs)
     System::integer *leftObject = (System::integer*)lhs;
     System::integer *rightObject = (System::integer*)rhs;
     verify_integer_type(leftObject, rightObject);
-    return (void*)(new System::boolean(leftObject->val & rightObject->val));
+    return (void*)(new System::integer(leftObject->val & rightObject->val));
 }
 
 void *PREFIX_INTEGER_METHOD_NAME(__op_or____oo)(void *lhs, void *rhs)
@@ -233,7 +233,7 @@ void *PREFIX_INTEGER_METHOD_NAME(__op_or____oo)(void *lhs, void *rhs)
     System::integer *leftObject = (System::integer*)lhs;
     System::integer *rightObject = (System::integer*)rhs;
     verify_integer_type(leftObject, rightObject);
-    return (void*)(new System::boolean(leftObject->val | rightObject->val));
+    return (void*)(new System::integer(leftObject->val | rightObject->val));
 }
 
 void *PREFIX_INTEGER_METHOD_NAME(__op_not____o)(void *rhs)
@@ -248,7 +248,7 @@ void *PREFIX_INTEGER_METHOD_NAME(__op_xor____oo)(void *lhs, void *rhs)
     System::integer *rightObject = (System::integer*)rhs;
 
     verify_integer_type(leftObject, rightObject);
-    return (void*)(new System::boolean(leftObject->val ^ rightObject->val));
+    return (void*)(new System::integer(leftObject->val ^ rightObject->val));
 }
 
 void *PREFIX_INTEGER_METHOD_NAME(__op_lshift____oo)(void *lhs, void *rhs)

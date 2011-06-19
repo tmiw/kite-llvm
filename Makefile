@@ -138,6 +138,8 @@ src/stdlib/language/kite.o: src/stdlib/System/string.h
 src/stdlib/language/kite.o: src/stdlib/System/exceptions/NotImplemented.h
 src/stdlib/language/kite.o: src/stdlib/System/exceptions/exception.h
 src/stdlib/language/kite.o: src/stdlib/System/exceptions/InvalidArgument.h
+src/stdlib/language/kite.o: src/stdlib/System/exceptions/TypeMismatch.h
+src/stdlib/language/kite.o: src/stdlib/System/exceptions/DivideByZero.h
 src/stdlib/language/kite.o: src/codegen/syntax_tree_printer.h
 src/stdlib/language/kite.o: src/codegen/llvm_node_codegen.h
 src/stdlib/language/kite.o: src/stdlib/System/integer.h
@@ -158,6 +160,8 @@ src/stdlib/System/dynamic_object.o: src/codegen/llvm_compile_state.h
 src/stdlib/System/dynamic_object.o: src/stdlib/language/kite/syntax_tree.h
 src/stdlib/System/dynamic_object.o: src/semantics/syntax_tree.h
 src/stdlib/System/dynamic_object.o: src/semantics/constants.h
+src/stdlib/System/exceptions/DivideByZero.o: src/stdlib/System/exceptions/DivideByZero.h
+src/stdlib/System/exceptions/DivideByZero.o: src/stdlib/System/exceptions/exception.h
 src/stdlib/System/exceptions/exception.o: src/stdlib/language/kite.h
 src/stdlib/System/exceptions/exception.o: src/stdlib/System/dynamic_object.h
 src/stdlib/System/exceptions/exception.o: src/semantics/constants.h
@@ -183,6 +187,7 @@ src/stdlib/System/integer.o: src/semantics/constants.h
 src/stdlib/System/integer.o: src/stdlib/System/boolean.h
 src/stdlib/System/integer.o: src/stdlib/System/exceptions/TypeMismatch.h
 src/stdlib/System/integer.o: src/stdlib/System/exceptions/exception.h
+src/stdlib/System/integer.o: src/stdlib/System/exceptions/DivideByZero.h
 src/stdlib/System/method.o: src/stdlib/System/method.h
 src/stdlib/System/method.o: src/stdlib/System/object.h
 src/stdlib/System/method.o: src/semantics/constants.h

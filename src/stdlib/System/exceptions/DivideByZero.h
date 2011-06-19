@@ -42,7 +42,7 @@ namespace kite
                 {
                     static System::dynamic_object class_object;
                     
-                    NotImplemented(std::string message = "Division by zero attempted")
+                    DivideByZero(std::string message = "Division by zero attempted")
                         : exception(message)
                     {
                         parent = &class_object;

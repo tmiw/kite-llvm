@@ -42,7 +42,9 @@ namespace kite
         typedef std::pair<semantics::code_operation, semantics::builtin_types> CodeOperationKey;
         typedef std::map<CodeOperationKey, IRBuilderFPtr> CodeOperationMap;
         typedef std::map<semantics::code_operation, std::string> OperatorMethodsMap;
-
+        typedef Value *(IRBuilder<>::*IRBuilderNUWFPtr)(Value*,Value*,const Twine&,bool,bool);
+        typedef Value *(IRBuilder<>::*IRBuilderRShiftFPtr)(Value*,Value*,const Twine&,bool);
+        
         static OperatorMethodsMap operator_map = map_list_of
             (semantics::ADD, "__op_plus__")
             (semantics::SUBTRACT, "__op_minus__")
@@ -70,18 +72,18 @@ namespace kite
             (semantics::REDUCE, "__op_reduce__");
 
         static CodeOperationMap codegen_map = map_list_of
-            (CodeOperationKey(semantics::ADD, semantics::INTEGER), &IRBuilder<>::CreateAdd)
+            (CodeOperationKey(semantics::ADD, semantics::INTEGER), (IRBuilderFPtr)(IRBuilderNUWFPtr)&IRBuilder<>::CreateAdd)
             (CodeOperationKey(semantics::ADD, semantics::FLOAT), &IRBuilder<>::CreateFAdd)
-            (CodeOperationKey(semantics::SUBTRACT, semantics::INTEGER), &IRBuilder<>::CreateSub)
+            (CodeOperationKey(semantics::SUBTRACT, semantics::INTEGER), (IRBuilderFPtr)(IRBuilderNUWFPtr)&IRBuilder<>::CreateSub)
             (CodeOperationKey(semantics::SUBTRACT, semantics::FLOAT), &IRBuilder<>::CreateFSub)
-            (CodeOperationKey(semantics::MULTIPLY, semantics::INTEGER), &IRBuilder<>::CreateMul)
+            (CodeOperationKey(semantics::MULTIPLY, semantics::INTEGER), (IRBuilderFPtr)(IRBuilderNUWFPtr)&IRBuilder<>::CreateMul)
             (CodeOperationKey(semantics::MULTIPLY, semantics::FLOAT), &IRBuilder<>::CreateFMul)
-            (CodeOperationKey(semantics::DIVIDE, semantics::INTEGER), &IRBuilder<>::CreateSDiv)
+            (CodeOperationKey(semantics::DIVIDE, semantics::INTEGER), (IRBuilderFPtr)(IRBuilderRShiftFPtr)&IRBuilder<>::CreateSDiv)
             (CodeOperationKey(semantics::DIVIDE, semantics::FLOAT), &IRBuilder<>::CreateFDiv)
             (CodeOperationKey(semantics::MODULO, semantics::INTEGER), &IRBuilder<>::CreateSRem)
             (CodeOperationKey(semantics::MODULO, semantics::FLOAT), &IRBuilder<>::CreateFRem)
-            (CodeOperationKey(semantics::LEFT_SHIFT, semantics::INTEGER), IRBuilderFPtr(&IRBuilder<>::CreateShl))
-            (CodeOperationKey(semantics::RIGHT_SHIFT, semantics::INTEGER), IRBuilderFPtr(&IRBuilder<>::CreateLShr))
+            (CodeOperationKey(semantics::LEFT_SHIFT, semantics::INTEGER), (IRBuilderFPtr)(IRBuilderNUWFPtr)&IRBuilder<>::CreateShl)
+            (CodeOperationKey(semantics::RIGHT_SHIFT, semantics::INTEGER), (IRBuilderFPtr)(IRBuilderRShiftFPtr)&IRBuilder<>::CreateLShr)
             (CodeOperationKey(semantics::LESS_THAN, semantics::INTEGER), &IRBuilder<>::CreateICmpSLT)
             (CodeOperationKey(semantics::LESS_THAN, semantics::FLOAT), &IRBuilder<>::CreateFCmpULT)
             (CodeOperationKey(semantics::LESS_OR_EQUALS, semantics::INTEGER), &IRBuilder<>::CreateICmpSLE)

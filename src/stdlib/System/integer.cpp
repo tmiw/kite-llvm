@@ -29,6 +29,7 @@
 #include <boost/assign.hpp>
 #include "integer.h"
 #include "boolean.h"
+#include "exceptions/TypeMismatch.h"
 using namespace boost::assign;
  
 namespace kite
@@ -39,6 +40,7 @@ namespace kite
         {
             object_method_map integer::method_map = map_list_of
                 ("__op_plus____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_plus____oo))))
+                ("__op_minus____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_minus____oo))))
                 ("__op_lt____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_lt____oo))))
                 ("__op_not____o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_not____o))))
                 ("__op_unminus____o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_unminus____o))))
@@ -84,13 +86,55 @@ namespace kite
 
 using namespace kite::stdlib;
 
+static void verify_integer_type(System::integer *left, System::integer *right)
+{
+    if (left->type != right->type)
+    {
+        System::exceptions::exception *exc = new System::exceptions::TypeMismatch("integer expected");
+        exc->throw_exception();
+    }
+}
+
+void *PREFIX_INTEGER_METHOD_NAME(__op_plus____oo)(void *lhs, void *rhs)
+{
+    System::integer *lhsInt = (System::integer*)lhs;
+    System::integer *rhsInt = (System::integer*)rhs;
+    verify_integer_type(lhsInt, rhsInt);
+    return (void*)(new kite::stdlib::System::integer(lhsInt->val + rhsInt->val));
+}
+
+void *PREFIX_INTEGER_METHOD_NAME(__op_minus____oo)(void *lhs, void *rhs)
+{
+    System::integer *lhsInt = (System::integer*)lhs;
+    System::integer *rhsInt = (System::integer*)rhs;
+    verify_integer_type(lhsInt, rhsInt);
+    return (void*)(new kite::stdlib::System::integer(lhsInt->val - rhsInt->val));
+}
+
+void *PREFIX_INTEGER_METHOD_NAME(__op_not____o)(void *rhs)
+{
+    System::integer *rhsInt = (System::integer*)rhs;
+    return (void*)(new kite::stdlib::System::integer(~rhsInt->val));
+}
+
+void *PREFIX_INTEGER_METHOD_NAME(__op_unminus____o)(void *rhs)
+{
+    System::integer *rhsInt = (System::integer*)rhs;
+    return (void*)(new kite::stdlib::System::integer(-rhsInt->val));
+}
+
+void *PREFIX_INTEGER_METHOD_NAME(__op_unplus____o)(void *rhs)
+{
+    System::integer *rhsInt = (System::integer*)rhs;
+    return (void*)(new kite::stdlib::System::integer(rhsInt->val));
+}
+
 void *PREFIX_INTEGER_METHOD_NAME(__op_lt____oo)(void *lhs, void *rhs)
 {
     System::integer *leftObject = (System::integer*)lhs;
     System::integer *rightObject = (System::integer*)rhs;
 
-    // TODO
-    assert(leftObject->type == rightObject->type);
+    verify_integer_type(leftObject, rightObject);
     return (void*)(new System::boolean(leftObject->val < rightObject->val));
 }
 
@@ -144,31 +188,5 @@ void *PREFIX_INTEGER_METHOD_NAME(obj__i)(int val)
 void *PREFIX_INTEGER_METHOD_NAME(obj__o)(void *val)
 {
     return val;
-}
-
-void *PREFIX_INTEGER_METHOD_NAME(__op_plus____oo)(void *lhs, void *rhs)
-{
-    System::integer *lhsInt = (System::integer*)lhs;
-    System::integer *rhsInt = (System::integer*)rhs;
-    assert(lhsInt->type == rhsInt->type); // TODO
-    return (void*)(new kite::stdlib::System::integer(lhsInt->val + rhsInt->val));
-}
-
-void *PREFIX_INTEGER_METHOD_NAME(__op_not____o)(void *rhs)
-{
-    System::integer *rhsInt = (System::integer*)rhs;
-    return (void*)(new kite::stdlib::System::integer(~rhsInt->val));
-}
-
-void *PREFIX_INTEGER_METHOD_NAME(__op_unminus____o)(void *rhs)
-{
-    System::integer *rhsInt = (System::integer*)rhs;
-    return (void*)(new kite::stdlib::System::integer(-rhsInt->val));
-}
-
-void *PREFIX_INTEGER_METHOD_NAME(__op_unplus____o)(void *rhs)
-{
-    System::integer *rhsInt = (System::integer*)rhs;
-    return (void*)(new kite::stdlib::System::integer(rhsInt->val));
 }
 

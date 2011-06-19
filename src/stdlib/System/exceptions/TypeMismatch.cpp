@@ -24,15 +24,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
- 
-#ifndef KITE_STDLIB__SYSTEM__INTEGER_H
-#define KITE_STDLIB__SYSTEM__INTEGER_H
 
-#include "object.h"
-
-#define INTEGER_METHOD_PREFIX System__integer__
-#define PREFIX_INTEGER_METHOD_NAME(name) System__integer__ ## name
-#define INTEGER_METHOD_PREFIX_AS_STRING "System__integer__"
+#include "TypeMismatch.h"
 
 namespace kite
 {
@@ -40,43 +33,19 @@ namespace kite
     {
         namespace System
         {
-            struct integer : System::object
+            namespace exceptions
             {
-                int val;
+                System::dynamic_object TypeMismatch::class_object;
                 
-                integer() : System::object(semantics::INTEGER), val(0) { }
-                integer(int val) : System::object(semantics::INTEGER), val(val) { }
-                
-                static object_method_map method_map;
-                bool to_boolean();
-                int to_integer();
-                double to_float();
-                int print();
-                System::object *to_object();
-            };
+                void TypeMismatch::InitializeClass()
+                {
+                    class_object.parent = &exception::class_object;
+                    class_object.properties["__name"] = new System::string("System.exceptions.TypeMismatch");
+                    // TODO
+                    //class_object.properties["__init____o"] =
+                    //    new System::method((void*)kite_exception_init);
+                }
+            }
         }
     }
 }
-
-extern "C"
-{
-    bool PREFIX_INTEGER_METHOD_NAME(bool__i)(int val);
-    int PREFIX_INTEGER_METHOD_NAME(int__i)(int val);
-    double PREFIX_INTEGER_METHOD_NAME(float__i)(int val);
-    int PREFIX_INTEGER_METHOD_NAME(print__i)(int val);
-    void *PREFIX_INTEGER_METHOD_NAME(obj__i)(int val);
-    bool PREFIX_INTEGER_METHOD_NAME(bool__o)(void *val);
-    int PREFIX_INTEGER_METHOD_NAME(int__o)(void *val);
-    double PREFIX_INTEGER_METHOD_NAME(float__o)(void *val);
-    void *PREFIX_INTEGER_METHOD_NAME(print__o)(void *val);
-    void *PREFIX_INTEGER_METHOD_NAME(obj__o)(void *val);
-
-    void *PREFIX_INTEGER_METHOD_NAME(__op_plus____oo)(void *lhs, void *rhs);
-    void *PREFIX_INTEGER_METHOD_NAME(__op_minus____oo)(void *lhs, void *rhs);
-    void *PREFIX_INTEGER_METHOD_NAME(__op_lt____oo)(void *lhs, void *rhs);
-    void *PREFIX_INTEGER_METHOD_NAME(__op_not____o)(void *rhs);
-    void *PREFIX_INTEGER_METHOD_NAME(__op_unminus____o)(void *rhs);
-    void *PREFIX_INTEGER_METHOD_NAME(__op_unplus____o)(void *rhs);
-}
-
-#endif

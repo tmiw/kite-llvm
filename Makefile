@@ -16,6 +16,7 @@ COMMON_OBJS=src/codegen/llvm_compile_state.o src/codegen/llvm_node_codegen.o \
 	 src/stdlib/System/dynamic_object.o src/stdlib/System/method.o src/stdlib/language/kite.o \
 	 src/stdlib/language/kite/syntax_tree.o src/stdlib/System/exceptions/exception.o \
 	 src/stdlib/System/exceptions/NotImplemented.o src/stdlib/System/exceptions/InvalidArgument.o \
+	 src/stdlib/System/exceptions/TypeMismatch.o \
 	 src/parser/constants.o src/parser/make.o src/parser/assignment.o src/parser/bitwise.o \
 	 src/parser/comparison.o src/parser/math.o src/parser/map_reduce.o src/parser/classes.o  \
 	 src/parser/decide.o src/parser/deref.o src/parser/grouping.o \
@@ -171,6 +172,8 @@ src/stdlib/System/exceptions/InvalidArgument.o: src/stdlib/System/exceptions/Inv
 src/stdlib/System/exceptions/InvalidArgument.o: src/stdlib/System/exceptions/exception.h
 src/stdlib/System/exceptions/NotImplemented.o: src/stdlib/System/exceptions/NotImplemented.h
 src/stdlib/System/exceptions/NotImplemented.o: src/stdlib/System/exceptions/exception.h
+src/stdlib/System/exceptions/TypeMismatch.o: src/stdlib/System/exceptions/TypeMismatch.h
+src/stdlib/System/exceptions/TypeMismatch.o: src/stdlib/System/exceptions/exception.h
 src/stdlib/System/float.o: src/stdlib/System/float.h
 src/stdlib/System/float.o: src/stdlib/System/object.h
 src/stdlib/System/float.o: src/semantics/constants.h
@@ -178,6 +181,8 @@ src/stdlib/System/integer.o: src/stdlib/System/integer.h
 src/stdlib/System/integer.o: src/stdlib/System/object.h
 src/stdlib/System/integer.o: src/semantics/constants.h
 src/stdlib/System/integer.o: src/stdlib/System/boolean.h
+src/stdlib/System/integer.o: src/stdlib/System/exceptions/TypeMismatch.h
+src/stdlib/System/integer.o: src/stdlib/System/exceptions/exception.h
 src/stdlib/System/method.o: src/stdlib/System/method.h
 src/stdlib/System/method.o: src/stdlib/System/object.h
 src/stdlib/System/method.o: src/semantics/constants.h

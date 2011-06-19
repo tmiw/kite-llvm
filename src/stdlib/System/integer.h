@@ -73,10 +73,23 @@ extern "C"
 
     void *PREFIX_INTEGER_METHOD_NAME(__op_plus____oo)(void *lhs, void *rhs);
     void *PREFIX_INTEGER_METHOD_NAME(__op_minus____oo)(void *lhs, void *rhs);
-    void *PREFIX_INTEGER_METHOD_NAME(__op_lt____oo)(void *lhs, void *rhs);
-    void *PREFIX_INTEGER_METHOD_NAME(__op_not____o)(void *rhs);
+    void *PREFIX_INTEGER_METHOD_NAME(__op_multiply____oo)(void *lhs, void *rhs);
+    void *PREFIX_INTEGER_METHOD_NAME(__op_divide____oo)(void *lhs, void *rhs);
+    void *PREFIX_INTEGER_METHOD_NAME(__op_mod____oo)(void *lhs, void *rhs);
     void *PREFIX_INTEGER_METHOD_NAME(__op_unminus____o)(void *rhs);
     void *PREFIX_INTEGER_METHOD_NAME(__op_unplus____o)(void *rhs);
+    void *PREFIX_INTEGER_METHOD_NAME(__op_equals____oo)(void *lhs, void *rhs);
+    void *PREFIX_INTEGER_METHOD_NAME(__op_nequals____oo)(void *lhs, void *rhs);
+    void *PREFIX_INTEGER_METHOD_NAME(__op_lt____oo)(void *lhs, void *rhs);
+    void *PREFIX_INTEGER_METHOD_NAME(__op_gt____oo)(void *lhs, void *rhs);
+    void *PREFIX_INTEGER_METHOD_NAME(__op_leq____oo)(void *lhs, void *rhs);
+    void *PREFIX_INTEGER_METHOD_NAME(__op_geq____oo)(void *lhs, void *rhs);
+    void *PREFIX_INTEGER_METHOD_NAME(__op_and____oo)(void *lhs, void *rhs);
+    void *PREFIX_INTEGER_METHOD_NAME(__op_or____oo)(void *lhs, void *rhs);
+    void *PREFIX_INTEGER_METHOD_NAME(__op_not____o)(void *rhs);
+    void *PREFIX_INTEGER_METHOD_NAME(__op_xor____oo)(void *lhs, void *rhs);
+    void *PREFIX_INTEGER_METHOD_NAME(__op_lshift____oo)(void *lhs, void *rhs);
+    void *PREFIX_INTEGER_METHOD_NAME(__op_rshift____oo)(void *lhs, void *rhs);
 }
 
 #endif

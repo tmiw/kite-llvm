@@ -16,7 +16,7 @@ COMMON_OBJS=src/codegen/llvm_compile_state.o src/codegen/llvm_node_codegen.o \
 	 src/stdlib/System/dynamic_object.o src/stdlib/System/method.o src/stdlib/language/kite.o \
 	 src/stdlib/language/kite/syntax_tree.o src/stdlib/System/exceptions/exception.o \
 	 src/stdlib/System/exceptions/NotImplemented.o src/stdlib/System/exceptions/InvalidArgument.o \
-	 src/stdlib/System/exceptions/TypeMismatch.o \
+	 src/stdlib/System/exceptions/TypeMismatch.o src/stdlib/System/exceptions/DivideByZero.o \
 	 src/parser/constants.o src/parser/make.o src/parser/assignment.o src/parser/bitwise.o \
 	 src/parser/comparison.o src/parser/math.o src/parser/map_reduce.o src/parser/classes.o  \
 	 src/parser/decide.o src/parser/deref.o src/parser/grouping.o \

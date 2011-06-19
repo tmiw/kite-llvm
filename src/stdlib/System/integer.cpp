@@ -30,6 +30,7 @@
 #include "integer.h"
 #include "boolean.h"
 #include "exceptions/TypeMismatch.h"
+#include "exceptions/DivideByZero.h"
 using namespace boost::assign;
  
 namespace kite
@@ -41,10 +42,23 @@ namespace kite
             object_method_map integer::method_map = map_list_of
                 ("__op_plus____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_plus____oo))))
                 ("__op_minus____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_minus____oo))))
-                ("__op_lt____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_lt____oo))))
-                ("__op_not____o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_not____o))))
+                ("__op_multiply____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_multiply____oo))))
+                ("__op_divide____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_divide____oo))))
+                ("__op_mod____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_mod____oo))))
                 ("__op_unminus____o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_unminus____o))))
                 ("__op_unplus____o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_unplus____o))))
+                ("__op_equals____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_equals____oo))))
+                ("__op_nequals____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_nequals____oo))))
+                ("__op_lt____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_lt____oo))))
+                ("__op_gt____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_gt____oo))))
+                ("__op_leq____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_leq____oo))))
+                ("__op_geq____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_geq____oo))))
+                ("__op_and____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_and____oo))))
+                ("__op_or____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_or____oo))))
+                ("__op_not____o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_not____o))))
+                ("__op_xor____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_xor____oo))))
+                ("__op_lshift____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_lshift____oo))))
+                ("__op_rshift____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_rshift____oo))))
                 ("bool__i", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_INTEGER_METHOD_NAME(bool__i))))
                 ("bool__o", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_INTEGER_METHOD_NAME(bool__o))))
                 ("int__i", function_semantics(semantics::INTEGER, (void*)&(PREFIX_INTEGER_METHOD_NAME(int__i))))
@@ -95,6 +109,15 @@ static void verify_integer_type(System::integer *left, System::integer *right)
     }
 }
 
+static void verify_divisor_not_zero(System::integer *right)
+{
+    if (right->val == 0)
+    {
+        System::exceptions::exception *exc = new System::exceptions::DivideByZero();
+        exc->throw_exception();
+    }
+}
+
 void *PREFIX_INTEGER_METHOD_NAME(__op_plus____oo)(void *lhs, void *rhs)
 {
     System::integer *lhsInt = (System::integer*)lhs;
@@ -111,10 +134,30 @@ void *PREFIX_INTEGER_METHOD_NAME(__op_minus____oo)(void *lhs, void *rhs)
     return (void*)(new kite::stdlib::System::integer(lhsInt->val - rhsInt->val));
 }
 
-void *PREFIX_INTEGER_METHOD_NAME(__op_not____o)(void *rhs)
+void *PREFIX_INTEGER_METHOD_NAME(__op_multiply____oo)(void *lhs, void *rhs)
 {
+    System::integer *lhsInt = (System::integer*)lhs;
     System::integer *rhsInt = (System::integer*)rhs;
-    return (void*)(new kite::stdlib::System::integer(~rhsInt->val));
+    verify_integer_type(lhsInt, rhsInt);
+    return (void*)(new kite::stdlib::System::integer(lhsInt->val * rhsInt->val));
+}
+
+void *PREFIX_INTEGER_METHOD_NAME(__op_divide____oo)(void *lhs, void *rhs)
+{
+    System::integer *lhsInt = (System::integer*)lhs;
+    System::integer *rhsInt = (System::integer*)rhs;
+    verify_integer_type(lhsInt, rhsInt);
+    verify_divisor_not_zero(rhsInt);
+    return (void*)(new kite::stdlib::System::integer(lhsInt->val / rhsInt->val));
+}
+
+void *PREFIX_INTEGER_METHOD_NAME(__op_mod____oo)(void *lhs, void *rhs)
+{
+    System::integer *lhsInt = (System::integer*)lhs;
+    System::integer *rhsInt = (System::integer*)rhs;
+    verify_integer_type(lhsInt, rhsInt);
+    verify_divisor_not_zero(rhsInt);
+    return (void*)(new kite::stdlib::System::integer(lhsInt->val % rhsInt->val));
 }
 
 void *PREFIX_INTEGER_METHOD_NAME(__op_unminus____o)(void *rhs)
@@ -129,13 +172,99 @@ void *PREFIX_INTEGER_METHOD_NAME(__op_unplus____o)(void *rhs)
     return (void*)(new kite::stdlib::System::integer(rhsInt->val));
 }
 
+void *PREFIX_INTEGER_METHOD_NAME(__op_equals____oo)(void *lhs, void *rhs)
+{
+    System::integer *lhsInt = (System::integer*)lhs;
+    System::integer *rhsInt = (System::integer*)rhs;
+    verify_integer_type(lhsInt, rhsInt);
+    return (void*)(new kite::stdlib::System::integer(lhsInt->val == rhsInt->val));
+}
+
+void *PREFIX_INTEGER_METHOD_NAME(__op_nequals____oo)(void *lhs, void *rhs)
+{
+    System::integer *lhsInt = (System::integer*)lhs;
+    System::integer *rhsInt = (System::integer*)rhs;
+    verify_integer_type(lhsInt, rhsInt);
+    return (void*)(new kite::stdlib::System::integer(lhsInt->val != rhsInt->val));
+}
+
 void *PREFIX_INTEGER_METHOD_NAME(__op_lt____oo)(void *lhs, void *rhs)
+{
+    System::integer *leftObject = (System::integer*)lhs;
+    System::integer *rightObject = (System::integer*)rhs;
+    verify_integer_type(leftObject, rightObject);
+    return (void*)(new System::boolean(leftObject->val < rightObject->val));
+}
+
+void *PREFIX_INTEGER_METHOD_NAME(__op_gt____oo)(void *lhs, void *rhs)
+{
+    System::integer *leftObject = (System::integer*)lhs;
+    System::integer *rightObject = (System::integer*)rhs;
+    verify_integer_type(leftObject, rightObject);
+    return (void*)(new System::boolean(leftObject->val > rightObject->val));
+}
+
+void *PREFIX_INTEGER_METHOD_NAME(__op_leq____oo)(void *lhs, void *rhs)
+{
+    System::integer *leftObject = (System::integer*)lhs;
+    System::integer *rightObject = (System::integer*)rhs;
+    verify_integer_type(leftObject, rightObject);
+    return (void*)(new System::boolean(leftObject->val <= rightObject->val));
+}
+
+void *PREFIX_INTEGER_METHOD_NAME(__op_geq____oo)(void *lhs, void *rhs)
+{
+    System::integer *leftObject = (System::integer*)lhs;
+    System::integer *rightObject = (System::integer*)rhs;
+    verify_integer_type(leftObject, rightObject);
+    return (void*)(new System::boolean(leftObject->val >= rightObject->val));
+}
+
+void *PREFIX_INTEGER_METHOD_NAME(__op_and____oo)(void *lhs, void *rhs)
+{
+    System::integer *leftObject = (System::integer*)lhs;
+    System::integer *rightObject = (System::integer*)rhs;
+    verify_integer_type(leftObject, rightObject);
+    return (void*)(new System::boolean(leftObject->val & rightObject->val));
+}
+
+void *PREFIX_INTEGER_METHOD_NAME(__op_or____oo)(void *lhs, void *rhs)
+{
+    System::integer *leftObject = (System::integer*)lhs;
+    System::integer *rightObject = (System::integer*)rhs;
+    verify_integer_type(leftObject, rightObject);
+    return (void*)(new System::boolean(leftObject->val | rightObject->val));
+}
+
+void *PREFIX_INTEGER_METHOD_NAME(__op_not____o)(void *rhs)
+{
+    System::integer *rhsInt = (System::integer*)rhs;
+    return (void*)(new kite::stdlib::System::integer(~rhsInt->val));
+}
+
+void *PREFIX_INTEGER_METHOD_NAME(__op_xor____oo)(void *lhs, void *rhs)
 {
     System::integer *leftObject = (System::integer*)lhs;
     System::integer *rightObject = (System::integer*)rhs;
 
     verify_integer_type(leftObject, rightObject);
-    return (void*)(new System::boolean(leftObject->val < rightObject->val));
+    return (void*)(new System::boolean(leftObject->val ^ rightObject->val));
+}
+
+void *PREFIX_INTEGER_METHOD_NAME(__op_lshift____oo)(void *lhs, void *rhs)
+{
+    System::integer *lhsInt = (System::integer*)lhs;
+    System::integer *rhsInt = (System::integer*)rhs;
+    verify_integer_type(lhsInt, rhsInt);
+    return (void*)(new kite::stdlib::System::integer(lhsInt->val << rhsInt->val));
+}
+
+void *PREFIX_INTEGER_METHOD_NAME(__op_rshift____oo)(void *lhs, void *rhs)
+{
+    System::integer *lhsInt = (System::integer*)lhs;
+    System::integer *rhsInt = (System::integer*)rhs;
+    verify_integer_type(lhsInt, rhsInt);
+    return (void*)(new kite::stdlib::System::integer(lhsInt->val >> rhsInt->val));
 }
 
 bool PREFIX_INTEGER_METHOD_NAME(bool__i)(int val)

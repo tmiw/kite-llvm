@@ -242,80 +242,120 @@ namespace kite
         Value *llvm_node_codegen::codegen_binary_op(semantics::syntax_tree const &tree) const
         {
             Value *lhs = boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
-            Value *rhs = boost::apply_visitor(llvm_node_codegen(state), tree.children[1]);
+            Value *rhs;
             Value *ret = NULL;
             const Type *lhs_type = lhs->getType();
-            const Type *rhs_type = rhs->getType();
- 
-            if (lhs_type == rhs_type && lhs_type != kite_type_to_llvm_type(semantics::OBJECT))
+            const Type *rhs_type;
+            
+            IRBuilder<> &builder = state.module_builder();
+            BasicBlock *currentBB = builder.GetInsertBlock();
+            Function *currentFunc = currentBB->getParent();
+            Module *module = state.current_module();
+            
+            if 
+                ((tree.op == semantics::AND || tree.op == semantics::OR) &&
+                 get_type(lhs) == semantics::BOOLEAN)
             {
-                if ((get_type(lhs) == semantics::INTEGER || get_type(lhs) == semantics::FLOAT) &&
-                    (tree.op == semantics::DIVIDE || tree.op == semantics::MODULO))
+                // Short circuiting special handling.
+                BasicBlock *do_other = BasicBlock::Create(getGlobalContext(), "do_other", currentFunc);
+                BasicBlock *collect_result = BasicBlock::Create(getGlobalContext(), "collect_result", currentFunc);
+                if (tree.op == semantics::AND)
                 {
-                    // Divide by zero special handling.
-                    IRBuilder<> &builder = state.module_builder();
-                    BasicBlock *currentBB = builder.GetInsertBlock();
-                    Function *currentFunc = currentBB->getParent();
-                    Module *module = state.current_module();
-                    
-                    Value *valAsInt = rhs, *result_eqzero, *result_neqzero;
-                    if (get_type(lhs) == semantics::FLOAT) valAsInt = builder.CreateFPToSI(rhs, kite_type_to_llvm_type(semantics::INTEGER));
-                    
-                    BasicBlock *neq_zero = BasicBlock::Create(getGlobalContext(), "neq_zero", currentFunc);
-                    BasicBlock *eq_zero = BasicBlock::Create(getGlobalContext(), "eq_zero", currentFunc);
-                    BasicBlock *div_result = BasicBlock::Create(getGlobalContext(), "div_result", currentFunc);
-                    Value *cond = builder.CreateICmpEQ(valAsInt, ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
-                    builder.CreateCondBr(cond, eq_zero, neq_zero);
-                    
-                    builder.SetInsertPoint(eq_zero);
-                    std::vector<const Type*> parameterTypes;
-                    const FunctionType *ftPtrLookup = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), parameterTypes, false);
-                    Function *funPtrLookup = Function::Create(ftPtrLookup, Function::ExternalLinkage, "kite_exception_raise_div_by_zero", module);
-                    if (funPtrLookup->getName() != "kite_exception_raise_div_by_zero")
-                    {  
-                        funPtrLookup->eraseFromParent();
-                        funPtrLookup = module->getFunction("kite_exception_raise_div_by_zero");
-                    }
-                    builder.CreateCall(funPtrLookup);
-                    if (get_type(lhs) == semantics::FLOAT) result_eqzero = ConstantFP::get(getGlobalContext(), APFloat(0.0));
-                    else result_eqzero = ConstantInt::get(getGlobalContext(), APInt(32, 0, true));
-                    builder.CreateBr(div_result);
-                    
-                    builder.SetInsertPoint(neq_zero);
-                    semantics::builtin_types op_type = get_type(lhs);
-                    IRBuilderFPtr ptr = codegen_map[CodeOperationKey(tree.op, op_type)];
-                    if (ptr != NULL)
-                    {
-                        result_neqzero = (state.module_builder().*ptr)(lhs, rhs, "");
-                        if (isa<UndefValue>(result_neqzero))
-                        {
-                            result_neqzero = NULL;
-                        }
-                    }
-                    if (result_neqzero == NULL)
-                    {
-                        if (get_type(lhs) == semantics::FLOAT) result_neqzero = ConstantFP::get(getGlobalContext(), APFloat(0.0));
-                        else result_neqzero = ConstantInt::get(getGlobalContext(), APInt(32, 0, true));
-                    }
-                    builder.CreateBr(div_result);
-                    
-                    builder.SetInsertPoint(div_result);
-                    ret = builder.CreatePHI(lhs_type);
-                    ((PHINode*)ret)->addIncoming(result_neqzero, neq_zero);
-                    ((PHINode*)ret)->addIncoming(result_eqzero, eq_zero);
+                    builder.CreateCondBr(lhs, do_other, collect_result);
                 }
                 else
                 {
-                    // TODO: short circuiting
-                    semantics::builtin_types op_type = get_type(lhs);
-                    IRBuilderFPtr ptr = codegen_map[CodeOperationKey(tree.op, op_type)];
-                    if (ptr != NULL)
+                    builder.CreateCondBr(lhs, collect_result, do_other);
+                }
+                
+                builder.SetInsertPoint(do_other);
+                semantics::builtin_types op_type = get_type(lhs);
+                IRBuilderFPtr ptr = codegen_map[CodeOperationKey(tree.op, op_type)];
+                rhs = boost::apply_visitor(llvm_node_codegen(state), tree.children[1]);
+                if (get_type(rhs) != semantics::BOOLEAN)
+                {
+                    std::vector<Value*> params;
+                    params.push_back(rhs);
+                    rhs = generate_llvm_method_call(rhs, "bool", params);
+                }
+                Value *other_val = (state.module_builder().*ptr)(lhs, rhs, "");
+                builder.CreateBr(collect_result);
+                do_other = builder.GetInsertBlock();
+                
+                builder.SetInsertPoint(collect_result);
+                PHINode *phi = builder.CreatePHI(lhs_type);
+                phi->addIncoming(other_val, do_other);
+                phi->addIncoming(lhs, currentBB);
+                ret = phi;
+            }
+            else 
+            {
+                rhs = boost::apply_visitor(llvm_node_codegen(state), tree.children[1]);
+                rhs_type = rhs->getType();
+                if (lhs_type == rhs_type && lhs_type != kite_type_to_llvm_type(semantics::OBJECT))
+                {
+                    if ((get_type(lhs) == semantics::INTEGER || get_type(lhs) == semantics::FLOAT) &&
+                        (tree.op == semantics::DIVIDE || tree.op == semantics::MODULO))
                     {
-                        ret = (state.module_builder().*ptr)(lhs, rhs, "");
+                        // Divide by zero special handling.
+                        Value *valAsInt = rhs, *result_eqzero, *result_neqzero;
+                        if (get_type(lhs) == semantics::FLOAT) valAsInt = builder.CreateFPToSI(rhs, kite_type_to_llvm_type(semantics::INTEGER));
+                    
+                        BasicBlock *neq_zero = BasicBlock::Create(getGlobalContext(), "neq_zero", currentFunc);
+                        BasicBlock *eq_zero = BasicBlock::Create(getGlobalContext(), "eq_zero", currentFunc);
+                        BasicBlock *div_result = BasicBlock::Create(getGlobalContext(), "div_result", currentFunc);
+                        Value *cond = builder.CreateICmpEQ(valAsInt, ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
+                        builder.CreateCondBr(cond, eq_zero, neq_zero);
+                    
+                        builder.SetInsertPoint(eq_zero);
+                        std::vector<const Type*> parameterTypes;
+                        const FunctionType *ftPtrLookup = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), parameterTypes, false);
+                        Function *funPtrLookup = Function::Create(ftPtrLookup, Function::ExternalLinkage, "kite_exception_raise_div_by_zero", module);
+                        if (funPtrLookup->getName() != "kite_exception_raise_div_by_zero")
+                        {  
+                            funPtrLookup->eraseFromParent();
+                            funPtrLookup = module->getFunction("kite_exception_raise_div_by_zero");
+                        }
+                        builder.CreateCall(funPtrLookup);
+                        if (get_type(lhs) == semantics::FLOAT) result_eqzero = ConstantFP::get(getGlobalContext(), APFloat(0.0));
+                        else result_eqzero = ConstantInt::get(getGlobalContext(), APInt(32, 0, true));
+                        builder.CreateBr(div_result);
+                    
+                        builder.SetInsertPoint(neq_zero);
+                        semantics::builtin_types op_type = get_type(lhs);
+                        IRBuilderFPtr ptr = codegen_map[CodeOperationKey(tree.op, op_type)];
+                        if (ptr != NULL)
+                        {
+                            result_neqzero = (state.module_builder().*ptr)(lhs, rhs, "");
+                            if (isa<UndefValue>(result_neqzero))
+                            {
+                                result_neqzero = NULL;
+                            }
+                        }
+                        if (result_neqzero == NULL)
+                        {
+                            if (get_type(lhs) == semantics::FLOAT) result_neqzero = ConstantFP::get(getGlobalContext(), APFloat(0.0));
+                            else result_neqzero = ConstantInt::get(getGlobalContext(), APInt(32, 0, true));
+                        }
+                        builder.CreateBr(div_result);
+                    
+                        builder.SetInsertPoint(div_result);
+                        ret = builder.CreatePHI(lhs_type);
+                        ((PHINode*)ret)->addIncoming(result_neqzero, neq_zero);
+                        ((PHINode*)ret)->addIncoming(result_eqzero, eq_zero);
+                    }
+                    else
+                    {
+                        semantics::builtin_types op_type = get_type(lhs);
+                        IRBuilderFPtr ptr = codegen_map[CodeOperationKey(tree.op, op_type)];
+                        if (ptr != NULL)
+                        {
+                            ret = (state.module_builder().*ptr)(lhs, rhs, "");
+                        }
                     }
                 }
             }
-
+            
             if (ret == NULL)
             {
                 // Use method call to perform operation.
@@ -795,6 +835,7 @@ namespace kite
                     emptyList.push_back(result);
                     result = generate_llvm_method_call(result, "obj", emptyList);
                 }
+                actionBB = builder.GetInsertBlock();
                 decideResults.push_back(result);
                 decideBlocks.push_back(actionBB);
                 builder.CreateBr(endBB);

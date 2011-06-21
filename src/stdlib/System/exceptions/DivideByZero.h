@@ -55,4 +55,9 @@ namespace kite
     }
 }
 
+extern "C"
+{
+    void kite_exception_raise_div_by_zero();
+}
+
 #endif

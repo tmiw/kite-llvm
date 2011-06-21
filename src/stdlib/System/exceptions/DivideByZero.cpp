@@ -49,3 +49,11 @@ namespace kite
         }
     }
 }
+
+using namespace kite::stdlib;
+
+void kite_exception_raise_div_by_zero()
+{
+    System::exceptions::exception *exc = new System::exceptions::DivideByZero();
+    exc->throw_exception();
+}

@@ -130,6 +130,7 @@ namespace kite
                     }
 
                     //current_module->dump();
+                    verifyFunction(*function);
                     void *fptr = execution_engine->getPointerToFunction(function);
                     System::object *(*FP)(System::object *) = (System::object*(*)(System::object*))fptr;
                     return (*FP)(context);

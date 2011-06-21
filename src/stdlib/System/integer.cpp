@@ -113,8 +113,7 @@ static void verify_divisor_not_zero(System::integer *right)
 {
     if (right->val == 0)
     {
-        System::exceptions::exception *exc = new System::exceptions::DivideByZero();
-        exc->throw_exception();
+        kite_exception_raise_div_by_zero();
     }
 }
 

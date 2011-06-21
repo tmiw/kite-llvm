@@ -249,13 +249,70 @@ namespace kite
  
             if (lhs_type == rhs_type && lhs_type != kite_type_to_llvm_type(semantics::OBJECT))
             {
-                // TODO: divide by zero handling
-                // TODO: short circuiting
-                semantics::builtin_types op_type = get_type(lhs);
-                IRBuilderFPtr ptr = codegen_map[CodeOperationKey(tree.op, op_type)];
-                if (ptr != NULL)
+                if ((get_type(lhs) == semantics::INTEGER || get_type(lhs) == semantics::FLOAT) &&
+                    (tree.op == semantics::DIVIDE || tree.op == semantics::MODULO))
                 {
-                    ret = (state.module_builder().*ptr)(lhs, rhs, "");
+                    // Divide by zero special handling.
+                    IRBuilder<> &builder = state.module_builder();
+                    BasicBlock *currentBB = builder.GetInsertBlock();
+                    Function *currentFunc = currentBB->getParent();
+                    Module *module = state.current_module();
+                    
+                    Value *valAsInt = rhs, *result_eqzero, *result_neqzero;
+                    if (get_type(lhs) == semantics::FLOAT) valAsInt = builder.CreateFPToSI(rhs, kite_type_to_llvm_type(semantics::INTEGER));
+                    
+                    BasicBlock *neq_zero = BasicBlock::Create(getGlobalContext(), "neq_zero", currentFunc);
+                    BasicBlock *eq_zero = BasicBlock::Create(getGlobalContext(), "eq_zero", currentFunc);
+                    BasicBlock *div_result = BasicBlock::Create(getGlobalContext(), "div_result", currentFunc);
+                    Value *cond = builder.CreateICmpEQ(valAsInt, ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
+                    builder.CreateCondBr(cond, eq_zero, neq_zero);
+                    
+                    builder.SetInsertPoint(eq_zero);
+                    std::vector<const Type*> parameterTypes;
+                    const FunctionType *ftPtrLookup = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), parameterTypes, false);
+                    Function *funPtrLookup = Function::Create(ftPtrLookup, Function::ExternalLinkage, "kite_exception_raise_div_by_zero", module);
+                    if (funPtrLookup->getName() != "kite_exception_raise_div_by_zero")
+                    {  
+                        funPtrLookup->eraseFromParent();
+                        funPtrLookup = module->getFunction("kite_exception_raise_div_by_zero");
+                    }
+                    builder.CreateCall(funPtrLookup);
+                    if (get_type(lhs) == semantics::FLOAT) result_eqzero = ConstantFP::get(getGlobalContext(), APFloat(0.0));
+                    else result_eqzero = ConstantInt::get(getGlobalContext(), APInt(32, 0, true));
+                    builder.CreateBr(div_result);
+                    
+                    builder.SetInsertPoint(neq_zero);
+                    semantics::builtin_types op_type = get_type(lhs);
+                    IRBuilderFPtr ptr = codegen_map[CodeOperationKey(tree.op, op_type)];
+                    if (ptr != NULL)
+                    {
+                        result_neqzero = (state.module_builder().*ptr)(lhs, rhs, "");
+                        if (isa<UndefValue>(result_neqzero))
+                        {
+                            result_neqzero = NULL;
+                        }
+                    }
+                    if (result_neqzero == NULL)
+                    {
+                        if (get_type(lhs) == semantics::FLOAT) result_neqzero = ConstantFP::get(getGlobalContext(), APFloat(0.0));
+                        else result_neqzero = ConstantInt::get(getGlobalContext(), APInt(32, 0, true));
+                    }
+                    builder.CreateBr(div_result);
+                    
+                    builder.SetInsertPoint(div_result);
+                    ret = builder.CreatePHI(lhs_type);
+                    ((PHINode*)ret)->addIncoming(result_neqzero, neq_zero);
+                    ((PHINode*)ret)->addIncoming(result_eqzero, eq_zero);
+                }
+                else
+                {
+                    // TODO: short circuiting
+                    semantics::builtin_types op_type = get_type(lhs);
+                    IRBuilderFPtr ptr = codegen_map[CodeOperationKey(tree.op, op_type)];
+                    if (ptr != NULL)
+                    {
+                        ret = (state.module_builder().*ptr)(lhs, rhs, "");
+                    }
                 }
             }
 
@@ -798,6 +855,7 @@ namespace kite
             runRetList.push_back(run_ret);
             run_ret = generate_llvm_method_call(run_ret, "obj", runRetList);
             builder.CreateBr(end_block);
+            run_block = builder.GetInsertBlock();
             
             // Create catch block
             builder.SetInsertPoint(catch_block);
@@ -818,6 +876,7 @@ namespace kite
             catch_ret = generate_llvm_method_call(catch_ret, "obj", catchRetList);
             builder.CreateBr(end_block);
             sym_stack.erase("__exc");
+            catch_block = builder.GetInsertBlock();
             
             // Create cleanup block
             builder.SetInsertPoint(end_block);
@@ -1062,8 +1121,10 @@ namespace kite
                                 std::vector<Value*> castParams;
                                 castParams.push_back(v);
                                 paramsCopy[i] = generate_llvm_method_call(v, std::string("obj"), castParams);
+                                parameterTypes[i] = kite_type_to_llvm_type(semantics::OBJECT);
                             }
                         }
+                        ft = FunctionType::get(tmpType, parameterTypes, false);
                         
                         method_name = name + std::string("__");
                         for (int i = 0; i < paramsCopy.size(); i++)
@@ -1090,6 +1151,7 @@ namespace kite
                     paramValuesLookup.push_back(builder.CreateBitCast(self, PointerType::getUnqual(Type::getInt32Ty(getGlobalContext()))));
                     paramValuesLookup.push_back(builder.CreateGlobalStringPtr(name.c_str()));
                     paramValuesLookup.push_back(ConstantInt::get(getGlobalContext(), APInt(32, paramsCopy.size(), true)));
+                    FunctionType::get(tmpType, parameterTypes, false);
                     fptr = builder.CreateBitCast(
                         builder.CreateCall(
                             funPtrLookup,
@@ -1236,6 +1298,7 @@ namespace kite
 
             std::vector<const Type*> parameterTypes;
             parameterTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
+            parameterTypes.push_back(kite_type_to_llvm_type(semantics::INTEGER));
             
             const FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), parameterTypes, false);
             Function *funPtr = Function::Create(ft, Function::ExternalLinkage, "kite_method_alloc", module);

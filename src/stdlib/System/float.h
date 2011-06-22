@@ -61,6 +61,7 @@ namespace kite
 extern "C"
 {
     bool PREFIX_FLOAT_METHOD_NAME(bool__f)(double val);
+    bool PREFIX_FLOAT_METHOD_NAME(bool__o)(void *val);
     int PREFIX_FLOAT_METHOD_NAME(int__f)(double val);
     double PREFIX_FLOAT_METHOD_NAME(float__f)(double val);
     double PREFIX_FLOAT_METHOD_NAME(print__f)(double val);

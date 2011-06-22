@@ -26,8 +26,12 @@
  ****************************************************************************/
  
 #include <iostream>
+#include <cmath>
 #include <boost/assign.hpp>
 #include "float.h"
+#include "boolean.h"
+#include "exceptions/TypeMismatch.h"
+#include "exceptions/DivideByZero.h"
 using namespace boost::assign;
  
 namespace kite
@@ -37,6 +41,19 @@ namespace kite
         namespace System
         {
             object_method_map fpnum::method_map = map_list_of
+                ("__op_plus____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_FLOAT_METHOD_NAME(__op_plus____oo))))
+                ("__op_minus____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_FLOAT_METHOD_NAME(__op_minus____oo))))
+                ("__op_multiply____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_FLOAT_METHOD_NAME(__op_multiply____oo))))
+                ("__op_divide____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_FLOAT_METHOD_NAME(__op_divide____oo))))
+                ("__op_mod____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_FLOAT_METHOD_NAME(__op_mod____oo))))
+                ("__op_unminus____o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_FLOAT_METHOD_NAME(__op_unminus____o))))
+                ("__op_unplus____o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_FLOAT_METHOD_NAME(__op_unplus____o))))
+                ("__op_equals____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_FLOAT_METHOD_NAME(__op_equals____oo))))
+                ("__op_nequals____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_FLOAT_METHOD_NAME(__op_nequals____oo))))
+                ("__op_lt____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_FLOAT_METHOD_NAME(__op_lt____oo))))
+                ("__op_gt____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_FLOAT_METHOD_NAME(__op_gt____oo))))
+                ("__op_leq____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_FLOAT_METHOD_NAME(__op_leq____oo))))
+                ("__op_geq____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_FLOAT_METHOD_NAME(__op_geq____oo))))
                 ("__op_not____o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_FLOAT_METHOD_NAME(__op_not____o))))
                 ("bool__f", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_FLOAT_METHOD_NAME(bool__f))))
                 ("int__f", function_semantics(semantics::INTEGER, (void*)&(PREFIX_FLOAT_METHOD_NAME(int__f))))
@@ -121,4 +138,123 @@ void *PREFIX_FLOAT_METHOD_NAME(__op_not____o)(void *rhs)
         ret = new System::fpnum(0.0f);
     }
     return (void*)ret;
+}
+
+static void verify_float_type(System::fpnum *left, System::fpnum *right)
+{
+    if (left->type != right->type)
+    {
+        System::exceptions::exception *exc = new System::exceptions::TypeMismatch("float expected");
+        exc->throw_exception();
+    }
+}
+
+static void verify_divisor_not_zero(System::fpnum *right)
+{
+    if (right->val == 0)
+    {
+        kite_exception_raise_div_by_zero();
+    }
+}
+
+void *PREFIX_FLOAT_METHOD_NAME(__op_plus____oo)(void *lhs, void *rhs)
+{
+    System::fpnum *lhsInt = (System::fpnum*)lhs;
+    System::fpnum *rhsInt = (System::fpnum*)rhs;
+    verify_float_type(lhsInt, rhsInt);
+    return (void*)(new kite::stdlib::System::fpnum(lhsInt->val + rhsInt->val));
+}
+
+void *PREFIX_FLOAT_METHOD_NAME(__op_minus____oo)(void *lhs, void *rhs)
+{
+    System::fpnum *lhsInt = (System::fpnum*)lhs;
+    System::fpnum *rhsInt = (System::fpnum*)rhs;
+    verify_float_type(lhsInt, rhsInt);
+    return (void*)(new kite::stdlib::System::fpnum(lhsInt->val - rhsInt->val));
+}
+
+void *PREFIX_FLOAT_METHOD_NAME(__op_multiply____oo)(void *lhs, void *rhs)
+{
+    System::fpnum *lhsInt = (System::fpnum*)lhs;
+    System::fpnum *rhsInt = (System::fpnum*)rhs;
+    verify_float_type(lhsInt, rhsInt);
+    return (void*)(new kite::stdlib::System::fpnum(lhsInt->val * rhsInt->val));
+}
+
+void *PREFIX_FLOAT_METHOD_NAME(__op_divide____oo)(void *lhs, void *rhs)
+{
+    System::fpnum *lhsInt = (System::fpnum*)lhs;
+    System::fpnum *rhsInt = (System::fpnum*)rhs;
+    verify_float_type(lhsInt, rhsInt);
+    verify_divisor_not_zero(rhsInt);
+    return (void*)(new kite::stdlib::System::fpnum(lhsInt->val / rhsInt->val));
+}
+
+void *PREFIX_FLOAT_METHOD_NAME(__op_mod____oo)(void *lhs, void *rhs)
+{
+    System::fpnum *lhsInt = (System::fpnum*)lhs;
+    System::fpnum *rhsInt = (System::fpnum*)rhs;
+    verify_float_type(lhsInt, rhsInt);
+    verify_divisor_not_zero(rhsInt);
+    return (void*)(new kite::stdlib::System::fpnum(fmod(lhsInt->val, rhsInt->val)));
+}
+
+void *PREFIX_FLOAT_METHOD_NAME(__op_unminus____o)(void *rhs)
+{
+    System::fpnum *rhsInt = (System::fpnum*)rhs;
+    return (void*)(new kite::stdlib::System::fpnum(-rhsInt->val));
+}
+
+void *PREFIX_FLOAT_METHOD_NAME(__op_unplus____o)(void *rhs)
+{
+    System::fpnum *rhsInt = (System::fpnum*)rhs;
+    return (void*)(new kite::stdlib::System::fpnum(rhsInt->val));
+}
+
+void *PREFIX_FLOAT_METHOD_NAME(__op_equals____oo)(void *lhs, void *rhs)
+{
+    System::fpnum *lhsInt = (System::fpnum*)lhs;
+    System::fpnum *rhsInt = (System::fpnum*)rhs;
+    verify_float_type(lhsInt, rhsInt);
+    return (void*)(new kite::stdlib::System::boolean(lhsInt->val == rhsInt->val));
+}
+
+void *PREFIX_FLOAT_METHOD_NAME(__op_nequals____oo)(void *lhs, void *rhs)
+{
+    System::fpnum *lhsInt = (System::fpnum*)lhs;
+    System::fpnum *rhsInt = (System::fpnum*)rhs;
+    verify_float_type(lhsInt, rhsInt);
+    return (void*)(new kite::stdlib::System::boolean(lhsInt->val != rhsInt->val));
+}
+
+void *PREFIX_FLOAT_METHOD_NAME(__op_lt____oo)(void *lhs, void *rhs)
+{
+    System::fpnum *leftObject = (System::fpnum*)lhs;
+    System::fpnum *rightObject = (System::fpnum*)rhs;
+    verify_float_type(leftObject, rightObject);
+    return (void*)(new System::boolean(leftObject->val < rightObject->val));
+}
+
+void *PREFIX_FLOAT_METHOD_NAME(__op_gt____oo)(void *lhs, void *rhs)
+{
+    System::fpnum *leftObject = (System::fpnum*)lhs;
+    System::fpnum *rightObject = (System::fpnum*)rhs;
+    verify_float_type(leftObject, rightObject);
+    return (void*)(new System::boolean(leftObject->val > rightObject->val));
+}
+
+void *PREFIX_FLOAT_METHOD_NAME(__op_leq____oo)(void *lhs, void *rhs)
+{
+    System::fpnum *leftObject = (System::fpnum*)lhs;
+    System::fpnum *rightObject = (System::fpnum*)rhs;
+    verify_float_type(leftObject, rightObject);
+    return (void*)(new System::boolean(leftObject->val <= rightObject->val));
+}
+
+void *PREFIX_FLOAT_METHOD_NAME(__op_geq____oo)(void *lhs, void *rhs)
+{
+    System::fpnum *leftObject = (System::fpnum*)lhs;
+    System::fpnum *rightObject = (System::fpnum*)rhs;
+    verify_float_type(leftObject, rightObject);
+    return (void*)(new System::boolean(leftObject->val >= rightObject->val));
 }

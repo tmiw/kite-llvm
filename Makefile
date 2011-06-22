@@ -9,6 +9,7 @@ LLVM_LDFLAGS=`$(LLVM_CONFIG) --ldflags`
 LLVM_LIBS=`$(LLVM_CONFIG) --libs` 
 GC_LIBS=-lgc
 GC_LDFLAGS=-L/usr/lib
+MATH_LIBS=-lm
 COMMON_OBJS=src/codegen/llvm_compile_state.o src/codegen/llvm_node_codegen.o \
 	 src/codegen/syntax_tree_node_printer.o src/codegen/syntax_tree_printer.o \
 	 src/stdlib/System/integer.o src/stdlib/System/string.o \
@@ -42,10 +43,10 @@ clean:
 	rm -rf Makefile.bak `find ./ -name '*.o'` kite ikt
 
 kite: $(KITE_OBJS)
-	$(CC) $(CPPFLAGS) $(LDFLAGS) -o kite $(KITE_OBJS) $(LLVM_LDFLAGS) $(LLVM_LIBS) $(GC_LDFLAGS) $(GC_LIBS)
+	$(CC) $(CPPFLAGS) $(LDFLAGS) -o kite $(KITE_OBJS) $(LLVM_LDFLAGS) $(LLVM_LIBS) $(GC_LDFLAGS) $(GC_LIBS) $(MATH_LIBS)
 
 ikt: $(IKT_OBJS)
-	$(CC) $(CPPFLAGS) $(LDFLAGS) -o ikt $(IKT_OBJS) $(LLVM_LDFLAGS) $(LLVM_LIBS) $(GC_LDFLAGS) $(GC_LIBS)
+	$(CC) $(CPPFLAGS) $(LDFLAGS) -o ikt $(IKT_OBJS) $(LLVM_LDFLAGS) $(LLVM_LIBS) $(GC_LDFLAGS) $(GC_LIBS) $(MATH_LIBS)
 
 # DO NOT DELETE
 
@@ -181,6 +182,10 @@ src/stdlib/System/exceptions/TypeMismatch.o: src/stdlib/System/exceptions/except
 src/stdlib/System/float.o: src/stdlib/System/float.h
 src/stdlib/System/float.o: src/stdlib/System/object.h
 src/stdlib/System/float.o: src/semantics/constants.h
+src/stdlib/System/float.o: src/stdlib/System/boolean.h
+src/stdlib/System/float.o: src/stdlib/System/exceptions/TypeMismatch.h
+src/stdlib/System/float.o: src/stdlib/System/exceptions/exception.h
+src/stdlib/System/float.o: src/stdlib/System/exceptions/DivideByZero.h
 src/stdlib/System/integer.o: src/stdlib/System/integer.h
 src/stdlib/System/integer.o: src/stdlib/System/object.h
 src/stdlib/System/integer.o: src/semantics/constants.h

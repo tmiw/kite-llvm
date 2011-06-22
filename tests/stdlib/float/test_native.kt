@@ -1,0 +1,12 @@
+1|bool|print;
+(-1)|bool|print;
+0|bool|print;
+1|int|print;
+(-1)|int|print;
+0|int|print;
+1|float|print;
+(-1)|float|print;
+0|float|print;
+1|print;
+(-1)|print;
+0|print;

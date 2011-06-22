@@ -66,6 +66,20 @@ extern "C"
     double PREFIX_FLOAT_METHOD_NAME(print__f)(double val);
     void *PREFIX_FLOAT_METHOD_NAME(print__o)(void *obj);
     void *PREFIX_FLOAT_METHOD_NAME(obj__f)(double val);
+    
+    void *PREFIX_FLOAT_METHOD_NAME(__op_plus____oo)(void *lhs, void *rhs);
+    void *PREFIX_FLOAT_METHOD_NAME(__op_minus____oo)(void *lhs, void *rhs);
+    void *PREFIX_FLOAT_METHOD_NAME(__op_multiply____oo)(void *lhs, void *rhs);
+    void *PREFIX_FLOAT_METHOD_NAME(__op_divide____oo)(void *lhs, void *rhs);
+    void *PREFIX_FLOAT_METHOD_NAME(__op_mod____oo)(void *lhs, void *rhs);
+    void *PREFIX_FLOAT_METHOD_NAME(__op_unminus____o)(void *rhs);
+    void *PREFIX_FLOAT_METHOD_NAME(__op_unplus____o)(void *rhs);
+    void *PREFIX_FLOAT_METHOD_NAME(__op_equals____oo)(void *lhs, void *rhs);
+    void *PREFIX_FLOAT_METHOD_NAME(__op_nequals____oo)(void *lhs, void *rhs);
+    void *PREFIX_FLOAT_METHOD_NAME(__op_lt____oo)(void *lhs, void *rhs);
+    void *PREFIX_FLOAT_METHOD_NAME(__op_gt____oo)(void *lhs, void *rhs);
+    void *PREFIX_FLOAT_METHOD_NAME(__op_leq____oo)(void *lhs, void *rhs);
+    void *PREFIX_FLOAT_METHOD_NAME(__op_geq____oo)(void *lhs, void *rhs);
     void *PREFIX_FLOAT_METHOD_NAME(__op_not____o)(void *rhs);
 }
 

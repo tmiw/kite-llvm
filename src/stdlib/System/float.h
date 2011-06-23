@@ -29,6 +29,8 @@
 #define KITE_STDLIB__SYSTEM__FLOAT_H
 
 #include "object.h"
+#include "dynamic_object.h"
+#include "string.h"
 
 #define FLOAT_METHOD_PREFIX System__float__
 #define PREFIX_FLOAT_METHOD_NAME(name) System__float__ ## name
@@ -42,6 +44,7 @@ namespace kite
         {
             struct fpnum : System::object
             {
+                static System::dynamic_object class_object;
                 double val;
                 
                 fpnum() : System::object(semantics::FLOAT), val(0) { }
@@ -53,6 +56,9 @@ namespace kite
                 double to_float();
                 double print();
                 System::object *to_object();
+                
+                static void InitializeClass();
+                static System::object *parse(System::object *t, System::string *str);
             };
         }
     }

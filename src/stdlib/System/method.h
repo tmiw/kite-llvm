@@ -43,7 +43,7 @@ namespace kite
                 int num_args;
 
                 method(void *ptr) :
-                    System::object(semantics::METHOD_TY), method_ptr(ptr) 
+                    System::object(semantics::METHOD_TY), method_ptr(ptr), this_ptr(NULL) 
                 {
                      // empty
                 }

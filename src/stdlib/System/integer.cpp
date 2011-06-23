@@ -39,6 +39,7 @@ namespace kite
     {
         namespace System
         {
+            System::dynamic_object integer::class_object;
             object_method_map integer::method_map = map_list_of
                 ("__op_plus____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_plus____oo))))
                 ("__op_minus____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_INTEGER_METHOD_NAME(__op_minus____oo))))
@@ -93,6 +94,20 @@ namespace kite
             System::object *integer::to_object()
             {
                 return (System::object*)PREFIX_INTEGER_METHOD_NAME(obj__i)(val);
+            }
+            
+            void integer::InitializeClass()
+            {
+                class_object.add_method("parse", 2, (void*)&integer::parse);
+                class_object.properties["__name"] = new System::string("System.integer");
+            }
+            
+            System::object *integer::parse(System::object *t, System::string *str, System::integer *base)
+            {
+                // TODO
+                assert(str->type == semantics::STRING);
+                assert(base->type == semantics::INTEGER);
+                return new System::integer(strtol(str->string_val.c_str(), (char**)NULL, base->val));
             }
         }
     }

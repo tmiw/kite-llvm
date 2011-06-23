@@ -50,6 +50,19 @@ namespace kite
                 
                 dynamic_object() : object(semantics::OBJECT), parent(NULL) { }
                 dynamic_object(object *p) : object(semantics::OBJECT), parent(p) { }
+                
+                void add_method(const char *name, int numargs, void *ptr)
+                {
+                    std::string real_name = std::string(name) + "__o";
+                    for (int i = numargs; i > 0; i--)
+                    {
+                        real_name += "o";
+                    }
+                    
+                    System::method *method = new System::method(ptr);
+                    method->num_args = numargs;
+                    properties[real_name] = method;
+                }
             };
         }
     }

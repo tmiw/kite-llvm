@@ -40,6 +40,7 @@ namespace kite
     {
         namespace System
         {
+            System::dynamic_object fpnum::class_object;
             object_method_map fpnum::method_map = map_list_of
                 ("__op_plus____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_FLOAT_METHOD_NAME(__op_plus____oo))))
                 ("__op_minus____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_FLOAT_METHOD_NAME(__op_minus____oo))))
@@ -86,6 +87,19 @@ namespace kite
             System::object *fpnum::to_object()
             {
                 return (System::object*)PREFIX_FLOAT_METHOD_NAME(obj__f)(val);
+            }
+            
+            void fpnum::InitializeClass()
+            {
+                class_object.add_method("parse", 1, (void*)&fpnum::parse);
+                class_object.properties["__name"] = new System::string("System.float");
+            }
+            
+            System::object *fpnum::parse(System::object *t, System::string *str)
+            {
+                // TODO
+                assert(str->type == semantics::STRING);
+                return new System::fpnum(atof(str->string_val.c_str()));
             }
         }
     }

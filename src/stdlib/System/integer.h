@@ -29,6 +29,8 @@
 #define KITE_STDLIB__SYSTEM__INTEGER_H
 
 #include "object.h"
+#include "dynamic_object.h"
+#include "string.h"
 
 #define INTEGER_METHOD_PREFIX System__integer__
 #define PREFIX_INTEGER_METHOD_NAME(name) System__integer__ ## name
@@ -42,6 +44,7 @@ namespace kite
         {
             struct integer : System::object
             {
+                static System::dynamic_object class_object;
                 int val;
                 
                 integer() : System::object(semantics::INTEGER), val(0) { }
@@ -53,6 +56,9 @@ namespace kite
                 double to_float();
                 int print();
                 System::object *to_object();
+                
+                static void InitializeClass();
+                static System::object *parse(System::object *t, System::string *str, System::integer *base);
             };
         }
     }

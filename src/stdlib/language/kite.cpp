@@ -89,6 +89,10 @@ namespace kite
                     exceptions_obj->properties["InvalidArgument"] = &System::exceptions::InvalidArgument::class_object;
                     exceptions_obj->properties["TypeMismatch"] = &System::exceptions::TypeMismatch::class_object;
                     exceptions_obj->properties["DivideByZero"] = &System::exceptions::DivideByZero::class_object;
+                    system_obj->properties["float"] = &System::fpnum::class_object;
+                    system_obj->properties["integer"] = &System::integer::class_object;
+                    System::fpnum::InitializeClass();
+                    System::integer::InitializeClass();
                     System::exceptions::exception::InitializeClass();
                     System::exceptions::NotImplemented::InitializeClass();
                     System::exceptions::InvalidArgument::InitializeClass();

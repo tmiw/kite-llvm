@@ -184,7 +184,7 @@ int *kite_find_funccall(int *obj, char *name, int numargs)
         // TODO
 failed_to_find_method:
         std::ostringstream ss;
-        ss << "Could not find method " << name << " that takes " << numargs << " argument(s).";
+        ss << "Could not find method " << name << " that takes " << (numargs - 1) << " argument(s).";
         System::exceptions::NotImplemented *exception = new System::exceptions::NotImplemented(ss.str());
         exception->throw_exception();
         

@@ -29,6 +29,7 @@
 
 #include <parser/parser.h>
 #include <stdlib/System/dynamic_object.h>
+#include <stdlib/System/list.h>
 #include <stdlib/System/exceptions/exception.h>
 #include <stdlib/System/exceptions/NotImplemented.h>
 #include <stdlib/System/exceptions/InvalidArgument.h>
@@ -91,8 +92,10 @@ namespace kite
                     exceptions_obj->properties["DivideByZero"] = &System::exceptions::DivideByZero::class_object;
                     system_obj->properties["float"] = &System::fpnum::class_object;
                     system_obj->properties["integer"] = &System::integer::class_object;
+                    system_obj->properties["list"] = &System::list::class_object;
                     System::fpnum::InitializeClass();
                     System::integer::InitializeClass();
+                    System::list::InitializeClass();
                     System::exceptions::exception::InitializeClass();
                     System::exceptions::NotImplemented::InitializeClass();
                     System::exceptions::InvalidArgument::InitializeClass();

@@ -51,6 +51,7 @@ namespace kite
                 ("int__o", function_semantics(semantics::INTEGER, (void*)0))
                 ("float__o", function_semantics(semantics::FLOAT, (void*)0))
                 ("print__o", function_semantics(semantics::OBJECT, (void*)0))
+                ("str__o", function_semantics(semantics::STRING, (void*)0))
                 ("obj__o", function_semantics(semantics::OBJECT, (void*)0));
 
             void object::finalizer_setup()
@@ -82,6 +83,34 @@ namespace kite
                 }
                 GC_register_finalizer_ignore_self( GC_base(real_this), 0, 0, 0, 0 );
             }
+            
+            std::string object::as_string()
+            {
+                std::ostringstream res;
+                switch(type)
+                {
+                    case semantics::INTEGER:
+                        res << ((integer*)this)->val;
+                        break;
+                    case semantics::FLOAT:
+                        res << ((fpnum*)this)->val;
+                        break;
+                    case semantics::BOOLEAN:
+                        res << ((boolean*)this)->val;
+                        break;
+                    case semantics::STRING:
+                        res << ((string*)this)->string_val;
+                        break;
+                    case semantics::METHOD_TY:
+                        res << "method";
+                        break;
+                    default:
+                        std::cout << "object" << std::endl;
+                        break;
+                }
+                
+                return res.str();
+            }
         }
     }
 }
@@ -90,28 +119,7 @@ using namespace kite::stdlib;
 
 void System::object::print()
 {
-    switch(type)
-    {
-        case semantics::INTEGER:
-            ((integer*)this)->print();
-            break;
-        case semantics::FLOAT:
-            ((fpnum*)this)->print();
-            break;
-        case semantics::BOOLEAN:
-            ((boolean*)this)->print();
-            break;
-        case semantics::STRING:
-            ((string*)this)->print();
-            break;
-        case semantics::METHOD_TY:
-            ((method*)this)->print();
-            break;
-        default:
-            std::cout << "object" << std::endl;
-            break;
-
-    }
+    std::cout << this->as_string() << std::endl;
 }
 
 int *kite_find_funccall(int *obj, char *name, int numargs)

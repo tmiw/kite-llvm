@@ -86,11 +86,6 @@ namespace kite
                 return PREFIX_INTEGER_METHOD_NAME(float__i)(val);
             }
             
-            int integer::print()
-            {
-                return PREFIX_INTEGER_METHOD_NAME(print__i)(val);
-            }
-            
             System::object *integer::to_object()
             {
                 return (System::object*)PREFIX_INTEGER_METHOD_NAME(obj__i)(val);

@@ -52,7 +52,8 @@ namespace kite
                 object(semantics::builtin_types type) : type(type) { }
 
                 void print();
-
+                std::string as_string();
+                
                 // For Boehm GC. Not using gc_cleanup to avoid the memory
                 // penalty that virtual methods cause.
                 void finalizer_setup();

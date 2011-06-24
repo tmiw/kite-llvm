@@ -34,6 +34,15 @@
 #include "method.h"
 #include <gc/gc_allocator.h>
 
+extern "C"
+{
+    void *kite_dynamic_object_alloc();
+    void kite_dynamic_object_set_parent(void *object, void *parent);
+    void kite_dynamic_object_set_name(void *object, char *name);
+    void **kite_dynamic_object_get_property(void *object, char *name, bool set);
+    void *kite_dynamic_object_get_root();
+}
+ 
 namespace kite
 {
     namespace stdlib
@@ -46,10 +55,17 @@ namespace kite
             struct dynamic_object : object
             {
                 object *parent;
+                void *obj_alloc_method;
                 property_map properties;
                 
-                dynamic_object() : object(semantics::OBJECT), parent(NULL) { }
-                dynamic_object(object *p) : object(semantics::OBJECT), parent(p) { }
+                dynamic_object() 
+                : object(semantics::OBJECT), 
+                  parent(NULL),
+                  obj_alloc_method((void*)&kite_dynamic_object_alloc) { }
+                dynamic_object(object *p) 
+                : object(semantics::OBJECT), 
+                  parent(p), 
+                  obj_alloc_method((void*)&kite_dynamic_object_alloc) { }
                 
                 void add_method(const char *name, int numargs, void *ptr)
                 {
@@ -66,15 +82,6 @@ namespace kite
             };
         }
     }
-}
-
-extern "C"
-{
-    void *kite_dynamic_object_alloc();
-    void kite_dynamic_object_set_parent(void *object, void *parent);
-    void kite_dynamic_object_set_name(void *object, char *name);
-    void **kite_dynamic_object_get_property(void *object, char *name, bool set);
-    void *kite_dynamic_object_get_root();
 }
 
 #endif

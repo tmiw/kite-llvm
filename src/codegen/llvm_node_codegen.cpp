@@ -1247,7 +1247,7 @@ namespace kite
 
             // Initialize dynamic_object that will store the class and insert
             // LLVM code to call __static_init__ on this object.
-            Value *obj = generate_llvm_dynamic_object_alloc();
+            Value *obj = generate_llvm_dynamic_object_alloc(NULL);
             if (tree.children.size() > 2)
             {
                 // Set child class parent.
@@ -1274,7 +1274,7 @@ namespace kite
             std::vector<Value*> params;
             Value *parent = boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
             
-            Value *obj = generate_llvm_dynamic_object_alloc();
+            Value *obj = generate_llvm_dynamic_object_alloc(parent);
             generate_llvm_dynamic_object_set_parent(obj, parent);
             
             params.push_back(obj);
@@ -1287,20 +1287,37 @@ namespace kite
             return obj;
         }
         
-        Value *llvm_node_codegen::generate_llvm_dynamic_object_alloc() const
+        Value *llvm_node_codegen::generate_llvm_dynamic_object_alloc(Value *orig) const
         {
             Module *module = state.current_module();
             IRBuilder<> &builder = state.module_builder();
+            Value *alloc_method;
             
             std::vector<const Type*> parameterTypes;
             const FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), parameterTypes, false);
-            Function *funPtr = Function::Create(ft, Function::ExternalLinkage, "kite_dynamic_object_alloc", module);
-            if (funPtr->getName() != "kite_dynamic_object_alloc")
+            
+            if (orig == NULL)
             {
-                funPtr->eraseFromParent();
-                funPtr = module->getFunction("kite_dynamic_object_alloc");
+                Function *funPtr = Function::Create(ft, Function::ExternalLinkage, "kite_dynamic_object_alloc", module);
+                if (funPtr->getName() != "kite_dynamic_object_alloc")
+                {
+                    funPtr->eraseFromParent();
+                    funPtr = module->getFunction("kite_dynamic_object_alloc");
+                }
+                alloc_method = funPtr;
             }
-            Value *obj = builder.CreateCall(funPtr);
+            else
+            {
+                if (orig->getType() == PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)))
+                {
+                    orig = builder.CreateLoad(orig);
+                }
+                orig = builder.CreateBitCast(orig, get_object_type()); // TODO
+                alloc_method = builder.CreateStructGEP(orig, 2);
+                alloc_method = builder.CreateBitCast(builder.CreateLoad(alloc_method), PointerType::getUnqual(ft));
+            }
+            
+            Value *obj = builder.CreateCall(alloc_method);
             return obj;
         }
         
@@ -1448,6 +1465,7 @@ namespace kite
             std::vector<const Type*> struct_types;
             struct_types.push_back(Type::getIntNTy(getGlobalContext(), sizeof(semantics::builtin_types) * 8));
             struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT));
+            struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT)); // alloc method
             struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT)); // placeholder
             return PointerType::getUnqual(StructType::get(getGlobalContext(), struct_types));
         }

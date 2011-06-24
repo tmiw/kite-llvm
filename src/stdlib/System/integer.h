@@ -54,7 +54,6 @@ namespace kite
                 bool to_boolean();
                 int to_integer();
                 double to_float();
-                int print();
                 System::object *to_object();
                 
                 static void InitializeClass();

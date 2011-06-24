@@ -67,11 +67,6 @@ namespace kite
                 return PREFIX_BOOLEAN_METHOD_NAME(float__b)(val);
             }
             
-            bool boolean::print()
-            {
-                return PREFIX_BOOLEAN_METHOD_NAME(print__b)(val);
-            }
-            
             System::object *boolean::to_object()
             {
                 return (System::object*)PREFIX_BOOLEAN_METHOD_NAME(obj__b)(val);

@@ -79,11 +79,6 @@ namespace kite
                 return PREFIX_FLOAT_METHOD_NAME(float__f)(val);
             }
             
-            double fpnum::print()
-            {
-                return PREFIX_FLOAT_METHOD_NAME(print__f)(val);
-            }
-            
             System::object *fpnum::to_object()
             {
                 return (System::object*)PREFIX_FLOAT_METHOD_NAME(obj__f)(val);

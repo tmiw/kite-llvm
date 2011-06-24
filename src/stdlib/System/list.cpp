@@ -25,6 +25,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include <iostream>
 #include <assert.h>
 #include "list.h"
 
@@ -46,6 +47,7 @@ namespace kite
                 class_object.add_method("head", 0, (void*)&list::head);
                 // TODO: next
                 class_object.add_method("prepend", 1, (void*)&list::prepend);
+                class_object.add_method("print", 0, (void*)&list::print);
                 class_object.add_method("removeAt", 1, (void*)&list::remove_at);
                 // TODO: reset
                 // TOOD: sort
@@ -53,6 +55,13 @@ namespace kite
                 class_object.add_method("sublist", 1, (void*)&list::sublist);
                 class_object.add_method("sublist", 2, (void*)&list::sublist_with_length);
                 class_object.add_method("tail", 0, (void*)&list::tail);
+                
+                class_object.obj_alloc_method = (void*)&list::__allocate_object;
+            }
+            
+            System::object *list::__allocate_object()
+            {
+                return new System::list();
             }
             
             System::object *list::append(System::list *list, System::object *item)
@@ -83,9 +92,19 @@ namespace kite
             System::object *list::prepend(System::list *list, System::object *item)
             {
                 System::list *new_list = new System::list();
-                new_list->list_contents = list->list_contents;
+                list_contents_type::iterator i = list->list_contents.begin();
+                for (; i != list->list_contents.end(); i++)
+                {
+                    new_list->list_contents.push_back(*i);
+                }
                 new_list->list_contents.push_front(item);
                 return new_list;
+            }
+            
+            System::object *list::print(System::list *list)
+            {
+                std::cout << list::as_string(list) << std::endl;
+                return list;
             }
             
             System::object *list::remove_at(System::list *list, System::integer *index)
@@ -95,7 +114,7 @@ namespace kite
                 
                 System::list *new_list = new System::list();
                 new_list->list_contents = list->list_contents;
-                std::deque<System::object*>::iterator iter = new_list->list_contents.begin();
+                list_contents_type::iterator iter = new_list->list_contents.begin();
                 for (int i = 0; i < new_list->list_contents.size(); i++)
                 {
                     if (i == index->val)
@@ -108,19 +127,54 @@ namespace kite
                 return new_list;
             }
             
-            System::object *list::as_string(System::list *list)
+            char *list::as_string(System::list *list)
             {
-                return NULL;
+                std::string result = "[";
+                int idx = 0;
+                for(
+                    list_contents_type::iterator i = list->list_contents.begin();
+                    i != list->list_contents.end();
+                    i++)
+                {
+                    result += (*i)->as_string();
+                    if (idx < list->list_contents.size() - 1)
+                    {
+                        result += ", ";
+                    }
+                    idx++;
+                }
+                result += "]";
+                
+                char *ret = (char*)GC_MALLOC(result.size() + 1);
+                strcpy(ret, result.c_str());
+                return ret;
             }
             
             System::object *list::sublist(System::list *list, System::integer *index_from)
             {
-                return NULL;
+                return sublist_with_length(list, index_from, new System::integer(list->list_contents.size()));
             }
             
             System::object *list::sublist_with_length(System::list *list, System::integer *index_from, System::integer *count)
             {
-                return NULL;
+                // TODO
+                assert(index_from->type == count->type == semantics::INTEGER);
+                int length = count->val;
+                int start = index_from->val;
+                list_contents_type::iterator iter = list->list_contents.begin();
+                System::list *ret = new System::list();
+                
+                for(; iter != list->list_contents.end(); iter++)
+                {
+                    if (length > 0 && start <= 0)
+                    {
+                        ret->list_contents.push_back(*iter);
+                    }
+                    length--;
+                    start--;
+                }
+                
+                return ret;
             }
             
             System::object *list::tail(System::list *list)

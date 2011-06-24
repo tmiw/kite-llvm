@@ -38,24 +38,27 @@ namespace kite
     {
         namespace System
         {
+            typedef std::deque<object*, gc_allocator<object*> > list_contents_type;
             struct list : dynamic_object
             {
                 static System::dynamic_object class_object;
-                std::deque<object*> list_contents;
+                list_contents_type list_contents;
                 
                 list() : dynamic_object(&class_object)
                 {
-                    // empty
+                    obj_alloc_method = class_object.obj_alloc_method;
                 }
                 
                 static void InitializeClass();
+                static System::object *__allocate_object();
                 static System::object *append(System::list *list, System::object *item);
                 static System::object *count(System::list *list);
                 static System::object *get_index(System::list *list, System::integer *index);
                 static System::object *head(System::list *list);
+                static System::object *print(System::list *list);
                 static System::object *prepend(System::list *list, System::object *item);
                 static System::object *remove_at(System::list *list, System::integer *index);
-                static System::object *as_string(System::list *list);
+                static char *as_string(System::list *list);
                 static System::object *sublist(System::list *list, System::integer *index_from);
                 static System::object *sublist_with_length(System::list *list, System::integer *index_from, System::integer *count);
                 static System::object *tail(System::list *list);

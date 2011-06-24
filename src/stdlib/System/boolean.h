@@ -52,7 +52,6 @@ namespace kite
                 int to_integer();
                 double to_float();
                 System::object *to_object();
-                bool print();
             };
         }
     }

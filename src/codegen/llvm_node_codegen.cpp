@@ -1192,7 +1192,6 @@ namespace kite
                     paramValuesLookup.push_back(builder.CreateBitCast(self, PointerType::getUnqual(Type::getInt32Ty(getGlobalContext()))));
                     paramValuesLookup.push_back(builder.CreateGlobalStringPtr(name.c_str()));
                     paramValuesLookup.push_back(ConstantInt::get(getGlobalContext(), APInt(32, paramsCopy.size(), true)));
-                    FunctionType::get(tmpType, parameterTypes, false);
                     fptr = builder.CreateBitCast(
                         builder.CreateCall(
                             funPtrLookup,
@@ -1201,6 +1200,28 @@ namespace kite
                         ),
                         PointerType::getUnqual(ft)
                     );
+                    
+                    if (name == "__init__" && paramsCopy.size() == 1)
+                    {
+                        Value *validatePtr = builder.CreateIsNotNull(fptr);
+                        
+                        BasicBlock *currentBB = builder.GetInsertBlock();
+                        Function *currentFunc = currentBB->getParent();
+                        BasicBlock *not_null = BasicBlock::Create(getGlobalContext(), "not_null", currentFunc);
+                        BasicBlock *end_block = BasicBlock::Create(getGlobalContext(), "end_block", currentFunc);
+                        builder.CreateCondBr(validatePtr, not_null, end_block);
+                        
+                        builder.SetInsertPoint(not_null);
+                        builder.CreateCall(
+                            fptr,
+                            paramsCopy.begin(),
+                            paramsCopy.end()
+                        );
+                        builder.CreateBr(end_block);
+                        
+                        builder.SetInsertPoint(end_block);
+                        return self;
+                    }
                 }
             
             }

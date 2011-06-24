@@ -183,11 +183,14 @@ int *kite_find_funccall(int *obj, char *name, int numargs)
         
         // TODO
 failed_to_find_method:
-        std::ostringstream ss;
-        ss << "Could not find method " << name << " that takes " << (numargs - 1) << " argument(s).";
-        System::exceptions::NotImplemented *exception = new System::exceptions::NotImplemented(ss.str());
-        exception->throw_exception();
-        
+        std::string theName(name);
+        if ((theName == "__init__" && numargs > 1) || (theName != "__init__"))
+        {
+            std::ostringstream ss;
+            ss << "Could not find method " << name << " that takes " << (numargs - 1) << " argument(s).";
+            System::exceptions::NotImplemented *exception = new System::exceptions::NotImplemented(ss.str());
+            exception->throw_exception();
+        }
         return NULL;
     }
 }

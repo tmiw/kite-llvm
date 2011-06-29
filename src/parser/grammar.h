@@ -95,6 +95,7 @@ namespace kite
             qi::rule<Iterator, semantics::syntax_tree_node(), SkipType> statement;
             qi::rule<Iterator, semantics::syntax_tree(), SkipType> math_statement;
             qi::rule<Iterator, semantics::syntax_tree(), SkipType> method_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> operator_statement;
             qi::rule<Iterator, semantics::syntax_tree(), SkipType> anon_method_statement;
             qi::rule<Iterator, semantics::syntax_tree(), SkipType> class_statement;
             qi::rule<Iterator, semantics::syntax_tree(), SkipType> loop_statement;
@@ -124,6 +125,7 @@ namespace kite
             qi::rule<Iterator, semantics::syntax_tree(), SkipType> constructor_statement;
             qi::rule<Iterator, semantics::syntax_tree(), SkipType> destructor_statement;
             qi::rule<Iterator, std::string(), SkipType> identifier;
+            qi::rule<Iterator, std::string(), SkipType> operator_identifier;
             qi::rule<Iterator, semantics::syntax_tree_node(), SkipType> numeric_value;
             qi::rule<Iterator, std::string()> unesc_str;
             qi::symbols<char const, char const> unesc_char;

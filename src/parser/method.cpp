@@ -17,6 +17,7 @@ namespace kite
             using namespace qi::labels;
 
             using phoenix::at_c;
+            using phoenix::at;
             using phoenix::push_back;
             using phoenix::push_front;
             using phoenix::begin;
@@ -27,6 +28,12 @@ namespace kite
             method_statement =
                    lit("method") [ at_c<0>(_val) = kite::semantics::METHOD ]
                 > identifier [ push_back(at_c<1>(_val), _1) ]
+                >> (lit('(') >> -(identifier [ push_back(at_c<1>(_val), _1) ] % ',') >> lit(')'))
+                > '[' >> start [ push_back(at_c<1>(_val), _1) ] >> ']';
+            
+            operator_statement =
+                   lit("operator") [ at_c<0>(_val) = kite::semantics::OPERATOR ]
+                > operator_identifier [ push_back(at_c<1>(_val), _1) ]
                 >> (lit('(') >> -(identifier [ push_back(at_c<1>(_val), _1) ] % ',') >> lit(')'))
                 > '[' >> start [ push_back(at_c<1>(_val), _1) ] >> ']';
             

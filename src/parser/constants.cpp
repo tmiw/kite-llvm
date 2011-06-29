@@ -53,6 +53,33 @@ namespace kite
                     - lit("operator")
                     - lit("construct")
                     - lit("false")); // [ _val = _1 ];
+            
+            operator_identifier = 
+                lit("plus") |
+                lit("minus") |
+                lit("multiply") |
+                lit("divide") |
+                lit("mod") |
+                lit("unplus") |
+                lit("unminus") |
+                lit("map") |
+                lit("reduce") |
+                lit("array") |
+                lit("array_set") |
+                lit("equals") |
+                lit("nequals") |
+                lit("lt") |
+                lit("gt") |
+                lit("leq") |
+                lit("geq") |
+                lit("and") |
+                lit("or") |
+                lit("not") |
+                lit("xor") |
+                lit("lshift") |
+                lit("rshift") |
+                lit("call") |
+                lit("property");
         }
         
         kite_grammar<pos_iterator_type, BOOST_TYPEOF(KITE_SKIP_RULE)> constants_grammar;

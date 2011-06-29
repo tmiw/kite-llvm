@@ -52,7 +52,7 @@ namespace kite
                 ("float__o", function_semantics(semantics::FLOAT, (void*)0))
                 ("print__o", function_semantics(semantics::OBJECT, (void*)0))
                 ("str__o", function_semantics(semantics::STRING, (void*)0))
-                ("obj__o", function_semantics(semantics::OBJECT, (void*)0));
+                ("obj__o", function_semantics(semantics::OBJECT, (void*)&obj__o));
 
             void object::finalizer_setup()
             {
@@ -222,4 +222,9 @@ bool kite_object_isof(void *lhs, void *rhs, bool type)
     } while (type && lhsObj);
     
     return ret;
+}
+
+void *obj__o(void *obj)
+{
+    return obj;
 }

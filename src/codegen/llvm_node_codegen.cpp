@@ -41,35 +41,8 @@ namespace kite
         typedef Value *(IRBuilder<>::*IRBuilderFPtr)(Value*,Value*,const Twine&);
         typedef std::pair<semantics::code_operation, semantics::builtin_types> CodeOperationKey;
         typedef std::map<CodeOperationKey, IRBuilderFPtr> CodeOperationMap;
-        typedef std::map<semantics::code_operation, std::string> OperatorMethodsMap;
         typedef Value *(IRBuilder<>::*IRBuilderNUWFPtr)(Value*,Value*,const Twine&,bool,bool);
         typedef Value *(IRBuilder<>::*IRBuilderRShiftFPtr)(Value*,Value*,const Twine&,bool);
-        
-        static OperatorMethodsMap operator_map = map_list_of
-            (semantics::ADD, "__op_plus__")
-            (semantics::SUBTRACT, "__op_minus__")
-            (semantics::MULTIPLY, "__op_multiply__")
-            (semantics::DIVIDE, "__op_divide__")
-            (semantics::MODULO, "__op_mod__")
-            (semantics::LEFT_SHIFT, "__op_lshift__")
-            (semantics::RIGHT_SHIFT, "__op_rshift__")
-            (semantics::LESS_THAN, "__op_lt__")
-            (semantics::GREATER_THAN, "__op_gt__")
-            (semantics::LESS_OR_EQUALS, "__op_leq__")
-            (semantics::GREATER_OR_EQUALS, "__op_geq__")
-            (semantics::EQUALS, "__op_equals__")
-            (semantics::NOT_EQUALS, "__op_nequals__")
-            (semantics::AND, "__op_and__")
-            (semantics::OR, "__op_or__")
-            (semantics::NOT, "__op_not__")
-            (semantics::UNARY_PLUS, "__op_unplus__")
-            (semantics::UNARY_MINUS, "__op_unminus__")
-            (semantics::XOR, "__op_xor__")
-            (semantics::CONSTRUCTOR, "__init__")
-            (semantics::DESTRUCTOR, "__destruct__")
-            (semantics::DEREF_ARRAY, "__op_deref_array__")
-            (semantics::MAP, "__op_map__")
-            (semantics::REDUCE, "__op_reduce__");
 
         static CodeOperationMap codegen_map = map_list_of
             (CodeOperationKey(semantics::ADD, semantics::INTEGER), (IRBuilderFPtr)(IRBuilderNUWFPtr)&IRBuilder<>::CreateAdd)
@@ -173,6 +146,7 @@ namespace kite
                     ret = codegen_decide_op(tree);
                     break;
                 case semantics::METHOD:
+                case semantics::OPERATOR:
                     ret = codegen_method_op(tree);
                     break;
                 case semantics::DEREF_METHOD_RELATIVE_SELF:
@@ -374,7 +348,7 @@ namespace kite
                 }
                 params.push_back(lhs);
                 params.push_back(rhs);
-                ret = generate_llvm_method_call(lhs, operator_map[tree.op], params);
+                ret = generate_llvm_method_call(lhs, semantics::operator_map[tree.op], params);
             }
 
             return ret;
@@ -391,7 +365,7 @@ namespace kite
                 default:
                     std::vector<Value*> params;
                     params.push_back(rhs);
-                    return generate_llvm_method_call(rhs, operator_map[tree.op], params);
+                    return generate_llvm_method_call(rhs, semantics::operator_map[tree.op], params);
             }
         }
         
@@ -415,7 +389,7 @@ namespace kite
             {
                 std::vector<Value*> params;
                 params.push_back(rhs);
-                return generate_llvm_method_call(rhs, operator_map[tree.op], params);
+                return generate_llvm_method_call(rhs, semantics::operator_map[tree.op], params);
             }
             
             return lhs;
@@ -432,7 +406,7 @@ namespace kite
                 default:
                     std::vector<Value*> params;
                     params.push_back(rhs);
-                    return generate_llvm_method_call(rhs, operator_map[tree.op], params);
+                    return generate_llvm_method_call(rhs, semantics::operator_map[tree.op], params);
             }
         }
         
@@ -520,7 +494,7 @@ namespace kite
             parameters.push_back(list_val);
             parameters.push_back(method_val);
             
-            return generate_llvm_method_call(list_val, operator_map[tree.op], parameters);
+            return generate_llvm_method_call(list_val, semantics::operator_map[tree.op], parameters);
         }
         
         Value *llvm_node_codegen::codegen_deref_filter_op(semantics::syntax_tree const &tree) const
@@ -668,7 +642,7 @@ namespace kite
             Value *index_val = boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
             parameters.push_back(index_val);
             
-            return generate_llvm_method_call(prev, operator_map[tree.op], parameters);
+            return generate_llvm_method_call(prev, semantics::operator_map[tree.op], parameters);
         }
         
         Value *llvm_node_codegen::codegen_variable_op(semantics::syntax_tree const &tree) const
@@ -946,7 +920,7 @@ namespace kite
             IRBuilder<> &builder = state.module_builder();
             int numargs = tree.children.size();
             std::vector<std::string> argnames;
-            std::string functionName = operator_map[tree.op];
+            std::string functionName = semantics::operator_map[tree.op];
             for (int i = 0; i < tree.children.size() - 1; i++)
             {
                 argnames.push_back(boost::get<std::string>(tree.children[i]));
@@ -974,7 +948,7 @@ namespace kite
             // TODO: refactor
             IRBuilder<> &builder = state.module_builder();
             std::vector<std::string> argnames;
-            std::string functionName = operator_map[tree.op];
+            std::string functionName = semantics::operator_map[tree.op];
         
             semantics::syntax_tree &body = const_cast<semantics::syntax_tree&>(boost::get<semantics::syntax_tree>(tree.children[0]));
             Value *method = generate_llvm_method(functionName, argnames, body);
@@ -996,6 +970,11 @@ namespace kite
             std::string functionName = boost::get<std::string>(tree.children[0]);
             std::vector<std::string> argnames;
 
+            if (tree.op == semantics::OPERATOR)
+            {
+                functionName = semantics::operator_name_map[functionName];
+            }
+            
             if (numargs < 0) numargs = 0;
             for (int i = 1; i < tree.children.size() - 1; i++)
             {
@@ -1283,7 +1262,7 @@ namespace kite
                 params.push_back(boost::apply_visitor(llvm_node_codegen(state), tree.children[i]));
             }
             
-            generate_llvm_method_call(obj, operator_map[semantics::CONSTRUCTOR], params);
+            generate_llvm_method_call(obj, semantics::operator_map[semantics::CONSTRUCTOR], params);
             return obj;
         }
         

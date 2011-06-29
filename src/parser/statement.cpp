@@ -20,6 +20,7 @@ namespace kite
                 ( loop_statement 
                 | decide_statement 
                 | method_statement 
+                | operator_statement
                 | class_statement
                 | constructor_statement
                 | destructor_statement

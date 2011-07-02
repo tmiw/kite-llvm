@@ -67,4 +67,10 @@ namespace kite
     }
 }
 
+extern "C"
+{
+    void *kite_list_new();
+    void kite_list_append(void *list, void *item);
+}
+
 #endif

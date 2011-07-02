@@ -89,6 +89,7 @@ namespace kite
             IS_CLASS,
             ISOF_CLASS,
             OPERATOR,
+            LIST_VAL,
         };
         
         typedef std::map<semantics::code_operation, std::string> OperatorMethodsMap;

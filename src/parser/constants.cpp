@@ -35,8 +35,14 @@ namespace kite
                 | lit("true") [ _val = true ]
                 | lit("false") [ _val = false ];
             
+            list_statement = 
+                lit("[") [ at_c<0>(_val) = kite::semantics::LIST_VAL ] >>
+                -(or_statement [ push_back(at_c<1>(_val), _1) ] % ',') >>
+                lit("]");
+            
             const_statement = 
                   numeric_value [ push_back(at_c<1>(_val), _1) ] [ at_c<0>(_val) = kite::semantics::CONST ]
+                | list_statement [ _val = _1 ]
                 | identifier [ push_back(at_c<1>(_val), _1) ] [ at_c<0>(_val) = kite::semantics::VARIABLE ]
                 | make_statement [ _val = _1 ];
             

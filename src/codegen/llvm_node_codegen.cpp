@@ -171,6 +171,9 @@ namespace kite
                 case semantics::ISOF_CLASS:
                     ret = codegen_isof_op(tree);
                     break;
+                case semantics::LIST_VAL:
+                    ret = codegen_list_op(tree);
+                    break;
             }
             
             return ret;
@@ -941,6 +944,55 @@ namespace kite
             
             state.current_symbol_stack()[functionName] = prop_entry;
             return method;
+        }
+
+        Value *llvm_node_codegen::codegen_list_op(semantics::syntax_tree const &tree) const
+        {
+            IRBuilder<> &builder = state.module_builder();
+            Module *module = state.current_module();
+            
+            std::vector<const Type*> parameterTypesNewList;
+            std::vector<Value*> paramValuesNewList;
+            const FunctionType *ftPtrNewList = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), parameterTypesNewList, false);
+            Function *funPtrNewList = Function::Create(ftPtrNewList, Function::ExternalLinkage, "kite_list_new", module);
+            if (funPtrNewList->getName() != "kite_list_new")
+            {
+                funPtrNewList->eraseFromParent();
+                funPtrNewList = module->getFunction("kite_list_new");
+            }
+            Value *listObject = builder.CreateCall(funPtrNewList);
+            
+            parameterTypesNewList.push_back(kite_type_to_llvm_type(semantics::OBJECT));
+            parameterTypesNewList.push_back(kite_type_to_llvm_type(semantics::OBJECT));
+            const FunctionType *ftPtrAppendList = FunctionType::get(parameterTypesNewList[0], parameterTypesNewList, false);
+            Function *funPtrAppendList = Function::Create(ftPtrAppendList, Function::ExternalLinkage, "kite_list_append", module);
+            if (funPtrAppendList->getName() != "kite_list_append")
+            {
+                funPtrAppendList->eraseFromParent();
+                funPtrAppendList = module->getFunction("kite_list_append");
+            }
+            
+            paramValuesNewList.push_back(listObject);
+            paramValuesNewList.push_back(NULL);
+            for (int i = 0; i < tree.children.size(); i++)
+            {
+                Value *listItem = boost::apply_visitor(llvm_node_codegen(state), tree.children[i]);
+                const Type *itemType = listItem->getType();
+                if (itemType == PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)))
+                {
+                    listItem = builder.CreateLoad(listItem);
+                }
+                else if (itemType != kite_type_to_llvm_type(semantics::OBJECT))
+                {
+                    std::vector<Value*> params;
+                    params.push_back(listItem);
+                    listItem = generate_llvm_method_call(listItem, "obj", params);
+                }
+                paramValuesNewList[1] = listItem;
+                builder.CreateCall(funPtrAppendList, paramValuesNewList.begin(), paramValuesNewList.end());
+            }
+
+            return listObject;
         }
 
         Value *llvm_node_codegen::codegen_destructor_op(semantics::syntax_tree const &tree) const

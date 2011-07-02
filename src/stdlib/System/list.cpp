@@ -187,3 +187,18 @@ namespace kite
         }
     }
 }
+
+using namespace kite::stdlib;
+
+void *kite_list_new()
+{
+    return (void*)(new System::list());
+}
+
+void kite_list_append(void *list, void *item)
+{
+    System::list *listObj = (System::list*)list;
+    System::object *itemObj = (System::object*)item;
+    
+    listObj->list_contents.push_back(itemObj);
+}

@@ -31,7 +31,7 @@ namespace kite
                           ("\\r", '\r')("\\t", '\t')("\\v", '\v')("\\\\", '\\')
                           ("\\\'", '\'')("\\\"", '\"');
             numeric_value = 
-                (real_parser<double, strict_real_policies<double> >() | int_ | unesc_str | anon_method_statement) [ _val = _1 ]
+                (real_parser<double, strict_real_policies<double> >() | int_ | unesc_str | method_ref_statement | anon_method_statement) [ _val = _1 ]
                 | lit("true") [ _val = true ]
                 | lit("false") [ _val = false ];
             

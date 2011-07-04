@@ -174,6 +174,9 @@ namespace kite
                 case semantics::LIST_VAL:
                     ret = codegen_list_op(tree);
                     break;
+                case semantics::METHOD_REF:
+                    ret = codegen_method_ref_op(tree);
+                    break;
             }
             
             return ret;
@@ -370,6 +373,60 @@ namespace kite
                     params.push_back(rhs);
                     return generate_llvm_method_call(rhs, semantics::operator_map[tree.op], params);
             }
+        }
+        
+        Value *llvm_node_codegen::codegen_method_ref_op(semantics::syntax_tree const &tree) const
+        {
+            Module *module = state.current_module();
+            IRBuilder<> &builder = state.module_builder();
+            Value *this_ptr = boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
+            std::string name = boost::get<std::string>(tree.children[1]);
+            int args = boost::get<int>(tree.children[2]);
+            
+            if (get_type(this_ptr) != semantics::OBJECT)
+            {
+                std::vector<Value*> params;
+                params.push_back(this_ptr);
+                this_ptr = generate_llvm_method_call(this_ptr, "obj", params);
+            }
+            
+            // TODO: refactor
+            std::vector<const Type*> parameterTypesLookup;
+            std::vector<Value*> paramValuesLookup;
+            parameterTypesLookup.push_back(PointerType::getUnqual(Type::getInt32Ty(getGlobalContext())));
+            parameterTypesLookup.push_back(kite_type_to_llvm_type(semantics::STRING));
+            parameterTypesLookup.push_back(kite_type_to_llvm_type(semantics::INTEGER));
+            const FunctionType *ftPtrLookup = FunctionType::get(parameterTypesLookup[0], parameterTypesLookup, false);
+            Function *funPtrLookup = Function::Create(ftPtrLookup, Function::ExternalLinkage, "kite_find_funccall", module);
+            if (funPtrLookup->getName() != "kite_find_funccall")
+            {
+                funPtrLookup->eraseFromParent();
+                funPtrLookup = module->getFunction("kite_find_funccall");
+            }
+            paramValuesLookup.push_back(builder.CreateBitCast(this_ptr, PointerType::getUnqual(Type::getInt32Ty(getGlobalContext()))));
+            paramValuesLookup.push_back(builder.CreateGlobalStringPtr(name.c_str()));
+            paramValuesLookup.push_back(ConstantInt::get(getGlobalContext(), APInt(32, args + 1, true)));
+            Value *fptr = builder.CreateCall(
+                funPtrLookup,
+                paramValuesLookup.begin(),
+                paramValuesLookup.end()
+            );
+            
+            std::vector<const Type*> parameterTypes;
+            parameterTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
+            parameterTypes.push_back(kite_type_to_llvm_type(semantics::INTEGER));
+            
+            const FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), parameterTypes, false);
+            Function *funPtr = Function::Create(ft, Function::ExternalLinkage, "kite_method_alloc", module);
+            if (funPtr->getName() != "kite_method_alloc")
+            {
+                funPtr->eraseFromParent();
+                funPtr = module->getFunction("kite_method_alloc");
+            }
+            Value *method = builder.CreateCall2(funPtr, builder.CreateBitCast(fptr, kite_type_to_llvm_type(semantics::OBJECT)), ConstantInt::get(kite_type_to_llvm_type(semantics::INTEGER), args + 0));
+            builder.CreateStore(this_ptr, builder.CreateStructGEP(builder.CreateBitCast(method, get_method_type()), 2));
+            
+            return method;
         }
         
         Value *llvm_node_codegen::codegen_unary_minus_op(semantics::syntax_tree const &tree) const
@@ -583,7 +640,6 @@ namespace kite
 
             Value *fptr = NULL;
 
-            // TODO: use different self if not NULL.
             Value *self = state.module_builder().CreateLoad(sym_stack["this"]);
             parameters.push_back(self);
             parameterTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
@@ -598,7 +654,10 @@ namespace kite
             if (sym_stack.find(method_name) != sym_stack.end())
             {
                 // local variable
-                // TODO: verify that variable is System::object*.
+                // TODO: verify that variable is System::object* first.
+                Value *method_obj = builder.CreateBitCast(builder.CreateLoad(sym_stack[method_name]), get_method_type());
+                parameters[0] = builder.CreateLoad(builder.CreateStructGEP(method_obj, 2));
+                
                 std::vector<const Type*> parameterTypesLookup;
                 std::vector<Value*> paramValuesLookup;
                 parameterTypesLookup.push_back(PointerType::getUnqual(Type::getInt32Ty(getGlobalContext())));
@@ -624,7 +683,15 @@ namespace kite
 
             if (fptr != NULL)
             {
-                // TODO: convert parameters to object type.
+                for (int i = 0; i < parameters.size(); i++)
+                {
+                    if (get_type(parameters[i]) != semantics::OBJECT)
+                    {
+                        std::vector<Value*> params;
+                        params.push_back(parameters[i]);
+                        parameters[i] = generate_llvm_method_call(parameters[i], "obj", params);
+                    }
+                }
                 return builder.CreateCall(
                     fptr,
                     parameters.begin(),

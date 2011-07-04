@@ -41,6 +41,13 @@ namespace kite
                    lit("method") [ at_c<0>(_val) = kite::semantics::METHOD ] [ push_back(at_c<1>(_val), std::string("__AnonMethod")) ]
                 >> (lit('(') >> -(identifier [ push_back(at_c<1>(_val), _1) ] % ',') >> lit(')'))
                 > '[' >> start [ push_back(at_c<1>(_val), _1) ] >> ']';
+                
+            method_ref_statement =
+                   lit("method_ref") [ at_c<0>(_val) = kite::semantics::METHOD_REF ]
+                >> (lit('(') > 
+                      or_statement [ push_back(at_c<1>(_val), _1) ] > ',' >
+                      unesc_str [ push_back(at_c<1>(_val), _1) ] > ',' >
+                      int_ [ push_back(at_c<1>(_val), _1) ] >> lit(')'));
         }
         
         kite_grammar<pos_iterator_type, BOOST_TYPEOF(KITE_SKIP_RULE)> method_grammar;

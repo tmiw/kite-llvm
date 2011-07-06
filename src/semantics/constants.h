@@ -91,6 +91,7 @@ namespace kite
             OPERATOR,
             LIST_VAL,
             METHOD_REF,
+            IMPORT,
         };
         
         typedef std::map<semantics::code_operation, std::string> OperatorMethodsMap;

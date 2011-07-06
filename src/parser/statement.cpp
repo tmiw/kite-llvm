@@ -16,6 +16,10 @@ namespace kite
             using qi::lit;
 
             math_statement = assign_statement;
+            import_statement = 
+                lit("import") [ at_c<0>(_val) = kite::semantics::IMPORT ] > 
+                unesc_str [ push_back(at_c<1>(_val), _1) ];
+            
             statement = 
                 ( loop_statement 
                 | decide_statement 
@@ -25,6 +29,7 @@ namespace kite
                 | constructor_statement
                 | destructor_statement
                 | exception_statement
+                | import_statement
                 | math_statement ) [ _val = _1 ] > ';';
             start = (*statement [ push_back(at_c<1>(_val), _1) ]) [ at_c<0>(_val) = kite::semantics::ITERATE ];
         }

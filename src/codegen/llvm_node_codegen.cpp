@@ -31,7 +31,10 @@
 #include <boost/variant/get.hpp>
 #include <boost/assign.hpp>
 #include "llvm_node_codegen.h"
+#include "stdlib/language/kite.h"
+
 using namespace boost::assign;
+using namespace kite::stdlib;
 
 namespace kite
 {
@@ -177,6 +180,9 @@ namespace kite
                 case semantics::METHOD_REF:
                     ret = codegen_method_ref_op(tree);
                     break;
+                case semantics::IMPORT:
+                    ret = codegen_import_op(tree);
+                    break;
             }
             
             return ret;
@@ -217,6 +223,15 @@ namespace kite
         Value *llvm_node_codegen::codegen_const_op(semantics::syntax_tree const &tree) const
         {
             return boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
+        }
+        
+        Value *llvm_node_codegen::codegen_import_op(semantics::syntax_tree const &tree) const
+        {
+            std::string module_name = boost::get<std::string>(tree.children[0]);
+            
+            language::kite::kite::ImportModule(module_name);
+            
+            return ConstantInt::get(getGlobalContext(), APInt(32, 0, true));
         }
         
         Value *llvm_node_codegen::codegen_binary_op(semantics::syntax_tree const &tree) const
@@ -1123,7 +1138,7 @@ namespace kite
                 return method_obj;
             }
             
-            return method;
+            return method_obj;
         }
 
         Value *llvm_node_codegen::generate_llvm_method(std::string name, std::vector<std::string> &argnames, semantics::syntax_tree &body) const

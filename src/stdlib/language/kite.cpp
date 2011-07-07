@@ -27,6 +27,8 @@
 
 #include "kite.h"
 
+#include <algorithm>
+#include <sys/stat.h>
 #include <parser/parser.h>
 #include <stdlib/System/dynamic_object.h>
 #include <stdlib/System/list.h>
@@ -66,6 +68,7 @@ namespace kite
                 ExecutionEngine *kite::execution_engine = NULL;
                 bool kite::enable_optimizer = false;
                 std::vector<jmp_buf*> kite::exception_stack;
+                std::vector<std::string> kite::search_path;
                 System::dynamic_object *kite::last_exception = NULL;
                 
                 void kite::InitializeRuntimeSystem()
@@ -101,8 +104,99 @@ namespace kite
                     System::exceptions::InvalidArgument::InitializeClass();
                     System::exceptions::TypeMismatch::InitializeClass();
                     System::exceptions::DivideByZero::InitializeClass();
+                    
+                    search_path.push_back("./");
                 }
 
+                System::object *kite::ImportModule(std::string &module_name)
+                {
+                    System::dynamic_object *context = root_object;
+
+                    // Generate module load list.
+                    std::vector<std::string> module_load_list;
+                    std::vector<std::string> module_name_list;
+                    size_t split_pos = module_name.find(".");
+                    size_t begin_pos = 0;
+                    while (split_pos != std::string::npos)
+                    {
+                        std::string tmp_string(module_name, 0, split_pos - begin_pos);
+                        std::replace(tmp_string.begin(), tmp_string.end(), '.', '/');
+                        module_load_list.push_back(tmp_string);
+                        module_name_list.push_back(std::string(module_name, begin_pos, split_pos - begin_pos));
+                        begin_pos = split_pos + 1;
+                        split_pos = module_name.find(".", split_pos + 1);
+                    }
+                    std::string tmp_string(module_name);
+                    std::replace(tmp_string.begin(), tmp_string.end(), '.', '/');
+                    module_load_list.push_back(tmp_string);
+                    module_name_list.push_back(std::string(module_name, begin_pos, std::string::npos));
+                    
+                    // Load each module in the list.
+                    int size = module_name_list.size();
+                    for (int index = 0; index < size; index++)
+                    {
+                        state.push_namespace_stack(module_name_list[index].c_str());
+                        
+                        std::string full_path;
+                        System::dynamic_object *the_object = new System::dynamic_object();
+                        the_object->properties["__name"] = new System::string(state.full_class_name().c_str());
+                        
+                        for (std::vector<std::string>::iterator pos = search_path.begin(); pos != search_path.end(); pos++)
+                        {
+                            struct stat st;
+                            
+                            // TODO: support C based Kite modules.
+                            full_path = *pos + module_load_list[index] + ".kt";
+                            if (stat(full_path.c_str(), &st) == 0)
+                            {
+                                break;
+                            }
+                            full_path = "";
+                        }
+                        
+                        if (context->properties[module_name_list[index]] != NULL) 
+                        {
+                            context = (System::dynamic_object*)context->properties[module_name_list[index]];
+                            continue;
+                        }
+                        
+                        if (full_path.size() == 0)
+                        {
+                            if (index == size - 1)
+                            {
+                                // TODO: throw exception for file not found.
+                                for (; index > 0; index--)
+                                {
+                                    state.pop_namespace_stack();
+                                }
+                                return NULL;
+                            }
+                        }
+                        else
+                        {
+                            language::kite::syntax_tree ast;
+                            if (ast.from_file(full_path))
+                            {
+                                ExecuteCode(ast, the_object);
+                            }
+                            else
+                            {
+                                // TODO: throw exception for parse error.
+                                for (; index > 0; index--)
+                                {
+                                    state.pop_namespace_stack();
+                                }
+                                return NULL;
+                            }
+                        }
+                        
+                        context->properties[module_name_list[index]] = the_object;
+                        context = the_object;
+                    }
+                    
+                    return context;
+                }
+                
                 System::object *kite::ExecuteCode(syntax_tree &ast)
                 {
                     return ExecuteCode(ast, root_object);

@@ -127,6 +127,7 @@ namespace kite
             qi::rule<Iterator, semantics::syntax_tree(), SkipType> list_statement;
             qi::rule<Iterator, semantics::syntax_tree(), SkipType> method_ref_statement;
             qi::rule<Iterator, semantics::syntax_tree(), SkipType> import_statement;
+            qi::rule<Iterator, semantics::syntax_tree(), SkipType> break_continue_statement;
             qi::rule<Iterator, std::string(), SkipType> identifier;
             qi::rule<Iterator, std::string(), SkipType> operator_identifier;
             qi::rule<Iterator, semantics::syntax_tree_node(), SkipType> numeric_value;

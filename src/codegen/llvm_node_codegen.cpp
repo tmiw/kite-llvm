@@ -183,6 +183,10 @@ namespace kite
                 case semantics::IMPORT:
                     ret = codegen_import_op(tree);
                     break;
+                case semantics::BREAK:
+                case semantics::CONTINUE:
+                    ret = codegen_break_continue_op(tree);
+                    break;
             }
             
             return ret;
@@ -215,6 +219,7 @@ namespace kite
             BOOST_FOREACH(semantics::syntax_tree_node const &node, tree.children)
             {
                 ret = boost::apply_visitor(llvm_node_codegen(state), node);
+                if (state.get_skip_remaining()) break;
             }
             
             return ret;
@@ -838,6 +843,9 @@ namespace kite
             BasicBlock *bodyBB = BasicBlock::Create(getGlobalContext(), "loopbody", currentFunc);
             BasicBlock *afterLoopBB = BasicBlock::Create(getGlobalContext(), "loopend", currentFunc);
             
+            state.push_loop(BB);
+            state.push_loop_end(afterLoopBB);
+            
             switch(tree.op)
             {
                 case semantics::WHILE:
@@ -850,9 +858,35 @@ namespace kite
             
             state.module_builder().SetInsertPoint(bodyBB);
             Value *inner = boost::apply_visitor(llvm_node_codegen(state), tree.children[1]);
-            state.module_builder().CreateBr(BB);
+            if (!state.get_skip_remaining()) state.module_builder().CreateBr(BB);
+            state.skip_remaining(false);
             
             state.module_builder().SetInsertPoint(afterLoopBB);
+            
+            state.pop_loop();
+            state.pop_loop_end();
+            
+            return ConstantInt::get(getGlobalContext(), APInt(32, 0, true)); // TODO
+        }
+        
+        Value *llvm_node_codegen::codegen_break_continue_op(semantics::syntax_tree const &tree) const
+        {
+            BasicBlock *currentLoop = NULL;
+            IRBuilder<> &builder = state.module_builder();
+            
+            // TODO: verify that we're inside of a loop.
+            switch(tree.op)
+            {
+                case semantics::CONTINUE:
+                    currentLoop = state.current_loop();
+                    break;
+                case semantics::BREAK:
+                    currentLoop = state.current_loop_end();
+                    break;
+            }
+            
+            builder.CreateBr(currentLoop);
+            state.skip_remaining(true);
             return ConstantInt::get(getGlobalContext(), APInt(32, 0, true)); // TODO
         }
         
@@ -881,23 +915,29 @@ namespace kite
                 }
                 else
                 {
-                    decideResults.push_back(ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) << 3, (uint64_t)0, true)));
+                    Value *zero = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) << 3, (uint64_t)0, true));
+                    zero = builder.CreateBitCast(zero, kite_type_to_llvm_type(semantics::OBJECT));
+                    decideResults.push_back(zero);
                     decideBlocks.push_back(condBB);
                     condBB = endBB;
                 }
                 builder.CreateCondBr(condition, actionBB, condBB);
                 builder.SetInsertPoint(actionBB);
                 Value *result = boost::apply_visitor(llvm_node_codegen(state), tree.children[i]);
-                if (get_type(result) != semantics::OBJECT) 
+                if (!state.get_skip_remaining())
                 {
-                    std::vector<Value*> emptyList;
-                    emptyList.push_back(result);
-                    result = generate_llvm_method_call(result, "obj", emptyList);
+                    if (get_type(result) != semantics::OBJECT)
+                    {
+                        std::vector<Value*> emptyList;
+                        emptyList.push_back(result);
+                        result = generate_llvm_method_call(result, "obj", emptyList);
+                    }
+                    decideResults.push_back(result);
+                    decideBlocks.push_back(actionBB);
                 }
                 actionBB = builder.GetInsertBlock();
-                decideResults.push_back(result);
-                decideBlocks.push_back(actionBB);
-                builder.CreateBr(endBB);
+                if (!state.get_skip_remaining()) builder.CreateBr(endBB);
+                state.skip_remaining(false);
                 builder.SetInsertPoint(condBB);
             }
             

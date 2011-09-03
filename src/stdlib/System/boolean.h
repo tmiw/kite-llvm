@@ -66,6 +66,8 @@ extern "C"
     bool PREFIX_BOOLEAN_METHOD_NAME(print__b)(bool val);
     void *PREFIX_BOOLEAN_METHOD_NAME(print__o)(void *val);
     void *PREFIX_BOOLEAN_METHOD_NAME(obj__b)(bool val);
+    char *PREFIX_BOOLEAN_METHOD_NAME(str__o)(void *val);
+    char *PREFIX_BOOLEAN_METHOD_NAME(str__b)(bool val);
     
     void *PREFIX_BOOLEAN_METHOD_NAME(__op_equals____oo)(void *lhs, void *rhs);
     void *PREFIX_BOOLEAN_METHOD_NAME(__op_nequals____oo)(void *lhs, void *rhs);

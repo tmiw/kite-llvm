@@ -40,6 +40,7 @@ namespace kite
     {
         namespace System
         {
+            System::dynamic_object fpnum::class_object;
             object_method_map fpnum::method_map = map_list_of
                 ("__op_plus____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_FLOAT_METHOD_NAME(__op_plus____oo))))
                 ("__op_minus____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_FLOAT_METHOD_NAME(__op_minus____oo))))
@@ -56,6 +57,7 @@ namespace kite
                 ("__op_geq____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_FLOAT_METHOD_NAME(__op_geq____oo))))
                 ("__op_not____o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_FLOAT_METHOD_NAME(__op_not____o))))
                 ("bool__f", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_FLOAT_METHOD_NAME(bool__f))))
+                ("bool__o", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_FLOAT_METHOD_NAME(bool__o))))
                 ("int__f", function_semantics(semantics::INTEGER, (void*)&(PREFIX_FLOAT_METHOD_NAME(int__f))))
                 ("float__f", function_semantics(semantics::FLOAT, (void*)&(PREFIX_FLOAT_METHOD_NAME(float__f))))
                 ("str__f", function_semantics(semantics::FLOAT, (void*)&(PREFIX_FLOAT_METHOD_NAME(str__f))))
@@ -79,14 +81,22 @@ namespace kite
                 return PREFIX_FLOAT_METHOD_NAME(float__f)(val);
             }
             
-            double fpnum::print()
-            {
-                return PREFIX_FLOAT_METHOD_NAME(print__f)(val);
-            }
-            
             System::object *fpnum::to_object()
             {
                 return (System::object*)PREFIX_FLOAT_METHOD_NAME(obj__f)(val);
+            }
+            
+            void fpnum::InitializeClass()
+            {
+                class_object.add_method("parse", 1, (void*)&fpnum::parse);
+                class_object.properties["__name"] = new System::string("System.float");
+            }
+            
+            System::object *fpnum::parse(System::object *t, System::string *str)
+            {
+                // TODO
+                assert(str->type == semantics::STRING);
+                return new System::fpnum(atof(str->string_val.c_str()));
             }
         }
     }
@@ -97,6 +107,12 @@ using namespace kite::stdlib;
 bool PREFIX_FLOAT_METHOD_NAME(bool__f)(double val)
 {
     return val != 0.0f;
+}
+
+bool PREFIX_FLOAT_METHOD_NAME(bool__o)(void *val)
+{
+    System::fpnum *fpobj = (System::fpnum*)val;
+    return fpobj->val != 0.0f;
 }
 
 int PREFIX_FLOAT_METHOD_NAME(int__f)(double val)

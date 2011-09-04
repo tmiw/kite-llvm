@@ -51,6 +51,14 @@ namespace kite
             inline Module *current_module() { return _moduleStack.back(); }
             Module *pop_module(); /*! Pops module from top of stack. */
             
+            void push_loop(BasicBlock *loop); /*! Pushes new loop onto stack. */
+            inline BasicBlock *current_loop() { return _loopStack.back(); }
+            BasicBlock *pop_loop(); /*! Pops loop from top of stack. */
+            
+            void push_loop_end(BasicBlock *loop); /*! Pushes new loop onto stack. */
+            inline BasicBlock *current_loop_end() { return _loopEndStack.back(); }
+            BasicBlock *pop_loop_end(); /*! Pops loop from top of stack. */
+            
             inline IRBuilder<> &module_builder() { return _moduleBuilder; }
             
             void push_symbol_stack();
@@ -66,12 +74,18 @@ namespace kite
             inline bool overrideOverloadedProperties() { return _overrideOverloadedProperties; }
             void overrideOverloadedProperties(bool val) { _overrideOverloadedProperties = val; }
 
+            inline void skip_remaining(bool val) { _skipRemainingStatements = val; }
+            inline bool get_skip_remaining() { return _skipRemainingStatements; }
+            
         private:
             std::vector<std::string> _namespaceStack;
             std::vector<Module*> _moduleStack;
+            std::vector<BasicBlock*> _loopStack;
+            std::vector<BasicBlock*> _loopEndStack;
             std::vector<std::map<std::string, Value*> *> _symbolTableStack;
             IRBuilder<> _moduleBuilder;
             bool _overrideOverloadedProperties;
+            bool _skipRemainingStatements;
         };
     }
 }

@@ -28,6 +28,8 @@
 #include <iostream>
 #include <boost/assign.hpp>
 #include "boolean.h"
+#include "exceptions/TypeMismatch.h"
+#include "exceptions/DivideByZero.h"
 using namespace boost::assign;
  
 namespace kite
@@ -37,12 +39,19 @@ namespace kite
         namespace System
         {
             object_method_map boolean::method_map = map_list_of
+                ("__op_equals____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(__op_equals____oo))))
+                ("__op_nequals____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(__op_nequals____oo))))
+                ("__op_and____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(__op_and____oo))))
+                ("__op_or____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(__op_or____oo))))
                 ("__op_not____o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(__op_not____o))))
+                ("__op_xor____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(__op_xor____oo))))            
                 ("bool__b", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(bool__b))))
                 ("int__b", function_semantics(semantics::INTEGER, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(int__b))))
                 ("float__b", function_semantics(semantics::FLOAT, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(float__b))))
                 ("print__b", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(print__b))))
                 ("print__o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(print__o))))
+                ("str__b", function_semantics(semantics::STRING, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(str__b))))
+                ("str__o", function_semantics(semantics::STRING, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(str__o))))
                 ("obj__b", function_semantics(semantics::OBJECT, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(obj__b))));
             
             bool boolean::to_boolean()
@@ -58,11 +67,6 @@ namespace kite
             double boolean::to_float()
             {
                 return PREFIX_BOOLEAN_METHOD_NAME(float__b)(val);
-            }
-            
-            bool boolean::print()
-            {
-                return PREFIX_BOOLEAN_METHOD_NAME(print__b)(val);
             }
             
             System::object *boolean::to_object()
@@ -106,13 +110,87 @@ void *PREFIX_BOOLEAN_METHOD_NAME(print__o)(void *val)
     return val;
 }
 
+char *PREFIX_BOOLEAN_METHOD_NAME(str__b)(bool val)
+{
+    char *retVal;
+    
+    if (val)
+    {
+        retVal = new char[5];
+        strcpy(retVal, "true");
+    }
+    else
+    {
+        retVal = new char[6];
+        strcpy(retVal, "false");
+    }
+    
+    return retVal;
+}
+
+char *PREFIX_BOOLEAN_METHOD_NAME(str__o)(void *val)
+{
+    System::boolean *objVal = (System::boolean*)val;
+    return PREFIX_BOOLEAN_METHOD_NAME(str__b)(objVal->val);
+}
+
 void *PREFIX_BOOLEAN_METHOD_NAME(obj__b)(bool val)
 {
     return (void*)(new System::boolean(val));
+}
+
+static void verify_boolean_type(System::boolean *left, System::boolean *right)
+{
+    if (left->type != right->type)
+    {
+        System::exceptions::exception *exc = new System::exceptions::TypeMismatch("boolean expected");
+        exc->throw_exception();
+    }
+}
+
+void *PREFIX_BOOLEAN_METHOD_NAME(__op_equals____oo)(void *lhs, void *rhs)
+{
+    System::boolean *lhsInt = (System::boolean*)lhs;
+    System::boolean *rhsInt = (System::boolean*)rhs;
+    verify_boolean_type(lhsInt, rhsInt);
+    return (void*)(new kite::stdlib::System::boolean(lhsInt->val == rhsInt->val));
+}
+
+void *PREFIX_BOOLEAN_METHOD_NAME(__op_nequals____oo)(void *lhs, void *rhs)
+{
+    System::boolean *lhsInt = (System::boolean*)lhs;
+    System::boolean *rhsInt = (System::boolean*)rhs;
+    verify_boolean_type(lhsInt, rhsInt);
+    return (void*)(new kite::stdlib::System::boolean(lhsInt->val != rhsInt->val));
+}
+
+void *PREFIX_BOOLEAN_METHOD_NAME(__op_and____oo)(void *lhs, void *rhs)
+{
+    System::boolean *leftObject = (System::boolean*)lhs;
+    System::boolean *rightObject = (System::boolean*)rhs;
+    verify_boolean_type(leftObject, rightObject);
+    return (void*)(new System::boolean(leftObject->val && rightObject->val));
+}
+
+void *PREFIX_BOOLEAN_METHOD_NAME(__op_or____oo)(void *lhs, void *rhs)
+{
+    System::boolean *leftObject = (System::boolean*)lhs;
+    System::boolean *rightObject = (System::boolean*)rhs;
+    verify_boolean_type(leftObject, rightObject);
+    return (void*)(new System::boolean(leftObject->val || rightObject->val));
 }
 
 void *PREFIX_BOOLEAN_METHOD_NAME(__op_not____o)(void *val)
 {
     System::boolean *objVal = (System::boolean*)val;
     return (void*)(new System::boolean(!objVal->val));
+}
+
+void *PREFIX_BOOLEAN_METHOD_NAME(__op_xor____oo)(void *lhs, void *rhs)
+{
+    System::boolean *leftObject = (System::boolean*)lhs;
+    System::boolean *rightObject = (System::boolean*)rhs;
+
+    verify_boolean_type(leftObject, rightObject);
+    return (void*)(new System::boolean(leftObject->val ^ rightObject->val));
 }

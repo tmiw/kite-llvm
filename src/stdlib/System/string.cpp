@@ -100,11 +100,6 @@ namespace kite
                 return PREFIX_STRING_METHOD_NAME(ltrim__s)(string_val.c_str());
             }
             
-            char* string::print()
-            {
-                return PREFIX_STRING_METHOD_NAME(print__s)(string_val.c_str());
-            }
-            
             char* string::rtrim()
             {
                 return PREFIX_STRING_METHOD_NAME(rtrim__s)(string_val.c_str());

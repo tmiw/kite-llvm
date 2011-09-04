@@ -28,6 +28,9 @@
 #ifndef KITE_SEMANTICS__CONSTANTS_H
 #define KITE_SEMANTICS__CONSTANTS_H
 
+#include <boost/assign.hpp>
+using namespace boost::assign;
+
 namespace kite
 {
     namespace semantics
@@ -85,7 +88,19 @@ namespace kite
             DESTRUCTOR,
             IS_CLASS,
             ISOF_CLASS,
+            OPERATOR,
+            LIST_VAL,
+            METHOD_REF,
+            IMPORT,
+            BREAK,
+            CONTINUE,
         };
+        
+        typedef std::map<semantics::code_operation, std::string> OperatorMethodsMap;
+        typedef std::map<std::string, std::string> OperatorMethodNameMap;
+        
+        extern OperatorMethodsMap operator_map;
+        extern OperatorMethodNameMap operator_name_map;
     }
 }
 

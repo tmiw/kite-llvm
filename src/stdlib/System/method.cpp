@@ -30,21 +30,6 @@
 
 using namespace kite::stdlib;
 
-namespace kite
-{
-     namespace stdlib
-     {
-        namespace System
-        {
-            System::method *method::print()
-            {
-                std::cout << "method" << std::endl;
-                return this;
-            }
-        }
-    }
-}
-
 void *kite_method_alloc(void *method_ptr, int args)
 {
     System::method *method = new System::method(method_ptr);

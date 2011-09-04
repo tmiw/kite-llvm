@@ -31,12 +31,18 @@ namespace kite
                           ("\\r", '\r')("\\t", '\t')("\\v", '\v')("\\\\", '\\')
                           ("\\\'", '\'')("\\\"", '\"');
             numeric_value = 
-                (real_parser<double, strict_real_policies<double> >() | int_ | unesc_str | anon_method_statement) [ _val = _1 ]
+                (real_parser<double, strict_real_policies<double> >() | int_ | unesc_str | method_ref_statement | anon_method_statement) [ _val = _1 ]
                 | lit("true") [ _val = true ]
                 | lit("false") [ _val = false ];
             
+            list_statement = 
+                lit("[") [ at_c<0>(_val) = kite::semantics::LIST_VAL ] >>
+                -(or_statement [ push_back(at_c<1>(_val), _1) ] % ',') >>
+                lit("]");
+            
             const_statement = 
                   numeric_value [ push_back(at_c<1>(_val), _1) ] [ at_c<0>(_val) = kite::semantics::CONST ]
+                | list_statement [ _val = _1 ]
                 | identifier [ push_back(at_c<1>(_val), _1) ] [ at_c<0>(_val) = kite::semantics::VARIABLE ]
                 | make_statement [ _val = _1 ];
             
@@ -53,6 +59,33 @@ namespace kite
                     - lit("operator")
                     - lit("construct")
                     - lit("false")); // [ _val = _1 ];
+            
+            operator_identifier = 
+                lit("plus") |
+                lit("minus") |
+                lit("multiply") |
+                lit("divide") |
+                lit("mod") |
+                lit("unplus") |
+                lit("unminus") |
+                lit("map") |
+                lit("reduce") |
+                lit("array") |
+                lit("array_set") |
+                lit("equals") |
+                lit("nequals") |
+                lit("lt") |
+                lit("gt") |
+                lit("leq") |
+                lit("geq") |
+                lit("and") |
+                lit("or") |
+                lit("not") |
+                lit("xor") |
+                lit("lshift") |
+                lit("rshift") |
+                lit("call") |
+                lit("property");
         }
         
         kite_grammar<pos_iterator_type, BOOST_TYPEOF(KITE_SKIP_RULE)> constants_grammar;

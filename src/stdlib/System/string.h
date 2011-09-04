@@ -60,7 +60,6 @@ namespace kite
                 int length();
                 char* lower();
                 char* ltrim();
-                char* print();
                 char* rtrim();
                 char* str();
                 char* trim();

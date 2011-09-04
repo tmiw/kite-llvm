@@ -51,7 +51,8 @@ namespace kite
                 ("int__o", function_semantics(semantics::INTEGER, (void*)0))
                 ("float__o", function_semantics(semantics::FLOAT, (void*)0))
                 ("print__o", function_semantics(semantics::OBJECT, (void*)0))
-                ("obj__o", function_semantics(semantics::OBJECT, (void*)0));
+                ("str__o", function_semantics(semantics::STRING, (void*)0))
+                ("obj__o", function_semantics(semantics::OBJECT, (void*)&obj__o));
 
             void object::finalizer_setup()
             {
@@ -82,6 +83,34 @@ namespace kite
                 }
                 GC_register_finalizer_ignore_self( GC_base(real_this), 0, 0, 0, 0 );
             }
+            
+            std::string object::as_string()
+            {
+                std::ostringstream res;
+                switch(type)
+                {
+                    case semantics::INTEGER:
+                        res << ((integer*)this)->val;
+                        break;
+                    case semantics::FLOAT:
+                        res << ((fpnum*)this)->val;
+                        break;
+                    case semantics::BOOLEAN:
+                        res << ((boolean*)this)->val;
+                        break;
+                    case semantics::STRING:
+                        res << ((string*)this)->string_val;
+                        break;
+                    case semantics::METHOD_TY:
+                        res << "method";
+                        break;
+                    default:
+                        std::cout << "object" << std::endl;
+                        break;
+                }
+                
+                return res.str();
+            }
         }
     }
 }
@@ -90,28 +119,7 @@ using namespace kite::stdlib;
 
 void System::object::print()
 {
-    switch(type)
-    {
-        case semantics::INTEGER:
-            ((integer*)this)->print();
-            break;
-        case semantics::FLOAT:
-            ((fpnum*)this)->print();
-            break;
-        case semantics::BOOLEAN:
-            ((boolean*)this)->print();
-            break;
-        case semantics::STRING:
-            ((string*)this)->print();
-            break;
-        case semantics::METHOD_TY:
-            ((method*)this)->print();
-            break;
-        default:
-            std::cout << "object" << std::endl;
-            break;
-
-    }
+    std::cout << this->as_string() << std::endl;
 }
 
 int *kite_find_funccall(int *obj, char *name, int numargs)
@@ -162,6 +170,7 @@ int *kite_find_funccall(int *obj, char *name, int numargs)
         do
         {
             System::property_map::iterator item = dyn_object->properties.find(method_name);
+                
             if (item != dyn_object->properties.end())
             {
                 System::object *method_obj = (*item).second;
@@ -183,11 +192,14 @@ int *kite_find_funccall(int *obj, char *name, int numargs)
         
         // TODO
 failed_to_find_method:
-        std::ostringstream ss;
-        ss << "Could not find method " << name << " that takes " << numargs << " argument(s).";
-        System::exceptions::NotImplemented *exception = new System::exceptions::NotImplemented(ss.str());
-        exception->throw_exception();
-        
+        std::string theName(name);
+        if ((theName == "__init__" && numargs > 1) || (theName != "__init__"))
+        {
+            std::ostringstream ss;
+            ss << "Could not find method " << name << " that takes " << (numargs - 1) << " argument(s).";
+            System::exceptions::NotImplemented *exception = new System::exceptions::NotImplemented(ss.str());
+            exception->throw_exception();
+        }
         return NULL;
     }
 }
@@ -211,4 +223,9 @@ bool kite_object_isof(void *lhs, void *rhs, bool type)
     } while (type && lhsObj);
     
     return ret;
+}
+
+void *obj__o(void *obj)
+{
+    return obj;
 }

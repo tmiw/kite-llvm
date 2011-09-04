@@ -32,7 +32,7 @@ namespace kite
     namespace codegen
     {
         llvm_compile_state::llvm_compile_state()
-	    : _moduleBuilder(getGlobalContext()), _overrideOverloadedProperties(false)
+	    : _moduleBuilder(getGlobalContext()), _overrideOverloadedProperties(false), _skipRemainingStatements(false)
 	    {
 	        // empty
 	    }
@@ -53,7 +53,31 @@ namespace kite
 	    {
 	        _moduleStack.push_back(module);
 	    }
+	    
+	    BasicBlock *llvm_compile_state::pop_loop()
+	    {
+            BasicBlock *returnValue = _loopStack.back();
+	        _loopStack.pop_back();
+	        return returnValue;
+	    }
 	               
+        void llvm_compile_state::push_loop(BasicBlock *loop)
+	    {
+	        _loopStack.push_back(loop);
+	    }
+	    
+	    BasicBlock *llvm_compile_state::pop_loop_end()
+	    {
+            BasicBlock *returnValue = _loopEndStack.back();
+	        _loopEndStack.pop_back();
+	        return returnValue;
+	    }
+	               
+        void llvm_compile_state::push_loop_end(BasicBlock *loop)
+	    {
+	        _loopEndStack.push_back(loop);
+	    }
+	              
 	    void llvm_compile_state::push_symbol_stack()
 	    {
 	        _symbolTableStack.push_back(new std::map<std::string, Value*>());

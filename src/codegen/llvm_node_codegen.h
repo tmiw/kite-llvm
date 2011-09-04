@@ -91,10 +91,14 @@ namespace kite
             Value *codegen_loop_op(semantics::syntax_tree const &tree) const;
             Value *codegen_decide_op(semantics::syntax_tree const &tree) const;
             Value *codegen_method_op(semantics::syntax_tree const &tree) const;
+            Value *codegen_method_ref_op(semantics::syntax_tree const &tree) const;
             Value *codegen_constructor_op(semantics::syntax_tree const &tree) const;
             Value *codegen_destructor_op(semantics::syntax_tree const &tree) const;
             Value *codegen_run_catch_op(semantics::syntax_tree const &tree) const;
             Value *codegen_isof_op(semantics::syntax_tree const &tree) const;
+            Value *codegen_list_op(semantics::syntax_tree const &tree) const;
+            Value *codegen_import_op(semantics::syntax_tree const &tree) const;
+            Value *codegen_break_continue_op(semantics::syntax_tree const &tree) const;
             
             Value *codegen_deref_property_op(semantics::syntax_tree const &tree, Value *prev) const;
             Value *codegen_deref_method_op(semantics::syntax_tree const &tree, Value *prev) const;
@@ -106,7 +110,7 @@ namespace kite
             
             stdlib::object_method_map &get_method_map(semantics::builtin_types type) const;
             Value *generate_llvm_method_call(Value *self, std::string name, std::vector<Value*> &params) const;
-            Value *generate_llvm_dynamic_object_alloc() const;
+            Value *generate_llvm_dynamic_object_alloc(Value *orig) const;
             void generate_llvm_dynamic_object_set_parent(Value *obj, Value *parent) const;
             void generate_llvm_dynamic_object_set_name(Value *obj) const;
             Value *generate_llvm_dynamic_object_get_property(Value *obj, std::string name, bool set = false) const;

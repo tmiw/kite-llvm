@@ -58,6 +58,8 @@ namespace kite
                 ("bool__f", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_FLOAT_METHOD_NAME(bool__f))))
                 ("int__f", function_semantics(semantics::INTEGER, (void*)&(PREFIX_FLOAT_METHOD_NAME(int__f))))
                 ("float__f", function_semantics(semantics::FLOAT, (void*)&(PREFIX_FLOAT_METHOD_NAME(float__f))))
+                ("str__f", function_semantics(semantics::FLOAT, (void*)&(PREFIX_FLOAT_METHOD_NAME(str__f))))
+                ("str__o", function_semantics(semantics::FLOAT, (void*)&(PREFIX_FLOAT_METHOD_NAME(str__o))))
                 ("print__f", function_semantics(semantics::FLOAT, (void*)&(PREFIX_FLOAT_METHOD_NAME(print__f))))
                 ("print__o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_FLOAT_METHOD_NAME(print__o))))
                 ("obj__f", function_semantics(semantics::OBJECT, (void*)&(PREFIX_FLOAT_METHOD_NAME(obj__f))));
@@ -111,6 +113,20 @@ double PREFIX_FLOAT_METHOD_NAME(print__f)(double val)
 {
     std::cout << val << std::endl;
     return val;
+}
+
+char *PREFIX_FLOAT_METHOD_NAME(str__f)(double val)
+{
+    char *retVal;
+    retVal = new char[256];
+    sprintf(retVal, "%f", &val);
+    return retVal;
+}
+
+char *PREFIX_FLOAT_METHOD_NAME(str__o)(void *obj)
+{
+    System::fpnum *val = (System::fpnum*)obj;
+    return PREFIX_FLOAT_METHOD_NAME(str__f)(val->val);
 }
 
 void *PREFIX_FLOAT_METHOD_NAME(print__o)(void *obj)

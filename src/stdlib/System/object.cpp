@@ -96,7 +96,10 @@ namespace kite
                         res << ((fpnum*)this)->val;
                         break;
                     case semantics::BOOLEAN:
-                        res << ((boolean*)this)->val;
+                        if (((boolean*)this)->val)
+                            res << "true";
+                        else
+                            res << "false";
                         break;
                     case semantics::STRING:
                         res << ((string*)this)->string_val;

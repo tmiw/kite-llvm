@@ -59,7 +59,9 @@ namespace kite
                 ("bool__f", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_FLOAT_METHOD_NAME(bool__f))))
                 ("bool__o", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_FLOAT_METHOD_NAME(bool__o))))
                 ("int__f", function_semantics(semantics::INTEGER, (void*)&(PREFIX_FLOAT_METHOD_NAME(int__f))))
+                ("int__o", function_semantics(semantics::INTEGER, (void*)&(PREFIX_FLOAT_METHOD_NAME(int__o))))
                 ("float__f", function_semantics(semantics::FLOAT, (void*)&(PREFIX_FLOAT_METHOD_NAME(float__f))))
+                ("float__o", function_semantics(semantics::FLOAT, (void*)&(PREFIX_FLOAT_METHOD_NAME(float__o))))
                 ("str__f", function_semantics(semantics::STRING, (void*)&(PREFIX_FLOAT_METHOD_NAME(str__f))))
                 ("str__o", function_semantics(semantics::STRING, (void*)&(PREFIX_FLOAT_METHOD_NAME(str__o))))
                 ("print__f", function_semantics(semantics::FLOAT, (void*)&(PREFIX_FLOAT_METHOD_NAME(print__f))))
@@ -120,9 +122,21 @@ int PREFIX_FLOAT_METHOD_NAME(int__f)(double val)
     return (int)val;
 }
 
+int PREFIX_FLOAT_METHOD_NAME(int__o)(void *val)
+{
+    System::fpnum *fpobj = (System::fpnum*)val;
+    return (int)fpobj->val;
+}
+
 double PREFIX_FLOAT_METHOD_NAME(float__f)(double val)
 {
     return val;
+}
+
+double PREFIX_FLOAT_METHOD_NAME(float__o)(void *val)
+{
+    System::fpnum *fpobj = (System::fpnum*)val;
+    return fpobj->val;
 }
 
 double PREFIX_FLOAT_METHOD_NAME(print__f)(double val)

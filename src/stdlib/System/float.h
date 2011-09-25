@@ -68,7 +68,9 @@ extern "C"
     bool PREFIX_FLOAT_METHOD_NAME(bool__f)(double val);
     bool PREFIX_FLOAT_METHOD_NAME(bool__o)(void *val);
     int PREFIX_FLOAT_METHOD_NAME(int__f)(double val);
+    int PREFIX_FLOAT_METHOD_NAME(int__o)(void *val);
     double PREFIX_FLOAT_METHOD_NAME(float__f)(double val);
+    double PREFIX_FLOAT_METHOD_NAME(float__o)(void *val);
     double PREFIX_FLOAT_METHOD_NAME(print__f)(double val);
     void *PREFIX_FLOAT_METHOD_NAME(print__o)(void *obj);
     char *PREFIX_FLOAT_METHOD_NAME(str__f)(double val);

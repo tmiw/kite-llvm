@@ -37,6 +37,7 @@
 #include <stdlib/System/exceptions/InvalidArgument.h>
 #include <stdlib/System/exceptions/TypeMismatch.h>
 #include <stdlib/System/exceptions/DivideByZero.h>
+#include <stdlib/System/exceptions/NullReference.h>
 #include <codegen/syntax_tree_printer.h>
 #include <codegen/llvm_node_codegen.h>
 #include <llvm/LLVMContext.h>
@@ -93,6 +94,7 @@ namespace kite
                     exceptions_obj->properties["InvalidArgument"] = &System::exceptions::InvalidArgument::class_object;
                     exceptions_obj->properties["TypeMismatch"] = &System::exceptions::TypeMismatch::class_object;
                     exceptions_obj->properties["DivideByZero"] = &System::exceptions::DivideByZero::class_object;
+                    exceptions_obj->properties["NullReference"] = &System::exceptions::NullReference::class_object;
                     system_obj->properties["float"] = &System::fpnum::class_object;
                     system_obj->properties["integer"] = &System::integer::class_object;
                     system_obj->properties["list"] = &System::list::class_object;
@@ -104,6 +106,7 @@ namespace kite
                     System::exceptions::InvalidArgument::InitializeClass();
                     System::exceptions::TypeMismatch::InitializeClass();
                     System::exceptions::DivideByZero::InitializeClass();
+                    System::exceptions::NullReference::InitializeClass();
                     
                     search_path.push_back("./");
                 }

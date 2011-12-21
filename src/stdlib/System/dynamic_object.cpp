@@ -28,6 +28,7 @@
 #include "dynamic_object.h"
 #include "string.h"
 #include "../language/kite.h"
+#include "exceptions/NullReference.h"
 
 using namespace kite::stdlib;
 
@@ -52,6 +53,12 @@ void **kite_dynamic_object_get_property(void *object, char *name, bool set)
     System::dynamic_object *cur = castedObj;
     void **ret = NULL;
 
+    if (object == NULL)
+    {
+        System::exceptions::NullReference *nre = new System::exceptions::NullReference();
+        nre->throw_exception();
+    }
+    
     if (!set)
     {
         do

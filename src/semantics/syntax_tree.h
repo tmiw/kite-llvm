@@ -44,6 +44,7 @@ namespace kite
             int,
             double,
             bool,
+            void*,
             std::string> syntax_tree_node;
         
         struct syntax_tree

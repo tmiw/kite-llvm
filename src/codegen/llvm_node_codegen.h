@@ -60,6 +60,7 @@ namespace kite
             
             // Type-specific codegen methods (for use in CONST tree type only)
             Value *operator()(int const &val) const;
+            Value *operator()(void* const &val) const;
             Value *operator()(double const &val) const;
             Value *operator()(bool const &val) const;
             Value *operator()(std::string const &val) const;

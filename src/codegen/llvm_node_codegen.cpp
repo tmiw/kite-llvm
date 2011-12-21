@@ -192,6 +192,16 @@ namespace kite
             return ret;
         }
         
+        // for 'null' value
+        Value *llvm_node_codegen::operator()(void* const &val) const
+        {
+            IRBuilder<> &builder = state.module_builder();
+            
+            return builder.CreateIntToPtr(
+                ConstantInt::get(getGlobalContext(), APInt(32, 0, true)),
+                kite_type_to_llvm_type(semantics::OBJECT));
+        }
+        
         Value *llvm_node_codegen::operator()(int const &val) const
         {
             return ConstantInt::get(getGlobalContext(), APInt(32, val, true));
@@ -994,11 +1004,26 @@ namespace kite
             std::vector<Value*> runRetList;
             runRetList.push_back(run_ret);
             run_ret = generate_llvm_method_call(run_ret, "obj", runRetList);
+            
+            // Clear exception stack entry after successful completion of block.
+            std::vector<const Type*> pop_exc_params;
+            const FunctionType *pop_exc_type = FunctionType::get(Type::getVoidTy(getGlobalContext()), pop_exc_params, false);
+            Function *pop_exc_fun = Function::Create(pop_exc_type, Function::ExternalLinkage, "kite_exception_stack_pop", module);
+            if (pop_exc_fun->getName() != "kite_exception_stack_pop")
+            {
+                pop_exc_fun->eraseFromParent();
+                pop_exc_fun = module->getFunction("kite_exception_stack_pop");
+            }
+            builder.CreateCall(pop_exc_fun);
+            
+            // Jump to end of run/catch statement.
             builder.CreateBr(end_block);
             run_block = builder.GetInsertBlock();
             
             // Create catch block
             builder.SetInsertPoint(catch_block);
+
+            // Retrieve exception object and execute catch block.
             std::map<std::string, Value*> &sym_stack = state.current_symbol_stack();
             std::vector<const Type*> get_exc_params;
             const FunctionType *get_exc_type = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), get_exc_params, false);
@@ -1010,6 +1035,10 @@ namespace kite
             }
             sym_stack["__exc"] = builder.CreateAlloca(kite_type_to_llvm_type(semantics::OBJECT));
             builder.CreateStore(builder.CreateCall(get_exc_fun), sym_stack["__exc"]);
+            
+            // Clear exception stack here to handle nested exceptions.
+            builder.CreateCall(pop_exc_fun);
+            
             Value *catch_ret = boost::apply_visitor(llvm_node_codegen(state), tree.children[1]);
             std::vector<Value*> catchRetList;
             catchRetList.push_back(catch_ret);
@@ -1025,15 +1054,6 @@ namespace kite
             phi->addIncoming(catch_ret, catch_block);
             //phi->addIncoming(default_val, currentBB);
             builder.SetInsertPoint(end_block);
-            std::vector<const Type*> pop_exc_params;
-            const FunctionType *pop_exc_type = FunctionType::get(Type::getVoidTy(getGlobalContext()), pop_exc_params, false);
-            Function *pop_exc_fun = Function::Create(pop_exc_type, Function::ExternalLinkage, "kite_exception_stack_pop", module);
-            if (pop_exc_fun->getName() != "kite_exception_stack_pop")
-            {
-                pop_exc_fun->eraseFromParent();
-                pop_exc_fun = module->getFunction("kite_exception_stack_pop");
-            }
-            builder.CreateCall(pop_exc_fun);
             
             // Return result.
             return phi;

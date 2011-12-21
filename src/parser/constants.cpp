@@ -33,7 +33,8 @@ namespace kite
             numeric_value = 
                 (real_parser<double, strict_real_policies<double> >() | int_ | unesc_str | method_ref_statement | anon_method_statement) [ _val = _1 ]
                 | lit("true") [ _val = true ]
-                | lit("false") [ _val = false ];
+                | lit("false") [ _val = false ]
+                | lit("null") [ _val = (void*)NULL ];
             
             list_statement = 
                 lit("[") [ at_c<0>(_val) = kite::semantics::LIST_VAL ] >>

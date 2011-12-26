@@ -47,8 +47,6 @@ namespace kite
         
         enum code_operation
         {
-            ITERATE,
-            CONST,
             ADD,
             SUBTRACT,
             MULTIPLY,
@@ -62,14 +60,18 @@ namespace kite
             GREATER_OR_EQUALS,
             EQUALS,
             NOT_EQUALS,
-            UNARY_PLUS,
-            UNARY_MINUS,
             NOT,
             OR,
             XOR,
             AND,
             MAP,
             REDUCE,
+            __END_BINARY_OPS, // DO NOT USE
+            UNARY_PLUS,
+            UNARY_MINUS,
+            __END_OVERRIDABLE_OPS, // DO NOT USE
+            ITERATE,
+            CONST,
             DEREF_FILTER,
             DEREF_PROPERTY,
             DEREF_METHOD,

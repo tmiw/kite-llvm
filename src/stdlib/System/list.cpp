@@ -37,33 +37,6 @@ namespace kite
         {
             System::dynamic_object list::class_object;
             
-            void list::InitializeClass()
-            {
-                // TODO: operators
-                class_object.add_method("append", 1, (void*)&list::append);
-                class_object.add_method("count", 0, (void*)&list::count);
-                // TODO: cur
-                class_object.add_method("getIndex", 1, (void*)&list::get_index);
-                class_object.add_method("head", 0, (void*)&list::head);
-                // TODO: next
-                class_object.add_method("prepend", 1, (void*)&list::prepend);
-                class_object.add_method("print", 0, (void*)&list::print);
-                class_object.add_method("removeAt", 1, (void*)&list::remove_at);
-                // TODO: reset
-                // TOOD: sort
-                class_object.add_method("str", 0, (void*)&list::as_string);
-                class_object.add_method("sublist", 1, (void*)&list::sublist);
-                class_object.add_method("sublist", 2, (void*)&list::sublist_with_length);
-                class_object.add_method("tail", 0, (void*)&list::tail);
-                
-                class_object.obj_alloc_method = (void*)&list::__allocate_object;
-            }
-            
-            System::object *list::__allocate_object()
-            {
-                return new System::list();
-            }
-            
             System::object *list::append(System::list *list, System::object *item)
             {
                 System::list *new_list = new System::list();

@@ -29,7 +29,7 @@
 #define KITE_STDLIB__SYSTEM__LIST_H
 
 #include <deque>
-#include "dynamic_object.h"
+#include "stdlib/api.h"
 #include "integer.h"
 
 namespace kite
@@ -39,18 +39,29 @@ namespace kite
         namespace System
         {
             typedef std::deque<object*, gc_allocator<object*> > list_contents_type;
-            struct list : dynamic_object
-            {
-                static System::dynamic_object class_object;
+            
+            BEGIN_KITE_BASE_CLASS(list)
+                BEGIN_KITE_CLASS_INITIALIZER
+                    // TODO: operators
+                    KITE_METHOD_DEFINE(append, 1, &list::append);
+                    KITE_METHOD_DEFINE(count, 0, &list::count);
+                    // TODO: cur
+                    KITE_METHOD_DEFINE(getIndex, 1, &list::get_index);
+                    KITE_METHOD_DEFINE(head, 0, &list::head);
+                    // TODO: next
+                    KITE_METHOD_DEFINE(prepend, 1, &list::prepend);
+                    KITE_METHOD_DEFINE(print, 0, &list::print);
+                    KITE_METHOD_DEFINE(removeAt, 1, &list::remove_at);
+                    // TODO: reset
+                    // TOOD: sort
+                    KITE_METHOD_DEFINE(str, 0, &list::as_string);
+                    KITE_METHOD_DEFINE(sublist, 1, &list::sublist);
+                    KITE_METHOD_DEFINE(sublist, 2, &list::sublist_with_length);
+                    KITE_METHOD_DEFINE(tail, 0, &list::tail);
+                END_KITE_CLASS_INITIALIZER
+                
                 list_contents_type list_contents;
                 
-                list() : dynamic_object(&class_object)
-                {
-                    obj_alloc_method = class_object.obj_alloc_method;
-                }
-                
-                static void InitializeClass();
-                static System::object *__allocate_object();
                 static System::object *append(System::list *list, System::object *item);
                 static System::object *count(System::list *list);
                 static System::object *get_index(System::list *list, System::integer *index);

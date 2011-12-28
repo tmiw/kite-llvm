@@ -48,6 +48,7 @@ namespace kite
                 string_type string_val;
                 
                 string() : System::object(semantics::STRING), string_val("") { }
+                string(const char *val) : System::object(semantics::STRING), string_val(val) { }
                 string(string_type val) : System::object(semantics::STRING), string_val(val) { }
                 
                 static object_method_map method_map;

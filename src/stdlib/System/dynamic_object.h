@@ -85,11 +85,11 @@ namespace kite
                     assert(op < semantics::__END_OVERRIDABLE_OPS && op != semantics::__END_BINARY_OPS);
                     if (op < semantics::__END_BINARY_OPS)
                     {
-                        add_method(semantics::operator_map[op], 1, ptr);
+                        add_method(semantics::operator_map[op].c_str(), 1, ptr);
                     }
                     else
                     {
-                        add_method(semantics::operator_map[op], 0, ptr);
+                        add_method(semantics::operator_map[op].c_str(), 0, ptr);
                     }
                 }
             };

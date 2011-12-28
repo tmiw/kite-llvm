@@ -57,7 +57,7 @@ namespace kite
                 System::object *to_object();
                 
                 static void InitializeClass();
-                static System::object *parse(System::object *t, System::string *str);
+                static object *parse(object *t, string *str);
             };
         }
     }

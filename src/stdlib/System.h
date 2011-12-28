@@ -25,13 +25,11 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
  
-#ifndef KITE_STDLIB__SYSTEM__EXCEPTIONS__EXCEPTION_H
-#define KITE_STDLIB__SYSTEM__EXCEPTIONS__EXCEPTION_H
+#ifndef KITE_STDLIB__SYSTEM_H
+#define KITE_STDLIB__SYSTEM_H
 
-#include <setjmp.h>
-#include <string>
-#include <stdlib/System/dynamic_object.h>
-#include <stdlib/System/string.h>
+#include <deque>
+#include "stdlib/api.h"
 
 namespace kite
 {
@@ -39,54 +37,13 @@ namespace kite
     {
         namespace System
         {
-            namespace exceptions
-            {
-                struct exception : System::dynamic_object
-                {
-                    static System::dynamic_object class_object;
-                    
-                    exception(std::string message = "Exception thrown")
-                        : System::dynamic_object(&class_object) 
-                    {
-                        initialize(message);
-                    }
-                        
-                    void throw_exception();
-                    void initialize(std::string message = "Exception thrown")
-                    {
-                        properties["message"] = new string(message.c_str());
-                    }
-                    
-                    static void InitializeClass();
-                };
-            }
+            BEGIN_KITE_BASE_CLASS(System)
+                BEGIN_KITE_CLASS_INITIALIZER
+                    // empty
+                END_KITE_CLASS_INITIALIZER
+            END_KITE_CLASS
         }
     }
-}
-
-#define KITE_EXCEPTION_RUN \
-    { \
-        jmp_buf __exc_buf; \
-        if (setjmp(__exc_buf) == 0) \
-        { \
-            kite_exception_stack_push(&__exc_buf);
-#define KITE_EXCEPTION_CATCH \
-        } \
-        else \
-        { 
-#define KITE_EXCEPTION_END \
-        } \
-        kite_exception_stack_pop(); \
-    }
-#define KITE_EXCEPTION_RETURN(val) kite_exception_stack_pop(); return val
-
-extern "C"
-{
-    void kite_exception_stack_push(jmp_buf *);
-    void kite_exception_stack_pop();
-    void *kite_exception_get();
-    void *kite_exception_throw(void *exc);
-    void *kite_exception_init(void *exc);
 }
 
 #endif

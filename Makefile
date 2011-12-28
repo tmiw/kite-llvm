@@ -12,7 +12,7 @@ GC_LDFLAGS=-L/usr/lib
 MATH_LIBS=-lm
 COMMON_OBJS=src/codegen/llvm_compile_state.o src/codegen/llvm_node_codegen.o \
 	 src/codegen/syntax_tree_node_printer.o src/codegen/syntax_tree_printer.o \
-	 src/stdlib/System/integer.o src/stdlib/System/string.o \
+	 src/stdlib/System.o src/stdlib/System/integer.o src/stdlib/System/string.o \
 	 src/stdlib/System/boolean.o src/stdlib/System/float.o src/stdlib/System/object.o \
 	 src/stdlib/System/dynamic_object.o src/stdlib/System/list.o src/stdlib/System/method.o \
 	 src/stdlib/language/kite.o src/stdlib/language/kite/syntax_tree.o src/stdlib/System/exceptions/exception.o \
@@ -143,11 +143,6 @@ src/stdlib/language/kite.o: src/codegen/llvm_compile_state.h
 src/stdlib/language/kite.o: src/stdlib/language/kite/syntax_tree.h
 src/stdlib/language/kite.o: src/semantics/syntax_tree.h
 src/stdlib/language/kite.o: src/semantics/constants.h src/parser/parser.h
-src/stdlib/language/kite.o: src/stdlib/System/list.h src/stdlib/api.h
-src/stdlib/language/kite.o: src/stdlib/System/dynamic_object.h
-src/stdlib/language/kite.o: src/stdlib/System/integer.h
-src/stdlib/language/kite.o: src/stdlib/System/dynamic_object.h
-src/stdlib/language/kite.o: src/stdlib/System/string.h
 src/stdlib/language/kite.o: src/stdlib/System/exceptions/exception.h
 src/stdlib/language/kite.o: src/stdlib/System/string.h
 src/stdlib/language/kite.o: src/stdlib/System/exceptions/NotImplemented.h
@@ -159,6 +154,8 @@ src/stdlib/language/kite.o: src/stdlib/System/exceptions/NullReference.h
 src/stdlib/language/kite.o: src/codegen/syntax_tree_printer.h
 src/stdlib/language/kite.o: src/codegen/llvm_node_codegen.h
 src/stdlib/language/kite.o: src/stdlib/System/integer.h
+src/stdlib/language/kite.o: src/stdlib/System/dynamic_object.h
+src/stdlib/language/kite.o: src/stdlib/System/string.h
 src/stdlib/language/kite.o: src/stdlib/System/boolean.h
 src/stdlib/language/kite.o: src/stdlib/System/float.h
 src/stdlib/language/kite.o: src/codegen/llvm_compile_state.h
@@ -221,13 +218,20 @@ src/stdlib/System/integer.o: src/stdlib/System/boolean.h
 src/stdlib/System/integer.o: src/stdlib/System/exceptions/TypeMismatch.h
 src/stdlib/System/integer.o: src/stdlib/System/exceptions/exception.h
 src/stdlib/System/integer.o: src/stdlib/System/exceptions/DivideByZero.h
-src/stdlib/System/list.o: src/stdlib/System/list.h src/stdlib/api.h
-src/stdlib/System/list.o: src/stdlib/System/dynamic_object.h
-src/stdlib/System/list.o: src/stdlib/System/integer.h
+src/stdlib/System/list.o: src/stdlib/System/list.h src/stdlib/System.h
+src/stdlib/System/list.o: src/stdlib/api.h src/stdlib/System/string.h
 src/stdlib/System/list.o: src/stdlib/System/object.h
 src/stdlib/System/list.o: src/semantics/constants.h
 src/stdlib/System/list.o: src/stdlib/System/dynamic_object.h
 src/stdlib/System/list.o: src/stdlib/System/method.h
+src/stdlib/System/list.o: src/stdlib/language/kite.h
+src/stdlib/System/list.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/list.o: src/codegen/llvm_compile_state.h
+src/stdlib/System/list.o: src/stdlib/language/kite/syntax_tree.h
+src/stdlib/System/list.o: src/semantics/syntax_tree.h
+src/stdlib/System/list.o: src/semantics/constants.h
+src/stdlib/System/list.o: src/stdlib/System/integer.h
+src/stdlib/System/list.o: src/stdlib/System/dynamic_object.h
 src/stdlib/System/list.o: src/stdlib/System/string.h
 src/stdlib/System/method.o: src/stdlib/System/method.h
 src/stdlib/System/method.o: src/stdlib/System/object.h
@@ -247,3 +251,12 @@ src/stdlib/System/object.o: src/stdlib/System/exceptions/NullReference.h
 src/stdlib/System/string.o: src/stdlib/System/string.h
 src/stdlib/System/string.o: src/stdlib/System/object.h
 src/stdlib/System/string.o: src/semantics/constants.h
+src/stdlib/System.o: src/stdlib/System.h src/stdlib/api.h
+src/stdlib/System.o: src/stdlib/System/string.h src/stdlib/System/object.h
+src/stdlib/System.o: src/semantics/constants.h
+src/stdlib/System.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System.o: src/stdlib/System/method.h src/stdlib/language/kite.h
+src/stdlib/System.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System.o: src/codegen/llvm_compile_state.h
+src/stdlib/System.o: src/stdlib/language/kite/syntax_tree.h
+src/stdlib/System.o: src/semantics/syntax_tree.h src/semantics/constants.h

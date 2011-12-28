@@ -50,7 +50,14 @@ namespace kite
             {
                 struct kite : System::dynamic_object
                 {
-                    static System::dynamic_object *root() { return root_object; }
+                    static System::dynamic_object *root() {
+                        if (root_object == NULL)
+                        {
+                            GC_init();
+                            root_object = new System::dynamic_object();
+                        } 
+                        return root_object; 
+                    }
 
                     static void InitializeRuntimeSystem();
                     static System::object *ExecuteCode(syntax_tree &ast, System::object *context);

@@ -31,7 +31,7 @@
 #include <sys/stat.h>
 #include <parser/parser.h>
 #include <stdlib/System/dynamic_object.h>
-#include <stdlib/System/list.h>
+//#include <stdlib/System/list.h>
 #include <stdlib/System/exceptions/exception.h>
 #include <stdlib/System/exceptions/NotImplemented.h>
 #include <stdlib/System/exceptions/InvalidArgument.h>
@@ -78,16 +78,14 @@ namespace kite
                     llvm_start_multithreaded();
                     llvm::JITEmitDebugInfo = true; // for not-weird stack traces in gdb
 
-                    GC_init();
                     current_module = new Module("__root_module", getGlobalContext());
-                    root_object = new System::dynamic_object();
                     state.push_module(current_module);
                     execution_engine = EngineBuilder(current_module).create();
                     
                     // TODO
-                    System::dynamic_object *system_obj = new System::dynamic_object();
+                    System::dynamic_object *system_obj = (System::dynamic_object*)root()->properties["System"]; //new System::dynamic_object();
                     System::dynamic_object *exceptions_obj = new System::dynamic_object();
-                    root_object->properties["System"] = system_obj;
+                    //root_object->properties["System"] = system_obj;
                     system_obj->properties["exceptions"] = exceptions_obj;
                     exceptions_obj->properties["exception"] = &System::exceptions::exception::class_object;
                     exceptions_obj->properties["NotImplemented"] = &System::exceptions::NotImplemented::class_object;
@@ -97,10 +95,10 @@ namespace kite
                     exceptions_obj->properties["NullReference"] = &System::exceptions::NullReference::class_object;
                     system_obj->properties["float"] = &System::fpnum::class_object;
                     system_obj->properties["integer"] = &System::integer::class_object;
-                    system_obj->properties["list"] = &System::list::class_object;
+                    //system_obj->properties["list"] = &System::list::class_object;
                     System::fpnum::InitializeClass();
                     System::integer::InitializeClass();
-                    System::list::InitializeClass();
+                    //System::list::InitializeClass();
                     System::exceptions::exception::InitializeClass();
                     System::exceptions::NotImplemented::InitializeClass();
                     System::exceptions::InvalidArgument::InitializeClass();

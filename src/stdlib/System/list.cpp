@@ -34,39 +34,37 @@ namespace kite
     namespace stdlib
     {
         namespace System
-        {
-            System::dynamic_object list::class_object;
-            
-            System::object *list::append(System::list *list, System::object *item)
+        {   
+            object *list::append(list *l, object *item)
             {
-                System::list *new_list = new System::list();
-                new_list->list_contents = list->list_contents;
+                list *new_list = new list();
+                new_list->list_contents = l->list_contents;
                 new_list->list_contents.push_back(item);
                 return new_list;
             }
             
-            System::object *list::count(System::list *list)
+            object *list::count(list *l)
             {
-                return new System::integer(list->list_contents.size());
+                return new integer(l->list_contents.size());
             }
             
-            System::object *list::get_index(System::list *list, System::integer *index)
+            object *list::get_index(list *l, integer *index)
             {
                 // TODO
                 assert(index->type == semantics::INTEGER);
-                return list->list_contents[index->val];
+                return l->list_contents[index->val];
             }
             
-            System::object *list::head(System::list *list)
+            object *list::head(list *l)
             {
-                return list->list_contents[0];
+                return l->list_contents[0];
             }
             
-            System::object *list::prepend(System::list *list, System::object *item)
+            object *list::prepend(list *l, object *item)
             {
-                System::list *new_list = new System::list();
-                list_contents_type::iterator i = list->list_contents.begin();
-                for (; i != list->list_contents.end(); i++)
+                list *new_list = new list();
+                list_contents_type::iterator i = l->list_contents.begin();
+                for (; i != l->list_contents.end(); i++)
                 {
                     new_list->list_contents.push_back(*i);
                 }
@@ -74,19 +72,19 @@ namespace kite
                 return new_list;
             }
             
-            System::object *list::print(System::list *list)
+            object *list::print(list *l)
             {
-                std::cout << list::as_string(list) << std::endl;
-                return list;
+                std::cout << list::as_string(l) << std::endl;
+                return l;
             }
             
-            System::object *list::remove_at(System::list *list, System::integer *index)
+            object *list::remove_at(list *l, integer *index)
             {
                 // TODO
                 assert(index->type == semantics::INTEGER);
                 
-                System::list *new_list = new System::list();
-                new_list->list_contents = list->list_contents;
+                list *new_list = new list();
+                new_list->list_contents = l->list_contents;
                 list_contents_type::iterator iter = new_list->list_contents.begin();
                 for (int i = 0; i < new_list->list_contents.size(); i++)
                 {
@@ -100,17 +98,17 @@ namespace kite
                 return new_list;
             }
             
-            char *list::as_string(System::list *list)
+            char *list::as_string(list *l)
             {
                 std::string result = "[";
                 int idx = 0;
                 for(
-                    list_contents_type::iterator i = list->list_contents.begin();
-                    i != list->list_contents.end();
+                    list_contents_type::iterator i = l->list_contents.begin();
+                    i != l->list_contents.end();
                     i++)
                 {
                     result += (*i)->as_string();
-                    if (idx < list->list_contents.size() - 1)
+                    if (idx < l->list_contents.size() - 1)
                     {
                         result += ", ";
                     }
@@ -123,21 +121,21 @@ namespace kite
                 return ret;
             }
             
-            System::object *list::sublist(System::list *list, System::integer *index_from)
+            object *list::sublist(list *l, integer *index_from)
             {
-                return sublist_with_length(list, index_from, new System::integer(list->list_contents.size()));
+                return sublist_with_length(l, index_from, new integer(l->list_contents.size()));
             }
             
-            System::object *list::sublist_with_length(System::list *list, System::integer *index_from, System::integer *count)
+            object *list::sublist_with_length(list *l, integer *index_from, integer *count)
             {
                 // TODO
                 assert(index_from->type == count->type == semantics::INTEGER);
                 int length = count->val;
                 int start = index_from->val;
-                list_contents_type::iterator iter = list->list_contents.begin();
-                System::list *ret = new System::list();
+                list_contents_type::iterator iter = l->list_contents.begin();
+                list *ret = new list();
                 
-                for(; iter != list->list_contents.end(); iter++)
+                for(; iter != l->list_contents.end(); iter++)
                 {
                     if (length > 0 && start <= 0)
                     {
@@ -150,16 +148,18 @@ namespace kite
                 return ret;
             }
             
-            System::object *list::tail(System::list *list)
+            object *list::tail(list *l)
             {
-                System::list *new_list = new System::list();
-                new_list->list_contents = list->list_contents;
+                list *new_list = new list();
+                new_list->list_contents = l->list_contents;
                 new_list->list_contents.pop_front();
                 return new_list;
             }
         }
     }
 }
+
+REGISTER_KITE_CLASS(kite::stdlib::System::System, kite::stdlib::System::list);
 
 using namespace kite::stdlib;
 

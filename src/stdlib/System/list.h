@@ -29,7 +29,7 @@
 #define KITE_STDLIB__SYSTEM__LIST_H
 
 #include <deque>
-#include "stdlib/api.h"
+#include "stdlib/System.h"
 #include "integer.h"
 
 namespace kite
@@ -41,6 +41,19 @@ namespace kite
             typedef std::deque<object*, gc_allocator<object*> > list_contents_type;
             
             BEGIN_KITE_BASE_CLASS(list)
+            public:
+                static object *append(list *list, object *item);
+                static object *count(list *list);
+                static object *get_index(list *list, integer *index);
+                static object *head(list *list);
+                static object *print(list *list);
+                static object *prepend(list *list, object *item);
+                static object *remove_at(list *list, integer *index);
+                static char *as_string(list *list);
+                static object *sublist(list *list, integer *index_from);
+                static object *sublist_with_length(list *list, integer *index_from, integer *count);
+                static object *tail(list *list);
+                
                 BEGIN_KITE_CLASS_INITIALIZER
                     // TODO: operators
                     KITE_METHOD_DEFINE(append, 1, &list::append);
@@ -61,18 +74,6 @@ namespace kite
                 END_KITE_CLASS_INITIALIZER
                 
                 list_contents_type list_contents;
-                
-                static System::object *append(System::list *list, System::object *item);
-                static System::object *count(System::list *list);
-                static System::object *get_index(System::list *list, System::integer *index);
-                static System::object *head(System::list *list);
-                static System::object *print(System::list *list);
-                static System::object *prepend(System::list *list, System::object *item);
-                static System::object *remove_at(System::list *list, System::integer *index);
-                static char *as_string(System::list *list);
-                static System::object *sublist(System::list *list, System::integer *index_from);
-                static System::object *sublist_with_length(System::list *list, System::integer *index_from, System::integer *count);
-                static System::object *tail(System::list *list);
             };
         }
     }

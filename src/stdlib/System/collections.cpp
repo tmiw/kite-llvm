@@ -25,12 +25,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
  
-#include "constants.h"
+#include "collections.h"
 
-namespace kite
-{
-    namespace semantics
-    {
-        // empty
-    }
-}
+
+REGISTER_KITE_CLASS(kite::stdlib::System::System, kite::stdlib::System::collections::collections)

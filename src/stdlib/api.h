@@ -207,6 +207,10 @@ namespace kite { \
     } \
 }
 
+/**
+ * Registers type with the Kite type system at the root level.
+ * @param name The class' name.
+ */
 #define REGISTER_KITE_CLASS_AT_ROOT(name) \
     namespace kite { \
         namespace stdlib { \

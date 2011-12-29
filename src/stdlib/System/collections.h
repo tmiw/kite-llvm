@@ -25,12 +25,28 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
  
-#include "constants.h"
+#ifndef KITE_STDLIB__SYSTEM_COLLECTIONS_H
+#define KITE_STDLIB__SYSTEM_COLLECTIONS_H
+
+#include "stdlib/api.h"
+#include "../System.h"
 
 namespace kite
 {
-    namespace semantics
+    namespace stdlib
     {
-        // empty
+        namespace System
+        {
+            namespace collections
+            {
+                BEGIN_KITE_BASE_CLASS(collections)
+                    BEGIN_KITE_CLASS_INITIALIZER
+                        // empty
+                    END_KITE_CLASS_INITIALIZER
+                END_KITE_CLASS
+            }
+        }
     }
 }
+
+#endif

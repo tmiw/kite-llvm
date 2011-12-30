@@ -757,6 +757,10 @@ namespace kite
             {
                 return generate_llvm_dynamic_object_get_root();
             }
+            else if (var_name == "__exc" && sym_stack.find("__exc") != sym_stack.end())
+            {
+                return sym_stack["__exc"];
+            }
             else if (var_name == "base")
             {
                 state.overrideOverloadedProperties(true);

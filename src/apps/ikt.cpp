@@ -93,7 +93,8 @@ int main(int argc, char **argv)
                 KITE_EXCEPTION_RUN
                     System::object *retValue = language::kite::kite::ExecuteCode(ast);
                     cout << "---> ";
-                    retValue->print();
+                    if (retValue) retValue->print();
+                    else cout << "null" << endl;
                 KITE_EXCEPTION_CATCH
                     System::exceptions::exception *exc = 
                         (System::exceptions::exception *)language::kite::kite::last_exception;

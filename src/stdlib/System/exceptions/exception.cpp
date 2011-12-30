@@ -56,7 +56,7 @@ namespace kite
                         void *methodPointer = NULL;
                         Dl_info sym_info;
                         dladdr(buf[i], &sym_info);
-                        if (sym_info.dli_sname[0] != '_')
+                        if (sym_info.dli_sname && sym_info.dli_sname[0] != '_')
                         {
                             std::string friendlyName = language::kite::kite::GetMethodNameFromPointer(buf[i], &methodPointer);
                             if (friendlyName.size() > 0)

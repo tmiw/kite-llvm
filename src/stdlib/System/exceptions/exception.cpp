@@ -51,9 +51,36 @@ namespace kite
                     std::ostringstream ss;
                     for (int i = 0; i < num_traces; i++)
                     {
+                        // Get friendly name based on LLVM info. If no friendly name,
+                        // most likely from a C/C++ function.
+                        void *methodPointer = NULL;
                         Dl_info sym_info;
                         dladdr(buf[i], &sym_info);
-                        ss << sym_info.dli_sname << "(" << sym_info.dli_fbase << ")" << std::endl;
+                        if (sym_info.dli_sname[0] != '_')
+                        {
+                            std::string friendlyName = language::kite::kite::GetMethodNameFromPointer(buf[i], &methodPointer);
+                            if (friendlyName.size() > 0)
+                            {
+                                // TODO: clean up method names for Kite operators.
+                                bool breakOut = false;
+                                if (friendlyName == "__static_init__")
+                                {
+                                    friendlyName = "(main program)";
+                                }
+                                else if (friendlyName.find("kite_") == 0) continue;
+                                else friendlyName = std::string("method ") + friendlyName;
+                                ss << "    in " << friendlyName << " + 0x" << std::hex << ((size_t)buf[i] - (size_t)methodPointer) << std::dec << std::endl;
+                                if (breakOut) break;
+                            }
+/*                            else
+                            {
+                                ss << sym_info.dli_sname << "(" << sym_info.dli_fbase << ")" << std::endl;
+                            }
+                        }
+                        else
+                        {
+                            ss << sym_info.dli_sname << "(" << sym_info.dli_fbase << ")" << std::endl;*/
+                        }
                     }
                     properties["trace"] = new System::string(ss.str().c_str());
                     

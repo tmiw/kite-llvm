@@ -70,7 +70,17 @@ void **kite_dynamic_object_get_property(void *object, char *name, bool set)
             }
             cur = (System::dynamic_object*)cur->parent;
         } while (cur);
-    
+
+        if (!ret)
+        {
+            // Look in root object for the desired symbol.
+            cur = language::kite::kite::root();
+            if (cur->properties.find(name) != cur->properties.end())
+            {
+                ret = (void**)&cur->properties[name];
+            }
+        }
+        
         if (!ret)
         {
             castedObj->properties[name] = NULL;

@@ -84,9 +84,9 @@ namespace kite
                     
                     // TODO
                     System::dynamic_object *system_obj = (System::dynamic_object*)root()->properties["System"]; //new System::dynamic_object();
-                    System::dynamic_object *exceptions_obj = new System::dynamic_object();
+                    System::dynamic_object *exceptions_obj = (System::dynamic_object*)system_obj->properties["exceptions"];
                     //root_object->properties["System"] = system_obj;
-                    system_obj->properties["exceptions"] = exceptions_obj;
+                    //system_obj->properties["exceptions"] = exceptions_obj;
                     exceptions_obj->properties["exception"] = &System::exceptions::exception::class_object;
                     exceptions_obj->properties["NotImplemented"] = &System::exceptions::NotImplemented::class_object;
                     exceptions_obj->properties["InvalidArgument"] = &System::exceptions::InvalidArgument::class_object;
@@ -241,6 +241,79 @@ namespace kite
                 void kite::DumpCompiledCode()
                 {
                     current_module->dump();
+                }
+                
+                static bool sort_pointers(std::pair<void *, Function *> i, std::pair<void *, Function *> j)
+                {
+                    return i.first > j.first;
+                }
+                
+                std::string kite::GetMethodNameFromPointer(void *ptr, void **beginPointer)
+                {
+                    // We need to go through every function object in
+                    // the LLVM Module object to find the correct function
+                    // name. This might cause performance issues if called often.
+                    // TODO: evaluate for possible performance improvement.
+                    // TODO: this method will break once we begin compiling to ELF binary files.
+                    std::string retValue;
+                    std::vector<std::pair<void *, Function *> > methods;
+                    for (Module::iterator i = current_module->begin();
+                         i != current_module->end();
+                         i++)
+                    {
+                        Function *fxn = i;
+                        //if (std::string(fxn->getName()).compare(0, 4, "kite") == 0) continue;
+                        void *fxn_begin_ptr = execution_engine->getPointerToFunction(fxn);
+                        methods.push_back(std::pair<void*, Function*>(fxn_begin_ptr, fxn));
+                    }
+                    std::sort(methods.begin(), methods.end(), sort_pointers);
+                    
+                    for (std::vector<std::pair<void *, Function *> >::iterator i = methods.begin();
+                         i != methods.end();
+                         i++)
+                    {
+                        if (ptr >= i->first /*&& std::string(i->second->getName()).compare(0, 4, "kite") != 0*/)
+                        {
+                            retValue = i->second->getName();
+                            *beginPointer = i->first;
+                            break;
+                        }
+                    }
+                    
+                    if (retValue.size() > 0)
+                    {
+                        // Found method name. Process and create 
+                        // user-friendly name for return.
+                        size_t idx = retValue.rfind("__");
+                        if (idx != std::string::npos)
+                        {
+                            retValue.erase(idx);
+                        }
+                        idx = retValue.rfind("__");
+                        if (idx == retValue.size() - 2)
+                        {
+                            // Operator methods (__init__, etc).
+                            // Skip both __ entirely.
+                            idx = retValue.rfind("__", idx - 2);
+                            idx -= 2;
+                        }
+                        bool isFirst = true;
+                        while (idx != std::string::npos && idx < retValue.size())
+                        {
+                            if (isFirst)
+                            {
+                                retValue.replace(idx, 2, "|");
+                                isFirst = false;
+                            }
+                            else
+                            {
+                                retValue.replace(idx, 2, ".");
+                            }
+                            idx = retValue.rfind("__", idx);
+                        }
+                    }
+                    
+                    return retValue;
                 }
             }
         }

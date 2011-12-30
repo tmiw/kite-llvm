@@ -37,6 +37,7 @@
 #include "dynamic_object.h"
 #include "exceptions/NotImplemented.h"
 #include "exceptions/InvalidArgument.h"
+#include "exceptions/NullReference.h"
 
 using namespace boost::assign;
  
@@ -52,7 +53,7 @@ namespace kite
                 ("float__o", function_semantics(semantics::FLOAT, (void*)0))
                 ("print__o", function_semantics(semantics::OBJECT, (void*)0))
                 ("str__o", function_semantics(semantics::STRING, (void*)0))
-                ("obj__o", function_semantics(semantics::OBJECT, (void*)0));
+                ("obj__o", function_semantics(semantics::OBJECT, (void*)&obj__o));
 
             void object::finalizer_setup()
             {
@@ -96,7 +97,10 @@ namespace kite
                         res << ((fpnum*)this)->val;
                         break;
                     case semantics::BOOLEAN:
-                        res << ((boolean*)this)->val;
+                        if (((boolean*)this)->val)
+                            res << "true";
+                        else
+                            res << "false";
                         break;
                     case semantics::STRING:
                         res << ((string*)this)->string_val;
@@ -122,11 +126,37 @@ void System::object::print()
     std::cout << this->as_string() << std::endl;
 }
 
-int *kite_find_funccall(int *obj, char *name, int numargs)
+int *kite_null_string(int *obj)
+{
+    assert(obj == NULL);
+    return (int*)"null";
+}
+
+int *kite_print_null(int *obj)
+{
+    assert(obj == NULL);
+    std::cout << "null" << std::endl;
+    return obj;
+}
+
+int *kite_find_funccall(int *obj, const char *name, int numargs)
 {
     System::object *obj_class = (System::object*)obj;
     std::string method_name = std::string(name) + "__";
     System::dynamic_object *dyn_object = NULL;
+    
+    if (obj == NULL && strncmp("str", name, 3) != 0 && strncmp("print", name, 5) != 0)
+    {
+        System::exceptions::NullReference *nre = new System::exceptions::NullReference();
+        nre->throw_exception();
+    }
+    else if (obj == NULL && numargs == 1)
+    {
+        if (strncmp("str", name, 3) == 0)
+            return (int*)&kite_null_string;
+        else
+            return (int*)&kite_print_null;
+    }
     
     for (int i = 0; i < numargs; i++)
     {
@@ -170,6 +200,7 @@ int *kite_find_funccall(int *obj, char *name, int numargs)
         do
         {
             System::property_map::iterator item = dyn_object->properties.find(method_name);
+                
             if (item != dyn_object->properties.end())
             {
                 System::object *method_obj = (*item).second;
@@ -222,4 +253,9 @@ bool kite_object_isof(void *lhs, void *rhs, bool type)
     } while (type && lhsObj);
     
     return ret;
+}
+
+void *obj__o(void *obj)
+{
+    return obj;
 }

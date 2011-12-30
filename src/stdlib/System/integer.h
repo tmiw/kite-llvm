@@ -42,7 +42,7 @@ namespace kite
     {
         namespace System
         {
-            struct integer : System::object
+            struct integer : object
             {
                 static System::dynamic_object class_object;
                 int val;
@@ -57,7 +57,7 @@ namespace kite
                 System::object *to_object();
                 
                 static void InitializeClass();
-                static System::object *parse(System::object *t, System::string *str, System::integer *base);
+                static System::object *parse(object *t, string *str, integer *base);
             };
         }
     }

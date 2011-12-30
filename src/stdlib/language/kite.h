@@ -50,18 +50,31 @@ namespace kite
             {
                 struct kite : System::dynamic_object
                 {
-                    static System::dynamic_object *root() { return root_object; }
+                    static System::dynamic_object *root() {
+                        if (root_object == NULL)
+                        {
+                            GC_init();
+                            root_object = new System::dynamic_object();
+                        } 
+                        return root_object; 
+                    }
 
                     static void InitializeRuntimeSystem();
                     static System::object *ExecuteCode(syntax_tree &ast, System::object *context);
                     static System::object *ExecuteCode(syntax_tree &ast);
+                    static System::object *ImportModule(std::string &module_name);
+                    
                     static void DumpCompiledCode();
 
+                    static std::string GetMethodNameFromPointer(void *ptr, void **beginPointer);
+                    
                     static bool enable_optimizer;
                     static std::vector<jmp_buf*> exception_stack;
                     static System::dynamic_object *last_exception;
-
-                    static System::dynamic_object *root_object;                    
+                    static System::dynamic_object *root_object;   
+                    
+                    static std::vector<std::string> search_path;
+                    
                     private:
                         static llvm::Module *current_module;
                         static codegen::llvm_compile_state state;

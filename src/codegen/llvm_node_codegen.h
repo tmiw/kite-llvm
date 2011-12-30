@@ -60,6 +60,7 @@ namespace kite
             
             // Type-specific codegen methods (for use in CONST tree type only)
             Value *operator()(int const &val) const;
+            Value *operator()(void* const &val) const;
             Value *operator()(double const &val) const;
             Value *operator()(bool const &val) const;
             Value *operator()(std::string const &val) const;
@@ -91,10 +92,14 @@ namespace kite
             Value *codegen_loop_op(semantics::syntax_tree const &tree) const;
             Value *codegen_decide_op(semantics::syntax_tree const &tree) const;
             Value *codegen_method_op(semantics::syntax_tree const &tree) const;
+            Value *codegen_method_ref_op(semantics::syntax_tree const &tree) const;
             Value *codegen_constructor_op(semantics::syntax_tree const &tree) const;
             Value *codegen_destructor_op(semantics::syntax_tree const &tree) const;
             Value *codegen_run_catch_op(semantics::syntax_tree const &tree) const;
             Value *codegen_isof_op(semantics::syntax_tree const &tree) const;
+            Value *codegen_list_op(semantics::syntax_tree const &tree) const;
+            Value *codegen_import_op(semantics::syntax_tree const &tree) const;
+            Value *codegen_break_continue_op(semantics::syntax_tree const &tree) const;
             
             Value *codegen_deref_property_op(semantics::syntax_tree const &tree, Value *prev) const;
             Value *codegen_deref_method_op(semantics::syntax_tree const &tree, Value *prev) const;

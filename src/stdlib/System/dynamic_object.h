@@ -79,6 +79,19 @@ namespace kite
                     method->num_args = numargs;
                     properties[real_name] = method;
                 }
+                
+                void add_operator(semantics::code_operation op, void *ptr)
+                {
+                    assert(op < semantics::__END_OVERRIDABLE_OPS && op != semantics::__END_BINARY_OPS);
+                    if (op < semantics::__END_BINARY_OPS)
+                    {
+                        add_method(semantics::Constants::Get().operator_map[op].c_str(), 1, ptr);
+                    }
+                    else
+                    {
+                        add_method(semantics::Constants::Get().operator_map[op].c_str(), 0, ptr);
+                    }
+                }
             };
         }
     }

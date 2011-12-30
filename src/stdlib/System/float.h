@@ -57,7 +57,7 @@ namespace kite
                 System::object *to_object();
                 
                 static void InitializeClass();
-                static System::object *parse(System::object *t, System::string *str);
+                static object *parse(object *t, string *str);
             };
         }
     }
@@ -68,9 +68,13 @@ extern "C"
     bool PREFIX_FLOAT_METHOD_NAME(bool__f)(double val);
     bool PREFIX_FLOAT_METHOD_NAME(bool__o)(void *val);
     int PREFIX_FLOAT_METHOD_NAME(int__f)(double val);
+    int PREFIX_FLOAT_METHOD_NAME(int__o)(void *val);
     double PREFIX_FLOAT_METHOD_NAME(float__f)(double val);
+    double PREFIX_FLOAT_METHOD_NAME(float__o)(void *val);
     double PREFIX_FLOAT_METHOD_NAME(print__f)(double val);
     void *PREFIX_FLOAT_METHOD_NAME(print__o)(void *obj);
+    char *PREFIX_FLOAT_METHOD_NAME(str__f)(double val);
+    char *PREFIX_FLOAT_METHOD_NAME(str__o)(void *obj);
     void *PREFIX_FLOAT_METHOD_NAME(obj__f)(double val);
     
     void *PREFIX_FLOAT_METHOD_NAME(__op_plus____oo)(void *lhs, void *rhs);

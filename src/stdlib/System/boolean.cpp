@@ -50,6 +50,8 @@ namespace kite
                 ("float__b", function_semantics(semantics::FLOAT, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(float__b))))
                 ("print__b", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(print__b))))
                 ("print__o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(print__o))))
+                ("str__b", function_semantics(semantics::STRING, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(str__b))))
+                ("str__o", function_semantics(semantics::STRING, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(str__o))))
                 ("obj__b", function_semantics(semantics::OBJECT, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(obj__b))));
             
             bool boolean::to_boolean()
@@ -106,6 +108,30 @@ void *PREFIX_BOOLEAN_METHOD_NAME(print__o)(void *val)
     if (objVal->val) std::cout << "true" << std::endl;
     else std::cout << "false" << std::endl;
     return val;
+}
+
+char *PREFIX_BOOLEAN_METHOD_NAME(str__b)(bool val)
+{
+    char *retVal;
+    
+    if (val)
+    {
+        retVal = new char[5];
+        strcpy(retVal, "true");
+    }
+    else
+    {
+        retVal = new char[6];
+        strcpy(retVal, "false");
+    }
+    
+    return retVal;
+}
+
+char *PREFIX_BOOLEAN_METHOD_NAME(str__o)(void *val)
+{
+    System::boolean *objVal = (System::boolean*)val;
+    return PREFIX_BOOLEAN_METHOD_NAME(str__b)(objVal->val);
 }
 
 void *PREFIX_BOOLEAN_METHOD_NAME(obj__b)(bool val)

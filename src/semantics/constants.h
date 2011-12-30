@@ -28,6 +28,9 @@
 #ifndef KITE_SEMANTICS__CONSTANTS_H
 #define KITE_SEMANTICS__CONSTANTS_H
 
+#include <boost/assign.hpp>
+using namespace boost::assign;
+
 namespace kite
 {
     namespace semantics
@@ -44,8 +47,6 @@ namespace kite
         
         enum code_operation
         {
-            ITERATE,
-            CONST,
             ADD,
             SUBTRACT,
             MULTIPLY,
@@ -59,18 +60,22 @@ namespace kite
             GREATER_OR_EQUALS,
             EQUALS,
             NOT_EQUALS,
-            UNARY_PLUS,
-            UNARY_MINUS,
             NOT,
             OR,
             XOR,
             AND,
             MAP,
             REDUCE,
+            __END_BINARY_OPS, // DO NOT USE
+            UNARY_PLUS,
+            UNARY_MINUS,
+            DEREF_ARRAY,
+            __END_OVERRIDABLE_OPS, // DO NOT USE
+            ITERATE,
+            CONST,
             DEREF_FILTER,
             DEREF_PROPERTY,
             DEREF_METHOD,
-            DEREF_ARRAY,
             DEREF_METHOD_RELATIVE_SELF, // xyz(...) without '|'.
             VARIABLE,
             ASSIGN,
@@ -85,6 +90,81 @@ namespace kite
             DESTRUCTOR,
             IS_CLASS,
             ISOF_CLASS,
+            OPERATOR,
+            LIST_VAL,
+            METHOD_REF,
+            IMPORT,
+            BREAK,
+            CONTINUE,
+        };
+        
+        typedef std::map<semantics::code_operation, std::string> OperatorMethodsMap;
+        typedef std::map<std::string, std::string> OperatorMethodNameMap;
+        
+        class Constants
+        {
+        public:
+            OperatorMethodsMap operator_map;
+            OperatorMethodNameMap operator_name_map;
+            
+            static Constants &Get()
+            {
+                static Constants *constants_ptr = new Constants();
+                return *constants_ptr;
+            }
+            
+            Constants()
+            {
+                operator_map = map_list_of
+                    (semantics::ADD, "__op_plus__")
+                    (semantics::SUBTRACT, "__op_minus__")
+                    (semantics::MULTIPLY, "__op_multiply__")
+                    (semantics::DIVIDE, "__op_divide__")
+                    (semantics::MODULO, "__op_mod__")
+                    (semantics::LEFT_SHIFT, "__op_lshift__")
+                    (semantics::RIGHT_SHIFT, "__op_rshift__")
+                    (semantics::LESS_THAN, "__op_lt__")
+                    (semantics::GREATER_THAN, "__op_gt__")
+                    (semantics::LESS_OR_EQUALS, "__op_leq__")
+                    (semantics::GREATER_OR_EQUALS, "__op_geq__")
+                    (semantics::EQUALS, "__op_equals__")
+                    (semantics::NOT_EQUALS, "__op_nequals__")
+                    (semantics::AND, "__op_and__")
+                    (semantics::OR, "__op_or__")
+                    (semantics::NOT, "__op_not__")
+                    (semantics::UNARY_PLUS, "__op_unplus__")
+                    (semantics::UNARY_MINUS, "__op_unminus__")
+                    (semantics::XOR, "__op_xor__")
+                    (semantics::CONSTRUCTOR, "__init__")
+                    (semantics::DESTRUCTOR, "__destruct__")
+                    (semantics::DEREF_ARRAY, "__op_deref_array__")
+                    (semantics::MAP, "__op_map__")
+                    (semantics::REDUCE, "__op_reduce__");
+
+                operator_name_map = map_list_of
+                    ("plus", "__op_plus__")
+                    ("minus", "__op_minus__")
+                    ("multiply", "__op_multiply__")
+                    ("divide", "__op_divide__")
+                    ("mod", "__op_mod__")
+                    ("lshift", "__op_lshift__")
+                    ("rshift", "__op_rshift__")
+                    ("lt", "__op_lt__")
+                    ("gt", "__op_gt__")
+                    ("leq", "__op_leq__")
+                    ("geq", "__op_geq__")
+                    ("equals", "__op_equals__")
+                    ("nequals", "__op_nequals__")
+                    ("and", "__op_and__")
+                    ("or", "__op_or__")
+                    ("not", "__op_not__")
+                    ("unplus", "__op_unplus__")
+                    ("unminus", "__op_unminus__")
+                    ("xor", "__op_xor__")
+                    ("array", "__op_deref_array__")
+                    ("map", "__op_map__")
+                    ("reduce", "__op_reduce__");
+            }
         };
     }
 }

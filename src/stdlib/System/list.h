@@ -29,7 +29,7 @@
 #define KITE_STDLIB__SYSTEM__LIST_H
 
 #include <deque>
-#include "dynamic_object.h"
+#include "stdlib/System.h"
 #include "integer.h"
 
 namespace kite
@@ -39,32 +39,50 @@ namespace kite
         namespace System
         {
             typedef std::deque<object*, gc_allocator<object*> > list_contents_type;
-            struct list : dynamic_object
-            {
-                static System::dynamic_object class_object;
+            
+            BEGIN_KITE_BASE_CLASS(list)
+            public:
+                static object *append(list *list, object *item);
+                static object *count(list *list);
+                static object *get_index(list *list, integer *index);
+                static object *head(list *list);
+                static object *print(list *list);
+                static object *prepend(list *list, object *item);
+                static object *remove_at(list *list, integer *index);
+                static char *as_string(list *list);
+                static object *sublist(list *list, integer *index_from);
+                static object *sublist_with_length(list *list, integer *index_from, integer *count);
+                static object *tail(list *list);
+                
+                BEGIN_KITE_CLASS_INITIALIZER
+                    // TODO: operators
+                    KITE_METHOD_DEFINE(append, 1, &list::append);
+                    KITE_METHOD_DEFINE(count, 0, &list::count);
+                    // TODO: cur
+                    KITE_METHOD_DEFINE(getIndex, 1, &list::get_index);
+                    KITE_METHOD_DEFINE(head, 0, &list::head);
+                    // TODO: next
+                    KITE_METHOD_DEFINE(prepend, 1, &list::prepend);
+                    KITE_METHOD_DEFINE(print, 0, &list::print);
+                    KITE_METHOD_DEFINE(removeAt, 1, &list::remove_at);
+                    // TODO: reset
+                    // TOOD: sort
+                    KITE_METHOD_DEFINE(str, 0, &list::as_string);
+                    KITE_METHOD_DEFINE(sublist, 1, &list::sublist);
+                    KITE_METHOD_DEFINE(sublist, 2, &list::sublist_with_length);
+                    KITE_METHOD_DEFINE(tail, 0, &list::tail);
+                END_KITE_CLASS_INITIALIZER
+                
                 list_contents_type list_contents;
-                
-                list() : dynamic_object(&class_object)
-                {
-                    obj_alloc_method = class_object.obj_alloc_method;
-                }
-                
-                static void InitializeClass();
-                static System::object *__allocate_object();
-                static System::object *append(System::list *list, System::object *item);
-                static System::object *count(System::list *list);
-                static System::object *get_index(System::list *list, System::integer *index);
-                static System::object *head(System::list *list);
-                static System::object *print(System::list *list);
-                static System::object *prepend(System::list *list, System::object *item);
-                static System::object *remove_at(System::list *list, System::integer *index);
-                static char *as_string(System::list *list);
-                static System::object *sublist(System::list *list, System::integer *index_from);
-                static System::object *sublist_with_length(System::list *list, System::integer *index_from, System::integer *count);
-                static System::object *tail(System::list *list);
             };
         }
     }
+}
+
+extern "C"
+{
+    void *kite_list_new();
+    void kite_list_append(void *list, void *item);
 }
 
 #endif

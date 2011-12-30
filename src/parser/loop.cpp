@@ -31,6 +31,10 @@ namespace kite
                 >> '['
                 >> start [ push_back(at_c<1>(_val), _1) ]
                 >> ']';
+                
+            break_continue_statement =
+                  lit("break") [ at_c<0>(_val) = kite::semantics::BREAK ]
+                | lit("continue") [ at_c<0>(_val) = kite::semantics::CONTINUE ];
         }
         
         kite_grammar<pos_iterator_type, BOOST_TYPEOF(KITE_SKIP_RULE)> loop_grammar;

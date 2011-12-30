@@ -157,6 +157,14 @@ namespace kite
     class_obj.add_operator(operation, (void*)function_pointer)
 
 /**
+ * Adds definition of constructor to class.
+ * @param num_params The number of parameters this constructor takes.
+ * @param function_pointer Pointer to a function that initializes this object.
+ */
+#define KITE_CONSTRUCTOR_DEFINE(num_params, function_pointer) \
+    KITE_METHOD_DEFINE(__init__, num_params, function_pointer)
+    
+/**
  * Ends class initializer definition.
  */
 #define END_KITE_CLASS_INITIALIZER \

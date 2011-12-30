@@ -16,7 +16,7 @@ COMMON_OBJS=src/codegen/llvm_compile_state.o src/codegen/llvm_node_codegen.o \
 	 src/stdlib/System/boolean.o src/stdlib/System/float.o src/stdlib/System/object.o \
 	 src/stdlib/System/dynamic_object.o src/stdlib/System/list.o src/stdlib/System/method.o \
 	 src/stdlib/System/collections.o src/stdlib/System/collections/array.o \
-	 src/stdlib/System/collections/queue.o \
+	 src/stdlib/System/collections/queue.o src/stdlib/System/collections/stack.o \
 	 src/stdlib/language/kite.o src/stdlib/language/kite/syntax_tree.o \
 	 src/stdlib/System/exceptions.o src/stdlib/System/exceptions/exception.o \
 	 src/stdlib/System/exceptions/NotImplemented.o src/stdlib/System/exceptions/InvalidArgument.o \
@@ -154,6 +154,7 @@ src/stdlib/language/kite.o: src/stdlib/System/exceptions/InvalidArgument.h
 src/stdlib/language/kite.o: src/stdlib/System/exceptions/TypeMismatch.h
 src/stdlib/language/kite.o: src/stdlib/System/exceptions/DivideByZero.h
 src/stdlib/language/kite.o: src/stdlib/System/exceptions/NullReference.h
+src/stdlib/language/kite.o: src/stdlib/System/exceptions/EmptyCollection.h
 src/stdlib/language/kite.o: src/codegen/syntax_tree_printer.h
 src/stdlib/language/kite.o: src/codegen/llvm_node_codegen.h
 src/stdlib/language/kite.o: src/stdlib/System/integer.h
@@ -209,6 +210,26 @@ src/stdlib/System/collections/queue.o: src/stdlib/System/dynamic_object.h
 src/stdlib/System/collections/queue.o: src/stdlib/System/string.h
 src/stdlib/System/collections/queue.o: src/stdlib/System/exceptions/EmptyCollection.h
 src/stdlib/System/collections/queue.o: src/stdlib/System/exceptions/exception.h
+src/stdlib/System/collections/stack.o: src/stdlib/System/collections/stack.h
+src/stdlib/System/collections/stack.o: src/stdlib/System/collections.h
+src/stdlib/System/collections/stack.o: src/stdlib/api.h
+src/stdlib/System/collections/stack.o: src/stdlib/System/string.h
+src/stdlib/System/collections/stack.o: src/stdlib/System/object.h
+src/stdlib/System/collections/stack.o: src/semantics/constants.h
+src/stdlib/System/collections/stack.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/collections/stack.o: src/stdlib/System/method.h
+src/stdlib/System/collections/stack.o: src/stdlib/language/kite.h
+src/stdlib/System/collections/stack.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/collections/stack.o: src/codegen/llvm_compile_state.h
+src/stdlib/System/collections/stack.o: src/stdlib/language/kite/syntax_tree.h
+src/stdlib/System/collections/stack.o: src/semantics/syntax_tree.h
+src/stdlib/System/collections/stack.o: src/semantics/constants.h
+src/stdlib/System/collections/stack.o: src/stdlib/System.h
+src/stdlib/System/collections/stack.o: src/stdlib/System/integer.h
+src/stdlib/System/collections/stack.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/collections/stack.o: src/stdlib/System/string.h
+src/stdlib/System/collections/stack.o: src/stdlib/System/exceptions/EmptyCollection.h
+src/stdlib/System/collections/stack.o: src/stdlib/System/exceptions/exception.h
 src/stdlib/System/collections.o: src/stdlib/System/collections.h
 src/stdlib/System/collections.o: src/stdlib/api.h src/stdlib/System/string.h
 src/stdlib/System/collections.o: src/stdlib/System/object.h

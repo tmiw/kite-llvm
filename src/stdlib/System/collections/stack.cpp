@@ -24,12 +24,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
- 
-#ifndef KITE_STDLIB__SYSTEM_COLLECTIONS__QUEUE_H
-#define KITE_STDLIB__SYSTEM_COLLECTIONS__QUEUE_H
 
-#include <deque>
-#include "stdlib/System/collections.h"
+#include <iostream>
+#include <algorithm>
+#include <assert.h>
+#include "stack.h"
+#include "../integer.h"
+#include "../exceptions/EmptyCollection.h"
 
 namespace kite
 {
@@ -39,30 +40,32 @@ namespace kite
         {
             namespace collections
             {
-                typedef std::deque<object*, gc_allocator<object*> > queue_contents_type;
-
-                BEGIN_KITE_BASE_CLASS(queue)
-                    private:
-                        static object *s_enqueue(queue *list, object *item) { return list->enqueue(item); }
-                        static object *s_dequeue(queue *list) { return list->dequeue(); }
-                        static object *s_size(queue *list) { return list->size(); }
-                        
-                    public:
-                        object *enqueue(object *item);
-                        object *dequeue();
-                        object *size();
-                                                
-                    BEGIN_KITE_CLASS_INITIALIZER    
-                        KITE_METHOD_DEFINE(enqueue, 1, &queue::s_enqueue);
-                        KITE_METHOD_DEFINE(dequeue, 0, &queue::s_dequeue);
-                        KITE_METHOD_DEFINE(size, 0, &queue::s_size);
-                    END_KITE_CLASS_INITIALIZER
+                object *stack::push(object *item)
+                {
+                    stack_contents.push_front(item);
+                    return this;
+                }
                 
-                    queue_contents_type queue_contents;
-                END_KITE_CLASS
+                object *stack::size()
+                {
+                    return new integer(stack_contents.size());
+                }
+                
+                object *stack::pop()
+                {
+                    if (stack_contents.size() == 0)
+                    {
+                        exceptions::EmptyCollection *exc = new exceptions::EmptyCollection("Stack is empty.");
+                        exc->throw_exception();
+                    }
+                    
+                    object *front_of_queue = stack_contents.front();
+                    stack_contents.pop_front();
+                    return front_of_queue;                }   
             }
         }
     }
 }
 
-#endif
+
+REGISTER_KITE_CLASS(kite::stdlib::System::collections::collections, kite::stdlib::System::collections::stack);

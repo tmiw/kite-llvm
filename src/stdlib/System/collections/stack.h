@@ -25,8 +25,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
  
-#ifndef KITE_STDLIB__SYSTEM_COLLECTIONS__QUEUE_H
-#define KITE_STDLIB__SYSTEM_COLLECTIONS__QUEUE_H
+#ifndef KITE_STDLIB__SYSTEM_COLLECTIONS__stack_H
+#define KITE_STDLIB__SYSTEM_COLLECTIONS__stack_H
 
 #include <deque>
 #include "stdlib/System/collections.h"
@@ -39,26 +39,26 @@ namespace kite
         {
             namespace collections
             {
-                typedef std::deque<object*, gc_allocator<object*> > queue_contents_type;
+                typedef std::deque<object*, gc_allocator<object*> > stack_contents_type;
 
-                BEGIN_KITE_BASE_CLASS(queue)
+                BEGIN_KITE_BASE_CLASS(stack)
                     private:
-                        static object *s_enqueue(queue *list, object *item) { return list->enqueue(item); }
-                        static object *s_dequeue(queue *list) { return list->dequeue(); }
-                        static object *s_size(queue *list) { return list->size(); }
+                        static object *s_push(stack *list, object *item) { return list->push(item); }
+                        static object *s_pop(stack *list) { return list->pop(); }
+                        static object *s_size(stack *list) { return list->size(); }
                         
                     public:
-                        object *enqueue(object *item);
-                        object *dequeue();
+                        object *push(object *item);
+                        object *pop();
                         object *size();
                                                 
                     BEGIN_KITE_CLASS_INITIALIZER    
-                        KITE_METHOD_DEFINE(enqueue, 1, &queue::s_enqueue);
-                        KITE_METHOD_DEFINE(dequeue, 0, &queue::s_dequeue);
-                        KITE_METHOD_DEFINE(size, 0, &queue::s_size);
+                        KITE_METHOD_DEFINE(push, 1, &stack::s_push);
+                        KITE_METHOD_DEFINE(pop, 0, &stack::s_pop);
+                        KITE_METHOD_DEFINE(size, 0, &stack::s_size);
                     END_KITE_CLASS_INITIALIZER
                 
-                    queue_contents_type queue_contents;
+                    stack_contents_type stack_contents;
                 END_KITE_CLASS
             }
         }

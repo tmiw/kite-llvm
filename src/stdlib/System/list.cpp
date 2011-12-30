@@ -26,6 +26,7 @@
  ****************************************************************************/
 
 #include <iostream>
+#include <cstring>
 #include <assert.h>
 #include "list.h"
 

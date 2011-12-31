@@ -166,7 +166,7 @@ using namespace kite::stdlib;
 
 void *kite_list_new()
 {
-    return (void*)(new System::list());
+    return (void*)System::list::Create(0);
 }
 
 void kite_list_append(void *list, void *item)

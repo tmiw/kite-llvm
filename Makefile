@@ -17,7 +17,7 @@ COMMON_OBJS=src/codegen/llvm_compile_state.o src/codegen/llvm_node_codegen.o \
 	 src/stdlib/System/dynamic_object.o src/stdlib/System/list.o src/stdlib/System/method.o \
 	 src/stdlib/System/collections.o src/stdlib/System/collections/array.o \
 	 src/stdlib/System/collections/queue.o src/stdlib/System/collections/stack.o \
-	 src/stdlib/System/collections/binary_tree.o \
+	 src/stdlib/System/collections/binary_tree.o src/stdlib/System/date.o \
 	 src/stdlib/language/kite.o src/stdlib/language/kite/syntax_tree.o \
 	 src/stdlib/System/exceptions.o src/stdlib/System/exceptions/exception.o \
 	 src/stdlib/System/exceptions/NotImplemented.o src/stdlib/System/exceptions/InvalidArgument.o \
@@ -26,7 +26,7 @@ COMMON_OBJS=src/codegen/llvm_compile_state.o src/codegen/llvm_node_codegen.o \
 	 src/parser/constants.o src/parser/make.o src/parser/assignment.o src/parser/bitwise.o \
 	 src/parser/comparison.o src/parser/math.o src/parser/map_reduce.o src/parser/classes.o  \
 	 src/parser/decide.o src/parser/deref.o src/parser/grouping.o \
-	 src/parser/loop.o src/parser/method.o \
+	 src/parser/loop.o src/parser/method.o src/stdlib/api.o \
 	 src/parser/statement.o src/parser/exceptions.o src/parser/constructor.o \
 	 src/parser/destructor.o src/parser/parser.o src/semantics/constants.o
 
@@ -129,6 +129,14 @@ src/parser/parser.o: src/semantics/constants.h src/parser/parser.h
 src/parser/statement.o: src/parser/grammar.h src/semantics/syntax_tree.h
 src/parser/statement.o: src/semantics/constants.h
 src/semantics/constants.o: src/semantics/constants.h
+src/stdlib/api.o: src/stdlib/api.h src/stdlib/System/string.h
+src/stdlib/api.o: src/stdlib/System/object.h src/semantics/constants.h
+src/stdlib/api.o: src/stdlib/System/dynamic_object.h
+src/stdlib/api.o: src/stdlib/System/method.h src/stdlib/language/kite.h
+src/stdlib/api.o: src/stdlib/System/dynamic_object.h
+src/stdlib/api.o: src/codegen/llvm_compile_state.h
+src/stdlib/api.o: src/stdlib/language/kite/syntax_tree.h
+src/stdlib/api.o: src/semantics/syntax_tree.h src/semantics/constants.h
 src/stdlib/language/kite/syntax_tree.o: src/stdlib/language/kite/syntax_tree.h
 src/stdlib/language/kite/syntax_tree.o: src/stdlib/System/dynamic_object.h
 src/stdlib/language/kite/syntax_tree.o: src/semantics/constants.h
@@ -267,6 +275,11 @@ src/stdlib/System/collections.o: src/stdlib/language/kite/syntax_tree.h
 src/stdlib/System/collections.o: src/semantics/syntax_tree.h
 src/stdlib/System/collections.o: src/semantics/constants.h
 src/stdlib/System/collections.o: src/stdlib/System.h
+src/stdlib/System/date.o: src/stdlib/System/date.h src/stdlib/System.h
+src/stdlib/System/date.o: src/stdlib/System/integer.h
+src/stdlib/System/date.o: src/stdlib/System/boolean.h
+src/stdlib/System/date.o: src/stdlib/System/object.h
+src/stdlib/System/date.o: src/semantics/constants.h
 src/stdlib/System/dynamic_object.o: src/stdlib/System/dynamic_object.h
 src/stdlib/System/dynamic_object.o: src/semantics/constants.h
 src/stdlib/System/dynamic_object.o: src/stdlib/System/object.h

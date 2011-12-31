@@ -86,6 +86,8 @@ namespace kite
 #define TOKENPASTE(x, y) x ## y
 #define TOKENPASTE2(x, y) TOKENPASTE(x, y)
 
+void *api_call_method(int numargs, void *obj, void *funcptr, va_list vl);
+
 /**
  * Defines a Kite class that inherits from a base class.
  * @param name Desired name of the class (relative to current namespace)
@@ -113,24 +115,9 @@ namespace kite
             \
             if (initptr != NULL) \
             { \
-                ffi_cif cif; \
-                ffi_type **args = new ffi_type*[numargs + 1]; \
-                void **values = new void*[numargs + 1]; \
-                void *rv; \
-                values[0] = (void*)obj; \
-                args[0] = &ffi_type_pointer; \
                 va_list vl; \
                 va_start(vl, numargs); \
-                for (int i = 0; i < numargs; i++) \
-                { \
-                    args[i + 1] = &ffi_type_pointer; \
-                    values[i + 1] = va_arg(vl, void*); \
-                } \
-                va_end(vl); \
-                ffi_prep_cif(&cif, FFI_DEFAULT_ABI, numargs + 1, &ffi_type_pointer, args); \
-                ffi_call(&cif, (void(*)())initptr, &rv, values); \
-                delete[] args; \
-                delete[] values; \
+                api_call_method(numargs, (void*)obj, initptr, vl); \
             } \
             return obj; \
         } \
@@ -256,5 +243,19 @@ namespace kite { \
             ObjectRegistration<name> & TOKENPASTE2(RegistrationHelper_, __LINE__) = ObjectRegistration<name>::Get(); \
         } \
     }
+
+/**
+ * Retrieves the integer value of an object's property.
+ * @param obj The object to act upon.
+ * @param prop_name The name of the property.
+ */
+#define KITE_GET_INTEGER_PROPERTY(obj, prop_name) ((kite::stdlib::System::integer*)obj->properties[#prop_name])->val
+
+/**
+ * Retrieves the boolean value of an object's property.
+ * @param obj The object to act upon.
+ * @param prop_name The name of the property.
+ */
+#define KITE_GET_BOOLEAN_PROPERTY(obj, prop_name) ((kite::stdlib::System::boolean*)obj->properties[#prop_name])->val
 
 #endif

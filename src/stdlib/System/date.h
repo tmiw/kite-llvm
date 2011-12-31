@@ -74,7 +74,7 @@ namespace kite
                 static object *s_now_gmt(date *d) { return d->now_gmt(); }
                 static object *s_now_local(date *d) { return d->now_local(); }
                 static object *s_parse(date *, string *value, string *format) { return date::parse(value, format); }
-                static object *s_str(date *d) { return d->str(); }
+                static const char *s_str(date *d) { return d->str(); }
                 static object *s_timestamp(date *d) { return d->timestamp(); }
                    
             public:
@@ -82,7 +82,7 @@ namespace kite
                 object *now_gmt();
                 object *now_local();
                 static object *parse(string *value, string *format);
-                object *str();
+                const char *str();
                 object *timestamp();
                              
                 BEGIN_KITE_CLASS_INITIALIZER

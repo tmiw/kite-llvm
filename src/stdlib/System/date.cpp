@@ -112,12 +112,12 @@ namespace kite
                     new boolean(t.tm_isdst));
             }
             
-            object *date::str()
+            const char *date::str()
             {
                 struct tm thistime;
                 datePropertiesToStructTm(this, &thistime);
                 time_t t = mktime(&thistime);
-                return new string(ctime(&t));
+                return ctime(&t);
             }
             
             object *date::timestamp()

@@ -26,7 +26,7 @@
  ****************************************************************************/
  
 #include <stdarg.h>
-#include <ffi/ffi.h>
+#include <ffi.h>
 #include "api.h"
 
 void *api_call_method(int numargs, void *obj, void *initptr, va_list vl)
@@ -43,7 +43,8 @@ void *api_call_method(int numargs, void *obj, void *initptr, va_list vl)
         args[i + 1] = &ffi_type_pointer;
         values[i + 1] = (void*)&val_heap[i + 1];
     }
-    assert(ffi_prep_cif(&cif, FFI_DEFAULT_ABI, numargs + 1, &ffi_type_pointer, args) == FFI_OK);
+    int rc = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, numargs + 1, &ffi_type_pointer, args);
+    assert(rc == FFI_OK);
     val_heap[0] = (void*)obj;
     for (int i = 0; i < numargs; i++)
     {

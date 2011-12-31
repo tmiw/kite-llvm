@@ -28,6 +28,7 @@
 #ifndef KITE_STDLIB__API_H
 #define KITE_STDLIB__API_H
 
+#include <ffi/ffi.h>
 #include "System/string.h"
 #include "System/dynamic_object.h"
 #include "language/kite.h"
@@ -99,7 +100,40 @@ namespace kite
             class_obj.obj_alloc_method = ObjectAllocator<name>::GetAllocatorMethodPointer(); \
         } \
         \
+    protected: \
+        friend class ObjectAllocator<name>; \
+        name() : inherit_from(&class_object()) { } \
+        name(kite::stdlib::System::dynamic_object *parent) : inherit_from(parent) { } \
     public: \
+        static name *Create(int numargs, ...) \
+        { \
+            name *obj = new name(); \
+            std::string funcname("__init__"); \
+            void *initptr = kite_find_funccall((int*)obj, funcname.c_str(), numargs + 1); \
+            \
+            if (initptr != NULL) \
+            { \
+                ffi_cif cif; \
+                ffi_type **args = new ffi_type*[numargs + 1]; \
+                void **values = new void*[numargs + 1]; \
+                void *rv; \
+                values[0] = (void*)obj; \
+                args[0] = &ffi_type_pointer; \
+                va_list vl; \
+                va_start(vl, numargs); \
+                for (int i = 0; i < numargs; i++) \
+                { \
+                    args[i + 1] = &ffi_type_pointer; \
+                    values[i + 1] = va_arg(vl, void*); \
+                } \
+                va_end(vl); \
+                ffi_prep_cif(&cif, FFI_DEFAULT_ABI, numargs + 1, &ffi_type_pointer, args); \
+                ffi_call(&cif, (void(*)())initptr, &rv, values); \
+                delete[] args; \
+                delete[] values; \
+            } \
+            return obj; \
+        } \
         static std::string &class_name() \
         { \
             static std::string full_name(#name); \
@@ -125,10 +159,7 @@ namespace kite
                 InitializeClass(*class_obj); \
             } \
             return *class_obj; \
-        } \
-        \
-        name() : inherit_from(&class_object()) { } \
-        name(kite::stdlib::System::dynamic_object *parent) : inherit_from(parent) { }
+        }
 
 /**
  * Begins class initializer definition.

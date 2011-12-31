@@ -80,7 +80,7 @@ namespace kite
                 
                 object *binary_tree::keys()
                 {
-                    list *key_list = new list();
+                    list *key_list = list::Create(0);
                     for (tree_contents_type::iterator i = tree_contents.begin();
                          i != tree_contents.end();
                          i++)

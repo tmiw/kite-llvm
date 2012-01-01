@@ -37,97 +37,100 @@ namespace kite
     {
         namespace System
         {
-            static void datePropertiesToStructTm(date *d, struct tm *t)
+            namespace date
             {
-                t->tm_sec = KITE_GET_INTEGER_PROPERTY(d, sec);
-                t->tm_min = KITE_GET_INTEGER_PROPERTY(d, min);
-                t->tm_hour = KITE_GET_INTEGER_PROPERTY(d, hour);
-                t->tm_mday = KITE_GET_INTEGER_PROPERTY(d, day_of_month);
-                t->tm_mon = KITE_GET_INTEGER_PROPERTY(d, month);
-                t->tm_year = KITE_GET_INTEGER_PROPERTY(d, year);
-                t->tm_wday = KITE_GET_INTEGER_PROPERTY(d, day_of_week);
-                t->tm_yday = KITE_GET_INTEGER_PROPERTY(d, day_of_year);
-                t->tm_isdst = KITE_GET_BOOLEAN_PROPERTY(d, dst);
-            }
+                static void datePropertiesToStructTm(date *d, struct tm *t)
+                {
+                    t->tm_sec = KITE_GET_INTEGER_PROPERTY(d, sec);
+                    t->tm_min = KITE_GET_INTEGER_PROPERTY(d, min);
+                    t->tm_hour = KITE_GET_INTEGER_PROPERTY(d, hour);
+                    t->tm_mday = KITE_GET_INTEGER_PROPERTY(d, day_of_month);
+                    t->tm_mon = KITE_GET_INTEGER_PROPERTY(d, month);
+                    t->tm_year = KITE_GET_INTEGER_PROPERTY(d, year);
+                    t->tm_wday = KITE_GET_INTEGER_PROPERTY(d, day_of_week);
+                    t->tm_yday = KITE_GET_INTEGER_PROPERTY(d, day_of_year);
+                    t->tm_isdst = KITE_GET_BOOLEAN_PROPERTY(d, dst);
+                }
             
-            object *date::format(string *format)
-            {
-                struct tm thistime;
-                char buf[2048];
+                object *date::format(string *format)
+                {
+                    struct tm thistime;
+                    char buf[2048];
                 
-                datePropertiesToStructTm(this, &thistime);
-                strftime(buf, 2048, format->string_val.c_str(), &thistime);
-                return new string(buf);
-            }
+                    datePropertiesToStructTm(this, &thistime);
+                    strftime(buf, 2048, format->string_val.c_str(), &thistime);
+                    return new string(buf);
+                }
             
-            object *date::now_gmt()
-            {
-                time_t t = time(NULL);
-                struct tm *current;                
-                current = gmtime(&t);
+                object *date::now_gmt()
+                {
+                    time_t t = time(NULL);
+                    struct tm *current;                
+                    current = gmtime(&t);
                 
-                return date::Create(9, 
-                    new integer(current->tm_sec),
-                    new integer(current->tm_min),
-                    new integer(current->tm_hour),
-                    new integer(current->tm_mday),
-                    new integer(current->tm_mon),
-                    new integer(current->tm_year),
-                    new integer(current->tm_wday),
-                    new integer(current->tm_yday),
-                    new boolean(current->tm_isdst));
-            }
+                    return date::Create(9, 
+                        new integer(current->tm_sec),
+                        new integer(current->tm_min),
+                        new integer(current->tm_hour),
+                        new integer(current->tm_mday),
+                        new integer(current->tm_mon),
+                        new integer(current->tm_year),
+                        new integer(current->tm_wday),
+                        new integer(current->tm_yday),
+                        new boolean(current->tm_isdst));
+                }
             
-            object *date::now_local()
-            {
-                time_t t = time(NULL);
-                struct tm *current;                
-                current = localtime(&t);
+                object *date::now_local()
+                {
+                    time_t t = time(NULL);
+                    struct tm *current;                
+                    current = localtime(&t);
                 
-                return date::Create(9, 
-                    new integer(current->tm_sec),
-                    new integer(current->tm_min),
-                    new integer(current->tm_hour),
-                    new integer(current->tm_mday),
-                    new integer(current->tm_mon),
-                    new integer(current->tm_year),
-                    new integer(current->tm_wday),
-                    new integer(current->tm_yday),
-                    new boolean(current->tm_isdst));
-            }
+                    return date::Create(9, 
+                        new integer(current->tm_sec),
+                        new integer(current->tm_min),
+                        new integer(current->tm_hour),
+                        new integer(current->tm_mday),
+                        new integer(current->tm_mon),
+                        new integer(current->tm_year),
+                        new integer(current->tm_wday),
+                        new integer(current->tm_yday),
+                        new boolean(current->tm_isdst));
+                }
             
-            object *date::parse(string *value, string *format)
-            {
-                struct tm t;
-                strptime(value->string_val.c_str(), format->string_val.c_str(), &t);
-                return date::Create(9, 
-                    new integer(t.tm_sec),
-                    new integer(t.tm_min),
-                    new integer(t.tm_hour),
-                    new integer(t.tm_mday),
-                    new integer(t.tm_mon),
-                    new integer(t.tm_year),
-                    new integer(t.tm_wday),
-                    new integer(t.tm_yday),
-                    new boolean(t.tm_isdst));
-            }
+                object *date::parse(string *value, string *format)
+                {
+                    struct tm t;
+                    strptime(value->string_val.c_str(), format->string_val.c_str(), &t);
+                    return date::Create(9, 
+                        new integer(t.tm_sec),
+                        new integer(t.tm_min),
+                        new integer(t.tm_hour),
+                        new integer(t.tm_mday),
+                        new integer(t.tm_mon),
+                        new integer(t.tm_year),
+                        new integer(t.tm_wday),
+                        new integer(t.tm_yday),
+                        new boolean(t.tm_isdst));
+                }
             
-            const char *date::str()
-            {
-                struct tm thistime;
-                datePropertiesToStructTm(this, &thistime);
-                time_t t = mktime(&thistime);
-                return ctime(&t);
-            }
+                const char *date::str()
+                {
+                    struct tm thistime;
+                    datePropertiesToStructTm(this, &thistime);
+                    time_t t = mktime(&thistime);
+                    return ctime(&t);
+                }
             
-            object *date::timestamp()
-            {
-                struct tm thistime;
-                datePropertiesToStructTm(this, &thistime);
-                return new integer(mktime(&thistime));
+                object *date::timestamp()
+                {
+                    struct tm thistime;
+                    datePropertiesToStructTm(this, &thistime);
+                    return new integer(mktime(&thistime));
+                }
             }
         }
     }
 }
 
-REGISTER_KITE_CLASS(kite::stdlib::System::System, kite::stdlib::System::date);
+REGISTER_KITE_CLASS(kite::stdlib::System::System, kite::stdlib::System::date::date);

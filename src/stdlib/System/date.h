@@ -25,8 +25,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
  
-#ifndef KITE_STDLIB__SYSTEM__LIST_H
-#define KITE_STDLIB__SYSTEM__LIST_H
+#ifndef KITE_STDLIB__SYSTEM__DATE_H
+#define KITE_STDLIB__SYSTEM__DATE_H
 
 #include <deque>
 #include "stdlib/System.h"
@@ -39,64 +39,67 @@ namespace kite
     {
         namespace System
         {
-            BEGIN_KITE_BASE_CLASS(date)
-            private:
-                static object *s_initialize(date *d)
-                {
-                    d->properties["day_of_month"] = new integer(1);
-                    d->properties["day_of_week"] = new integer(0);
-                    d->properties["day_of_year"] = new integer(0);
-                    d->properties["dst"] = new boolean(false);
-                    d->properties["hour"] = new integer(0);
-                    d->properties["min"] = new integer(0);
-                    d->properties["month"] = new integer(1);
-                    d->properties["sec"] = new integer(0);
-                    d->properties["year"] = new integer(1900);
-                }
+            namespace date
+            {
+                BEGIN_KITE_BASE_CLASS(date)
+                private:
+                    static object *s_initialize(date *d)
+                    {
+                        d->properties["day_of_month"] = new integer(1);
+                        d->properties["day_of_week"] = new integer(0);
+                        d->properties["day_of_year"] = new integer(0);
+                        d->properties["dst"] = new boolean(false);
+                        d->properties["hour"] = new integer(0);
+                        d->properties["min"] = new integer(0);
+                        d->properties["month"] = new integer(1);
+                        d->properties["sec"] = new integer(0);
+                        d->properties["year"] = new integer(1900);
+                    }
                 
-                static object *s_initialize_with_params
-                    (date *d, integer *sec, integer *min, integer *hour, 
-                     integer *day_of_month, integer *month, integer *year, 
-                     integer *day_of_week, integer *day_of_year, boolean *dst)
-                {
-                    d->properties["day_of_month"] = day_of_month;
-                    d->properties["day_of_week"] = day_of_week;
-                    d->properties["day_of_year"] = day_of_year;
-                    d->properties["dst"] = dst;
-                    d->properties["hour"] = hour;
-                    d->properties["min"] = min;
-                    d->properties["month"] = month;
-                    d->properties["sec"] = sec;
-                    d->properties["year"] = year;
-                }
+                    static object *s_initialize_with_params
+                        (date *d, integer *sec, integer *min, integer *hour, 
+                         integer *day_of_month, integer *month, integer *year, 
+                         integer *day_of_week, integer *day_of_year, boolean *dst)
+                    {
+                        d->properties["day_of_month"] = day_of_month;
+                        d->properties["day_of_week"] = day_of_week;
+                        d->properties["day_of_year"] = day_of_year;
+                        d->properties["dst"] = dst;
+                        d->properties["hour"] = hour;
+                        d->properties["min"] = min;
+                        d->properties["month"] = month;
+                        d->properties["sec"] = sec;
+                        d->properties["year"] = year;
+                    }
                 
-                static object *s_format(date *d, string *format) { return d->format(format); }
-                static object *s_now_gmt(date *d) { return d->now_gmt(); }
-                static object *s_now_local(date *d) { return d->now_local(); }
-                static object *s_parse(date *, string *value, string *format) { return date::parse(value, format); }
-                static const char *s_str(date *d) { return d->str(); }
-                static object *s_timestamp(date *d) { return d->timestamp(); }
+                    static object *s_format(date *d, string *format) { return d->format(format); }
+                    static object *s_now_gmt(date *d) { return d->now_gmt(); }
+                    static object *s_now_local(date *d) { return d->now_local(); }
+                    static object *s_parse(date *, string *value, string *format) { return date::parse(value, format); }
+                    static const char *s_str(date *d) { return d->str(); }
+                    static object *s_timestamp(date *d) { return d->timestamp(); }
                    
-            public:
-                object *format(string *format);
-                object *now_gmt();
-                object *now_local();
-                static object *parse(string *value, string *format);
-                const char *str();
-                object *timestamp();
+                public:
+                    object *format(string *format);
+                    object *now_gmt();
+                    object *now_local();
+                    static object *parse(string *value, string *format);
+                    const char *str();
+                    object *timestamp();
                              
-                BEGIN_KITE_CLASS_INITIALIZER
-                    KITE_CONSTRUCTOR_DEFINE(0, &date::s_initialize);
-                    KITE_CONSTRUCTOR_DEFINE(9, &date::s_initialize_with_params);
+                    BEGIN_KITE_CLASS_INITIALIZER
+                        KITE_CONSTRUCTOR_DEFINE(0, &date::s_initialize);
+                        KITE_CONSTRUCTOR_DEFINE(9, &date::s_initialize_with_params);
                     
-                    KITE_METHOD_DEFINE(format, 1, &date::s_format);
-                    KITE_METHOD_DEFINE(now_gmt, 0, &date::s_now_gmt);
-                    KITE_METHOD_DEFINE(now_local, 0, &date::s_now_local);
-                    KITE_METHOD_DEFINE(parse, 2, &date::s_parse);
-                    KITE_METHOD_DEFINE(str, 0, &date::s_str);
-                    KITE_METHOD_DEFINE(timestamp, 0, &date::s_timestamp);
-                END_KITE_CLASS_INITIALIZER
-            };
+                        KITE_METHOD_DEFINE(format, 1, &date::s_format);
+                        KITE_METHOD_DEFINE(now_gmt, 0, &date::s_now_gmt);
+                        KITE_METHOD_DEFINE(now_local, 0, &date::s_now_local);
+                        KITE_METHOD_DEFINE(parse, 2, &date::s_parse);
+                        KITE_METHOD_DEFINE(str, 0, &date::s_str);
+                        KITE_METHOD_DEFINE(timestamp, 0, &date::s_timestamp);
+                    END_KITE_CLASS_INITIALIZER
+                };
+            }
         }
     }
 }

@@ -25,35 +25,15 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include "../exceptions.h"
 #include "DivideByZero.h"
 
-namespace kite
-{
-    namespace stdlib
-    {
-        namespace System
-        {
-            namespace exceptions
-            {
-                System::dynamic_object DivideByZero::class_object;
-                
-                void DivideByZero::InitializeClass()
-                {
-                    class_object.parent = &exception::class_object;
-                    class_object.properties["__name"] = new System::string("System.exceptions.DivideByZero");
-                    // TODO
-                    //class_object.properties["__init____o"] =
-                    //    new System::method((void*)kite_exception_init);
-                }
-            }
-        }
-    }
-}
+REGISTER_KITE_CLASS(kite::stdlib::System::exceptions::exceptions, kite::stdlib::System::exceptions::DivideByZero)
 
 using namespace kite::stdlib;
 
 void kite_exception_raise_div_by_zero()
 {
-    System::exceptions::exception *exc = new System::exceptions::DivideByZero();
+    System::exceptions::exception *exc = System::exceptions::DivideByZero::Create(0);
     exc->throw_exception();
 }

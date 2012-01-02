@@ -52,7 +52,10 @@ namespace kite
                     f->file_handle = fopen(name->string_val.c_str(), mode->string_val.c_str());
                     if (f->file_handle == NULL)
                     {
-                        exceptions::FileError *exc = new exceptions::FileError("Problem opening file.");
+                        exceptions::FileError *exc = exceptions::FileError::Create(
+                            1,
+                            new string("Problem opening file.")
+                        );
                         exc->throw_exception();
                     }
                     return f;

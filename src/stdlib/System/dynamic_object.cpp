@@ -27,9 +27,46 @@
 
 #include "dynamic_object.h"
 #include "string.h"
+#include "method.h"
 #include "../language/kite.h"
 #include "exceptions/NullReference.h"
 
+namespace kite
+{
+    namespace stdlib
+    {
+        namespace System
+        {
+            dynamic_object dynamic_object::t_class_object;
+            
+            void dynamic_object::add_method(const char *name, int numargs, void *ptr)
+            {
+                std::string real_name = std::string(name) + "__o";
+                for (int i = numargs; i > 0; i--)
+                {
+                    real_name += "o";
+                }
+                
+                System::method *method = new System::method(ptr);
+                method->num_args = numargs;
+                properties[real_name] = method;
+            }
+            
+            void dynamic_object::add_operator(semantics::code_operation op, void *ptr)
+            {
+                assert(op < semantics::__END_OVERRIDABLE_OPS && op != semantics::__END_BINARY_OPS);
+                if (op < semantics::__END_BINARY_OPS)
+                {
+                    add_method(semantics::Constants::Get().operator_map[op].c_str(), 1, ptr);
+                }
+                else
+                {
+                    add_method(semantics::Constants::Get().operator_map[op].c_str(), 0, ptr);
+                }
+            }
+        }
+    }
+}
 using namespace kite::stdlib;
 
 void *kite_dynamic_object_alloc()
@@ -55,7 +92,7 @@ void **kite_dynamic_object_get_property(void *object, char *name, bool set)
 
     if (object == NULL)
     {
-        System::exceptions::NullReference *nre = new System::exceptions::NullReference();
+        System::exceptions::NullReference *nre = System::exceptions::NullReference::Create(0);
         nre->throw_exception();
     }
     

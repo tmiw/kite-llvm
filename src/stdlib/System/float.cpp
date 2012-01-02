@@ -191,7 +191,10 @@ static void verify_float_type(System::fpnum *left, System::fpnum *right)
 {
     if (left->type != right->type)
     {
-        System::exceptions::exception *exc = new System::exceptions::TypeMismatch("float expected");
+        System::exceptions::exception *exc = System::exceptions::TypeMismatch::Create(
+            1,
+            new System::string("float expected")
+        );
         exc->throw_exception();
     }
 }

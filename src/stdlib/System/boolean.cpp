@@ -38,6 +38,8 @@ namespace kite
     {
         namespace System
         {
+            System::dynamic_object boolean::class_object;
+            
             object_method_map boolean::method_map = map_list_of
                 ("__op_equals____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(__op_equals____oo))))
                 ("__op_nequals____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(__op_nequals____oo))))
@@ -72,6 +74,11 @@ namespace kite
             System::object *boolean::to_object()
             {
                 return (System::object*)PREFIX_BOOLEAN_METHOD_NAME(obj__b)(val);
+            }
+            
+            void boolean::InitializeClass()
+            {
+                class_object.properties["__name"] = new System::string("System.boolean");
             }
         }
     }
@@ -143,7 +150,10 @@ static void verify_boolean_type(System::boolean *left, System::boolean *right)
 {
     if (left->type != right->type)
     {
-        System::exceptions::exception *exc = new System::exceptions::TypeMismatch("boolean expected");
+        System::exceptions::exception *exc = System::exceptions::TypeMismatch::Create(
+            1,
+            new System::string("boolean expected")
+        );
         exc->throw_exception();
     }
 }

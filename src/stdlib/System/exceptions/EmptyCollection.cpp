@@ -24,28 +24,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
- 
+
+#include "../exceptions.h"
 #include "EmptyCollection.h"
 
- namespace kite
- {
-     namespace stdlib
-     {
-         namespace System
-         {
-             namespace exceptions
-             {
-                 System::dynamic_object EmptyCollection::class_object;
-
-                 void EmptyCollection::InitializeClass()
-                 {
-                     class_object.parent = &exception::class_object;
-                     class_object.properties["__name"] = new System::string("System.exceptions.EmptyCollection");
-                     // TODO
-                     //class_object.properties["__init____o"] =
-                     //    new System::method((void*)kite_exception_init);
-                 }
-             }
-         }
-     }
- }
+REGISTER_KITE_CLASS(kite::stdlib::System::exceptions::exceptions, kite::stdlib::System::exceptions::EmptyCollection)

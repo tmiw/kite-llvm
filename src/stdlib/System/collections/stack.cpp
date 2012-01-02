@@ -55,13 +55,17 @@ namespace kite
                 {
                     if (stack_contents.size() == 0)
                     {
-                        exceptions::EmptyCollection *exc = new exceptions::EmptyCollection("Stack is empty.");
+                        exceptions::EmptyCollection *exc = exceptions::EmptyCollection::Create(
+                            1,
+                            new string("Stack is empty.")
+                        );
                         exc->throw_exception();
                     }
                     
                     object *front_of_queue = stack_contents.front();
                     stack_contents.pop_front();
-                    return front_of_queue;                }   
+                    return front_of_queue;
+                }   
             }
         }
     }

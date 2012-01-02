@@ -36,6 +36,8 @@ namespace kite
     {
         namespace System
         {
+            System::dynamic_object string::class_object;
+            
             object_method_map string::method_map = map_list_of
                 ("append__ss", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(append__ss))))
                 ("asc__s", function_semantics(semantics::INTEGER, (void*)&(PREFIX_STRING_METHOD_NAME(asc__s))))
@@ -123,6 +125,11 @@ namespace kite
             System::object *string::to_object()
             {
                 return (System::object*)(PREFIX_STRING_METHOD_NAME(obj__s)(string_val.c_str()));
+            }
+            
+            void string::InitializeClass()
+            {
+                class_object.properties["__name"] = new System::string("System.string");
             }
         }
     }

@@ -38,18 +38,20 @@ namespace kite
         {
             namespace exceptions
             {
-                struct InvalidArgument : exception
-                {
-                    static System::dynamic_object class_object;
-                    
-                    InvalidArgument(std::string message = "Method not implemented")
-                        : exception(message)
+                BEGIN_KITE_CHILD_CLASS(InvalidArgument, exception)
+                private:
+                    static exception *s_initialize(exception *exc)
                     {
-                        parent = &class_object;
+                        exc->properties["message"] = new string("Method argument invalid.");
+                        return exc;
                     }
 
-                    static void InitializeClass();
-                };
+                public:
+                    BEGIN_KITE_CLASS_INITIALIZER
+                        KITE_CONSTRUCTOR_DEFINE(0, &InvalidArgument::s_initialize);
+                    END_KITE_CLASS_INITIALIZER
+                    
+                END_KITE_CLASS
             }
         }
     }

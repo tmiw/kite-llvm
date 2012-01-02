@@ -30,6 +30,7 @@
 #include <assert.h>
 #include "array.h"
 #include "../boolean.h"
+#include "../method.h"
 #include "../exceptions/InvalidArgument.h"
 
 namespace kite
@@ -75,7 +76,7 @@ namespace kite
                 {
                     if (index->type != semantics::INTEGER)
                     {
-                        (new exceptions::InvalidArgument("Argument 1 must be an integer."))->throw_exception();
+                        (exceptions::InvalidArgument::Create(1, new string("Argument 1 must be an integer.")))->throw_exception();
                     }
                     
                     return this->array_contents[index->val];
@@ -150,14 +151,14 @@ namespace kite
                 {
                     if (m->type != semantics::METHOD_TY)
                     {
-                        (new exceptions::InvalidArgument("Argument 1 must be a method object."))->throw_exception();
+                        (exceptions::InvalidArgument::Create(1, new string("Argument 1 must be a method object.")))->throw_exception();
                     }
                     
                     method *method_obj = (method*)m;
                     
                     if (method_obj->num_args != 2)
                     {
-                        (new exceptions::InvalidArgument("Argument 1: method takes the wrong number of arguments."))->throw_exception();
+                        (exceptions::InvalidArgument::Create(1, new string("Argument 1: method takes the wrong number of arguments.")))->throw_exception();
                     }
                     
                     array *retval = new array();
@@ -165,10 +166,9 @@ namespace kite
                          i != this->array_contents.end();
                          i++)
                     {
-                        object *(*methodptr)(object *thisobj, object *element) =
-                            (object *(*)(object *, object *))method_obj->method_ptr;
                         retval->array_contents.push_back(
-                            (*methodptr)(method_obj->this_ptr, *i));
+                            method_obj->invoke(*i)
+                        );
                     }
                     
                     return retval;
@@ -194,14 +194,14 @@ namespace kite
                 {
                     if (m->type != semantics::METHOD_TY)
                     {
-                        (new exceptions::InvalidArgument("Argument 1 must be a method object."))->throw_exception();
+                        (exceptions::InvalidArgument::Create(1, new string("Argument 1 must be a method object.")))->throw_exception();
                     }
                     
                     method *method_obj = (method*)m;
                     
                     if (method_obj->num_args != 3)
                     {
-                        (new exceptions::InvalidArgument("Argument 1: method takes the wrong number of arguments."))->throw_exception();
+                        (exceptions::InvalidArgument::Create(1, new string("Argument 1: method takes the wrong number of arguments.")))->throw_exception();
                     }
                     
                     object *tmpval = NULL;
@@ -241,7 +241,7 @@ namespace kite
                 {
                     if (index->type != semantics::INTEGER)
                     {
-                        (new exceptions::InvalidArgument("Argument 1 must be an integer."))->throw_exception();
+                        (exceptions::InvalidArgument::Create(1, new string("Argument 1 must be an integer.")))->throw_exception();
                     }
                     
                     this->array_contents[index->val] = item;

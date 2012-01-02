@@ -147,7 +147,7 @@ int *kite_find_funccall(int *obj, const char *name, int numargs)
     
     if (obj == NULL && strncmp("str", name, 3) != 0 && strncmp("print", name, 5) != 0)
     {
-        System::exceptions::NullReference *nre = new System::exceptions::NullReference();
+        System::exceptions::NullReference *nre = System::exceptions::NullReference::Create(0);
         nre->throw_exception();
     }
     else if (obj == NULL && numargs == 1)
@@ -213,7 +213,10 @@ int *kite_find_funccall(int *obj, const char *name, int numargs)
                 {
                     std::ostringstream ss;
                     ss << name << " is not callable.";
-                    System::exceptions::InvalidArgument *exception = new System::exceptions::InvalidArgument(ss.str());
+                    System::exceptions::InvalidArgument *exception = System::exceptions::InvalidArgument::Create(
+                        1,
+                        new System::string(ss.str().c_str())
+                    );
                     exception->throw_exception();
                 }
             }
@@ -227,7 +230,10 @@ failed_to_find_method:
         {
             std::ostringstream ss;
             ss << "Could not find method " << name << " that takes " << (numargs - 1) << " argument(s).";
-            System::exceptions::NotImplemented *exception = new System::exceptions::NotImplemented(ss.str());
+            System::exceptions::NotImplemented *exception = System::exceptions::NotImplemented::Create(
+                1,
+                new System::string(ss.str().c_str())
+            );
             exception->throw_exception();
         }
         return NULL;

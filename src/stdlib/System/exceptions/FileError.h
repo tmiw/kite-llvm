@@ -38,18 +38,20 @@ namespace kite
         {
             namespace exceptions
             {
-                struct FileError : exception
-                {
-                    static System::dynamic_object class_object;
-                    
-                    FileError(std::string message = "Error encountered during file operation.")
-                        : exception(message)
+                BEGIN_KITE_CHILD_CLASS(FileError, exception)
+                private:
+                    static exception *s_initialize(exception *exc)
                     {
-                        parent = &class_object;
+                        exc->properties["message"] = new string("File error encountered.");
+                        return exc;
                     }
 
-                    static void InitializeClass();
-                };
+                public:
+                    BEGIN_KITE_CLASS_INITIALIZER
+                        KITE_CONSTRUCTOR_DEFINE(0, &FileError::s_initialize);
+                    END_KITE_CLASS_INITIALIZER
+                    
+                END_KITE_CLASS
             }
         }
     }

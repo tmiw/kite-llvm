@@ -145,6 +145,7 @@ void *api_call_method(int numargs, void *obj, void *funcptr, va_list vl);
             if (class_obj->properties.find("__name") == class_obj->properties.end() && !suppress) \
             { \
                 InitializeClass(*class_obj); \
+                class_obj->parent = &inherit_from::class_object(); \
             } \
             return *class_obj; \
         }
@@ -230,7 +231,7 @@ namespace kite { \
             } \
         }; \
         \
-        ObjectRegistration<name> & TOKENPASTE2(RegistrationHelper_, __LINE__) = ObjectRegistration<name>::Get(); \
+        ObjectRegistration<name> & TOKENPASTE2(RegistrationHelper_, FILE_NO) = ObjectRegistration<name>::Get(); \
     } \
 }
 
@@ -241,7 +242,7 @@ namespace kite { \
 #define REGISTER_KITE_CLASS_AT_ROOT(name) \
     namespace kite { \
         namespace stdlib { \
-            ObjectRegistration<name> & TOKENPASTE2(RegistrationHelper_, __LINE__) = ObjectRegistration<name>::Get(); \
+            ObjectRegistration<name> & TOKENPASTE2(RegistrationHelper_, FILE_NO) = ObjectRegistration<name>::Get(); \
         } \
     }
 

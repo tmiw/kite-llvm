@@ -31,15 +31,7 @@
 #include <sys/stat.h>
 #include <parser/parser.h>
 #include <stdlib/System/dynamic_object.h>
-//#include <stdlib/System/list.h>
-#include <stdlib/System/exceptions/exception.h>
-#include <stdlib/System/exceptions/NotImplemented.h>
-#include <stdlib/System/exceptions/InvalidArgument.h>
-#include <stdlib/System/exceptions/TypeMismatch.h>
-#include <stdlib/System/exceptions/DivideByZero.h>
-#include <stdlib/System/exceptions/NullReference.h>
-#include <stdlib/System/exceptions/EmptyCollection.h>
-#include <stdlib/System/exceptions/FileError.h>
+#include <stdlib/System/method.h>
 #include <codegen/syntax_tree_printer.h>
 #include <codegen/llvm_node_codegen.h>
 #include <llvm/LLVMContext.h>
@@ -84,32 +76,17 @@ namespace kite
                     state.push_module(current_module);
                     execution_engine = EngineBuilder(current_module).create();
                     
-                    // TODO
-                    System::dynamic_object *system_obj = (System::dynamic_object*)root()->properties["System"]; //new System::dynamic_object();
-                    System::dynamic_object *exceptions_obj = (System::dynamic_object*)system_obj->properties["exceptions"];
-                    //root_object->properties["System"] = system_obj;
-                    //system_obj->properties["exceptions"] = exceptions_obj;
-                    exceptions_obj->properties["exception"] = &System::exceptions::exception::class_object;
-                    exceptions_obj->properties["NotImplemented"] = &System::exceptions::NotImplemented::class_object;
-                    exceptions_obj->properties["InvalidArgument"] = &System::exceptions::InvalidArgument::class_object;
-                    exceptions_obj->properties["TypeMismatch"] = &System::exceptions::TypeMismatch::class_object;
-                    exceptions_obj->properties["DivideByZero"] = &System::exceptions::DivideByZero::class_object;
-                    exceptions_obj->properties["NullReference"] = &System::exceptions::NullReference::class_object;
-                    exceptions_obj->properties["EmptyCollection"] = &System::exceptions::EmptyCollection::class_object;
-                    exceptions_obj->properties["FileError"] = &System::exceptions::FileError::class_object;
+                    System::dynamic_object *system_obj = (System::dynamic_object*)root()->properties["System"];
                     system_obj->properties["float"] = &System::fpnum::class_object;
                     system_obj->properties["integer"] = &System::integer::class_object;
-                    //system_obj->properties["list"] = &System::list::class_object;
+                    system_obj->properties["boolean"] = &System::boolean::class_object;
+                    system_obj->properties["method"] = &System::method::class_object;
+                    system_obj->properties["string"] = &System::string::class_object;
                     System::fpnum::InitializeClass();
                     System::integer::InitializeClass();
-                    //System::list::InitializeClass();
-                    System::exceptions::exception::InitializeClass();
-                    System::exceptions::NotImplemented::InitializeClass();
-                    System::exceptions::InvalidArgument::InitializeClass();
-                    System::exceptions::TypeMismatch::InitializeClass();
-                    System::exceptions::DivideByZero::InitializeClass();
-                    System::exceptions::NullReference::InitializeClass();
-                    System::exceptions::EmptyCollection::InitializeClass();
+                    System::boolean::InitializeClass();
+                    System::method::InitializeClass();
+                    System::string::InitializeClass();
                     
                     search_path.push_back("./");
                 }

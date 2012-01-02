@@ -28,6 +28,7 @@
 #ifndef KITE_STDLIB__SYSTEM__EXCEPTIONS__NOT_IMPLEMENTED_H
 #define KITE_STDLIB__SYSTEM__EXCEPTIONS__NOT_IMPLEMENTED_H
 
+#include "../exceptions.h"
 #include "exception.h"
 
 namespace kite
@@ -38,18 +39,20 @@ namespace kite
         {
             namespace exceptions
             {
-                struct NotImplemented : exception
-                {
-                    static System::dynamic_object class_object;
-                    
-                    NotImplemented(std::string message = "Method not implemented")
-                        : exception(message)
+                BEGIN_KITE_CHILD_CLASS(NotImplemented, exception)
+                private:
+                    static exception *s_initialize(exception *exc)
                     {
-                        parent = &class_object;
+                        exc->properties["message"] = new string("Method not implemented.");
+                        return exc;
                     }
 
-                    static void InitializeClass();
-                };
+                public:
+                    BEGIN_KITE_CLASS_INITIALIZER
+                        KITE_CONSTRUCTOR_DEFINE(0, &NotImplemented::s_initialize);
+                    END_KITE_CLASS_INITIALIZER
+                    
+                END_KITE_CLASS
             }
         }
     }

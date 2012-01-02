@@ -28,7 +28,7 @@
 #ifndef KITE_STDLIB__SYSTEM__METHOD_H
 #define KITE_STDLIB__SYSTEM__METHOD_H
 
-#include "object.h"
+#include "dynamic_object.h"
 
 namespace kite
 {
@@ -38,6 +38,8 @@ namespace kite
         {
             struct method : System::object
             {
+                static System::dynamic_object class_object;
+                
                 void *method_ptr;
                 System::object *this_ptr;
                 int num_args;
@@ -50,6 +52,8 @@ namespace kite
                 
                 object *invoke() { return invoke(NULL); }
                 object *invoke(object *param1, ...);
+                
+                static void InitializeClass();
             };
         }
     }

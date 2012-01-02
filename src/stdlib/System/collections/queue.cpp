@@ -55,7 +55,10 @@ namespace kite
                 {
                     if (queue_contents.size() == 0)
                     {
-                        exceptions::EmptyCollection *exc = new exceptions::EmptyCollection("Queue is empty.");
+                        exceptions::EmptyCollection *exc = exceptions::EmptyCollection::Create(
+                            1,
+                            new string("Queue is empty.")
+                        );
                         exc->throw_exception();
                     }
                     

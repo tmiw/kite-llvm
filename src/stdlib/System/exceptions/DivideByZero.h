@@ -38,18 +38,20 @@ namespace kite
         {
             namespace exceptions
             {
-                struct DivideByZero : exception
-                {
-                    static System::dynamic_object class_object;
-                    
-                    DivideByZero(std::string message = "Division by zero attempted")
-                        : exception(message)
+                BEGIN_KITE_CHILD_CLASS(DivideByZero, exception)
+                private:
+                    static exception *s_initialize(exception *exc)
                     {
-                        parent = &class_object;
+                        exc->properties["message"] = new string("Division by zero attempted.");
+                        return exc;
                     }
-
-                    static void InitializeClass();
-                };
+                
+                public:
+                    BEGIN_KITE_CLASS_INITIALIZER
+                        KITE_CONSTRUCTOR_DEFINE(0, &DivideByZero::s_initialize);
+                    END_KITE_CLASS_INITIALIZER
+                    
+                END_KITE_CLASS
             }
         }
     }

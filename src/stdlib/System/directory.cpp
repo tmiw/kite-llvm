@@ -43,7 +43,10 @@ namespace kite
             {
                 if (dir_handle == NULL)
                 {
-                    exceptions::FileError *exc = new exceptions::FileError("Directory not open.");
+                    exceptions::FileError *exc = exceptions::FileError::Create(
+                        1,
+                        new string("Directory not open.")
+                    );
                     exc->throw_exception();
                 }
             }

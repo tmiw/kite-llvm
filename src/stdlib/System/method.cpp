@@ -29,6 +29,7 @@
 #include <ffi.h>
 #include <iostream>
 #include "method.h"
+#include "string.h"
 
 namespace kite
 {
@@ -36,6 +37,8 @@ namespace kite
     {
         namespace System
         {
+            System::dynamic_object method::class_object;
+            
             object *method::invoke(object *param1, ...)
             {
                 ffi_cif cif;
@@ -68,6 +71,11 @@ namespace kite
                 free(val_heap);
                 /*delete[] val_heap;*/
                 return (object*)rv;
+            }
+            
+            void method::InitializeClass()
+            {
+                class_object.properties["__name"] = new System::string("System.method");
             }
         }
     }

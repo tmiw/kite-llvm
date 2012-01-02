@@ -31,7 +31,6 @@
 #include <map>
 #include <semantics/constants.h>
 #include "object.h"
-#include "method.h"
 #include <gc/gc_allocator.h>
 
 extern "C"
@@ -54,6 +53,9 @@ namespace kite
             typedef std::map<std::string, object*, map_compare, map_allocator> property_map;
             struct dynamic_object : object
             {
+                static dynamic_object t_class_object;
+                static dynamic_object &class_object() { return t_class_object; }
+                
                 object *parent;
                 void *obj_alloc_method;
                 property_map properties;
@@ -67,31 +69,8 @@ namespace kite
                   parent(p), 
                   obj_alloc_method((void*)&kite_dynamic_object_alloc) { }
                 
-                void add_method(const char *name, int numargs, void *ptr)
-                {
-                    std::string real_name = std::string(name) + "__o";
-                    for (int i = numargs; i > 0; i--)
-                    {
-                        real_name += "o";
-                    }
-                    
-                    System::method *method = new System::method(ptr);
-                    method->num_args = numargs;
-                    properties[real_name] = method;
-                }
-                
-                void add_operator(semantics::code_operation op, void *ptr)
-                {
-                    assert(op < semantics::__END_OVERRIDABLE_OPS && op != semantics::__END_BINARY_OPS);
-                    if (op < semantics::__END_BINARY_OPS)
-                    {
-                        add_method(semantics::Constants::Get().operator_map[op].c_str(), 1, ptr);
-                    }
-                    else
-                    {
-                        add_method(semantics::Constants::Get().operator_map[op].c_str(), 0, ptr);
-                    }
-                }
+                void add_method(const char *name, int numargs, void *ptr);
+                void add_operator(semantics::code_operation op, void *ptr);
             };
         }
     }

@@ -38,18 +38,24 @@ namespace kite
         {
             namespace exceptions
             {
-                struct TypeMismatch : exception
-                {
-                    static System::dynamic_object class_object;
-                    
-                    TypeMismatch(std::string message = "Type mismatch")
-                        : exception(message)
+                BEGIN_KITE_CHILD_CLASS(TypeMismatch, exception)
+                private:
+                    static exception *s_initialize(exception *exc)
                     {
-                        parent = &class_object;
+                        exc->properties["message"] = new string("Type mismatch.");
+                        return exc;
                     }
-
-                    static void InitializeClass();
-                };
+                    
+                    static void s_throw(exception *exc) { exc->throw_exception(); }
+                
+                public:
+                    void throw_exception();
+                    
+                    BEGIN_KITE_CLASS_INITIALIZER
+                        KITE_CONSTRUCTOR_DEFINE(0, &TypeMismatch::s_initialize);
+                    END_KITE_CLASS_INITIALIZER
+                    
+                END_KITE_CLASS
             }
         }
     }

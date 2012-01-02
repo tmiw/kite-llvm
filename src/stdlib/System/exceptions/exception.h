@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011, Mooneer Salem
+ * Copyright (c) 2012, Mooneer Salem
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,7 @@
 
 #include <setjmp.h>
 #include <string>
+#include <stdlib/api.h>
 #include <stdlib/System/dynamic_object.h>
 #include <stdlib/System/string.h>
 
@@ -41,24 +42,33 @@ namespace kite
         {
             namespace exceptions
             {
-                struct exception : System::dynamic_object
-                {
-                    static System::dynamic_object class_object;
-                    
-                    exception(std::string message = "Exception thrown")
-                        : System::dynamic_object(&class_object) 
+                BEGIN_KITE_BASE_CLASS(exception)
+                private:
+                    static exception *s_initialize(exception *exc)
                     {
-                        initialize(message);
+                        exc->properties["message"] = new string("Exception thrown.");
+                        return exc;
                     }
-                        
+                    
+                    static exception *s_initialize_with_message(exception *exc, string *message)
+                    {
+                        exc->properties["message"] = message;
+                        return exc;
+                    }
+                    
+                    static void s_throw(exception *exc) { exc->throw_exception(); }
+                
+                public:
                     void throw_exception();
-                    void initialize(std::string message = "Exception thrown")
-                    {
-                        properties["message"] = new string(message.c_str());
-                    }
                     
-                    static void InitializeClass();
-                };
+                    BEGIN_KITE_CLASS_INITIALIZER
+                        KITE_CONSTRUCTOR_DEFINE(0, &exception::s_initialize);
+                        KITE_CONSTRUCTOR_DEFINE(1, &exception::s_initialize_with_message);
+                        
+                        KITE_METHOD_DEFINE(throw, 0, &exception::s_throw);
+                    END_KITE_CLASS_INITIALIZER
+                    
+                END_KITE_CLASS
             }
         }
     }
@@ -86,7 +96,6 @@ extern "C"
     void kite_exception_stack_pop();
     void *kite_exception_get();
     void *kite_exception_throw(void *exc);
-    void *kite_exception_init(void *exc);
 }
 
 #endif

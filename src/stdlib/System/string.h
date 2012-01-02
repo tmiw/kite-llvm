@@ -29,6 +29,7 @@
 #define KITE_STDLIB__SYSTEM__STRING_H
 
 #include <gc/gc_allocator.h>
+#include "dynamic_object.h"
 #include "object.h"
 
 #define STRING_METHOD_PREFIX System__string__
@@ -45,6 +46,8 @@ namespace kite
             
             struct string : System::object
             {
+                static System::dynamic_object class_object;
+                
                 string_type string_val;
                 
                 string() : System::object(semantics::STRING), string_val("") { }
@@ -66,6 +69,8 @@ namespace kite
                 char* trim();
                 char* upper();
                 System::object *to_object();
+                
+                static void InitializeClass();
             };
         }
     }

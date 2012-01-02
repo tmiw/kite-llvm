@@ -25,27 +25,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include "../exceptions.h"
 #include "FileError.h"
 
-namespace kite
-{
-    namespace stdlib
-    {
-        namespace System
-        {
-            namespace exceptions
-            {
-                System::dynamic_object FileError::class_object;
-                
-                void FileError::InitializeClass()
-                {
-                    class_object.parent = &exception::class_object;
-                    class_object.properties["__name"] = new System::string("System.exceptions.FileError");
-                    // TODO
-                    //class_object.properties["__init____o"] =
-                    //    new System::method((void*)kite_exception_init);
-                }
-            }
-        }
-    }
-}
+REGISTER_KITE_CLASS(kite::stdlib::System::exceptions::exceptions, kite::stdlib::System::exceptions::FileError)

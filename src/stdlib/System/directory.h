@@ -32,6 +32,7 @@
 #include "../System.h"
 #include "exceptions/FileError.h"
 #include "integer.h"
+#include "method.h"
 
 namespace kite
 {
@@ -46,7 +47,10 @@ namespace kite
                     d->dir_handle = opendir(name->string_val.c_str());
                     if (d->dir_handle == NULL)
                     {
-                        exceptions::FileError *exc = new exceptions::FileError("Problem opening directory.");
+                        exceptions::FileError *exc = exceptions::FileError::Create(
+                            1,
+                            new string("Problem opening directory.")
+                        );
                         exc->throw_exception();
                     }
                     return d;

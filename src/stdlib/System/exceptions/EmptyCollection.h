@@ -38,18 +38,20 @@
          {
              namespace exceptions
              {
-                 struct EmptyCollection : exception
-                 {
-                     static System::dynamic_object class_object;
-
-                     EmptyCollection(std::string message = "The collection is empty.")
-                         : exception(message)
+                 BEGIN_KITE_CHILD_CLASS(EmptyCollection, exception)
+                 private:
+                     static exception *s_initialize(exception *exc)
                      {
-                         parent = &class_object;
+                         exc->properties["message"] = new string("The collection is empty.");
+                         return exc;
                      }
 
-                     static void InitializeClass();
-                 };
+                 public:
+                     BEGIN_KITE_CLASS_INITIALIZER
+                         KITE_CONSTRUCTOR_DEFINE(0, &EmptyCollection::s_initialize);
+                     END_KITE_CLASS_INITIALIZER
+
+                 END_KITE_CLASS
              }
          }
      }

@@ -114,7 +114,10 @@ static void verify_integer_type(System::integer *left, System::integer *right)
 {
     if (left->type != right->type)
     {
-        System::exceptions::exception *exc = new System::exceptions::TypeMismatch("integer expected");
+        System::exceptions::exception *exc = System::exceptions::TypeMismatch::Create(
+            1,
+            new System::string("integer expected")
+        );
         exc->throw_exception();
     }
 }

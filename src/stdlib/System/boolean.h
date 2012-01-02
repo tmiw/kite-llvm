@@ -28,6 +28,7 @@
 #ifndef KITE_STDLIB__SYSTEM__BOOLEAN_H
 #define KITE_STDLIB__SYSTEM__BOOLEAN_H
 
+#include "dynamic_object.h"
 #include "object.h"
 
 #define BOOLEAN_METHOD_PREFIX System__boolean__
@@ -42,6 +43,7 @@ namespace kite
         {
             struct boolean : System::object
             {
+                static System::dynamic_object class_object;
                 bool val;
                 
                 boolean() : System::object(semantics::BOOLEAN), val(0) { }
@@ -52,6 +54,8 @@ namespace kite
                 int to_integer();
                 double to_float();
                 System::object *to_object();
+                
+                static void InitializeClass();
             };
         }
     }

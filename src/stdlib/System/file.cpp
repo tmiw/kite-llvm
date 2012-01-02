@@ -41,7 +41,10 @@ namespace kite
             {
                 if (file_handle == NULL)
                 {
-                    exceptions::FileError *exc = new exceptions::FileError("File not open.");
+                    exceptions::FileError *exc = exceptions::FileError::Create(
+                        1,
+                        new string("File not open.")
+                    );
                     exc->throw_exception();
                 }
             }

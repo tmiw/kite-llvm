@@ -50,7 +50,10 @@ namespace kite
                 {
                     if (index->type != semantics::STRING)
                     {
-                        (new exceptions::InvalidArgument("Argument 1 must be a string."))->throw_exception();
+                        (exceptions::InvalidArgument::Create(
+                            1,
+                            new string("Argument 1 must be a string.")
+                        ))->throw_exception();
                     }
                     string *str = (string*)index;
                     tree_contents[str->string_val.c_str()] = item;
@@ -61,7 +64,10 @@ namespace kite
                 {
                     if (index->type != semantics::STRING)
                     {
-                        (new exceptions::InvalidArgument("Argument 1 must be a string."))->throw_exception();
+                        (exceptions::InvalidArgument::Create(
+                            1,
+                            new string("Argument 1 must be a string.")
+                        ))->throw_exception();
                     }
                     string *str = (string*)index;
                     return tree_contents[str->string_val.c_str()];
@@ -71,7 +77,10 @@ namespace kite
                 {
                     if (index->type != semantics::STRING)
                     {
-                        (new exceptions::InvalidArgument("Argument 1 must be a string."))->throw_exception();
+                        (exceptions::InvalidArgument::Create(
+                            1,
+                            new string("Argument 1 must be a string.")
+                        ))->throw_exception();
                     }
                     string *str = (string*)index;
                     tree_contents.erase(str->string_val.c_str());

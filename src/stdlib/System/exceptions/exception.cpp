@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011, Mooneer Salem
+ * Copyright (c) 2012, Mooneer Salem
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,7 @@
 #include <execinfo.h>
 #include <dlfcn.h>
 #include <stdlib/language/kite.h> 
+#include "../exceptions.h"
 #include "exception.h"
 
 namespace kite
@@ -39,8 +40,6 @@ namespace kite
         {
             namespace exceptions
             {
-                System::dynamic_object exception::class_object;
-                
                 void exception::throw_exception()
                 {
                     #define NUM_TRACE 32
@@ -99,32 +98,18 @@ namespace kite
                         exit(-1);
                     }
                 }
-                
-                void exception::InitializeClass()
-                {
-                    class_object.properties["throw__o"] =
-                        new System::method((void*)kite_exception_throw);
-                    class_object.properties["__init____o"] =
-                        new System::method((void*)kite_exception_init);
-                    class_object.properties["__name"] = new System::string("System.exceptions.exception");
-                }
             }
         }
     }
 }
+
+REGISTER_KITE_CLASS(kite::stdlib::System::exceptions::exceptions, kite::stdlib::System::exceptions::exception)
 
 using namespace kite::stdlib;
 
 void *kite_exception_get()
 {
     return (void*)language::kite::kite::last_exception;
-}
-
-void *kite_exception_init(void *exc)
-{
-    System::exceptions::exception *exception = (System::exceptions::exception*)exc;
-    exception->initialize();
-    return exc;
 }
 
 void *kite_exception_throw(void *exc)

@@ -49,8 +49,6 @@ namespace kite
                     static void s_throw(exception *exc) { exc->throw_exception(); }
                 
                 public:
-                    void throw_exception();
-                    
                     BEGIN_KITE_CLASS_INITIALIZER
                         KITE_CONSTRUCTOR_DEFINE(0, &TypeMismatch::s_initialize);
                     END_KITE_CLASS_INITIALIZER

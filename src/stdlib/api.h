@@ -139,10 +139,10 @@ void *api_call_method(int numargs, void *obj, void *funcptr, va_list vl);
             return empty_str; \
         } \
         \
-        static kite::stdlib::System::dynamic_object& class_object() \
+        static kite::stdlib::System::dynamic_object& class_object(bool suppress = false) \
         { \
             static kite::stdlib::System::dynamic_object *class_obj = new kite::stdlib::System::dynamic_object(); \
-            if (class_obj->properties.find("__name") == class_obj->properties.end()) \
+            if (class_obj->properties.find("__name") == class_obj->properties.end() && !suppress) \
             { \
                 InitializeClass(*class_obj); \
             } \

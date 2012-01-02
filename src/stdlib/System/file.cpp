@@ -26,12 +26,10 @@
  ****************************************************************************/
 
 #include <iostream>
-#include <cstring>
-#include <unistd.h>
-#include <sys/time.h>
-#include <assert.h>
-#include "directory.h"
-#include "list.h"
+#include <cstdio>
+#include <sys/stat.h>
+#include "file.h"
+#include "boolean.h"
 
 namespace kite
 {
@@ -39,68 +37,79 @@ namespace kite
     {
         namespace System
         {
-            void directory::check_directory_open()
+            void file::check_file_open()
             {
-                if (dir_handle == NULL)
+                if (file_handle == NULL)
                 {
-                    exceptions::FileError *exc = new exceptions::FileError("Directory not open.");
+                    exceptions::FileError *exc = new exceptions::FileError("File not open.");
                     exc->throw_exception();
                 }
             }
             
-            object *directory::map(method *m)
+            object *file::close()
             {
-                check_directory_open();
+                check_file_open();
+                fclose(file_handle);
+                file_handle = NULL;
+            }
+            
+            object *file::exists(string *path)
+            {
+                struct stat buf;
+                int result = stat(path->string_val.c_str(), &buf);
+                return new boolean(result);
+            }
+            
+            object *file::read(integer *bytes)
+            {
+                char buf[bytes->val + 1];
+                int ret;
                 
-                list *l = list::Create(0);
-                int pos = telldir(dir_handle);
-                rewinddir(dir_handle);
+                check_file_open();
+                ret = fread(buf, 1, bytes->val, file_handle);
+                if (ret == 0) return NULL;
+                return new string(buf);
+            }
+            
+            object *file::readline()
+            {
+                char buf[1024], *rval;
+                std::string full_string;
                 
-                struct dirent *ent = readdir(dir_handle);
-                while (ent != 0)
+                check_file_open();
+                do
                 {
-                    string *dirname = new string(ent->d_name);
-                    l->list_contents.push_back(
-                        m->invoke(dirname)
-                    );
-                    ent = readdir(dir_handle);
-                }
-                seekdir(dir_handle, pos);
-                return l;
-            }
-            
-            object *directory::close()
-            {
-                check_directory_open();
-                closedir(dir_handle);
-                dir_handle = NULL;
-            }
-            
-            object *directory::read()
-            {
-                struct dirent *ent;
+                    rval = fgets(buf, 1024, file_handle);
+                    if (rval == NULL) break;
+                    
+                    full_string += buf;
+                } while (rval && full_string.size() > 1023);
                 
-                check_directory_open();
-                ent = readdir(dir_handle);
-                if (ent == NULL) return NULL;
-                
-                return new string(ent->d_name);
+                return new string(full_string.c_str());
             }
             
-            object *directory::seek(integer *pos)
+            object *file::seek(integer *pos)
             {
-                check_directory_open();
-                seekdir(dir_handle, pos->val);
+                check_file_open();
+                fseek(file_handle, pos->val, SEEK_SET);
                 return this;
             }
             
-            object *directory::tell()
+            object *file::tell()
             {
-                check_directory_open();
-                return new integer(telldir(dir_handle));
+                check_file_open();
+                return new integer(ftell(file_handle));
+            }
+            
+            object *file::write(string *str)
+            {
+                check_file_open();
+                return new integer(
+                    fwrite(str->string_val.c_str(), 1, str->string_val.size(), file_handle)
+                );
             }
         }
     }
 }
 
-REGISTER_KITE_CLASS(kite::stdlib::System::System, kite::stdlib::System::directory);
+REGISTER_KITE_CLASS(kite::stdlib::System::System, kite::stdlib::System::file);

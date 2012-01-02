@@ -27,6 +27,7 @@
  
 #include <iostream>
 #include <boost/assign.hpp>
+#include <semantics/constants.h>
 #include "boolean.h"
 #include "exceptions/TypeMismatch.h"
 #include "exceptions/DivideByZero.h"
@@ -48,6 +49,7 @@ namespace kite
                 ("__op_not____o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(__op_not____o))))
                 ("__op_xor____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(__op_xor____oo))))            
                 ("bool__b", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(bool__b))))
+                ("bool__o", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(bool__o))))
                 ("int__b", function_semantics(semantics::INTEGER, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(int__b))))
                 ("float__b", function_semantics(semantics::FLOAT, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(float__b))))
                 ("print__b", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_BOOLEAN_METHOD_NAME(print__b))))
@@ -89,6 +91,13 @@ using namespace kite::stdlib;
 bool PREFIX_BOOLEAN_METHOD_NAME(bool__b)(bool val)
 {
     return val;
+}
+
+bool PREFIX_BOOLEAN_METHOD_NAME(bool__o)(void *val)
+{
+    System::boolean *objVal = (System::boolean*)val;
+
+    return objVal->val;
 }
 
 int PREFIX_BOOLEAN_METHOD_NAME(int__b)(bool val)
@@ -203,4 +212,10 @@ void *PREFIX_BOOLEAN_METHOD_NAME(__op_xor____oo)(void *lhs, void *rhs)
 
     verify_boolean_type(leftObject, rightObject);
     return (void*)(new System::boolean(leftObject->val ^ rightObject->val));
+}
+
+bool kite_object_is_boolean(void *obj)
+{
+    System::boolean *objVal = (System::boolean*)obj;
+    return objVal->type == kite::semantics::BOOLEAN;
 }

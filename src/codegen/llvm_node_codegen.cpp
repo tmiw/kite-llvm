@@ -284,6 +284,41 @@ namespace kite
                 rhs = boost::apply_visitor(llvm_node_codegen(state), tree.children[1]);
                 if (get_type(rhs) != semantics::BOOLEAN)
                 {
+                    BasicBlock *type_error_block = BasicBlock::Create(getGlobalContext(), "raise_type_error", currentFunc);
+                    BasicBlock *type_error_block_end = BasicBlock::Create(getGlobalContext(), "raise_type_error_end", currentFunc);
+                    if (get_type(rhs) == semantics::OBJECT)
+                    {
+                        std::vector<const Type*> parameterTypes;
+                        parameterTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
+                        const FunctionType *ftPtrLookup = FunctionType::get(kite_type_to_llvm_type(semantics::BOOLEAN), parameterTypes, false);
+                        Function *funPtrLookup = Function::Create(ftPtrLookup, Function::ExternalLinkage, "kite_object_is_boolean", module);
+                        if (funPtrLookup->getName() != "kite_object_is_boolean")
+                        {  
+                            funPtrLookup->eraseFromParent();
+                            funPtrLookup = module->getFunction("kite_object_is_boolean");
+                        }
+                        Value *ret = builder.CreateCall(funPtrLookup, rhs);
+                        builder.CreateCondBr(ret, type_error_block_end, type_error_block);
+                    }
+                    else
+                    {
+                        builder.CreateBr(type_error_block);
+                    }
+                    
+                    builder.SetInsertPoint(type_error_block);
+                    std::vector<const Type*> parameterTypes;
+                    parameterTypes.push_back(kite_type_to_llvm_type(semantics::STRING));
+                    const FunctionType *ftPtrLookup = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), parameterTypes, false);
+                    Function *funPtrLookup = Function::Create(ftPtrLookup, Function::ExternalLinkage, "kite_exception_raise_type_mismatch", module);
+                    if (funPtrLookup->getName() != "kite_exception_raise_type_mismatch")
+                    {  
+                        funPtrLookup->eraseFromParent();
+                        funPtrLookup = module->getFunction("kite_exception_raise_type_mismatch");
+                    }
+                    builder.CreateCall(funPtrLookup, builder.CreateGlobalStringPtr("boolean expected."));
+                    builder.CreateBr(type_error_block_end);
+                    builder.SetInsertPoint(type_error_block_end);
+
                     std::vector<Value*> params;
                     params.push_back(rhs);
                     rhs = generate_llvm_method_call(rhs, "bool", params);

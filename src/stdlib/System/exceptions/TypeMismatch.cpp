@@ -29,3 +29,14 @@
 #include "TypeMismatch.h"
 
 REGISTER_KITE_CLASS(kite::stdlib::System::exceptions::exceptions, kite::stdlib::System::exceptions::TypeMismatch)
+
+using namespace kite::stdlib;
+
+void kite_exception_raise_type_mismatch(const char *message)
+{
+    System::exceptions::exception *exc = System::exceptions::TypeMismatch::Create(
+        1,
+        new System::string(message)
+    );
+    exc->throw_exception();
+}

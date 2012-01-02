@@ -64,6 +64,7 @@ namespace kite
 extern "C"
 {
     bool PREFIX_BOOLEAN_METHOD_NAME(bool__b)(bool val);
+    bool PREFIX_BOOLEAN_METHOD_NAME(bool__o)(void *val);
     int PREFIX_BOOLEAN_METHOD_NAME(int__b)(bool val);
     double PREFIX_BOOLEAN_METHOD_NAME(float__b)(bool val);
     bool PREFIX_BOOLEAN_METHOD_NAME(print__b)(bool val);
@@ -78,6 +79,8 @@ extern "C"
     void *PREFIX_BOOLEAN_METHOD_NAME(__op_or____oo)(void *lhs, void *rhs);
     void *PREFIX_BOOLEAN_METHOD_NAME(__op_not____o)(void *rhs);
     void *PREFIX_BOOLEAN_METHOD_NAME(__op_xor____oo)(void *lhs, void *rhs);
+    
+    bool kite_object_is_boolean(void *obj);
 }
 
 #endif

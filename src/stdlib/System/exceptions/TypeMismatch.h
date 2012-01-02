@@ -59,4 +59,9 @@ namespace kite
     }
 }
 
+extern "C"
+{
+    void kite_exception_raise_type_mismatch(const char *message);
+}
+
 #endif

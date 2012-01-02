@@ -25,10 +25,10 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
  
-#ifndef KITE_STDLIB__SYSTEM__METHOD_H
-#define KITE_STDLIB__SYSTEM__METHOD_H
+#ifndef KITE_STDLIB__SYSTEM__EXCEPTIONS__FILE_ERROR_H
+#define KITE_STDLIB__SYSTEM__EXCEPTIONS__FILE_ERROR_H
 
-#include "object.h"
+#include "exception.h"
 
 namespace kite
 {
@@ -36,29 +36,23 @@ namespace kite
     {
         namespace System
         {
-            struct method : System::object
+            namespace exceptions
             {
-                void *method_ptr;
-                System::object *this_ptr;
-                int num_args;
-
-                method(void *ptr) :
-                    System::object(semantics::METHOD_TY), method_ptr(ptr), this_ptr(NULL) 
+                struct FileError : exception
                 {
-                     // empty
-                }
-                
-                object *invoke() { return invoke(NULL); }
-                object *invoke(object *param1, ...);
-            };
+                    static System::dynamic_object class_object;
+                    
+                    FileError(std::string message = "Error encountered during file operation.")
+                        : exception(message)
+                    {
+                        parent = &class_object;
+                    }
+
+                    static void InitializeClass();
+                };
+            }
         }
     }
-}
-
-extern "C"
-{
-    void *kite_method_alloc(void *method_ptr, int args);
-    void *kite_method_verify_semantics(void *method, int args);
 }
 
 #endif

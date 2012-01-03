@@ -1492,7 +1492,13 @@ namespace kite
             params.push_back(obj);
             for(int i = 1; i < tree.children.size(); i++)
             {
-                params.push_back(boost::apply_visitor(llvm_node_codegen(state), tree.children[i]));
+                Value *v = boost::apply_visitor(llvm_node_codegen(state), tree.children[i]);
+                
+                if (v->getType() == PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)))
+                {
+                    v = builder.CreateLoad(v);
+                }
+                params.push_back(v);
             }
             
             generate_llvm_method_call(obj, semantics::Constants::Get().operator_map[semantics::CONSTRUCTOR], params);

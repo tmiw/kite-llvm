@@ -183,6 +183,13 @@ void *api_call_method(int numargs, void *obj, void *funcptr, va_list vl);
  */
 #define KITE_CONSTRUCTOR_DEFINE(num_params, function_pointer) \
     KITE_METHOD_DEFINE(__init__, num_params, function_pointer)
+
+/**
+ * Adds definition of destructor to class.
+ * @param function_pointer Pointer to a function that initializes this object.
+ */
+#define KITE_DESTRUCTOR_DEFINE(function_pointer) \
+    KITE_METHOD_DEFINE(__destruct__, 0, function_pointer)
     
 /**
  * Ends class initializer definition.
@@ -259,5 +266,12 @@ namespace kite { \
  * @param prop_name The name of the property.
  */
 #define KITE_GET_BOOLEAN_PROPERTY(obj, prop_name) ((kite::stdlib::System::boolean*)obj->properties[#prop_name])->val
+
+/**
+ * Determines whether a property is set.
+ * @param obj The object to act upon.
+ * @param prop_name The name of the property.
+ */
+#define KITE_PROPERTY_EXISTS(obj, prop_name) (obj->properties[#prop_name] != NULL)
 
 #endif

@@ -109,7 +109,8 @@ namespace kite
                         res << "method";
                         break;
                     default:
-                        std::cout << "object" << std::endl;
+                        char *(*funcptr)(object *) = (char *(*)(object *))kite_find_funccall((int*)this, "str", 1);
+                        std::cout << (*funcptr)(this) << std::endl;
                         break;
                 }
                 

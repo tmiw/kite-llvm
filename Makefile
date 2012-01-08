@@ -28,7 +28,7 @@ COMMON_OBJS=src/codegen/llvm_compile_state.o src/codegen/llvm_node_codegen.o \
 	 src/stdlib/System/exceptions/TypeMismatch.o src/stdlib/System/exceptions/DivideByZero.o \
 	 src/stdlib/System/exceptions/NullReference.o src/stdlib/System/exceptions/EmptyCollection.o \
 	 src/stdlib/System/exceptions/FileError.o src/stdlib/System/exceptions/SocketError.o \
-	 src/stdlib/System/exceptions/DnsError.o \
+	 src/stdlib/System/exceptions/DnsError.o src/stdlib/System/os.o \
 	 src/parser/constants.o src/parser/make.o src/parser/assignment.o src/parser/bitwise.o \
 	 src/parser/comparison.o src/parser/math.o src/parser/map_reduce.o src/parser/classes.o  \
 	 src/parser/decide.o src/parser/deref.o src/parser/grouping.o \
@@ -158,10 +158,16 @@ src/stdlib/language/kite.o: src/semantics/syntax_tree.h
 src/stdlib/language/kite.o: src/semantics/constants.h src/parser/parser.h
 src/stdlib/language/kite.o: src/stdlib/System/method.h
 src/stdlib/language/kite.o: src/stdlib/System/dynamic_object.h
+src/stdlib/language/kite.o: src/stdlib/System/os.h src/stdlib/api.h
+src/stdlib/language/kite.o: src/stdlib/System/string.h
+src/stdlib/language/kite.o: src/stdlib/System/dynamic_object.h
+src/stdlib/language/kite.o: src/stdlib/language/kite.h src/stdlib/System.h
+src/stdlib/language/kite.o: src/stdlib/System/list.h src/stdlib/System.h
+src/stdlib/language/kite.o: src/stdlib/System/integer.h
+src/stdlib/language/kite.o: src/stdlib/System/string.h
 src/stdlib/language/kite.o: src/codegen/syntax_tree_printer.h
 src/stdlib/language/kite.o: src/codegen/llvm_node_codegen.h
 src/stdlib/language/kite.o: src/stdlib/System/integer.h
-src/stdlib/language/kite.o: src/stdlib/System/string.h
 src/stdlib/language/kite.o: src/stdlib/System/string.h
 src/stdlib/language/kite.o: src/stdlib/System/boolean.h
 src/stdlib/language/kite.o: src/stdlib/System/float.h
@@ -268,10 +274,11 @@ src/stdlib/System/date/hires.o: src/stdlib/System/integer.h
 src/stdlib/System/date/hires.o: src/stdlib/System/boolean.h
 src/stdlib/System/date.o: src/stdlib/System/date.h src/stdlib/System.h
 src/stdlib/System/date.o: src/stdlib/System/integer.h
-src/stdlib/System/date.o: src/stdlib/System/boolean.h
-src/stdlib/System/date.o: src/stdlib/System/dynamic_object.h
 src/stdlib/System/date.o: src/stdlib/System/object.h
 src/stdlib/System/date.o: src/semantics/constants.h
+src/stdlib/System/date.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/date.o: src/stdlib/System/string.h
+src/stdlib/System/date.o: src/stdlib/System/boolean.h
 src/stdlib/System/directory.o: src/stdlib/System/directory.h
 src/stdlib/System/directory.o: src/stdlib/System.h src/stdlib/api.h
 src/stdlib/System/directory.o: src/stdlib/System/string.h
@@ -285,6 +292,7 @@ src/stdlib/System/directory.o: src/stdlib/System/exceptions/exception.h
 src/stdlib/System/directory.o: src/stdlib/System/dynamic_object.h
 src/stdlib/System/directory.o: src/stdlib/System/string.h
 src/stdlib/System/directory.o: src/stdlib/System/integer.h
+src/stdlib/System/directory.o: src/stdlib/System/string.h
 src/stdlib/System/directory.o: src/stdlib/System/method.h
 src/stdlib/System/directory.o: src/stdlib/System/list.h src/stdlib/System.h
 src/stdlib/System/dynamic_object.o: src/stdlib/System/dynamic_object.h
@@ -449,6 +457,7 @@ src/stdlib/System/file.o: src/stdlib/System/exceptions/exception.h
 src/stdlib/System/file.o: src/stdlib/System/dynamic_object.h
 src/stdlib/System/file.o: src/stdlib/System/string.h
 src/stdlib/System/file.o: src/stdlib/System/integer.h
+src/stdlib/System/file.o: src/stdlib/System/string.h
 src/stdlib/System/file.o: src/stdlib/System/boolean.h
 src/stdlib/System/float.o: src/stdlib/System/float.h
 src/stdlib/System/float.o: src/stdlib/System/object.h
@@ -465,10 +474,11 @@ src/stdlib/System/float.o: src/stdlib/System/dynamic_object.h
 src/stdlib/System/float.o: src/stdlib/System/string.h
 src/stdlib/System/float.o: src/stdlib/System/exceptions/DivideByZero.h
 src/stdlib/System/integer.o: src/stdlib/System/integer.h
-src/stdlib/System/integer.o: src/stdlib/System/boolean.h
-src/stdlib/System/integer.o: src/stdlib/System/dynamic_object.h
 src/stdlib/System/integer.o: src/stdlib/System/object.h
 src/stdlib/System/integer.o: src/semantics/constants.h
+src/stdlib/System/integer.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/integer.o: src/stdlib/System/string.h
+src/stdlib/System/integer.o: src/stdlib/System/boolean.h
 src/stdlib/System/integer.o: src/stdlib/System/exceptions/TypeMismatch.h
 src/stdlib/System/integer.o: src/stdlib/System/exceptions/exception.h
 src/stdlib/System/integer.o: src/stdlib/api.h src/stdlib/System/string.h
@@ -479,14 +489,19 @@ src/stdlib/System/integer.o: src/stdlib/System/string.h
 src/stdlib/System/integer.o: src/stdlib/System/exceptions/DivideByZero.h
 src/stdlib/System/list.o: src/stdlib/System/list.h src/stdlib/System.h
 src/stdlib/System/list.o: src/stdlib/System/integer.h
+src/stdlib/System/list.o: src/stdlib/System/object.h
+src/stdlib/System/list.o: src/semantics/constants.h
+src/stdlib/System/list.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/list.o: src/stdlib/System/string.h
 src/stdlib/System/math/range.o: src/stdlib/System/list.h src/stdlib/System.h
 src/stdlib/System/math/range.o: src/stdlib/System/integer.h
+src/stdlib/System/math/range.o: src/stdlib/System/object.h
+src/stdlib/System/math/range.o: src/semantics/constants.h
+src/stdlib/System/math/range.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/math/range.o: src/stdlib/System/string.h
 src/stdlib/System/math/range.o: src/stdlib/System/math/range.h
 src/stdlib/System/math/range.o: src/stdlib/System/math.h src/stdlib/System.h
 src/stdlib/System/math/range.o: src/stdlib/api.h src/stdlib/System/string.h
-src/stdlib/System/math/range.o: src/stdlib/System/dynamic_object.h
-src/stdlib/System/math/range.o: src/stdlib/System/object.h
-src/stdlib/System/math/range.o: src/semantics/constants.h
 src/stdlib/System/math/range.o: src/stdlib/System/dynamic_object.h
 src/stdlib/System/math/range.o: src/stdlib/language/kite.h
 src/stdlib/System/math/range.o: src/stdlib/System/exceptions/TypeMismatch.h
@@ -494,7 +509,6 @@ src/stdlib/System/math/range.o: src/stdlib/System/exceptions/exception.h
 src/stdlib/System/math/range.o: src/stdlib/System/dynamic_object.h
 src/stdlib/System/math/range.o: src/stdlib/System/string.h
 src/stdlib/System/math/range.o: src/stdlib/System/float.h
-src/stdlib/System/math/range.o: src/stdlib/System/string.h
 src/stdlib/System/math/range.o: src/stdlib/System/boolean.h
 src/stdlib/System/math/range.o: src/stdlib/System/integer.h
 src/stdlib/System/math.o: src/stdlib/System/math.h src/stdlib/System.h
@@ -605,6 +619,12 @@ src/stdlib/System/object.o: src/stdlib/System/dynamic_object.h
 src/stdlib/System/object.o: src/stdlib/System/string.h
 src/stdlib/System/object.o: src/stdlib/System/exceptions/InvalidArgument.h
 src/stdlib/System/object.o: src/stdlib/System/exceptions/NullReference.h
+src/stdlib/System/os.o: src/stdlib/System/os.h src/stdlib/api.h
+src/stdlib/System/os.o: src/stdlib/System/string.h
+src/stdlib/System/os.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/os.o: src/stdlib/System/object.h src/semantics/constants.h
+src/stdlib/System/os.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/os.o: src/stdlib/language/kite.h src/stdlib/System.h
 src/stdlib/System/string.o: src/stdlib/System/string.h
 src/stdlib/System/string.o: src/stdlib/System/dynamic_object.h
 src/stdlib/System/string.o: src/stdlib/System/object.h

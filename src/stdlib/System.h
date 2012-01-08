@@ -28,7 +28,6 @@
 #ifndef KITE_STDLIB__SYSTEM_H
 #define KITE_STDLIB__SYSTEM_H
 
-#include <deque>
 #include "stdlib/api.h"
 
 namespace kite

@@ -32,6 +32,8 @@
 #include <parser/parser.h>
 #include <stdlib/System/dynamic_object.h>
 #include <stdlib/System/method.h>
+#include <stdlib/System/os.h>
+#include <stdlib/System/list.h>
 #include <codegen/syntax_tree_printer.h>
 #include <codegen/llvm_node_codegen.h>
 #include <llvm/LLVMContext.h>
@@ -66,7 +68,7 @@ namespace kite
                 std::vector<std::string> kite::search_path;
                 System::dynamic_object *kite::last_exception = NULL;
                 
-                void kite::InitializeRuntimeSystem()
+                void kite::InitializeRuntimeSystem(int argc, char **argv)
                 {
                     InitializeNativeTarget();
                     llvm_start_multithreaded();
@@ -89,6 +91,14 @@ namespace kite
                     System::string::InitializeClass();
                     
                     search_path.push_back("./");
+                    
+                    // Initialize args array
+                    System::list *arg_list = System::list::Create(0);
+                    for (int index = 0; index < argc; index++)
+                    {
+                        arg_list->list_contents.push_back(new System::string(argv[index]));
+                    }
+                    System::os::os::class_object().properties["args"] = arg_list;
                 }
 
                 System::object *kite::ImportModule(std::string &module_name)

@@ -64,7 +64,7 @@ int main(int argc, char **argv)
     argc -= optind;
     argv += optind;
          
-    language::kite::kite::InitializeRuntimeSystem();
+    language::kite::kite::InitializeRuntimeSystem(argc, argv);
     language::kite::kite::enable_optimizer = optimize_code;
 
     cout << "Interactive Kite console" << endl;

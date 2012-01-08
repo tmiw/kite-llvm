@@ -683,6 +683,10 @@ namespace kite
             for (int i = 1; i < tree.children.size(); i++)
             {
                 Value *param_val = boost::apply_visitor(llvm_node_codegen(state), tree.children[i]);
+                if (param_val->getType() == PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)))
+                {
+                    param_val = builder.CreateLoad(param_val);
+                }
                 parameters.push_back(param_val);
             }
             

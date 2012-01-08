@@ -28,7 +28,7 @@ COMMON_OBJS=src/codegen/llvm_compile_state.o src/codegen/llvm_node_codegen.o \
 	 src/stdlib/System/exceptions/TypeMismatch.o src/stdlib/System/exceptions/DivideByZero.o \
 	 src/stdlib/System/exceptions/NullReference.o src/stdlib/System/exceptions/EmptyCollection.o \
 	 src/stdlib/System/exceptions/FileError.o src/stdlib/System/exceptions/SocketError.o \
-	 src/stdlib/System/exceptions/DnsError.o src/stdlib/System/os.o \
+	 src/stdlib/System/exceptions/DnsError.o src/stdlib/System/os.o src/stdlib/System/os/posix.o \
 	 src/parser/constants.o src/parser/make.o src/parser/assignment.o src/parser/bitwise.o \
 	 src/parser/comparison.o src/parser/math.o src/parser/map_reduce.o src/parser/classes.o  \
 	 src/parser/decide.o src/parser/deref.o src/parser/grouping.o \
@@ -162,9 +162,9 @@ src/stdlib/language/kite.o: src/stdlib/System/os.h src/stdlib/api.h
 src/stdlib/language/kite.o: src/stdlib/System/string.h
 src/stdlib/language/kite.o: src/stdlib/System/dynamic_object.h
 src/stdlib/language/kite.o: src/stdlib/language/kite.h src/stdlib/System.h
-src/stdlib/language/kite.o: src/stdlib/System/list.h src/stdlib/System.h
 src/stdlib/language/kite.o: src/stdlib/System/integer.h
 src/stdlib/language/kite.o: src/stdlib/System/string.h
+src/stdlib/language/kite.o: src/stdlib/System/list.h src/stdlib/System.h
 src/stdlib/language/kite.o: src/codegen/syntax_tree_printer.h
 src/stdlib/language/kite.o: src/codegen/llvm_node_codegen.h
 src/stdlib/language/kite.o: src/stdlib/System/integer.h
@@ -619,12 +619,38 @@ src/stdlib/System/object.o: src/stdlib/System/dynamic_object.h
 src/stdlib/System/object.o: src/stdlib/System/string.h
 src/stdlib/System/object.o: src/stdlib/System/exceptions/InvalidArgument.h
 src/stdlib/System/object.o: src/stdlib/System/exceptions/NullReference.h
+src/stdlib/System/os/posix.o: src/stdlib/System/os/posix.h src/stdlib/api.h
+src/stdlib/System/os/posix.o: src/stdlib/System/string.h
+src/stdlib/System/os/posix.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/os/posix.o: src/stdlib/System/object.h
+src/stdlib/System/os/posix.o: src/semantics/constants.h
+src/stdlib/System/os/posix.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/os/posix.o: src/stdlib/language/kite.h
+src/stdlib/System/os/posix.o: src/stdlib/System/method.h
+src/stdlib/System/os/posix.o: src/stdlib/System/file.h src/stdlib/System.h
+src/stdlib/System/os/posix.o: src/stdlib/System/exceptions/FileError.h
+src/stdlib/System/os/posix.o: src/stdlib/System/exceptions/exception.h
+src/stdlib/System/os/posix.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/os/posix.o: src/stdlib/System/string.h
+src/stdlib/System/os/posix.o: src/stdlib/System/integer.h
+src/stdlib/System/os/posix.o: src/stdlib/System/string.h
+src/stdlib/System/os/posix.o: src/stdlib/System/os.h
+src/stdlib/System/os/posix.o: src/stdlib/System/exceptions/exception.h
+src/stdlib/System/os/posix.o: src/stdlib/System/boolean.h
+src/stdlib/System/os/posix.o: src/stdlib/System/integer.h
 src/stdlib/System/os.o: src/stdlib/System/os.h src/stdlib/api.h
 src/stdlib/System/os.o: src/stdlib/System/string.h
 src/stdlib/System/os.o: src/stdlib/System/dynamic_object.h
 src/stdlib/System/os.o: src/stdlib/System/object.h src/semantics/constants.h
 src/stdlib/System/os.o: src/stdlib/System/dynamic_object.h
 src/stdlib/System/os.o: src/stdlib/language/kite.h src/stdlib/System.h
+src/stdlib/System/os.o: src/stdlib/System/integer.h
+src/stdlib/System/os.o: src/stdlib/System/string.h
+src/stdlib/System/os.o: src/stdlib/System/exceptions/FileError.h
+src/stdlib/System/os.o: src/stdlib/System/exceptions/exception.h
+src/stdlib/System/os.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/os.o: src/stdlib/System/string.h
+src/stdlib/System/os.o: src/stdlib/System/exceptions/exception.h
 src/stdlib/System/string.o: src/stdlib/System/string.h
 src/stdlib/System/string.o: src/stdlib/System/dynamic_object.h
 src/stdlib/System/string.o: src/stdlib/System/object.h

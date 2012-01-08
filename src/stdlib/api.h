@@ -103,6 +103,10 @@ void *api_call_method(int numargs, void *obj, void *funcptr, va_list vl);
             class_obj.obj_alloc_method = ObjectAllocator<name>::GetAllocatorMethodPointer(); \
         } \
         \
+        static const char *__internal_str(name *) \
+        { \
+            return full_class_name(); \
+        } \
     protected: \
         friend class ObjectAllocator<name>; \
         name() : inherit_from(&class_object()) { } \
@@ -157,7 +161,9 @@ void *api_call_method(int numargs, void *obj, void *funcptr, va_list vl);
     public: \
         static void InitializeClass(kite::stdlib::System::dynamic_object& class_obj) \
         { \
-            _SetAllocator(class_obj);
+            _SetAllocator(class_obj); \
+            \
+            class_obj.add_method("str", 0, (void*)&__internal_str);
 
 /**
  * Adds definition of Kite method to class.

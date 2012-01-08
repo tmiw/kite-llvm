@@ -72,6 +72,9 @@ namespace kite
                 
                 FILE *file_handle;
             public:
+                static file *create_from_pointer(FILE *fptr) { return new file(fptr); }
+                FILE *stdio_handle() { return file_handle; }
+                
                 object *close();
                 static object *exists(string *path);
                 object *read(integer *bytes);

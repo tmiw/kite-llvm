@@ -11,6 +11,7 @@ LLVM_LIBS=`$(LLVM_CONFIG) --libs`
 GC_LIBS=-lgc
 GC_LDFLAGS=-L/usr/lib
 MATH_LIBS=-lm
+REGEX_LIBS=-lboost_regex
 COMMON_OBJS=src/codegen/llvm_compile_state.o src/codegen/llvm_node_codegen.o \
 	 src/codegen/syntax_tree_node_printer.o src/codegen/syntax_tree_printer.o \
 	 src/stdlib/System.o src/stdlib/System/integer.o src/stdlib/System/string.o \
@@ -29,6 +30,7 @@ COMMON_OBJS=src/codegen/llvm_compile_state.o src/codegen/llvm_node_codegen.o \
 	 src/stdlib/System/exceptions/NullReference.o src/stdlib/System/exceptions/EmptyCollection.o \
 	 src/stdlib/System/exceptions/FileError.o src/stdlib/System/exceptions/SocketError.o \
 	 src/stdlib/System/exceptions/DnsError.o src/stdlib/System/os.o src/stdlib/System/os/posix.o \
+	 src/stdlib/System/regex.o src/stdlib/System/regex/match_result.o \
 	 src/parser/constants.o src/parser/make.o src/parser/assignment.o src/parser/bitwise.o \
 	 src/parser/comparison.o src/parser/math.o src/parser/map_reduce.o src/parser/classes.o  \
 	 src/parser/decide.o src/parser/deref.o src/parser/grouping.o \
@@ -54,10 +56,10 @@ clean:
 	rm -rf Makefile.bak `find ./ -name '*.o'` kite ikt
 
 kite: $(KITE_OBJS)
-	$(CC) $(CPPFLAGS) $(LDFLAGS) -o kite $(KITE_OBJS) $(LLVM_LDFLAGS) $(LLVM_LIBS) $(GC_LDFLAGS) $(GC_LIBS) $(MATH_LIBS)
+	$(CC) $(CPPFLAGS) $(LDFLAGS) -o kite $(KITE_OBJS) $(LLVM_LDFLAGS) $(LLVM_LIBS) $(GC_LDFLAGS) $(GC_LIBS) $(MATH_LIBS) $(REGEX_LIBS)
 
 ikt: $(IKT_OBJS)
-	$(CC) $(CPPFLAGS) $(LDFLAGS) -o ikt $(IKT_OBJS) $(LLVM_LDFLAGS) $(LLVM_LIBS) $(GC_LDFLAGS) $(GC_LIBS) $(MATH_LIBS)
+	$(CC) $(CPPFLAGS) $(LDFLAGS) -o ikt $(IKT_OBJS) $(LLVM_LDFLAGS) $(LLVM_LIBS) $(GC_LDFLAGS) $(GC_LIBS) $(MATH_LIBS) $(REGEX_LIBS)
 
 # DO NOT DELETE
 
@@ -651,6 +653,32 @@ src/stdlib/System/os.o: src/stdlib/System/exceptions/exception.h
 src/stdlib/System/os.o: src/stdlib/System/dynamic_object.h
 src/stdlib/System/os.o: src/stdlib/System/string.h
 src/stdlib/System/os.o: src/stdlib/System/exceptions/exception.h
+src/stdlib/System/regex/match_result.o: src/stdlib/System/regex/match_result.h
+src/stdlib/System/regex/match_result.o: src/stdlib/api.h
+src/stdlib/System/regex/match_result.o: src/stdlib/System/string.h
+src/stdlib/System/regex/match_result.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/regex/match_result.o: src/stdlib/System/object.h
+src/stdlib/System/regex/match_result.o: src/semantics/constants.h
+src/stdlib/System/regex/match_result.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/regex/match_result.o: src/stdlib/language/kite.h
+src/stdlib/System/regex/match_result.o: src/stdlib/System/regex.h
+src/stdlib/System/regex/match_result.o: src/stdlib/System.h
+src/stdlib/System/regex/match_result.o: src/stdlib/System/integer.h
+src/stdlib/System/regex/match_result.o: src/stdlib/System/string.h
+src/stdlib/System/regex/match_result.o: src/stdlib/System/boolean.h
+src/stdlib/System/regex.o: src/stdlib/System/regex.h src/stdlib/api.h
+src/stdlib/System/regex.o: src/stdlib/System/string.h
+src/stdlib/System/regex.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/regex.o: src/stdlib/System/object.h
+src/stdlib/System/regex.o: src/semantics/constants.h
+src/stdlib/System/regex.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/regex.o: src/stdlib/language/kite.h src/stdlib/System.h
+src/stdlib/System/regex.o: src/stdlib/System/integer.h
+src/stdlib/System/regex.o: src/stdlib/System/string.h
+src/stdlib/System/regex.o: src/stdlib/System/boolean.h
+src/stdlib/System/regex.o: src/stdlib/System/exceptions/exception.h
+src/stdlib/System/regex.o: src/stdlib/System/regex/match_result.h
+src/stdlib/System/regex.o: src/stdlib/System/list.h src/stdlib/System.h
 src/stdlib/System/string.o: src/stdlib/System/string.h
 src/stdlib/System/string.o: src/stdlib/System/dynamic_object.h
 src/stdlib/System/string.o: src/stdlib/System/object.h

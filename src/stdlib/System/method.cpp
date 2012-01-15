@@ -30,6 +30,7 @@
 #include <iostream>
 #include "method.h"
 #include "string.h"
+#include "list.h"
 
 namespace kite
 {
@@ -73,9 +74,36 @@ namespace kite
                 return (object*)rv;
             }
             
+            object *method::invoke_with_arg_list(list *l)
+            {
+                ffi_cif cif;
+                ffi_type *args[num_args + 1];
+                void *values[num_args + 1];
+                void **val_heap = (void**)malloc((num_args + 1) * sizeof(void*)); /*new void*[numargs + 1];*/
+                void *rv;
+                args[0] = &ffi_type_pointer;
+                values[0] = &val_heap[0];
+                for (int i = 0; i < num_args; i++)
+                {
+                    args[i + 1] = &ffi_type_pointer;
+                    values[i + 1] = (void*)&val_heap[i + 1];
+                }
+                int rc = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, num_args + 1, &ffi_type_pointer, args);
+                assert(rc == FFI_OK);
+                val_heap[0] = (void*)this_ptr;
+                for (int i = 0; i < num_args; i++)
+                {
+                    val_heap[i + 1] = (void*)l->list_contents[i];
+                }
+                ffi_call(&cif, (void(*)())method_ptr, &rv, values);
+                free(val_heap);
+                /*delete[] val_heap;*/
+                return (object*)rv;
+            }
+            
             void method::InitializeClass()
             {
-                class_object.properties["__name"] = new System::string("System.method");
+                class_object.properties["__name"] = new string("System.method");
             }
         }
     }

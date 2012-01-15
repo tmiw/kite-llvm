@@ -73,8 +73,6 @@ namespace kite
                     static System::dynamic_object *last_exception;
                     static System::dynamic_object *root_object;   
                     
-                    static std::vector<std::string> search_path;
-                    
                     private:
                         static llvm::Module *current_module;
                         static codegen::llvm_compile_state state;

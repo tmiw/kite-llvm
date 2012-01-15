@@ -34,6 +34,8 @@
 #include <stdlib/System/method.h>
 #include <stdlib/System/os.h>
 #include <stdlib/System/list.h>
+#include <stdlib/System/regex.h>
+#include <stdlib/System/vm/loader.h>
 #include <codegen/syntax_tree_printer.h>
 #include <codegen/llvm_node_codegen.h>
 #include <llvm/LLVMContext.h>
@@ -65,7 +67,6 @@ namespace kite
                 ExecutionEngine *kite::execution_engine = NULL;
                 bool kite::enable_optimizer = false;
                 std::vector<jmp_buf*> kite::exception_stack;
-                std::vector<std::string> kite::search_path;
                 System::dynamic_object *kite::last_exception = NULL;
                 
                 void kite::InitializeRuntimeSystem(int argc, char **argv)
@@ -89,8 +90,6 @@ namespace kite
                     System::boolean::InitializeClass();
                     System::method::InitializeClass();
                     System::string::InitializeClass();
-                    
-                    search_path.push_back("./");
                     
                     // Initialize args array
                     System::list *arg_list = System::list::Create(0);
@@ -124,6 +123,10 @@ namespace kite
                     module_load_list.push_back(tmp_string);
                     module_name_list.push_back(std::string(module_name, begin_pos, std::string::npos));
                     
+                    // Split search path on ':'.
+                    System::regex::regex *rgx = System::regex::regex::Create(1, new System::string(":"));
+                    System::list *search_path = (System::list*)rgx->split((System::string*)System::vm::loader::class_object().properties["searchPath"]);
+                    
                     // Load each module in the list.
                     int size = module_name_list.size();
                     for (int index = 0; index < size; index++)
@@ -134,12 +137,12 @@ namespace kite
                         System::dynamic_object *the_object = new System::dynamic_object();
                         the_object->properties["__name"] = new System::string(state.full_class_name().c_str());
                         
-                        for (std::vector<std::string>::iterator pos = search_path.begin(); pos != search_path.end(); pos++)
+                        for (std::deque<System::object*>::iterator pos = search_path->list_contents.begin(); pos != search_path->list_contents.end(); pos++)
                         {
                             struct stat st;
                             
                             // TODO: support C based Kite modules.
-                            full_path = *pos + module_load_list[index] + ".kt";
+                            full_path = std::string(((System::string*)(*pos))->string_val.c_str()) + module_load_list[index] + ".kt";
                             if (stat(full_path.c_str(), &st) == 0)
                             {
                                 break;

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011, Mooneer Salem
+ * Copyright (c) 2012, Mooneer Salem
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,10 +25,12 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
  
-#ifndef KITE_STDLIB__SYSTEM__METHOD_H
-#define KITE_STDLIB__SYSTEM__METHOD_H
+#ifndef KITE_STDLIB__SYSTEM__VM__COMPILER_H
+#define KITE_STDLIB__SYSTEM__VM__COMPILER_H
 
-#include "dynamic_object.h"
+#include "stdlib/api.h"
+#include "../vm.h"
+#include "string.h"
 
 namespace kite
 {
@@ -36,36 +38,25 @@ namespace kite
     {
         namespace System
         {
-            struct list;
-            
-            struct method : System::object
+            namespace vm
             {
-                static System::dynamic_object class_object;
-                
-                void *method_ptr;
-                System::object *this_ptr;
-                int num_args;
-
-                method(void *ptr) :
-                    System::object(semantics::METHOD_TY), method_ptr(ptr), this_ptr(NULL) 
-                {
-                     // empty
-                }
-                
-                object *invoke() { return invoke(NULL); }
-                object *invoke(object *param1, ...);
-                object *invoke_with_arg_list(list *l);
-                
-                static void InitializeClass();
-            };
+                BEGIN_KITE_BASE_CLASS(compiler)
+                private:
+                    static object* s_compileFile(compiler *, string *file) { return compiler::compileFile(file); }
+                    static object* s_compileString(compiler *, string *code) { return compiler::compileString(code); }
+                    
+                public:
+                    static object* compileFile(string *file);
+                    static object* compileString(string *code);
+                    
+                    BEGIN_KITE_CLASS_INITIALIZER
+                        KITE_METHOD_DEFINE(compileFile, 1, &compiler::s_compileFile);
+                        KITE_METHOD_DEFINE(compileString, 1, &compiler::s_compileString);
+                    END_KITE_CLASS_INITIALIZER
+                END_KITE_CLASS
+            }
         }
     }
-}
-
-extern "C"
-{
-    void *kite_method_alloc(void *method_ptr, int args);
-    void *kite_method_verify_semantics(void *method, int args);
 }
 
 #endif

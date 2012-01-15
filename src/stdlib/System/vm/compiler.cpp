@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011, Mooneer Salem
+ * Copyright (c) 2012, Mooneer Salem
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,11 +24,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
- 
-#ifndef KITE_STDLIB__SYSTEM__METHOD_H
-#define KITE_STDLIB__SYSTEM__METHOD_H
 
-#include "dynamic_object.h"
+#include <stdlib/language/kite.h>
+#include <stdlib/language/kite/syntax_tree.h>
+#include "compiler.h"
 
 namespace kite
 {
@@ -36,36 +35,43 @@ namespace kite
     {
         namespace System
         {
-            struct list;
-            
-            struct method : System::object
+            namespace vm
             {
-                static System::dynamic_object class_object;
-                
-                void *method_ptr;
-                System::object *this_ptr;
-                int num_args;
-
-                method(void *ptr) :
-                    System::object(semantics::METHOD_TY), method_ptr(ptr), this_ptr(NULL) 
+                object* compiler::compileFile(string *file)
                 {
-                     // empty
+                    language::kite::syntax_tree ast;
+                    
+                    std::string p(std::string(file->string_val.c_str()));
+                    if (ast.from_file(p))
+                    {
+                        dynamic_object *ctx = new dynamic_object();
+                        language::kite::kite::ExecuteCode(ast, ctx);
+                        return ctx;
+                    }
+                    else
+                    {
+                        return NULL;
+                    }
                 }
                 
-                object *invoke() { return invoke(NULL); }
-                object *invoke(object *param1, ...);
-                object *invoke_with_arg_list(list *l);
-                
-                static void InitializeClass();
-            };
+                object* compiler::compileString(string *code)
+                {
+                    language::kite::syntax_tree ast;
+                    
+                    std::string p(code->string_val.c_str());
+                    if (ast.from_string(p))
+                    {
+                        dynamic_object *ctx = new dynamic_object();
+                        language::kite::kite::ExecuteCode(ast, ctx);
+                        return ctx;
+                    }
+                    else
+                    {
+                        return NULL;
+                    }
+                }
+            }
         }
     }
 }
-
-extern "C"
-{
-    void *kite_method_alloc(void *method_ptr, int args);
-    void *kite_method_verify_semantics(void *method, int args);
-}
-
-#endif
+REGISTER_KITE_CLASS(kite::stdlib::System::vm::vm, kite::stdlib::System::vm::compiler)

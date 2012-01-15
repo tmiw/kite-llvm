@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011, Mooneer Salem
+ * Copyright (c) 2012, Mooneer Salem
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,47 +25,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
  
-#ifndef KITE_STDLIB__SYSTEM__METHOD_H
-#define KITE_STDLIB__SYSTEM__METHOD_H
+#include "../System.h"
+#include "vm.h"
 
-#include "dynamic_object.h"
-
-namespace kite
-{
-    namespace stdlib
-    {
-        namespace System
-        {
-            struct list;
-            
-            struct method : System::object
-            {
-                static System::dynamic_object class_object;
-                
-                void *method_ptr;
-                System::object *this_ptr;
-                int num_args;
-
-                method(void *ptr) :
-                    System::object(semantics::METHOD_TY), method_ptr(ptr), this_ptr(NULL) 
-                {
-                     // empty
-                }
-                
-                object *invoke() { return invoke(NULL); }
-                object *invoke(object *param1, ...);
-                object *invoke_with_arg_list(list *l);
-                
-                static void InitializeClass();
-            };
-        }
-    }
-}
-
-extern "C"
-{
-    void *kite_method_alloc(void *method_ptr, int args);
-    void *kite_method_verify_semantics(void *method, int args);
-}
-
-#endif
+REGISTER_KITE_CLASS(kite::stdlib::System::System, kite::stdlib::System::vm::vm)

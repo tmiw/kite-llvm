@@ -31,6 +31,8 @@ COMMON_OBJS=src/codegen/llvm_compile_state.o src/codegen/llvm_node_codegen.o \
 	 src/stdlib/System/exceptions/FileError.o src/stdlib/System/exceptions/SocketError.o \
 	 src/stdlib/System/exceptions/DnsError.o src/stdlib/System/os.o src/stdlib/System/os/posix.o \
 	 src/stdlib/System/regex.o src/stdlib/System/regex/match_result.o \
+	 src/stdlib/System/vm.o src/stdlib/System/vm/compiler.o src/stdlib/System/vm/loader.o \
+	 src/stdlib/System/vm/thread.o \
 	 src/parser/constants.o src/parser/make.o src/parser/assignment.o src/parser/bitwise.o \
 	 src/parser/comparison.o src/parser/math.o src/parser/map_reduce.o src/parser/classes.o  \
 	 src/parser/decide.o src/parser/deref.o src/parser/grouping.o \
@@ -167,6 +169,10 @@ src/stdlib/language/kite.o: src/stdlib/language/kite.h src/stdlib/System.h
 src/stdlib/language/kite.o: src/stdlib/System/integer.h
 src/stdlib/language/kite.o: src/stdlib/System/string.h
 src/stdlib/language/kite.o: src/stdlib/System/list.h src/stdlib/System.h
+src/stdlib/language/kite.o: src/stdlib/System/regex.h
+src/stdlib/language/kite.o: src/stdlib/System/boolean.h
+src/stdlib/language/kite.o: src/stdlib/System/vm/loader.h
+src/stdlib/language/kite.o: src/stdlib/System/vm.h
 src/stdlib/language/kite.o: src/codegen/syntax_tree_printer.h
 src/stdlib/language/kite.o: src/codegen/llvm_node_codegen.h
 src/stdlib/language/kite.o: src/stdlib/System/integer.h
@@ -533,6 +539,8 @@ src/stdlib/System/method.o: src/stdlib/System/dynamic_object.h
 src/stdlib/System/method.o: src/stdlib/System/string.h
 src/stdlib/System/method.o: src/stdlib/System/object.h
 src/stdlib/System/method.o: src/semantics/constants.h
+src/stdlib/System/method.o: src/stdlib/System/list.h src/stdlib/System.h
+src/stdlib/System/method.o: src/stdlib/System/integer.h
 src/stdlib/System/network/socket.o: src/stdlib/System/network.h
 src/stdlib/System/network/socket.o: src/stdlib/api.h
 src/stdlib/System/network/socket.o: src/stdlib/System/string.h
@@ -683,6 +691,54 @@ src/stdlib/System/string.o: src/stdlib/System/string.h
 src/stdlib/System/string.o: src/stdlib/System/dynamic_object.h
 src/stdlib/System/string.o: src/stdlib/System/object.h
 src/stdlib/System/string.o: src/semantics/constants.h
+src/stdlib/System/vm/compiler.o: src/stdlib/language/kite.h
+src/stdlib/System/vm/compiler.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/vm/compiler.o: src/semantics/constants.h
+src/stdlib/System/vm/compiler.o: src/stdlib/System/object.h
+src/stdlib/System/vm/compiler.o: src/codegen/llvm_compile_state.h
+src/stdlib/System/vm/compiler.o: src/stdlib/language/kite/syntax_tree.h
+src/stdlib/System/vm/compiler.o: src/semantics/syntax_tree.h
+src/stdlib/System/vm/compiler.o: src/semantics/constants.h
+src/stdlib/System/vm/compiler.o: src/stdlib/System/vm/compiler.h
+src/stdlib/System/vm/compiler.o: src/stdlib/api.h src/stdlib/System/string.h
+src/stdlib/System/vm/compiler.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/vm/compiler.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/vm/compiler.o: src/stdlib/language/kite.h
+src/stdlib/System/vm/compiler.o: src/stdlib/System/vm.h
+src/stdlib/System/vm/compiler.o: src/stdlib/System/string.h
+src/stdlib/System/vm/loader.o: src/stdlib/language/kite.h
+src/stdlib/System/vm/loader.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/vm/loader.o: src/semantics/constants.h
+src/stdlib/System/vm/loader.o: src/stdlib/System/object.h
+src/stdlib/System/vm/loader.o: src/codegen/llvm_compile_state.h
+src/stdlib/System/vm/loader.o: src/stdlib/language/kite/syntax_tree.h
+src/stdlib/System/vm/loader.o: src/semantics/syntax_tree.h
+src/stdlib/System/vm/loader.o: src/semantics/constants.h
+src/stdlib/System/vm/loader.o: src/stdlib/System/vm/loader.h src/stdlib/api.h
+src/stdlib/System/vm/loader.o: src/stdlib/System/string.h
+src/stdlib/System/vm/loader.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/vm/loader.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/vm/loader.o: src/stdlib/language/kite.h
+src/stdlib/System/vm/loader.o: src/stdlib/System/vm.h
+src/stdlib/System/vm/loader.o: src/stdlib/System/string.h
+src/stdlib/System/vm/thread.o: src/stdlib/System/vm/thread.h src/stdlib/api.h
+src/stdlib/System/vm/thread.o: src/stdlib/System/string.h
+src/stdlib/System/vm/thread.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/vm/thread.o: src/stdlib/System/object.h
+src/stdlib/System/vm/thread.o: src/semantics/constants.h
+src/stdlib/System/vm/thread.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/vm/thread.o: src/stdlib/language/kite.h
+src/stdlib/System/vm/thread.o: src/stdlib/System/vm.h
+src/stdlib/System/vm/thread.o: src/stdlib/System/list.h src/stdlib/System.h
+src/stdlib/System/vm/thread.o: src/stdlib/System/integer.h
+src/stdlib/System/vm/thread.o: src/stdlib/System/string.h
+src/stdlib/System/vm/thread.o: src/stdlib/System/method.h
+src/stdlib/System/vm.o: src/stdlib/System.h src/stdlib/api.h
+src/stdlib/System/vm.o: src/stdlib/System/string.h
+src/stdlib/System/vm.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/vm.o: src/stdlib/System/object.h src/semantics/constants.h
+src/stdlib/System/vm.o: src/stdlib/System/dynamic_object.h
+src/stdlib/System/vm.o: src/stdlib/language/kite.h src/stdlib/System/vm.h
 src/stdlib/System.o: src/stdlib/System.h src/stdlib/api.h
 src/stdlib/System.o: src/stdlib/System/string.h
 src/stdlib/System.o: src/stdlib/System/dynamic_object.h

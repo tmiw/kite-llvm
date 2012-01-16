@@ -34,7 +34,8 @@ namespace kite
                 
             break_continue_statement =
                   lit("break") [ at_c<0>(_val) = kite::semantics::BREAK ]
-                | lit("continue") [ at_c<0>(_val) = kite::semantics::CONTINUE ];
+                | lit("continue") [ at_c<0>(_val) = kite::semantics::CONTINUE ]
+                | lit("return") >> const_statement [ push_back(at_c<1>(_val), _1) ] [ at_c<0>(_val) = kite::semantics::RETURN_VAL ];
         }
         
         kite_grammar<pos_iterator_type, BOOST_TYPEOF(KITE_SKIP_RULE)> loop_grammar;

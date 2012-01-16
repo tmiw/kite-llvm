@@ -193,12 +193,12 @@ namespace kite
                     return context;
                 }
                 
-                System::object *kite::ExecuteCode(syntax_tree &ast)
+                System::object *kite::ExecuteCode(syntax_tree &ast, bool suppressExec)
                 {
-                    return ExecuteCode(ast, root_object);
+                    return ExecuteCode(ast, root_object, suppressExec);
                 }
 
-                System::object *kite::ExecuteCode(syntax_tree &ast, System::object *context)
+                System::object *kite::ExecuteCode(syntax_tree &ast, System::object *context, bool suppressExec)
                 {
                     codegen::llvm_node_codegen cg(state);
                     std::vector<std::string> argNames;
@@ -229,8 +229,16 @@ namespace kite
                     //current_module->dump();
                     verifyFunction(*function);
                     void *fptr = execution_engine->getPointerToFunction(function);
-                    System::object *(*FP)(System::object *) = (System::object*(*)(System::object*))fptr;
-                    return (*FP)(context);
+                    
+                    if (!suppressExec)
+                    {
+                        System::object *(*FP)(System::object *) = (System::object*(*)(System::object*))fptr;
+                        return (*FP)(context);
+                    }
+                    else
+                    {
+                        return NULL;
+                    }
                 }
 
                 void kite::DumpCompiledCode()

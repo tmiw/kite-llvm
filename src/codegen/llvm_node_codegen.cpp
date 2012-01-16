@@ -187,6 +187,9 @@ namespace kite
                 case semantics::CONTINUE:
                     ret = codegen_break_continue_op(tree);
                     break;
+                case semantics::RETURN_VAL:
+                    ret = codegen_return_op(tree);
+                    break;
             }
             
             return ret;
@@ -1244,6 +1247,25 @@ namespace kite
             return method_obj;
         }
 
+        Value *llvm_node_codegen::codegen_return_op(semantics::syntax_tree const &tree) const
+        {
+            IRBuilder<> &builder = state.module_builder();
+            Value *ret = boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
+            if (ret->getType() == PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)))
+            {
+                ret = builder.CreateLoad(ret);
+            }
+            else if (get_type(ret) != semantics::OBJECT)
+            {
+                std::vector<Value*> params;
+                params.push_back(ret);
+                ret = generate_llvm_method_call(ret, "obj", params);
+            }
+            builder.CreateRet(ret);
+            state.skip_remaining(true);
+            return ret;
+        }
+        
         Value *llvm_node_codegen::generate_llvm_method(std::string name, std::vector<std::string> &argnames, semantics::syntax_tree &body) const
         {
             BasicBlock *currentBB = state.module_builder().GetInsertBlock();
@@ -1291,17 +1313,21 @@ namespace kite
             Value *ret = llvm_node_codegen(state)(body);
             state.pop_symbol_stack();
             
-            if (ret->getType() == PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)))
+            if (state.get_skip_remaining() == false)
             {
-                ret = builder.CreateLoad(ret);
+                if (ret->getType() == PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)))
+                {
+                    ret = builder.CreateLoad(ret);
+                }
+                else if (get_type(ret) != semantics::OBJECT)
+                {
+                    std::vector<Value*> params;
+                    params.push_back(ret);
+                    ret = generate_llvm_method_call(ret, "obj", params);
+                }
+                builder.CreateRet(ret);
             }
-            else if (get_type(ret) != semantics::OBJECT)
-            {
-                std::vector<Value*> params;
-                params.push_back(ret);
-                ret = generate_llvm_method_call(ret, "obj", params);
-            }
-            builder.CreateRet(ret);
+            state.skip_remaining(false);
             if (currentBB) state.module_builder().SetInsertPoint(currentBB);
             return F;
         }

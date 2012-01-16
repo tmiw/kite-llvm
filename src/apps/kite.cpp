@@ -41,6 +41,7 @@ void usage(char *app_name)
     printf("       -a: output parse tree\n");
     printf("       -o: optimize compiled code\n");
     printf("       -d: dump compiled code to stdout\n");
+    printf("       -x: suppress execution of code\n");
     printf("     file: the Kite file to execute (default: standard input)\n");
     exit(0);
 }
@@ -51,8 +52,9 @@ int main(int argc, char **argv)
     bool output_ast = false;
     bool optimize_code = false;
     bool dump_code = false;
+    bool suppress_exec = false;
     
-    while ((ch = getopt(argc, argv, "haod")) != -1)
+    while ((ch = getopt(argc, argv, "haodx")) != -1)
     {
         switch(ch)
         {
@@ -64,6 +66,9 @@ int main(int argc, char **argv)
                 break;
             case 'd':
                 dump_code = true;
+                break;
+            case 'x':
+                suppress_exec = true;
                 break;
             case 'h':
             default:
@@ -90,7 +95,7 @@ int main(int argc, char **argv)
             ast.print();
         }
         
-        language::kite::kite::ExecuteCode(ast); 
+        language::kite::kite::ExecuteCode(ast, suppress_exec); 
         if (dump_code) language::kite::kite::DumpCompiledCode();
 
         return 0;

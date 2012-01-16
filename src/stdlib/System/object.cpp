@@ -79,7 +79,7 @@ namespace kite
                 System::object *real_this = (System::object*)((char*) obj + (ptrdiff_t) displ);
                 if (real_this->type == semantics::OBJECT) // only do destruction for non-trivial objects
                 {
-                    void *(*deinit_method)(void *) = (void*(*)(void*))kite_find_funccall((int*)real_this, "__destruct__", 1);
+                    void *(*deinit_method)(void *) = (void*(*)(void*))kite_find_funccall((void*)real_this, "__destruct__", 1);
                     if (deinit_method != NULL) (*deinit_method)((void*)real_this);    
                 }
                 GC_register_finalizer_ignore_self( GC_base(real_this), 0, 0, 0, 0 );
@@ -109,7 +109,7 @@ namespace kite
                         res << "method";
                         break;
                     default:
-                        char *(*funcptr)(object *) = (char *(*)(object *))kite_find_funccall((int*)this, "str", 1);
+                        char *(*funcptr)(object *) = (char *(*)(object *))kite_find_funccall((void*)this, "str", 1);
                         std::cout << (*funcptr)(this) << std::endl;
                         break;
                 }
@@ -127,20 +127,20 @@ void System::object::print()
     std::cout << this->as_string() << std::endl;
 }
 
-int *kite_null_string(int *obj)
+void *kite_null_string(void *obj)
 {
     assert(obj == NULL);
-    return (int*)"null";
+    return (void*)"null";
 }
 
-int *kite_print_null(int *obj)
+void *kite_print_null(void *obj)
 {
     assert(obj == NULL);
     std::cout << "null" << std::endl;
     return obj;
 }
 
-int *kite_find_funccall(int *obj, const char *name, int numargs)
+void *kite_find_funccall(void *obj, const char *name, int numargs)
 {
     System::object *obj_class = (System::object*)obj;
     std::string method_name = std::string(name) + "__";
@@ -154,9 +154,9 @@ int *kite_find_funccall(int *obj, const char *name, int numargs)
     else if (obj == NULL && numargs == 1)
     {
         if (strncmp("str", name, 3) == 0)
-            return (int*)&kite_null_string;
+            return (void*)&kite_null_string;
         else
-            return (int*)&kite_print_null;
+            return (void*)&kite_print_null;
     }
     
     for (int i = 0; i < numargs; i++)
@@ -188,7 +188,7 @@ int *kite_find_funccall(int *obj, const char *name, int numargs)
         object_method_map::iterator iter = method_map->find(method_name);
         if (iter != method_map->end())
         {
-            return (int*)((*iter).second.second);
+            return (void*)((*iter).second.second);
         }
         else
         {
@@ -208,7 +208,7 @@ int *kite_find_funccall(int *obj, const char *name, int numargs)
                 if (method_obj->type == kite::semantics::METHOD_TY)
                 {
                     System::method *met = (System::method*)method_obj;
-                    return (int*)met->method_ptr;
+                    return (void*)met->method_ptr;
                 }
                 else
                 {

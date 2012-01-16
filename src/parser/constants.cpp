@@ -52,6 +52,7 @@ namespace kite
                     - lit("decide") 
                     - lit("while") 
                     - lit("until")
+                    - lit("return")
                     - lit("true")
                     - lit("make")
                     - lit("run")

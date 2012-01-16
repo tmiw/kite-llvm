@@ -96,6 +96,7 @@ namespace kite
             IMPORT,
             BREAK,
             CONTINUE,
+            RETURN_VAL,
         };
         
         typedef std::map<semantics::code_operation, std::string> OperatorMethodsMap;

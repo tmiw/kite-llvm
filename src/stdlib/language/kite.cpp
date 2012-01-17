@@ -39,7 +39,6 @@
 #include <codegen/syntax_tree_printer.h>
 #include <codegen/llvm_node_codegen.h>
 #include <llvm/LLVMContext.h>
-#include <llvm/Target/TargetSelect.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/ExecutionEngine/JIT.h>
@@ -47,7 +46,7 @@
 #include <llvm/Analysis/Verifier.h>
 #include <llvm/Analysis/Passes.h>
 #include <llvm/Target/TargetData.h>
-#include <llvm/Target/TargetSelect.h>
+#include <llvm/Support/TargetSelect.h>
 #include <llvm/Transforms/Scalar.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Target/TargetOptions.h>

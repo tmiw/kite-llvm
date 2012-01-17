@@ -4,11 +4,11 @@ CPPFLAGS=-g -DFILE_NO=$(RANDOM_NUM)
 #-O2
 LDFLAGS=-rdynamic
 INC=-Isrc/ -I/opt/local/include -I/usr/include/ffi
-LLVM_CONFIG=llvm-config
+LLVM_CONFIG=llvm-config-mp-3.0
 LLVM_CPPFLAGS=`$(LLVM_CONFIG) --cppflags`
 LLVM_LDFLAGS=`$(LLVM_CONFIG) --ldflags`
 LLVM_LIBS=`$(LLVM_CONFIG) --libs` 
-GC_LIBS=-lgc
+GC_LIBS=-L/opt/local/lib -lgc
 GC_LDFLAGS=-L/usr/lib
 MATH_LIBS=-lm
 REGEX_LIBS=-lboost_regex

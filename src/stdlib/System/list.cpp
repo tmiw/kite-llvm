@@ -130,7 +130,8 @@ namespace kite
             object *list::sublist_with_length(list *l, integer *index_from, integer *count)
             {
                 // TODO
-                assert(index_from->type == count->type == semantics::INTEGER);
+                assert(index_from->type == semantics::INTEGER);
+                assert(count->type == semantics::INTEGER);
                 int length = count->val;
                 int start = index_from->val;
                 list_contents_type::iterator iter = l->list_contents.begin();

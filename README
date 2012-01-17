@@ -8,7 +8,7 @@ definitely not nearly ready for prime time. You have been warned.
 
 PREREQUISITES:
 --------------
-* LLVM == 2.9 (install the development packages your distro provides)
+* LLVM == 3.0 (install the development packages your distro provides)
 * C++ compiler (tested on g++ 4.2.1 on OSX, 4.5.3 on Debian)
 * Boost: Spirit (for parsing), Regex (for System.regex)
 * Boehm GC (http://www.hpl.hp.com/personal/Hans_Boehm/gc/)

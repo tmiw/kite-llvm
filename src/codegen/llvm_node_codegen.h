@@ -72,7 +72,7 @@ namespace kite
 
             static std::string type_to_code(semantics::builtin_types type);
             static semantics::builtin_types get_type(Value *val);
-            static const Type *kite_type_to_llvm_type(semantics::builtin_types type);
+            static Type *kite_type_to_llvm_type(semantics::builtin_types type);
             static std::string kite_type_to_function_prefix(semantics::builtin_types type);
         private:
             llvm_compile_state &state;
@@ -119,8 +119,8 @@ namespace kite
             Value *generate_llvm_method_alloc(Value *method) const;
             Value *generate_llvm_dynamic_object_get_root() const;
 
-            const Type *get_method_type() const;
-            const Type *get_object_type() const;
+            Type *get_method_type() const;
+            Type *get_object_type() const;
         };
     }
 }

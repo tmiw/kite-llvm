@@ -257,8 +257,8 @@ namespace kite
             Value *lhs = boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
             Value *rhs;
             Value *ret = NULL;
-            const Type *lhs_type = lhs->getType();
-            const Type *rhs_type;
+            Type *lhs_type = lhs->getType();
+            Type *rhs_type;
             
             IRBuilder<> &builder = state.module_builder();
             BasicBlock *currentBB = builder.GetInsertBlock();
@@ -291,9 +291,9 @@ namespace kite
                     BasicBlock *type_error_block_end = BasicBlock::Create(getGlobalContext(), "raise_type_error_end", currentFunc);
                     if (get_type(rhs) == semantics::OBJECT)
                     {
-                        std::vector<const Type*> parameterTypes;
+                        std::vector<Type*> parameterTypes;
                         parameterTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
-                        const FunctionType *ftPtrLookup = FunctionType::get(kite_type_to_llvm_type(semantics::BOOLEAN), parameterTypes, false);
+                        FunctionType *ftPtrLookup = FunctionType::get(kite_type_to_llvm_type(semantics::BOOLEAN), ArrayRef<Type*>(parameterTypes), false);
                         Function *funPtrLookup = Function::Create(ftPtrLookup, Function::ExternalLinkage, "kite_object_is_boolean", module);
                         if (funPtrLookup->getName() != "kite_object_is_boolean")
                         {  
@@ -309,9 +309,9 @@ namespace kite
                     }
                     
                     builder.SetInsertPoint(type_error_block);
-                    std::vector<const Type*> parameterTypes;
+                    std::vector<Type*> parameterTypes;
                     parameterTypes.push_back(kite_type_to_llvm_type(semantics::STRING));
-                    const FunctionType *ftPtrLookup = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), parameterTypes, false);
+                    FunctionType *ftPtrLookup = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), ArrayRef<Type*>(parameterTypes), false);
                     Function *funPtrLookup = Function::Create(ftPtrLookup, Function::ExternalLinkage, "kite_exception_raise_type_mismatch", module);
                     if (funPtrLookup->getName() != "kite_exception_raise_type_mismatch")
                     {  
@@ -331,7 +331,7 @@ namespace kite
                 do_other = builder.GetInsertBlock();
                 
                 builder.SetInsertPoint(collect_result);
-                PHINode *phi = builder.CreatePHI(lhs_type);
+                PHINode *phi = builder.CreatePHI(lhs_type, 2);
                 phi->addIncoming(other_val, do_other);
                 phi->addIncoming(lhs, currentBB);
                 ret = phi;
@@ -356,8 +356,8 @@ namespace kite
                         builder.CreateCondBr(cond, eq_zero, neq_zero);
                     
                         builder.SetInsertPoint(eq_zero);
-                        std::vector<const Type*> parameterTypes;
-                        const FunctionType *ftPtrLookup = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), parameterTypes, false);
+                        std::vector<Type*> parameterTypes;
+                        FunctionType *ftPtrLookup = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), ArrayRef<Type*>(parameterTypes), false);
                         Function *funPtrLookup = Function::Create(ftPtrLookup, Function::ExternalLinkage, "kite_exception_raise_div_by_zero", module);
                         if (funPtrLookup->getName() != "kite_exception_raise_div_by_zero")
                         {  
@@ -388,7 +388,7 @@ namespace kite
                         builder.CreateBr(div_result);
                     
                         builder.SetInsertPoint(div_result);
-                        ret = builder.CreatePHI(lhs_type);
+                        ret = builder.CreatePHI(lhs_type, 2);
                         ((PHINode*)ret)->addIncoming(result_neqzero, neq_zero);
                         ((PHINode*)ret)->addIncoming(result_eqzero, eq_zero);
                     }
@@ -459,12 +459,12 @@ namespace kite
             }
             
             // TODO: refactor
-            std::vector<const Type*> parameterTypesLookup;
+            std::vector<Type*> parameterTypesLookup;
             std::vector<Value*> paramValuesLookup;
             parameterTypesLookup.push_back(PointerType::getUnqual(Type::getInt32Ty(getGlobalContext())));
             parameterTypesLookup.push_back(kite_type_to_llvm_type(semantics::STRING));
             parameterTypesLookup.push_back(kite_type_to_llvm_type(semantics::INTEGER));
-            const FunctionType *ftPtrLookup = FunctionType::get(parameterTypesLookup[0], parameterTypesLookup, false);
+            FunctionType *ftPtrLookup = FunctionType::get(parameterTypesLookup[0], ArrayRef<Type*>(parameterTypesLookup), false);
             Function *funPtrLookup = Function::Create(ftPtrLookup, Function::ExternalLinkage, "kite_find_funccall", module);
             if (funPtrLookup->getName() != "kite_find_funccall")
             {
@@ -476,15 +476,14 @@ namespace kite
             paramValuesLookup.push_back(ConstantInt::get(getGlobalContext(), APInt(32, args + 1, true)));
             Value *fptr = builder.CreateCall(
                 funPtrLookup,
-                paramValuesLookup.begin(),
-                paramValuesLookup.end()
+                ArrayRef<Value*>(paramValuesLookup)
             );
             
-            std::vector<const Type*> parameterTypes;
+            std::vector<Type*> parameterTypes;
             parameterTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
             parameterTypes.push_back(kite_type_to_llvm_type(semantics::INTEGER));
             
-            const FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), parameterTypes, false);
+            FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), ArrayRef<Type*>(parameterTypes), false);
             Function *funPtr = Function::Create(ft, Function::ExternalLinkage, "kite_method_alloc", module);
             if (funPtr->getName() != "kite_method_alloc")
             {
@@ -568,12 +567,12 @@ namespace kite
                 type = ConstantInt::get(getGlobalContext(), APInt(1, 1, true));
             }
             
-            std::vector<const Type*> parameterTypes;
+            std::vector<Type*> parameterTypes;
             std::vector<Value*> paramValues;
             parameterTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
             parameterTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
             parameterTypes.push_back(kite_type_to_llvm_type(semantics::BOOLEAN));
-            const FunctionType *ftPtrLookup = FunctionType::get(parameterTypes[2], parameterTypes, false);
+            FunctionType *ftPtrLookup = FunctionType::get(parameterTypes[2], ArrayRef<Type*>(parameterTypes), false);
             Function *funPtrLookup = Function::Create(ftPtrLookup, Function::ExternalLinkage, "kite_object_isof", module);
             if (funPtrLookup->getName() != "kite_object_isof")
             {  
@@ -598,8 +597,7 @@ namespace kite
             paramValues.push_back(type);
             return builder.CreateCall(
                 funPtrLookup,
-                paramValues.begin(),
-                paramValues.end()
+                ArrayRef<Value*>(paramValues)
             );
         }
 
@@ -705,7 +703,7 @@ namespace kite
         {
             std::string method_name = boost::get<std::string>(tree.children[0]);
             std::vector<Value*> parameters;
-            std::vector<const Type*> parameterTypes;
+            std::vector<Type*> parameterTypes;
             std::map<std::string, Value*> &sym_stack = state.current_symbol_stack();
             Module *module = state.current_module();
             IRBuilder<> &builder = state.module_builder();
@@ -721,7 +719,7 @@ namespace kite
                 parameters.push_back(param_val);
                 parameterTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
             }
-            const FunctionType *ft = FunctionType::get(parameterTypes[0], parameterTypes, false);
+            FunctionType *ft = FunctionType::get(parameterTypes[0], ArrayRef<Type*>(parameterTypes), false);
 
             if (sym_stack.find(method_name) != sym_stack.end())
             {
@@ -730,11 +728,11 @@ namespace kite
                 Value *method_obj = builder.CreateBitCast(builder.CreateLoad(sym_stack[method_name]), get_method_type());
                 parameters[0] = builder.CreateLoad(builder.CreateStructGEP(method_obj, 2));
                 
-                std::vector<const Type*> parameterTypesLookup;
+                std::vector<Type*> parameterTypesLookup;
                 std::vector<Value*> paramValuesLookup;
                 parameterTypesLookup.push_back(PointerType::getUnqual(Type::getInt32Ty(getGlobalContext())));
                 parameterTypesLookup.push_back(kite_type_to_llvm_type(semantics::INTEGER));
-                const FunctionType *ftPtrLookup = FunctionType::get(parameterTypesLookup[0], parameterTypesLookup, false);
+                FunctionType *ftPtrLookup = FunctionType::get(parameterTypesLookup[0], ArrayRef<Type*>(parameterTypesLookup), false);
                 Function *funPtrLookup = Function::Create(ftPtrLookup, Function::ExternalLinkage, "kite_method_verify_semantics", module);
                 if (funPtrLookup->getName() != "kite_method_verify_semantics")
                 {  
@@ -746,8 +744,7 @@ namespace kite
                 fptr = builder.CreateBitCast(
                     builder.CreateCall(
                         funPtrLookup,
-                        paramValuesLookup.begin(),
-                        paramValuesLookup.end()
+                        ArrayRef<Value*>(paramValuesLookup)
                     ),
                     PointerType::getUnqual(ft)
                 );
@@ -766,8 +763,7 @@ namespace kite
                 }
                 return builder.CreateCall(
                     fptr,
-                    parameters.begin(),
-                    parameters.end()
+                    ArrayRef<Value*>(parameters)
                 );
             }
             else
@@ -833,7 +829,7 @@ namespace kite
                     BasicBlock *has_var = BasicBlock::Create(getGlobalContext(), "varnotexists", currentFunc);
                     BasicBlock *end_var = BasicBlock::Create(getGlobalContext(), "varend", currentFunc);
                     Value *zeroInt = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) * 8, 0, true));
-                    Value *zeroPtr = builder.CreateBitCast(zeroInt, propValue->getType());
+                    Value *zeroPtr = builder.CreateIntToPtr(zeroInt, propValue->getType());
                     Value *cmpValue = builder.CreateICmpEQ(propValue, zeroPtr);
                     builder.CreateCondBr(cmpValue, has_var, end_var);
                     
@@ -844,7 +840,7 @@ namespace kite
                     builder.CreateBr(end_var);
                     
                     builder.SetInsertPoint(end_var);
-                    PHINode *phi = builder.CreatePHI(PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)));
+                    PHINode *phi = builder.CreatePHI(PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)), 2);
                     phi->addIncoming(getProp, sym_block);
                     phi->addIncoming(createVar, has_var);
                     sym_stack[var_name] = phi;
@@ -972,7 +968,7 @@ namespace kite
                 else
                 {
                     Value *zero = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) << 3, (uint64_t)0, true));
-                    zero = builder.CreateBitCast(zero, kite_type_to_llvm_type(semantics::OBJECT));
+                    zero = builder.CreateIntToPtr(zero, kite_type_to_llvm_type(semantics::OBJECT));
                     decideResults.push_back(zero);
                     decideBlocks.push_back(condBB);
                     condBB = endBB;
@@ -998,7 +994,7 @@ namespace kite
             }
             
             builder.SetInsertPoint(endBB);
-            PN = builder.CreatePHI(kite_type_to_llvm_type(semantics::OBJECT));
+            PN = builder.CreatePHI(kite_type_to_llvm_type(semantics::OBJECT), decideResults.size());
             for (int index = 0; index < decideResults.size(); index++)
             {
                 Value *val = decideResults[index];
@@ -1023,9 +1019,9 @@ namespace kite
             //Value *default_val = ConstantInt::get(Type::getInt32Ty(getGlobalContext()), 0); // TODO
             
             Value *jmpbuf = builder.CreateAlloca(Type::getInt8Ty(getGlobalContext()), ConstantInt::get(Type::getInt32Ty(getGlobalContext()), sizeof(jmp_buf)));
-            std::vector<const Type*> setjmp_params;
+            std::vector<Type*> setjmp_params;
             setjmp_params.push_back(jmpbuf->getType());
-            const FunctionType *setjmp_type = FunctionType::get(Type::getInt32Ty(getGlobalContext()), setjmp_params, false);
+            FunctionType *setjmp_type = FunctionType::get(Type::getInt32Ty(getGlobalContext()), ArrayRef<Type*>(setjmp_params), false);
             Function *setjmp_fun = Function::Create(setjmp_type, Function::ExternalLinkage, "setjmp", module);
             if (setjmp_fun->getName() != "setjmp")
             {
@@ -1038,7 +1034,7 @@ namespace kite
             
             // Create run block
             builder.SetInsertPoint(run_block);
-            const FunctionType *pushjmp_type = FunctionType::get(Type::getVoidTy(getGlobalContext()), setjmp_params, false);
+            FunctionType *pushjmp_type = FunctionType::get(Type::getVoidTy(getGlobalContext()), ArrayRef<Type*>(setjmp_params), false);
             Function *pushjmp_fun = Function::Create(pushjmp_type, Function::ExternalLinkage, "kite_exception_stack_push", module);
             if (pushjmp_fun->getName() != "kite_exception_stack_push")
             {
@@ -1052,8 +1048,8 @@ namespace kite
             run_ret = generate_llvm_method_call(run_ret, "obj", runRetList);
             
             // Clear exception stack entry after successful completion of block.
-            std::vector<const Type*> pop_exc_params;
-            const FunctionType *pop_exc_type = FunctionType::get(Type::getVoidTy(getGlobalContext()), pop_exc_params, false);
+            std::vector<Type*> pop_exc_params;
+            FunctionType *pop_exc_type = FunctionType::get(Type::getVoidTy(getGlobalContext()), ArrayRef<Type*>(pop_exc_params), false);
             Function *pop_exc_fun = Function::Create(pop_exc_type, Function::ExternalLinkage, "kite_exception_stack_pop", module);
             if (pop_exc_fun->getName() != "kite_exception_stack_pop")
             {
@@ -1071,8 +1067,8 @@ namespace kite
 
             // Retrieve exception object and execute catch block.
             std::map<std::string, Value*> &sym_stack = state.current_symbol_stack();
-            std::vector<const Type*> get_exc_params;
-            const FunctionType *get_exc_type = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), get_exc_params, false);
+            std::vector<Type*> get_exc_params;
+            FunctionType *get_exc_type = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), ArrayRef<Type*>(get_exc_params), false);
             Function *get_exc_fun = Function::Create(get_exc_type, Function::ExternalLinkage, "kite_exception_get", module);
             if (get_exc_fun->getName() != "kite_exception_get")
             {
@@ -1095,7 +1091,7 @@ namespace kite
             
             // Create cleanup block
             builder.SetInsertPoint(end_block);
-            PHINode *phi = builder.CreatePHI(kite_type_to_llvm_type(semantics::OBJECT));
+            PHINode *phi = builder.CreatePHI(kite_type_to_llvm_type(semantics::OBJECT), 2);
             phi->addIncoming(run_ret, run_block);
             phi->addIncoming(catch_ret, catch_block);
             //phi->addIncoming(default_val, currentBB);
@@ -1139,9 +1135,9 @@ namespace kite
             IRBuilder<> &builder = state.module_builder();
             Module *module = state.current_module();
             
-            std::vector<const Type*> parameterTypesNewList;
+            std::vector<Type*> parameterTypesNewList;
             std::vector<Value*> paramValuesNewList;
-            const FunctionType *ftPtrNewList = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), parameterTypesNewList, false);
+            FunctionType *ftPtrNewList = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), ArrayRef<Type*>(parameterTypesNewList), false);
             Function *funPtrNewList = Function::Create(ftPtrNewList, Function::ExternalLinkage, "kite_list_new", module);
             if (funPtrNewList->getName() != "kite_list_new")
             {
@@ -1152,7 +1148,7 @@ namespace kite
             
             parameterTypesNewList.push_back(kite_type_to_llvm_type(semantics::OBJECT));
             parameterTypesNewList.push_back(kite_type_to_llvm_type(semantics::OBJECT));
-            const FunctionType *ftPtrAppendList = FunctionType::get(parameterTypesNewList[0], parameterTypesNewList, false);
+            FunctionType *ftPtrAppendList = FunctionType::get(parameterTypesNewList[0], ArrayRef<Type*>(parameterTypesNewList), false);
             Function *funPtrAppendList = Function::Create(ftPtrAppendList, Function::ExternalLinkage, "kite_list_append", module);
             if (funPtrAppendList->getName() != "kite_list_append")
             {
@@ -1177,7 +1173,7 @@ namespace kite
                     listItem = generate_llvm_method_call(listItem, "obj", params);
                 }
                 paramValuesNewList[1] = listItem;
-                builder.CreateCall(funPtrAppendList, paramValuesNewList.begin(), paramValuesNewList.end());
+                builder.CreateCall(funPtrAppendList, ArrayRef<Value*>(paramValuesNewList));
             }
 
             return listObject;
@@ -1269,7 +1265,7 @@ namespace kite
         Value *llvm_node_codegen::generate_llvm_method(std::string name, std::vector<std::string> &argnames, semantics::syntax_tree &body) const
         {
             BasicBlock *currentBB = state.module_builder().GetInsertBlock();
-            std::vector<const Type*> argTypes;
+            std::vector<Type*> argTypes;
             std::string functionName = state.identifier_prefix() + name;
             int numargs = argnames.size();
 
@@ -1286,7 +1282,7 @@ namespace kite
             }
             
             Module *currentModule = state.current_module();
-            FunctionType *FT = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), argTypes, false);
+            FunctionType *FT = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), ArrayRef<Type*>(argTypes), false);
             Function *F = Function::Create(FT, Function::ExternalLinkage, functionName.c_str(), currentModule);
             BasicBlock *BB = BasicBlock::Create(getGlobalContext(), "entry", F);
             IRBuilder<> &builder = state.module_builder();
@@ -1339,7 +1335,7 @@ namespace kite
             semantics::builtin_types type = get_type(self);
             stdlib::object_method_map &method_map = get_method_map(type);
             std::string method_name = name;
-            std::vector<const Type*> parameterTypes;
+            std::vector<Type*> parameterTypes;
             std::vector<Value*> paramsCopy(params);
             
             if (self->getType() == PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)))
@@ -1368,7 +1364,7 @@ namespace kite
                 semantics = method_map[method_name];
                 tmpType = const_cast<Type*>(kite_type_to_llvm_type(semantics.first));
             }
-            const FunctionType *ft = FunctionType::get(tmpType, parameterTypes, false);
+            FunctionType *ft = FunctionType::get(tmpType, ArrayRef<Type*>(parameterTypes), false);
             Value *fptr;
             if ((uint64_t)semantics.second != 0)
             {
@@ -1419,12 +1415,12 @@ namespace kite
                 
                 if (fptr == NULL)
                 {
-                    std::vector<const Type*> parameterTypesLookup;
+                    std::vector<Type*> parameterTypesLookup;
                     std::vector<Value*> paramValuesLookup;
                     parameterTypesLookup.push_back(PointerType::getUnqual(Type::getInt32Ty(getGlobalContext())));
                     parameterTypesLookup.push_back(kite_type_to_llvm_type(semantics::STRING));
                     parameterTypesLookup.push_back(kite_type_to_llvm_type(semantics::INTEGER));
-                    const FunctionType *ftPtrLookup = FunctionType::get(parameterTypesLookup[0], parameterTypesLookup, false);
+                    FunctionType *ftPtrLookup = FunctionType::get(parameterTypesLookup[0], ArrayRef<Type*>(parameterTypesLookup), false);
                     Function *funPtrLookup = Function::Create(ftPtrLookup, Function::ExternalLinkage, "kite_find_funccall", module);
                     if (funPtrLookup->getName() != "kite_find_funccall")
                     {
@@ -1437,8 +1433,7 @@ namespace kite
                     fptr = builder.CreateBitCast(
                         builder.CreateCall(
                             funPtrLookup,
-                            paramValuesLookup.begin(),
-                            paramValuesLookup.end()
+                            ArrayRef<Value*>(paramValuesLookup)
                         ),
                         PointerType::getUnqual(ft)
                     );
@@ -1456,8 +1451,7 @@ namespace kite
                         builder.SetInsertPoint(not_null);
                         builder.CreateCall(
                             fptr,
-                            paramsCopy.begin(),
-                            paramsCopy.end()
+                            ArrayRef<Value*>(paramsCopy)
                         );
                         builder.CreateBr(end_block);
                         
@@ -1469,8 +1463,7 @@ namespace kite
             }
             self = builder.CreateCall(
                 fptr,
-                paramsCopy.begin(),
-                paramsCopy.end()
+                ArrayRef<Value*>(paramsCopy)
             );
             return self;
         }
@@ -1541,8 +1534,8 @@ namespace kite
             IRBuilder<> &builder = state.module_builder();
             Value *alloc_method;
             
-            std::vector<const Type*> parameterTypes;
-            const FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), parameterTypes, false);
+            std::vector<Type*> parameterTypes;
+            FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), ArrayRef<Type*>(parameterTypes), false);
             
             if (orig == NULL)
             {
@@ -1574,11 +1567,11 @@ namespace kite
             Module *module = state.current_module();
             IRBuilder<> &builder = state.module_builder();
             
-            std::vector<const Type*> parameterTypes;
+            std::vector<Type*> parameterTypes;
             parameterTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
             parameterTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
             
-            const FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), parameterTypes, false);
+            FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), ArrayRef<Type*>(parameterTypes), false);
             Function *funPtr = Function::Create(ft, Function::ExternalLinkage, "kite_dynamic_object_set_parent", module);
             if (funPtr->getName() != "kite_dynamic_object_set_parent")
             {
@@ -1599,11 +1592,11 @@ namespace kite
             Module *module = state.current_module();
             IRBuilder<> &builder = state.module_builder();
             
-            std::vector<const Type*> parameterTypes;
+            std::vector<Type*> parameterTypes;
             parameterTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
             parameterTypes.push_back(kite_type_to_llvm_type(semantics::STRING));
             
-            const FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), parameterTypes, false);
+            FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), ArrayRef<Type*>(parameterTypes), false);
             Function *funPtr = Function::Create(ft, Function::ExternalLinkage, "kite_dynamic_object_set_name", module);
             if (funPtr->getName() != "kite_dynamic_object_set_name")
             {
@@ -1623,11 +1616,11 @@ namespace kite
             Function *function = (Function*)method;
             int num_args = function->arg_size();
 
-            std::vector<const Type*> parameterTypes;
+            std::vector<Type*> parameterTypes;
             parameterTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
             parameterTypes.push_back(kite_type_to_llvm_type(semantics::INTEGER));
             
-            const FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), parameterTypes, false);
+            FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), ArrayRef<Type*>(parameterTypes), false);
             Function *funPtr = Function::Create(ft, Function::ExternalLinkage, "kite_method_alloc", module);
             if (funPtr->getName() != "kite_method_alloc")
             {
@@ -1642,12 +1635,12 @@ namespace kite
             Module *module = state.current_module();
             IRBuilder<> &builder = state.module_builder();
             
-            std::vector<const Type*> parameterTypes;
+            std::vector<Type*> parameterTypes;
             parameterTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
             parameterTypes.push_back(kite_type_to_llvm_type(semantics::STRING));
             parameterTypes.push_back(kite_type_to_llvm_type(semantics::BOOLEAN));
             
-            const FunctionType *ft = FunctionType::get(PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)), parameterTypes, false);
+            FunctionType *ft = FunctionType::get(PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)), ArrayRef<Type*>(parameterTypes), false);
             Function *funPtr = Function::Create(ft, Function::ExternalLinkage, "kite_dynamic_object_get_property", module);
             if (funPtr->getName() != "kite_dynamic_object_get_property")
             {
@@ -1667,8 +1660,8 @@ namespace kite
             Module *module = state.current_module();
             IRBuilder<> &builder = state.module_builder();
             
-            std::vector<const Type*> parameterTypes;
-            const FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), parameterTypes, false);
+            std::vector<Type*> parameterTypes;
+            FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), ArrayRef<Type*>(parameterTypes), false);
             Function *funPtr = Function::Create(ft, Function::ExternalLinkage, "kite_dynamic_object_get_root", module);
             if (funPtr->getName() != "kite_dynamic_object_get_root")
             {
@@ -1708,24 +1701,24 @@ namespace kite
             return op_type;
         }
         
-        const Type *llvm_node_codegen::get_object_type() const
+        Type *llvm_node_codegen::get_object_type() const
         {
-            std::vector<const Type*> struct_types;
+            std::vector<Type*> struct_types;
             struct_types.push_back(Type::getIntNTy(getGlobalContext(), sizeof(semantics::builtin_types) * 8));
             struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT));
             struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT)); // alloc method
             struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT)); // placeholder
-            return PointerType::getUnqual(StructType::get(getGlobalContext(), struct_types));
+            return PointerType::getUnqual(StructType::get(getGlobalContext(), ArrayRef<Type*>(struct_types)));
         }
 
-        const Type *llvm_node_codegen::get_method_type() const
+        Type *llvm_node_codegen::get_method_type() const
         {
-            std::vector<const Type*> struct_types;
+            std::vector<Type*> struct_types;
             struct_types.push_back(kite_type_to_llvm_type(semantics::INTEGER));
             struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT));
             struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT));
             struct_types.push_back(kite_type_to_llvm_type(semantics::INTEGER));
-            return PointerType::getUnqual(StructType::get(getGlobalContext(), struct_types));
+            return PointerType::getUnqual(StructType::get(getGlobalContext(), ArrayRef<Type*>(struct_types)));
         }
 
         stdlib::object_method_map &llvm_node_codegen::get_method_map(semantics::builtin_types type) const
@@ -1786,7 +1779,7 @@ namespace kite
             }
         }
         
-        const Type *llvm_node_codegen::kite_type_to_llvm_type(semantics::builtin_types type)
+        Type *llvm_node_codegen::kite_type_to_llvm_type(semantics::builtin_types type)
         {
             switch(type)
             {

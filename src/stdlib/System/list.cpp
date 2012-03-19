@@ -157,6 +157,99 @@ namespace kite
                 new_list->list_contents.pop_front();
                 return new_list;
             }
+            
+            object *list::equals(list *lhs, list *rhs)
+            {
+                bool ret = lhs->list_contents.size() == rhs->list_contents.size();
+                if (ret)
+                {
+                    for (int i = 0; i < lhs->list_contents.size(); i++)
+                    {
+                        object *l_obj = lhs->list_contents[i];
+                        object *r_obj = rhs->list_contents[i];
+                        object *ret_obj = l_obj->invoke_operator(semantics::EQUALS, r_obj);
+                        
+                        ret &= ((boolean*)ret_obj)->val;
+                        if (!ret) break;
+                    }
+                }
+                return new boolean(ret);
+            }
+            
+            object *list::not_equals(list *lhs, list *rhs)
+            {
+                object *ret = equals(lhs, rhs);
+                return new boolean(!((boolean*)ret)->val);
+            }
+
+            object *list::less_than(list *lhs, list *rhs)
+            {
+                bool ret = lhs->list_contents.size() == rhs->list_contents.size();
+                if (ret)
+                {
+                    for (int i = 0; i < lhs->list_contents.size(); i++)
+                    {
+                        object *l_obj = lhs->list_contents[i];
+                        object *r_obj = rhs->list_contents[i];
+                        object *ret_obj = l_obj->invoke_operator(semantics::LESS_THAN, r_obj);
+                        
+                        ret &= ((boolean*)ret_obj)->val;
+                        if (!ret) break;
+                    }
+                }
+                return new boolean(ret);
+            }
+            
+            object *list::less_than_or_equals(list *lhs, list *rhs)
+            {
+                bool ret_val;
+                boolean *lt_val = (boolean*)less_than(lhs, rhs);
+                ret_val = lt_val->val;
+                if (!ret_val)
+                {
+                    boolean *eq_val = (boolean*)equals(lhs, rhs);
+                    ret_val = eq_val->val;
+                }
+                return new boolean(ret_val);
+            }
+            
+            object *list::greater_than(list *lhs, list *rhs)
+            {
+                object *ret = less_than_or_equals(lhs, rhs);
+                return new boolean(!((boolean*)ret)->val);
+            }
+            
+            object *list::greater_than_or_equals(list *lhs, list *rhs)
+            {
+                object *ret = less_than(lhs, rhs);
+                return new boolean(!((boolean*)ret)->val);
+            }
+            
+            object *list::append_in_place(list *lhs, object *rhs)
+            {
+                lhs->list_contents.push_back(rhs);
+                return lhs;
+            }
+            
+            object *list::map(list *lhs, method *m)
+            {
+                list *new_list = new list();
+                for (int i = 0; i < lhs->list_contents.size(); i++)
+                {
+                    new_list->list_contents.push_back(m->invoke(lhs->list_contents[i]));
+                }
+                return new_list;
+            }
+            
+            object *list::reduce(list *lhs, method *m)
+            {
+                object *prev = NULL;
+                for (int i = 0; i < lhs->list_contents.size(); i++)
+                {
+                    prev = m->invoke(prev, lhs->list_contents[i]);
+                }
+                return prev;
+            }
         }
     }
 }

@@ -28,6 +28,8 @@
 #include <iostream>
 #include <boost/assign.hpp>
 #include "string.h"
+#include "boolean.h"
+
 using namespace boost::assign;
  
 namespace kite
@@ -39,6 +41,13 @@ namespace kite
             System::dynamic_object string::class_object;
             
             object_method_map string::method_map = map_list_of
+                ("__op_plus____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_STRING_METHOD_NAME(__op_plus____oo))))
+                ("__op_equals____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_STRING_METHOD_NAME(__op_equals____oo))))
+                ("__op_nequals____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_STRING_METHOD_NAME(__op_nequals____oo))))
+                ("__op_lt____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_STRING_METHOD_NAME(__op_lt____oo))))
+                ("__op_gt____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_STRING_METHOD_NAME(__op_gt____oo))))
+                ("__op_leq____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_STRING_METHOD_NAME(__op_leq____oo))))
+                ("__op_geq____oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_STRING_METHOD_NAME(__op_geq____oo))))
                 ("append__ss", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(append__ss))))
                 ("asc__s", function_semantics(semantics::INTEGER, (void*)&(PREFIX_STRING_METHOD_NAME(asc__s))))
                 ("bool__s", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_STRING_METHOD_NAME(bool__s))))
@@ -254,4 +263,60 @@ char* PREFIX_STRING_METHOD_NAME(upper__s)(const char *val)
     }
     *tmp = 0;
     return ret;
+}
+
+void *PREFIX_STRING_METHOD_NAME(__op_plus____oo)(void *lhs, void *rhs)
+{
+    System::string *lhs_str = (System::string*)lhs;
+    System::string *rhs_str = (System::string*)rhs;
+    
+    return new System::string(lhs_str->string_val + rhs_str->string_val);
+}
+
+void *PREFIX_STRING_METHOD_NAME(__op_equals____oo)(void *lhs, void *rhs)
+{
+    System::string *lhs_str = (System::string*)lhs;
+    System::string *rhs_str = (System::string*)rhs;
+    
+    return new System::boolean(lhs_str->string_val == rhs_str->string_val);
+}
+
+void *PREFIX_STRING_METHOD_NAME(__op_nequals____oo)(void *lhs, void *rhs)
+{
+    System::string *lhs_str = (System::string*)lhs;
+    System::string *rhs_str = (System::string*)rhs;
+    
+    return new System::boolean(lhs_str->string_val != rhs_str->string_val);
+}
+
+void *PREFIX_STRING_METHOD_NAME(__op_lt____oo)(void *lhs, void *rhs)
+{
+    System::string *lhs_str = (System::string*)lhs;
+    System::string *rhs_str = (System::string*)rhs;
+    
+    return new System::boolean(lhs_str->string_val < rhs_str->string_val);
+}
+
+void *PREFIX_STRING_METHOD_NAME(__op_gt____oo)(void *lhs, void *rhs)
+{
+    System::string *lhs_str = (System::string*)lhs;
+    System::string *rhs_str = (System::string*)rhs;
+    
+    return new System::boolean(lhs_str->string_val > rhs_str->string_val);
+}
+
+void *PREFIX_STRING_METHOD_NAME(__op_leq____oo)(void *lhs, void *rhs)
+{
+    System::string *lhs_str = (System::string*)lhs;
+    System::string *rhs_str = (System::string*)rhs;
+    
+    return new System::boolean(lhs_str->string_val <= rhs_str->string_val);
+}
+
+void *PREFIX_STRING_METHOD_NAME(__op_geq____oo)(void *lhs, void *rhs)
+{
+    System::string *lhs_str = (System::string*)lhs;
+    System::string *rhs_str = (System::string*)rhs;
+    
+    return new System::boolean(lhs_str->string_val >= rhs_str->string_val);
 }

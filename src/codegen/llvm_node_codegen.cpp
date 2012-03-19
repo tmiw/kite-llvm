@@ -1309,8 +1309,8 @@ namespace kite
             Value *ret = llvm_node_codegen(state)(body);
             state.pop_symbol_stack();
             
-            if (state.get_skip_remaining() == false)
-            {
+            /*if (state.get_skip_remaining() == false)
+            {*/
                 if (ret->getType() == PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)))
                 {
                     ret = builder.CreateLoad(ret);
@@ -1322,7 +1322,7 @@ namespace kite
                     ret = generate_llvm_method_call(ret, "obj", params);
                 }
                 builder.CreateRet(ret);
-            }
+            //}
             state.skip_remaining(false);
             if (currentBB) state.module_builder().SetInsertPoint(currentBB);
             return F;

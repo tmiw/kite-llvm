@@ -31,6 +31,7 @@
 #include <cmath>
 #include "../System.h"
 #include "exceptions/TypeMismatch.h"
+#include "exceptions/DivideByZero.h"
 #include "float.h"
 #include "integer.h"
 #include "boolean.h"
@@ -108,6 +109,30 @@ extern "C" int isnan(double);
         return new fpnum(name(p1->val, p2->val)); \
     }
 
+#define TWO_PARAM_DIVIDE_MATH_FUNCTION(name) \
+    static object *s_ ## name(math *, fpnum *p1, fpnum *p2) \
+    { \
+        if (p1->type != semantics::FLOAT || p2->type != semantics::FLOAT) \
+        { \
+            exceptions::exception *exc = exceptions::TypeMismatch::Create( \
+                1, \
+                new string("float expected.") \
+            ); \
+            exc->throw_exception(); \
+        } \
+        \
+        if (p2->val == 0.0) \
+        { \
+            exceptions::exception *exc = exceptions::DivideByZero::Create( \
+                1, \
+                new string("Cannot divide by zero.") \
+            ); \
+            exc->throw_exception(); \
+        } \
+        \
+        return new fpnum(name(p1->val, p2->val)); \
+    }
+
 namespace kite
 {
     namespace stdlib
@@ -134,7 +159,7 @@ namespace kite
                     ONE_PARAM_MATH_FUNCTION(exp)
                     ONE_PARAM_MATH_FUNCTION(fabs)
                     ONE_PARAM_MATH_FUNCTION(floor)
-                    TWO_PARAM_MATH_FUNCTION(fmod) // TODO: verify division by zero
+                    TWO_PARAM_DIVIDE_MATH_FUNCTION(fmod)
                     TWO_PARAM_MATH_FUNCTION(hypot)
                     ONE_PARAM_MATH_FUNCTION(ilogb)
                     ONE_PARAM_MATH_FUNCTION_BOOL_RET(isnan)
@@ -177,7 +202,7 @@ namespace kite
                         DEFINE_ONE_PARAM_MATH_FUNCTION(exp)
                         DEFINE_ONE_PARAM_MATH_FUNCTION(fabs)
                         DEFINE_ONE_PARAM_MATH_FUNCTION(floor)
-                        DEFINE_TWO_PARAM_MATH_FUNCTION(fmod) // TODO: verify division by zero
+                        DEFINE_TWO_PARAM_MATH_FUNCTION(fmod)
                         DEFINE_TWO_PARAM_MATH_FUNCTION(hypot)
                         DEFINE_ONE_PARAM_MATH_FUNCTION(ilogb)
                         DEFINE_ONE_PARAM_MATH_FUNCTION(isnan)

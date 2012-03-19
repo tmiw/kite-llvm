@@ -64,6 +64,9 @@ namespace kite
                     obj->finalizer_setup();
                     return (void*)obj;
                 }
+                
+                object *invoke_operator(semantics::code_operation op);
+                object *invoke_operator(semantics::code_operation op, object *rhs);
             };
         }
     }

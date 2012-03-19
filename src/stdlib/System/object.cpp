@@ -85,6 +85,20 @@ namespace kite
                 GC_register_finalizer_ignore_self( GC_base(real_this), 0, 0, 0, 0 );
             }
             
+            object *object::invoke_operator(semantics::code_operation op)
+            {
+                std::string method_name = semantics::Constants::Get().operator_map[op].c_str();
+                object *(*func)(object *) = (object *(*)(object *))kite_find_funccall(this, method_name.c_str(), 1);
+                return (*func)(this);
+            }
+            
+            object *object::invoke_operator(semantics::code_operation op, object *rhs)
+            {
+                std::string method_name = semantics::Constants::Get().operator_map[op].c_str();
+                object *(*func)(object *, object *) = (object *(*)(object *, object *))kite_find_funccall(this, method_name.c_str(), 2);
+                return (*func)(this, rhs);
+            }
+            
             std::string object::as_string()
             {
                 std::ostringstream res;

@@ -31,6 +31,8 @@
 #include <deque>
 #include "stdlib/System.h"
 #include "integer.h"
+#include "boolean.h"
+#include "method.h"
 
 namespace kite
 {
@@ -54,14 +56,38 @@ namespace kite
                 static object *sublist_with_length(list *list, integer *index_from, integer *count);
                 static object *tail(list *list);
                 
+                static object *equals(list *lhs, list *rhs);
+                static object *not_equals(list *lhs, list *rhs);
+                static object *less_than(list *lhs, list *rhs);
+                static object *less_than_or_equals(list *lhs, list *rhs);
+                static object *greater_than(list *lhs, list *rhs);
+                static object *greater_than_or_equals(list *lhs, list *rhs);
+                static object *append_in_place(list *lhs, object *rhs);
+                static object *map(list *lhs, method *m);
+                static object *reduce(list *lhs, method *m);
+
+                static object *as_object(list *lhs) { return lhs; }
+                
                 BEGIN_KITE_CLASS_INITIALIZER
-                    // TODO: operators
+                    KITE_OPERATOR_DEFINE(semantics::ADD, &list::append);
+                    KITE_OPERATOR_DEFINE(semantics::EQUALS, &list::equals);
+                    KITE_OPERATOR_DEFINE(semantics::NOT_EQUALS, &list::not_equals);
+                    KITE_OPERATOR_DEFINE(semantics::LESS_THAN, &list::less_than);
+                    KITE_OPERATOR_DEFINE(semantics::LESS_OR_EQUALS, &list::less_than_or_equals);
+                    KITE_OPERATOR_DEFINE(semantics::GREATER_THAN, &list::greater_than);
+                    KITE_OPERATOR_DEFINE(semantics::GREATER_OR_EQUALS, &list::greater_than_or_equals);
+                    KITE_OPERATOR_DEFINE(semantics::LEFT_SHIFT, &list::append_in_place);
+                    KITE_OPERATOR_DEFINE(semantics::MAP, &list::map);
+                    KITE_OPERATOR_DEFINE(semantics::REDUCE, &list::reduce);
+                    KITE_OPERATOR_DEFINE(semantics::DEREF_ARRAY, &list::get_index);
+                    
                     KITE_METHOD_DEFINE(append, 1, &list::append);
                     KITE_METHOD_DEFINE(count, 0, &list::count);
                     // TODO: cur
                     KITE_METHOD_DEFINE(getIndex, 1, &list::get_index);
                     KITE_METHOD_DEFINE(head, 0, &list::head);
                     // TODO: next
+                    KITE_METHOD_DEFINE(obj, 0, &list::as_object);
                     KITE_METHOD_DEFINE(prepend, 1, &list::prepend);
                     KITE_METHOD_DEFINE(print, 0, &list::print);
                     KITE_METHOD_DEFINE(removeAt, 1, &list::remove_at);

@@ -95,6 +95,14 @@ extern "C"
     char* PREFIX_STRING_METHOD_NAME(str__s)(const char *val);
     char* PREFIX_STRING_METHOD_NAME(trim__s)(const char *val);
     char* PREFIX_STRING_METHOD_NAME(upper__s)(const char *val);
+    
+    void *PREFIX_STRING_METHOD_NAME(__op_plus____oo)(void *lhs, void *rhs);
+    void *PREFIX_STRING_METHOD_NAME(__op_equals____oo)(void *lhs, void *rhs);
+    void *PREFIX_STRING_METHOD_NAME(__op_nequals____oo)(void *lhs, void *rhs);
+    void *PREFIX_STRING_METHOD_NAME(__op_lt____oo)(void *lhs, void *rhs);
+    void *PREFIX_STRING_METHOD_NAME(__op_gt____oo)(void *lhs, void *rhs);
+    void *PREFIX_STRING_METHOD_NAME(__op_leq____oo)(void *lhs, void *rhs);
+    void *PREFIX_STRING_METHOD_NAME(__op_geq____oo)(void *lhs, void *rhs);
 }
 
 #endif

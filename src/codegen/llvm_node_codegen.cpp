@@ -1311,6 +1311,8 @@ namespace kite
             
             /*if (state.get_skip_remaining() == false)
             {*/
+            if (ret != NULL)
+            {
                 if (ret->getType() == PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)))
                 {
                     ret = builder.CreateLoad(ret);
@@ -1321,7 +1323,13 @@ namespace kite
                     params.push_back(ret);
                     ret = generate_llvm_method_call(ret, "obj", params);
                 }
-                builder.CreateRet(ret);
+            }
+            else
+            {
+                ret = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*), (uint64_t)0, true));
+                ret = builder.CreateIntToPtr(ret, PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)));
+            }
+            builder.CreateRet(ret);
             //}
             state.skip_remaining(false);
             if (currentBB) state.module_builder().SetInsertPoint(currentBB);

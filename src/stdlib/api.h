@@ -78,6 +78,11 @@ namespace kite
                 static ObjectRegistration<T> *registration_ptr = new ObjectRegistration<T>();
                 return *registration_ptr;
             }
+            
+            static std::string full_class_name()
+            {
+                return T::class_name();
+            }
         };
     }
 }
@@ -229,8 +234,7 @@ namespace kite { \
         public: \
             ObjectRegistration() \
             { \
-                ObjectRegistration<parent> &parent_reg = ObjectRegistration<parent>::Get(); \
-                std::string full_name = std::string(parent::full_class_name()) + "." + name::class_name(); \
+                std::string full_name = full_class_name(); \
                 System::dynamic_object &class_obj = name::class_object(); \
                 System::dynamic_object &parent_class_obj = parent::class_object(); \
                 class_obj.properties["__name"] = new System::string(full_name.c_str()); \
@@ -241,6 +245,11 @@ namespace kite { \
             { \
                 static ObjectRegistration<name> *registration_ptr = new ObjectRegistration<name>(); \
                 return *registration_ptr; \
+            } \
+            static std::string full_class_name() \
+            { \
+                ObjectRegistration<parent> &parent_reg = ObjectRegistration<parent>::Get(); \
+                return std::string(parent_reg.full_class_name()) + "." + name::class_name(); \
             } \
         }; \
         \

@@ -25,6 +25,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include <stdio.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <sys/types.h>

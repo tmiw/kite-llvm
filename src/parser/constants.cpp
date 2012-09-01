@@ -48,7 +48,7 @@ namespace kite
                 | make_statement [ _val = _1 ];
             
             identifier =
-                (qi::lexeme[ (qi::alpha | '_') >> *(qi::alnum | '_') ] 
+                (qi::lexeme[ (qi::alpha | qi::char_('_')) >> *(qi::alnum | qi::char_('_')) ] 
                     - lit("decide") 
                     - lit("while") 
                     - lit("until")

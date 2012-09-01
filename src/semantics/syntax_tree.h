@@ -51,6 +51,10 @@ namespace kite
         {
             code_operation op;
             std::deque<syntax_tree_node> children;
+            
+            int line;
+            int column;
+            std::string filename;
         };
     }
 }

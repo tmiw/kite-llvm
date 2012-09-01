@@ -86,7 +86,7 @@ int main(int argc, char **argv)
     language::kite::syntax_tree ast; 
     
     if (argc > 0) r = ast.from_file(argv[0]);
-    else r = ast.from_stream(cin);
+    else r = ast.from_stream(cin, "(stdin)");
 
     if (r)
     {

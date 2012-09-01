@@ -56,7 +56,7 @@ namespace kite
 {
     namespace parser
     {
-        bool kite_parser::parse(std::istream &stream, semantics::syntax_tree &ast)
+        bool kite_parser::parse(std::istream &stream, semantics::syntax_tree &ast, std::string filename)
         {
             using boost::spirit::ascii::space;
             using boost::spirit::multi_pass;
@@ -68,7 +68,7 @@ namespace kite
             forward_iterator_type fwd_end;
 
             // wrap forward iterator with position iterator, to record the position
-            pos_iterator_type position_begin(fwd_begin, fwd_end, "(stdin)"); // TODO
+            pos_iterator_type position_begin(fwd_begin, fwd_end, filename);
             pos_iterator_type position_end;
 
             kite_grammar<pos_iterator_type, BOOST_TYPEOF(KITE_SKIP_RULE)> grammar;

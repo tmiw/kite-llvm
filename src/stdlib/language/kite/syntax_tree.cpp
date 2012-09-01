@@ -44,18 +44,18 @@ namespace kite
                 bool syntax_tree::from_file(std::string file)
                 {
                     std::ifstream stream(file.c_str());
-                    return from_stream(stream);
+                    return from_stream(stream, file);
                 }
 
-                bool syntax_tree::from_stream(std::istream &stream)
+                bool syntax_tree::from_stream(std::istream &stream, std::string filename)
                 {
-                    return parser::kite_parser().parse(stream, ast);
+                    return parser::kite_parser().parse(stream, ast, filename);
                 }
 
                 bool syntax_tree::from_string(std::string &code)
                 {
                     std::istringstream stream(code.c_str());
-                    return from_stream(stream);
+                    return from_stream(stream, "(stdin)");
                 }
 
                 void syntax_tree::print()

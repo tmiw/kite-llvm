@@ -4,15 +4,20 @@ CPPFLAGS=-g -DFILE_NO=$(RANDOM_NUM)
 #-O2
 LDFLAGS=-rdynamic
 INC=-Isrc/ -I/opt/local/include -I/usr/include/ffi
-LLVM_CONFIG=llvm-config-mp-3.0
+LLVM_CONFIG=llvm-config-mp-3.1
+LLVM_VERSION=$(shell $(LLVM_CONFIG) --version)
 LLVM_CPPFLAGS=`$(LLVM_CONFIG) --cppflags`
 LLVM_LDFLAGS=`$(LLVM_CONFIG) --ldflags`
 LLVM_LIBS=`$(LLVM_CONFIG) --libs` 
 GC_LIBS=-L/opt/local/lib -lgc
 GC_LDFLAGS=-L/usr/lib
 MATH_LIBS=-lm
-REGEX_LIBS=-lboost_regex
+REGEX_LIBS=-lboost_regex-mt
 OPENSSL_LIBS=-lssl -lcrypto
+
+ifeq ($(LLVM_VERSION),3.1)
+LLVM_VERSION_DEF=-DLLVM3_1
+endif
 
 COMMON_OBJS=src/codegen/llvm_compile_state.o src/codegen/llvm_node_codegen.o \
 	 src/codegen/syntax_tree_node_printer.o src/codegen/syntax_tree_printer.o \
@@ -46,7 +51,7 @@ KITE_OBJS=src/apps/kite.o $(COMMON_OBJS)
 IKT_OBJS=src/apps/ikt.o $(COMMON_OBJS)
 
 .cpp.o: %.cpp
-	$(CC) -c -o $@ $(CPPFLAGS) $(INC) $(LLVM_CPPFLAGS) $<
+	$(CC) -c -o $@ $(CPPFLAGS) $(INC) $(LLVM_CPPFLAGS) $(LLVM_VERSION_DEF) $<
 
 all: kite ikt
 

@@ -72,11 +72,20 @@ namespace kite
                 {
                     InitializeNativeTarget();
                     llvm_start_multithreaded();
+#ifdef LLVM3_1
+                    llvm::TargetOptions targetOptions;
+                    targetOptions.JITEmitDebugInfo = true;
+#else
                     llvm::JITEmitDebugInfo = true; // for not-weird stack traces in gdb
+#endif
 
                     current_module = new Module("__root_module", getGlobalContext());
                     state.push_module(current_module);
-                    execution_engine = EngineBuilder(current_module).create();
+                    EngineBuilder engineBuilder(current_module);
+#ifdef LLVM3_1
+                    engineBuilder.setTargetOptions(targetOptions);
+#endif
+                    execution_engine = engineBuilder.create();
                     
                     System::dynamic_object *system_obj = (System::dynamic_object*)root()->properties["System"];
                     system_obj->properties["float"] = &System::fpnum::class_object;

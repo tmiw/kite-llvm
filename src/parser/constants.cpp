@@ -63,31 +63,31 @@ namespace kite
                     - lit("false")); // [ _val = _1 ];
             
             operator_identifier = 
-                lit("plus") |
-                lit("minus") |
-                lit("multiply") |
-                lit("divide") |
-                lit("mod") |
-                lit("unplus") |
-                lit("unminus") |
-                lit("map") |
-                lit("reduce") |
-                lit("array") |
-                lit("array_set") |
-                lit("equals") |
-                lit("nequals") |
-                lit("lt") |
-                lit("gt") |
-                lit("leq") |
-                lit("geq") |
-                lit("and") |
-                lit("or") |
-                lit("not") |
-                lit("xor") |
-                lit("lshift") |
-                lit("rshift") |
-                lit("call") |
-                lit("property");
+                qi::string("plus") |
+                qi::string("minus") |
+                qi::string("multiply") |
+                qi::string("divide") |
+                qi::string("mod") |
+                qi::string("unplus") |
+                qi::string("unminus") |
+                qi::string("map") |
+                qi::string("reduce") |
+                qi::string("array") |
+                qi::string("array_set") |
+                qi::string("equals") |
+                qi::string("nequals") |
+                qi::string("lt") |
+                qi::string("gt") |
+                qi::string("leq") |
+                qi::string("geq") |
+                qi::string("and") |
+                qi::string("or") |
+                qi::string("not") |
+                qi::string("xor") |
+                qi::string("lshift") |
+                qi::string("rshift") |
+                qi::string("call") |
+                qi::string("property");
         }
         
         kite_grammar<pos_iterator_type, BOOST_TYPEOF(KITE_SKIP_RULE)> constants_grammar;

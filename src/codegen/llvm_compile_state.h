@@ -84,7 +84,8 @@ namespace kite
 
             inline void skip_remaining(bool val) { _skipRemainingStatements = val; }
             inline bool get_skip_remaining() { return _skipRemainingStatements; }
-            
+
+            std::map<std::string, MDNode*> compileUnitCache;            
         private:
             std::vector<std::string> _namespaceStack;
             std::vector<Module*> _moduleStack;

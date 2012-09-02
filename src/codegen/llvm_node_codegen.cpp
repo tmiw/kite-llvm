@@ -1984,22 +1984,36 @@ namespace kite
             if (debugLoc.getLine() == 0)
             {
                 // Create compile unit
-                std::vector<Value*> compileUnitV;
-                compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 17 + LLVMDebugVersion, true)));
-                compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
-                compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0xAA35, true))); // DW_LANG_Kite 
+                MDNode *compileUnit;
+                if (state.compileUnitCache.find(pos.file) == state.compileUnitCache.end())
+                {
+                    std::vector<Value*> compileUnitV;
+                    compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 17 + LLVMDebugVersion, true)));
+                    compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
+                    //compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0xAA35, true))); // DW_LANG_Kite 
+                    compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 12, true))); // DW_LANG_C99 for correct gdb behavior (for now) -- TODO 
                 
-                boost::filesystem::path p(pos.file);
-                compileUnitV.push_back(MDString::get(getGlobalContext(), p.filename().string()));
-                compileUnitV.push_back(MDString::get(getGlobalContext(), p.parent_path().string()));
-                compileUnitV.push_back(MDString::get(getGlobalContext(), "Kite version 2.0")); // TODO
-                compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(1, 1, true)));
-                compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(1, 0, true)));
-                compileUnitV.push_back(MDString::get(getGlobalContext(), ""));
-                compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
+                    boost::filesystem::path p(pos.file);
+                    compileUnitV.push_back(MDString::get(getGlobalContext(), p.filename().string()));
+                    compileUnitV.push_back(MDString::get(getGlobalContext(), p.parent_path().string()));
+                    compileUnitV.push_back(MDString::get(getGlobalContext(), "Kite version 2.0")); // TODO
+                    compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(1, 1, true)));
+                    compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(1, 0, true)));
+                    compileUnitV.push_back(MDString::get(getGlobalContext(), ""));
+                    compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
                 
-                MDNode *compileUnit = MDNode::get(getGlobalContext(), compileUnitV);
+                    compileUnit = MDNode::get(getGlobalContext(), compileUnitV);
+                    state.compileUnitCache[pos.file] = compileUnit;
                 
+                    // Add compile unit to named list
+                    NamedMDNode *cuNode = state.current_module()->getOrInsertNamedMetadata("llvm.dbg.cu");
+                    cuNode->addOperand(compileUnit);
+                }
+                else
+                {
+                    compileUnit = state.compileUnitCache[pos.file];
+                }
+
                 // Create type for method
                 std::vector<Value*> subroutineTypeV;
                 subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 21 + LLVMDebugVersion, true)));

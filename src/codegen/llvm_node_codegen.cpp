@@ -853,7 +853,7 @@ namespace kite
                     
                     builder.SetInsertPoint(has_var);
                     // TODO: check __root too.
-                    Value *createVar = builder.CreateAlloca(kite_type_to_llvm_type(semantics::OBJECT));
+                    Value *createVar = generate_debug_data(builder.CreateAlloca(kite_type_to_llvm_type(semantics::OBJECT)), tree.position);
                     generate_debug_data(builder.CreateStore(zeroPtr, createVar), tree.position);
                     generate_debug_data(builder.CreateBr(end_var), tree.position);
                     
@@ -2032,7 +2032,7 @@ namespace kite
                 
                 // Create subprogram
                 std::vector<Value*> subprogramV;
-                subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 17 + LLVMDebugVersion, true)));
+                subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 46 + LLVMDebugVersion, true)));
                 subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
                 subprogramV.push_back(compileUnit);
                 subprogramV.push_back(MDString::get(getGlobalContext(), state.current_c_method_name()));

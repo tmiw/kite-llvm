@@ -25,21 +25,21 @@ namespace kite
             using phoenix::front;
             
             deref_property_statement =
-                lit('.') [ at_c<0>(_val) = kite::semantics::DEREF_PROPERTY ] >
+                lit('.') [ at_c<0>(_val) = kite::semantics::DEREF_PROPERTY ] >> iter_pos [ at_c<2>(_val) = phoenix::construct<semantics::syntax_tree_position>(_1) ] >
                 identifier [ push_back(at_c<1>(_val), _1) ];
             
             deref_method_statement =
-                lit('|') [ at_c<0>(_val) = kite::semantics::DEREF_METHOD ] >
+                lit('|') [ at_c<0>(_val) = kite::semantics::DEREF_METHOD ] >> iter_pos [ at_c<2>(_val) = phoenix::construct<semantics::syntax_tree_position>(_1) ] >
                 identifier [ push_back(at_c<1>(_val), _1) ] >>
                 -(lit('(') >> -(or_statement [ push_back(at_c<1>(_val), _1) ] % ',') >> lit(')'));
             
             deref_method_mandatory_params =
                    identifier [ push_back(at_c<1>(_val), _1) ]
-                >> lit('(') [ at_c<0>(_val) = kite::semantics::DEREF_METHOD_RELATIVE_SELF ]
+                >> lit('(') [ at_c<0>(_val) = kite::semantics::DEREF_METHOD_RELATIVE_SELF ] >> iter_pos [ at_c<2>(_val) = phoenix::construct<semantics::syntax_tree_position>(_1) ]
                 >> -(or_statement [ push_back(at_c<1>(_val), _1) ] % ',') >> lit(')');
                 
             deref_array_statement =
-                lit('[') [ at_c<0>(_val) = kite::semantics::DEREF_ARRAY ] >>
+                lit('[') [ at_c<0>(_val) = kite::semantics::DEREF_ARRAY ] >> iter_pos [ at_c<2>(_val) = phoenix::construct<semantics::syntax_tree_position>(_1) ] >>
                 or_statement [ push_back(at_c<1>(_val), _1) ] >>
                 lit(']');
                 
@@ -49,18 +49,18 @@ namespace kite
             deref_filter_only_statement =
                 (    grouping_statement 
                         [ push_back(at_c<1>(_val), _1) ]
-                        [ at_c<0>(_val) = kite::semantics::DEREF_FILTER ])
+                        [ at_c<0>(_val) = kite::semantics::DEREF_FILTER ] >> iter_pos [ at_c<2>(_val) = phoenix::construct<semantics::syntax_tree_position>(_1) ])
                 >> *deref_types [ push_back(at_c<1>(_val), _1) ];
                         
             deref_filter_statement =
                     (deref_method_mandatory_params 
                          [ push_back(at_c<1>(_val), _1) ]
-                         [ at_c<0>(_val) = kite::semantics::DEREF_FILTER ]
+                         [ at_c<0>(_val) = kite::semantics::DEREF_FILTER ] >> iter_pos [ at_c<2>(_val) = phoenix::construct<semantics::syntax_tree_position>(_1) ]
                   >> *deref_types [ push_back(at_c<1>(_val), _1) ])
                   |
                   ((    grouping_statement 
                           [ push_back(at_c<1>(_val), _1) ]
-                          [ at_c<0>(_val) = kite::semantics::DEREF_FILTER ])
+                          [ at_c<0>(_val) = kite::semantics::DEREF_FILTER ] >> iter_pos [ at_c<2>(_val) = phoenix::construct<semantics::syntax_tree_position>(_1) ])
                           >> *deref_types [ push_back(at_c<1>(_val), _1) ]);
         }
         

@@ -25,7 +25,7 @@ namespace kite
             using phoenix::front;
 
             exception_statement =
-                   lit("run") [ at_c<0>(_val) = kite::semantics::RUN_CATCH ]
+                   lit("run") [ at_c<0>(_val) = kite::semantics::RUN_CATCH ] >> iter_pos [ at_c<2>(_val) = phoenix::construct<semantics::syntax_tree_position>(_1) ]
                 >> '['
                 >> start [ push_back(at_c<1>(_val), _1) ]
                 >> ']'

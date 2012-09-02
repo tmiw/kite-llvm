@@ -25,7 +25,7 @@ namespace kite
             using phoenix::front;
             
             class_statement =
-                   lit("class") [ at_c<0>(_val) = kite::semantics::CLASS ]
+                   lit("class") [ at_c<0>(_val) = kite::semantics::CLASS ] >> iter_pos [ at_c<2>(_val) = phoenix::construct<semantics::syntax_tree_position>(_1) ]
                 > identifier [ push_back(at_c<1>(_val), _1) ]
                 >> -(    lit("from") 
                       >> deref_filter_only_statement [ push_back(at_c<1>(_val), _1) ])

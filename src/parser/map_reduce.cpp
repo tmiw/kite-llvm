@@ -26,8 +26,8 @@ namespace kite
             
             map_reduce_statement =
                 (    deref_filter_statement [ push_back(at_c<1>(_val), _1) ]
-                  >> ((lit("<|") [ at_c<0>(_val) = kite::semantics::REDUCE ]) |
-                      (lit("<-") [ at_c<0>(_val) = kite::semantics::MAP ]))
+                  >> ((lit("<|") [ at_c<0>(_val) = kite::semantics::REDUCE ] >> iter_pos [ at_c<2>(_val) = phoenix::construct<semantics::syntax_tree_position>(_1) ]) |
+                      (lit("<-") [ at_c<0>(_val) = kite::semantics::MAP ] >> iter_pos [ at_c<2>(_val) = phoenix::construct<semantics::syntax_tree_position>(_1) ]))
                   > deref_filter_statement [ push_back(at_c<1>(_val), _1) ])
                 | deref_filter_statement [ _val = _1 ];
         }

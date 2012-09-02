@@ -25,7 +25,7 @@ namespace kite
             using phoenix::front;
             
             decide_statement = 
-                   lit("decide") [ at_c<0>(_val) = kite::semantics::DECIDE ]
+                   lit("decide") [ at_c<0>(_val) = kite::semantics::DECIDE ] >> iter_pos [ at_c<2>(_val) = phoenix::construct<semantics::syntax_tree_position>(_1) ]
                 > '['
                 >>    ((
                         (

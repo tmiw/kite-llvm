@@ -17,7 +17,7 @@ namespace kite
 
             math_statement = assign_statement;
             import_statement = 
-                lit("import") [ at_c<0>(_val) = kite::semantics::IMPORT ] > 
+                lit("import") [ at_c<0>(_val) = kite::semantics::IMPORT ] >> iter_pos [ at_c<2>(_val) = phoenix::construct<semantics::syntax_tree_position>(_1) ] > 
                 unesc_str [ push_back(at_c<1>(_val), _1) ];
             
             statement = 
@@ -32,7 +32,7 @@ namespace kite
                 | import_statement
                 | break_continue_statement
                 | math_statement ) [ _val = _1 ] > ';';
-            start = (*statement [ push_back(at_c<1>(_val), _1) ]) [ at_c<0>(_val) = kite::semantics::ITERATE ];
+            start = (*statement [ push_back(at_c<1>(_val), _1) ]) [ at_c<0>(_val) = kite::semantics::ITERATE ] >> iter_pos [ at_c<2>(_val) = phoenix::construct<semantics::syntax_tree_position>(_1) ];
         }
         
         kite_grammar<pos_iterator_type, BOOST_TYPEOF(KITE_SKIP_RULE)> statement_grammar;

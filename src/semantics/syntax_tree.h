@@ -47,14 +47,34 @@ namespace kite
             void*,
             std::string> syntax_tree_node;
         
+        struct syntax_tree_position
+        {
+            int line;
+            int column;
+            std::string file;
+            
+            syntax_tree_position() { }
+            
+            template<typename PositionT>
+            syntax_tree_position(PositionT &pos)
+                : line(pos.get_position().line), column(pos.get_position().column), file(pos.get_position().file)
+            {
+                // empty
+            }
+            
+            syntax_tree_position(const syntax_tree_position &pos)
+                : line(pos.line), column(pos.column), file(pos.file)
+            {
+                // empty
+            }
+        };
+        
         struct syntax_tree
         {
             code_operation op;
             std::deque<syntax_tree_node> children;
             
-            int line;
-            int column;
-            std::string filename;
+            syntax_tree_position position;
         };
     }
 }

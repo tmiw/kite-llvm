@@ -26,24 +26,24 @@ namespace kite
             using phoenix::front;
             
             method_statement =
-                   lit("method") [ at_c<0>(_val) = kite::semantics::METHOD ]
+                   lit("method") [ at_c<0>(_val) = kite::semantics::METHOD ] >> iter_pos [ at_c<2>(_val) = phoenix::construct<semantics::syntax_tree_position>(_1) ]
                 > identifier [ push_back(at_c<1>(_val), _1) ]
                 >> (lit('(') >> -(identifier [ push_back(at_c<1>(_val), _1) ] % ',') >> lit(')'))
                 > '[' >> start [ push_back(at_c<1>(_val), _1) ] >> ']';
             
             operator_statement =
-                   lit("operator") [ at_c<0>(_val) = kite::semantics::OPERATOR ]
+                   lit("operator") [ at_c<0>(_val) = kite::semantics::OPERATOR ] >> iter_pos [ at_c<2>(_val) = phoenix::construct<semantics::syntax_tree_position>(_1) ]
                 > operator_identifier [ push_back(at_c<1>(_val), _1) ]
                 >> (lit('(') >> -(identifier [ push_back(at_c<1>(_val), _1) ] % ',') >> lit(')'))
                 > '[' >> start [ push_back(at_c<1>(_val), _1) ] >> ']';
             
             anon_method_statement =
-                   lit("method") [ at_c<0>(_val) = kite::semantics::METHOD ] [ push_back(at_c<1>(_val), std::string("__AnonMethod")) ]
+                   lit("method") [ at_c<0>(_val) = kite::semantics::METHOD ] [ push_back(at_c<1>(_val), std::string("__AnonMethod")) ] >> iter_pos [ at_c<2>(_val) = phoenix::construct<semantics::syntax_tree_position>(_1) ]
                 >> (lit('(') >> -(identifier [ push_back(at_c<1>(_val), _1) ] % ',') >> lit(')'))
                 > '[' >> start [ push_back(at_c<1>(_val), _1) ] >> ']';
                 
             method_ref_statement =
-                   lit("method_ref") [ at_c<0>(_val) = kite::semantics::METHOD_REF ]
+                   lit("method_ref") [ at_c<0>(_val) = kite::semantics::METHOD_REF ] >> iter_pos [ at_c<2>(_val) = phoenix::construct<semantics::syntax_tree_position>(_1) ]
                 >> (lit('(') > 
                       or_statement [ push_back(at_c<1>(_val), _1) ] > ',' >
                       unesc_str [ push_back(at_c<1>(_val), _1) ] > ',' >

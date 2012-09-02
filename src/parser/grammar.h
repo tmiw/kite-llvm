@@ -32,10 +32,7 @@
 
 #include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/include/phoenix_fusion.hpp>
-#include <boost/spirit/include/phoenix_stl.hpp>
+#include <boost/spirit/include/phoenix.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 
 using boost::spirit::ascii::space;
@@ -51,10 +48,84 @@ typedef classic::position_iterator2<forward_iterator_type> pos_iterator_type;
 
 #define KITE_SKIP_RULE space | ('#' >> *(ascii::char_ - qi::eol) >> qi::eol)
 
+// Necessary for line number collection.
+// =====================================
+
+namespace kite 
+{ 
+    namespace parser
+    {
+        // iter_pos contains the location in the file.
+        BOOST_SPIRIT_TERMINAL(iter_pos);
+    }
+}
+
+namespace boost { namespace spirit
+{
+    // We want custom_parser::iter_pos to be usable as a terminal only,
+    // and only for parser expressions (qi::domain).
+    template <>
+    struct use_terminal<qi::domain, kite::parser::tag::iter_pos>
+      : mpl::true_
+    {};
+}}
+
 namespace kite
 {
     namespace parser
     {
+        struct iter_pos_parser
+          : boost::spirit::qi::primitive_parser<iter_pos_parser>
+        {
+            // Define the attribute type exposed by this parser component
+            template <typename Context, typename Iterator>
+            struct attribute
+            {
+                typedef Iterator type;
+            };
+ 
+            // This function is called during the actual parsing process
+            template <typename Iterator, typename Context
+              , typename Skipper, typename Attribute>
+            bool parse(Iterator& first, Iterator const& last
+              , Context&, Skipper const& skipper, Attribute& attr) const
+            {
+                boost::spirit::qi::skip_over(first, last, skipper);
+                boost::spirit::traits::assign_to(first, attr);
+                return true;
+            }
+ 
+            // This function is called during error handling to create
+            // a human readable string for the error context.
+            template <typename Context>
+            boost::spirit::info what(Context&) const
+            {
+                return boost::spirit::info("iter_pos");
+            }
+        };
+    }
+}
+
+namespace boost { namespace spirit { namespace qi
+{
+    // This is the factory function object invoked in order to create
+    // an instance of our iter_pos_parser.
+    template <typename Modifiers>
+    struct make_primitive<kite::parser::tag::iter_pos, Modifiers>
+    {
+        typedef kite::parser::iter_pos_parser result_type;
+ 
+        result_type operator()(unused_type, unused_type) const
+        {
+            return result_type();
+        }
+    };
+}}}
+
+namespace kite
+{
+    namespace parser
+    {        
         namespace fusion = boost::fusion;
         namespace phoenix = boost::phoenix;
         namespace qi = boost::spirit::qi;
@@ -160,6 +231,7 @@ BOOST_FUSION_ADAPT_STRUCT(
     kite::semantics::syntax_tree,
     (kite::semantics::code_operation, op)
     (std::deque<kite::semantics::syntax_tree_node>, children)
+    (kite::semantics::syntax_tree_position, position)
 )
 
 #endif

@@ -25,7 +25,7 @@ namespace kite
             using phoenix::front;
             
             destructor_statement =
-                   lit("destruct") [ at_c<0>(_val) = kite::semantics::DESTRUCTOR ]
+                   lit("destruct") [ at_c<0>(_val) = kite::semantics::DESTRUCTOR ] >> iter_pos [ at_c<2>(_val) = phoenix::construct<semantics::syntax_tree_position>(_1) ]
                 > '[' >> start [ push_back(at_c<1>(_val), _1) ] >> ']';
         }
         

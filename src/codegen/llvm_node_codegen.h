@@ -111,16 +111,18 @@ namespace kite
             Value *codegen_make_op(semantics::syntax_tree const &tree) const;
             
             stdlib::object_method_map &get_method_map(semantics::builtin_types type) const;
-            Value *generate_llvm_method_call(Value *self, std::string name, std::vector<Value*> &params) const;
-            Value *generate_llvm_dynamic_object_alloc(Value *orig) const;
-            void generate_llvm_dynamic_object_set_parent(Value *obj, Value *parent) const;
-            void generate_llvm_dynamic_object_set_name(Value *obj) const;
-            Value *generate_llvm_dynamic_object_get_property(Value *obj, std::string name, bool set = false) const;
-            Value *generate_llvm_method_alloc(Value *method) const;
-            Value *generate_llvm_dynamic_object_get_root() const;
+            Value *generate_llvm_method_call(Value *self, std::string name, std::vector<Value*> &params, const semantics::syntax_tree &tree) const;
+            Value *generate_llvm_dynamic_object_alloc(Value *orig, const semantics::syntax_tree &tree) const;
+            void generate_llvm_dynamic_object_set_parent(Value *obj, Value *parent, const semantics::syntax_tree &tree) const;
+            void generate_llvm_dynamic_object_set_name(Value *obj, const semantics::syntax_tree &tree) const;
+            Value *generate_llvm_dynamic_object_get_property(Value *obj, std::string name, const semantics::syntax_tree &tree, bool set = false) const;
+            Value *generate_llvm_method_alloc(Value *method, const semantics::syntax_tree &tree) const;
+            Value *generate_llvm_dynamic_object_get_root(const semantics::syntax_tree &tree) const;
 
             Type *get_method_type() const;
             Type *get_object_type() const;
+            
+            Instruction *generate_debug_data(Instruction *instruction, const semantics::syntax_tree_position &pos) const;
         };
     }
 }

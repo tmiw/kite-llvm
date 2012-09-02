@@ -59,6 +59,14 @@ namespace kite
             inline BasicBlock *current_loop_end() { return _loopEndStack.back(); }
             BasicBlock *pop_loop_end(); /*! Pops loop from top of stack. */
             
+            void push_friendly_method_name(std::string name); /*! Pushes new method onto stack. */
+            inline std::string current_friendly_method_name() { return _methodStack.back(); }
+            std::string pop_friendly_method_name(); /*! Pops method from top of stack. */
+            
+            void push_c_method_name(std::string name); /*! Pushes new method onto stack. */
+            inline std::string current_c_method_name() { return _cMethodStack.back(); }
+            std::string pop_c_method_name(); /*! Pops method from top of stack. */
+            
             inline IRBuilder<> &module_builder() { return _moduleBuilder; }
             
             void push_symbol_stack();
@@ -82,6 +90,8 @@ namespace kite
             std::vector<Module*> _moduleStack;
             std::vector<BasicBlock*> _loopStack;
             std::vector<BasicBlock*> _loopEndStack;
+            std::vector<std::string> _methodStack;
+            std::vector<std::string> _cMethodStack;
             std::vector<std::map<std::string, Value*> *> _symbolTableStack;
             IRBuilder<> _moduleBuilder;
             bool _overrideOverloadedProperties;

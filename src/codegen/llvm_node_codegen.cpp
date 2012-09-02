@@ -30,6 +30,7 @@
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/get.hpp>
 #include <boost/assign.hpp>
+#include <boost/filesystem.hpp>
 #include "llvm_node_codegen.h"
 #include "stdlib/language/kite.h"
 
@@ -274,11 +275,11 @@ namespace kite
                 BasicBlock *collect_result = BasicBlock::Create(getGlobalContext(), "collect_result", currentFunc);
                 if (tree.op == semantics::AND)
                 {
-                    builder.CreateCondBr(lhs, do_other, collect_result);
+                    generate_debug_data(builder.CreateCondBr(lhs, do_other, collect_result), tree.position);
                 }
                 else
                 {
-                    builder.CreateCondBr(lhs, collect_result, do_other);
+                    generate_debug_data(builder.CreateCondBr(lhs, collect_result, do_other), tree.position);
                 }
                 
                 builder.SetInsertPoint(do_other);
@@ -300,12 +301,12 @@ namespace kite
                             funPtrLookup->eraseFromParent();
                             funPtrLookup = module->getFunction("kite_object_is_boolean");
                         }
-                        Value *ret = builder.CreateCall(funPtrLookup, rhs);
-                        builder.CreateCondBr(ret, type_error_block_end, type_error_block);
+                        Value *ret = generate_debug_data(builder.CreateCall(funPtrLookup, rhs), tree.position);
+                        generate_debug_data(builder.CreateCondBr(ret, type_error_block_end, type_error_block), tree.position);
                     }
                     else
                     {
-                        builder.CreateBr(type_error_block);
+                        generate_debug_data(builder.CreateBr(type_error_block), tree.position);
                     }
                     
                     builder.SetInsertPoint(type_error_block);
@@ -318,22 +319,23 @@ namespace kite
                         funPtrLookup->eraseFromParent();
                         funPtrLookup = module->getFunction("kite_exception_raise_type_mismatch");
                     }
-                    builder.CreateCall(funPtrLookup, builder.CreateGlobalStringPtr("boolean expected."));
-                    builder.CreateBr(type_error_block_end);
+                    generate_debug_data(builder.CreateCall(funPtrLookup, builder.CreateGlobalStringPtr("boolean expected.")), tree.position);
+                    generate_debug_data(builder.CreateBr(type_error_block_end), tree.position);
                     builder.SetInsertPoint(type_error_block_end);
 
                     std::vector<Value*> params;
                     params.push_back(rhs);
-                    rhs = generate_llvm_method_call(rhs, "bool", params);
+                    rhs = generate_llvm_method_call(rhs, "bool", params, tree);
                 }
                 Value *other_val = (state.module_builder().*ptr)(lhs, rhs, "");
-                builder.CreateBr(collect_result);
+                generate_debug_data(builder.CreateBr(collect_result), tree.position);
                 do_other = builder.GetInsertBlock();
                 
                 builder.SetInsertPoint(collect_result);
                 PHINode *phi = builder.CreatePHI(lhs_type, 2);
                 phi->addIncoming(other_val, do_other);
                 phi->addIncoming(lhs, currentBB);
+                generate_debug_data(phi, tree.position);
                 ret = phi;
             }
             else 
@@ -353,7 +355,7 @@ namespace kite
                         BasicBlock *eq_zero = BasicBlock::Create(getGlobalContext(), "eq_zero", currentFunc);
                         BasicBlock *div_result = BasicBlock::Create(getGlobalContext(), "div_result", currentFunc);
                         Value *cond = builder.CreateICmpEQ(valAsInt, ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
-                        builder.CreateCondBr(cond, eq_zero, neq_zero);
+                        generate_debug_data(builder.CreateCondBr(cond, eq_zero, neq_zero), tree.position);
                     
                         builder.SetInsertPoint(eq_zero);
                         std::vector<Type*> parameterTypes;
@@ -364,10 +366,10 @@ namespace kite
                             funPtrLookup->eraseFromParent();
                             funPtrLookup = module->getFunction("kite_exception_raise_div_by_zero");
                         }
-                        builder.CreateCall(funPtrLookup);
+                        generate_debug_data(builder.CreateCall(funPtrLookup), tree.position);
                         if (get_type(lhs) == semantics::FLOAT) result_eqzero = ConstantFP::get(getGlobalContext(), APFloat(0.0));
                         else result_eqzero = ConstantInt::get(getGlobalContext(), APInt(32, 0, true));
-                        builder.CreateBr(div_result);
+                        generate_debug_data(builder.CreateBr(div_result), tree.position);
                     
                         builder.SetInsertPoint(neq_zero);
                         semantics::builtin_types op_type = get_type(lhs);
@@ -385,12 +387,13 @@ namespace kite
                             if (get_type(lhs) == semantics::FLOAT) result_neqzero = ConstantFP::get(getGlobalContext(), APFloat(0.0));
                             else result_neqzero = ConstantInt::get(getGlobalContext(), APInt(32, 0, true));
                         }
-                        builder.CreateBr(div_result);
+                        generate_debug_data(builder.CreateBr(div_result), tree.position);
                     
                         builder.SetInsertPoint(div_result);
                         ret = builder.CreatePHI(lhs_type, 2);
                         ((PHINode*)ret)->addIncoming(result_neqzero, neq_zero);
                         ((PHINode*)ret)->addIncoming(result_eqzero, eq_zero);
+                        generate_debug_data((PHINode*)ret, tree.position);
                     }
                     else
                     {
@@ -411,18 +414,18 @@ namespace kite
                 if (lhs_type != kite_type_to_llvm_type(semantics::OBJECT))
                 {
                     params.push_back(lhs);
-                    lhs = generate_llvm_method_call(lhs, "obj", params);
+                    lhs = generate_llvm_method_call(lhs, "obj", params, tree);
                     params.clear();
                 }
                 if (rhs_type != kite_type_to_llvm_type(semantics::OBJECT))
                 {
                     params.push_back(rhs);
-                    rhs = generate_llvm_method_call(lhs, "obj", params);
+                    rhs = generate_llvm_method_call(lhs, "obj", params, tree);
                     params.clear();
                 }
                 params.push_back(lhs);
                 params.push_back(rhs);
-                ret = generate_llvm_method_call(lhs, semantics::Constants::Get().operator_map[tree.op], params);
+                ret = generate_llvm_method_call(lhs, semantics::Constants::Get().operator_map[tree.op], params, tree);
             }
 
             return ret;
@@ -439,7 +442,7 @@ namespace kite
                 default:
                     std::vector<Value*> params;
                     params.push_back(rhs);
-                    return generate_llvm_method_call(rhs, semantics::Constants::Get().operator_map[tree.op], params);
+                    return generate_llvm_method_call(rhs, semantics::Constants::Get().operator_map[tree.op], params, tree);
             }
         }
         
@@ -455,7 +458,7 @@ namespace kite
             {
                 std::vector<Value*> params;
                 params.push_back(this_ptr);
-                this_ptr = generate_llvm_method_call(this_ptr, "obj", params);
+                this_ptr = generate_llvm_method_call(this_ptr, "obj", params, tree);
             }
             
             // TODO: refactor
@@ -474,10 +477,10 @@ namespace kite
             paramValuesLookup.push_back(builder.CreateBitCast(this_ptr, PointerType::getUnqual(Type::getInt32Ty(getGlobalContext()))));
             paramValuesLookup.push_back(builder.CreateGlobalStringPtr(name.c_str()));
             paramValuesLookup.push_back(ConstantInt::get(getGlobalContext(), APInt(32, args + 1, true)));
-            Value *fptr = builder.CreateCall(
+            Value *fptr = generate_debug_data(builder.CreateCall(
                 funPtrLookup,
                 ArrayRef<Value*>(paramValuesLookup)
-            );
+            ), tree.position);
             
             std::vector<Type*> parameterTypes;
             parameterTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
@@ -490,8 +493,12 @@ namespace kite
                 funPtr->eraseFromParent();
                 funPtr = module->getFunction("kite_method_alloc");
             }
-            Value *method = builder.CreateCall2(funPtr, builder.CreateBitCast(fptr, kite_type_to_llvm_type(semantics::OBJECT)), ConstantInt::get(kite_type_to_llvm_type(semantics::INTEGER), args + 0));
-            builder.CreateStore(this_ptr, builder.CreateStructGEP(builder.CreateBitCast(method, get_method_type()), 2));
+            Value *method = generate_debug_data(
+                builder.CreateCall2(funPtr, builder.CreateBitCast(fptr, kite_type_to_llvm_type(semantics::OBJECT)), ConstantInt::get(kite_type_to_llvm_type(semantics::INTEGER), args + 0)),
+                tree.position);
+            generate_debug_data(
+                builder.CreateStore(this_ptr, builder.CreateStructGEP(builder.CreateBitCast(method, get_method_type()), 2)),
+                tree.position);
             
             return method;
         }
@@ -516,7 +523,7 @@ namespace kite
             {
                 std::vector<Value*> params;
                 params.push_back(rhs);
-                return generate_llvm_method_call(rhs, semantics::Constants::Get().operator_map[tree.op], params);
+                return generate_llvm_method_call(rhs, semantics::Constants::Get().operator_map[tree.op], params, tree);
             }
             
             return lhs;
@@ -533,7 +540,7 @@ namespace kite
                 default:
                     std::vector<Value*> params;
                     params.push_back(rhs);
-                    return generate_llvm_method_call(rhs, semantics::Constants::Get().operator_map[tree.op], params);
+                    return generate_llvm_method_call(rhs, semantics::Constants::Get().operator_map[tree.op], params, tree);
             }
         }
         
@@ -549,13 +556,13 @@ namespace kite
             if (lhsType == PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)) ||
                 (lhsType != kite_type_to_llvm_type(semantics::OBJECT) && isa<PointerType>(lhsType)))
             {
-                lhs = builder.CreateLoad(lhs);
+                lhs = generate_debug_data(builder.CreateLoad(lhs), tree.position);
             }
             const Type *rhsType = rhs->getType();
             if (rhsType == PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)) ||
                 (rhsType != kite_type_to_llvm_type(semantics::OBJECT) && isa<PointerType>(rhsType)))
             {
-                rhs = builder.CreateLoad(rhs);
+                rhs = generate_debug_data(builder.CreateLoad(rhs), tree.position);
             }
             
             if (tree.op == semantics::IS_CLASS)
@@ -584,21 +591,22 @@ namespace kite
             if (lhs->getType() != kite_type_to_llvm_type(semantics::OBJECT))
             {
                 params.push_back(lhs);
-                lhs = generate_llvm_method_call(lhs, "obj", params);
+                lhs = generate_llvm_method_call(lhs, "obj", params, tree);
             }
             paramValues.push_back(lhs);
             if (rhs->getType() != kite_type_to_llvm_type(semantics::OBJECT))
             {
                 params.clear();
                 params.push_back(rhs);
-                rhs = generate_llvm_method_call(rhs, "obj", params);
+                rhs = generate_llvm_method_call(rhs, "obj", params, tree);
             }
             paramValues.push_back(rhs);
             paramValues.push_back(type);
-            return builder.CreateCall(
-                funPtrLookup,
-                ArrayRef<Value*>(paramValues)
-            );
+            return generate_debug_data(
+                builder.CreateCall(
+                    funPtrLookup,
+                    ArrayRef<Value*>(paramValues)
+                ), tree.position);
         }
 
         Value *llvm_node_codegen::codegen_map_op(semantics::syntax_tree const &tree) const
@@ -620,7 +628,7 @@ namespace kite
             parameters.push_back(list_val);
             parameters.push_back(method_val);
             
-            return generate_llvm_method_call(list_val, semantics::Constants::Get().operator_map[tree.op], parameters);
+            return generate_llvm_method_call(list_val, semantics::Constants::Get().operator_map[tree.op], parameters, tree);
         }
         
         Value *llvm_node_codegen::codegen_deref_filter_op(semantics::syntax_tree const &tree) const
@@ -670,7 +678,7 @@ namespace kite
         Value *llvm_node_codegen::codegen_deref_property_op(semantics::syntax_tree const &tree, Value *prev) const
         {
             std::string property_name = boost::get<std::string>(tree.children[0]);
-            return generate_llvm_dynamic_object_get_property(prev, property_name);
+            return generate_llvm_dynamic_object_get_property(prev, property_name, tree);
         }
         
         Value *llvm_node_codegen::codegen_deref_method_op(semantics::syntax_tree const &tree, Value *prev) const
@@ -686,7 +694,7 @@ namespace kite
                 Value *param_val = boost::apply_visitor(llvm_node_codegen(state), tree.children[i]);
                 if (param_val->getType() == PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)))
                 {
-                    param_val = builder.CreateLoad(param_val);
+                    param_val = generate_debug_data(builder.CreateLoad(param_val), tree.position);
                 }
                 parameters.push_back(param_val);
             }
@@ -694,9 +702,9 @@ namespace kite
             if (state.overrideOverloadedProperties())
             {
                 state.overrideOverloadedProperties(false);
-                parameters[0] = builder.CreateLoad(sym_stack["this"]);
+                parameters[0] = generate_debug_data(builder.CreateLoad(sym_stack["this"]), tree.position);
             }
-            return generate_llvm_method_call(prev, method_name, parameters);
+            return generate_llvm_method_call(prev, method_name, parameters, tree);
         }
         
         Value *llvm_node_codegen::codegen_deref_method_relative_self_op(semantics::syntax_tree const &tree) const
@@ -710,7 +718,7 @@ namespace kite
 
             Value *fptr = NULL;
 
-            Value *self = state.module_builder().CreateLoad(sym_stack["this"]);
+            Value *self = generate_debug_data(state.module_builder().CreateLoad(sym_stack["this"]), tree.position);
             parameters.push_back(self);
             parameterTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
             for (int i = 1; i < tree.children.size(); i++)
@@ -725,8 +733,13 @@ namespace kite
             {
                 // local variable
                 // TODO: verify that variable is System::object* first.
-                Value *method_obj = builder.CreateBitCast(builder.CreateLoad(sym_stack[method_name]), get_method_type());
-                parameters[0] = builder.CreateLoad(builder.CreateStructGEP(method_obj, 2));
+                Value *method_obj = builder.CreateBitCast(
+                    generate_debug_data(
+                        builder.CreateLoad(sym_stack[method_name]), tree.position),
+                    get_method_type());
+                parameters[0] = generate_debug_data(
+                    builder.CreateLoad(builder.CreateStructGEP(method_obj, 2)),
+                    tree.position);
                 
                 std::vector<Type*> parameterTypesLookup;
                 std::vector<Value*> paramValuesLookup;
@@ -739,15 +752,19 @@ namespace kite
                     funPtrLookup->eraseFromParent();
                     funPtrLookup = module->getFunction("kite_method_verify_semantics");
                 }
-                paramValuesLookup.push_back(builder.CreateLoad(sym_stack[method_name]));
+                paramValuesLookup.push_back(
+                    generate_debug_data(
+                        builder.CreateLoad(sym_stack[method_name]),
+                        tree.position));
                 paramValuesLookup.push_back(ConstantInt::get(getGlobalContext(), APInt(32, parameters.size(), true)));
                 fptr = builder.CreateBitCast(
-                    builder.CreateCall(
-                        funPtrLookup,
-                        ArrayRef<Value*>(paramValuesLookup)
-                    ),
-                    PointerType::getUnqual(ft)
-                );
+                    generate_debug_data(
+                        builder.CreateCall(
+                            funPtrLookup,
+                            ArrayRef<Value*>(paramValuesLookup)
+                        ),
+                        tree.position),
+                    PointerType::getUnqual(ft));
             }
 
             if (fptr != NULL)
@@ -758,17 +775,18 @@ namespace kite
                     {
                         std::vector<Value*> params;
                         params.push_back(parameters[i]);
-                        parameters[i] = generate_llvm_method_call(parameters[i], "obj", params);
+                        parameters[i] = generate_llvm_method_call(parameters[i], "obj", params, tree);
                     }
                 }
-                return builder.CreateCall(
-                    fptr,
-                    ArrayRef<Value*>(parameters)
-                );
+                return generate_debug_data(
+                    builder.CreateCall(
+                        fptr,
+                        ArrayRef<Value*>(parameters)
+                    ), tree.position);
             }
             else
             {
-                return generate_llvm_method_call(self, method_name, parameters);
+                return generate_llvm_method_call(self, method_name, parameters, tree);
             }
         }
 
@@ -780,7 +798,7 @@ namespace kite
             Value *index_val = boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
             parameters.push_back(index_val);
             
-            return generate_llvm_method_call(prev, semantics::Constants::Get().operator_map[tree.op], parameters);
+            return generate_llvm_method_call(prev, semantics::Constants::Get().operator_map[tree.op], parameters, tree);
         }
         
         Value *llvm_node_codegen::codegen_variable_op(semantics::syntax_tree const &tree) const
@@ -793,7 +811,7 @@ namespace kite
             
             if (var_name == "__root")
             {
-                return generate_llvm_dynamic_object_get_root();
+                return generate_llvm_dynamic_object_get_root(tree);
             }
             else if (var_name == "__exc" && sym_stack.find("__exc") != sym_stack.end())
             {
@@ -802,13 +820,13 @@ namespace kite
             else if (var_name == "base")
             {
                 state.overrideOverloadedProperties(true);
-                Value *this_obj = builder.CreateLoad(sym_stack["this"]);
+                Value *this_obj = generate_debug_data(builder.CreateLoad(sym_stack["this"]), tree.position);
                 this_obj = builder.CreateBitCast(this_obj, get_object_type());
                 this_obj = builder.CreateStructGEP(this_obj, 1);
-                this_obj = builder.CreateLoad(this_obj);
+                this_obj = generate_debug_data(builder.CreateLoad(this_obj), tree.position);
                 this_obj = builder.CreateBitCast(this_obj, get_object_type());
                 this_obj = builder.CreateStructGEP(this_obj, 1);
-                this_obj = builder.CreateLoad(this_obj);
+                this_obj = generate_debug_data(builder.CreateLoad(this_obj), tree.position);
                 return this_obj;
             }
             else
@@ -816,36 +834,37 @@ namespace kite
                 if (sym_stack.count(var_name) == 0)
                 {
                     BasicBlock *sym_block = BasicBlock::Create(getGlobalContext(), "varcreate", currentFunc);
-                    builder.CreateBr(sym_block);
+                    generate_debug_data(builder.CreateBr(sym_block), tree.position);
                     
                     builder.SetInsertPoint(sym_block);
                     // TODO: do not autocreate var in this/__root if it doesn't exist.
                     // The method level version will be used until the end of this method,
                     // and then other methods in the class may end up using the one in
                     // the instance instead of another method-level var.
-                    Value *getProp = generate_llvm_dynamic_object_get_property(sym_stack["this"], var_name);
-                    Value *propValue = builder.CreateLoad(getProp);
+                    Value *getProp = generate_llvm_dynamic_object_get_property(sym_stack["this"], var_name, tree);
+                    Value *propValue = generate_debug_data(builder.CreateLoad(getProp), tree.position);
                     
                     BasicBlock *has_var = BasicBlock::Create(getGlobalContext(), "varnotexists", currentFunc);
                     BasicBlock *end_var = BasicBlock::Create(getGlobalContext(), "varend", currentFunc);
                     Value *zeroInt = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) * 8, 0, true));
                     Value *zeroPtr = builder.CreateIntToPtr(zeroInt, propValue->getType());
                     Value *cmpValue = builder.CreateICmpEQ(propValue, zeroPtr);
-                    builder.CreateCondBr(cmpValue, has_var, end_var);
+                    generate_debug_data(builder.CreateCondBr(cmpValue, has_var, end_var), tree.position);
                     
                     builder.SetInsertPoint(has_var);
                     // TODO: check __root too.
                     Value *createVar = builder.CreateAlloca(kite_type_to_llvm_type(semantics::OBJECT));
-                    builder.CreateStore(zeroPtr, createVar);
-                    builder.CreateBr(end_var);
+                    generate_debug_data(builder.CreateStore(zeroPtr, createVar), tree.position);
+                    generate_debug_data(builder.CreateBr(end_var), tree.position);
                     
                     builder.SetInsertPoint(end_var);
                     PHINode *phi = builder.CreatePHI(PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)), 2);
                     phi->addIncoming(getProp, sym_block);
                     phi->addIncoming(createVar, has_var);
                     sym_stack[var_name] = phi;
+                    generate_debug_data(phi, tree.position);
                 }
-                return builder.CreateLoad(sym_stack[var_name]);
+                return generate_debug_data(builder.CreateLoad(sym_stack[var_name]), tree.position);
             }
         }
         
@@ -862,10 +881,13 @@ namespace kite
                 {
                     if (lhs->getType() != rhs->getType())
                     {
-                        sym_stack[i->first] = state.module_builder().CreateAlloca(rhs->getType());
+                        sym_stack[i->first] = 
+                            generate_debug_data(
+                                state.module_builder().CreateAlloca(rhs->getType()),
+                                tree.position);
                         ptr = sym_stack[i->first];
                     }
-                    state.module_builder().CreateStore(rhs, ptr);
+                    generate_debug_data(state.module_builder().CreateStore(rhs, ptr), tree.position);
                     return rhs;
                 }
             }
@@ -876,9 +898,9 @@ namespace kite
             {
                 std::vector<Value*> params;
                 params.push_back(rhs);
-                rhs = generate_llvm_method_call(rhs, "obj", params);
+                rhs = generate_llvm_method_call(rhs, "obj", params, tree);
             }
-            state.module_builder().CreateStore(rhs, lhs);
+            generate_debug_data(state.module_builder().CreateStore(rhs, lhs), tree.position);
             return rhs;
         }
         
@@ -888,7 +910,7 @@ namespace kite
             Function *currentFunc = currentBB->getParent();
             BasicBlock *BB = BasicBlock::Create(getGlobalContext(), "loop", currentFunc);
             
-            state.module_builder().CreateBr(BB);
+            generate_debug_data(state.module_builder().CreateBr(BB), tree.position);
             state.module_builder().SetInsertPoint(BB);
             Value *condition = boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
             
@@ -901,16 +923,16 @@ namespace kite
             switch(tree.op)
             {
                 case semantics::WHILE:
-                    state.module_builder().CreateCondBr(condition, bodyBB, afterLoopBB);
+                    generate_debug_data(state.module_builder().CreateCondBr(condition, bodyBB, afterLoopBB), tree.position);
                     break;
                 case semantics::UNTIL:
-                    state.module_builder().CreateCondBr(condition, afterLoopBB, bodyBB);
+                    generate_debug_data(state.module_builder().CreateCondBr(condition, afterLoopBB, bodyBB), tree.position);
                     break;
             }
             
             state.module_builder().SetInsertPoint(bodyBB);
             Value *inner = boost::apply_visitor(llvm_node_codegen(state), tree.children[1]);
-            if (!state.get_skip_remaining()) state.module_builder().CreateBr(BB);
+            if (!state.get_skip_remaining()) generate_debug_data(state.module_builder().CreateBr(BB), tree.position);
             state.skip_remaining(false);
             
             state.module_builder().SetInsertPoint(afterLoopBB);
@@ -937,7 +959,7 @@ namespace kite
                     break;
             }
             
-            builder.CreateBr(currentLoop);
+            generate_debug_data(builder.CreateBr(currentLoop), tree.position);
             state.skip_remaining(true);
             return ConstantInt::get(getGlobalContext(), APInt(32, 0, true)); // TODO
         }
@@ -955,7 +977,7 @@ namespace kite
             std::vector<Value*> decideResults;
             std::vector<BasicBlock*> decideBlocks;
             
-            builder.CreateBr(condBB);
+            generate_debug_data(builder.CreateBr(condBB), tree.position);
             builder.SetInsertPoint(condBB);
             for(int i = 0; i < tree.children.size(); i++)
             {
@@ -973,7 +995,7 @@ namespace kite
                     decideBlocks.push_back(condBB);
                     condBB = endBB;
                 }
-                builder.CreateCondBr(condition, actionBB, condBB);
+                generate_debug_data(builder.CreateCondBr(condition, actionBB, condBB), tree.position);
                 builder.SetInsertPoint(actionBB);
                 Value *result = boost::apply_visitor(llvm_node_codegen(state), tree.children[i]);
                 if (!state.get_skip_remaining())
@@ -982,13 +1004,13 @@ namespace kite
                     {
                         std::vector<Value*> emptyList;
                         emptyList.push_back(result);
-                        result = generate_llvm_method_call(result, "obj", emptyList);
+                        result = generate_llvm_method_call(result, "obj", emptyList, tree);
                     }
                     decideResults.push_back(result);
                     decideBlocks.push_back(actionBB);
                 }
                 actionBB = builder.GetInsertBlock();
-                if (!state.get_skip_remaining()) builder.CreateBr(endBB);
+                if (!state.get_skip_remaining()) generate_debug_data(builder.CreateBr(endBB), tree.position);
                 state.skip_remaining(false);
                 builder.SetInsertPoint(condBB);
             }
@@ -1001,6 +1023,7 @@ namespace kite
                 BasicBlock *bb = decideBlocks[index];
                 PN->addIncoming(val, bb);
             }
+            generate_debug_data(PN, tree.position);
             return PN;
             //return ConstantInt::get(getGlobalContext(), APInt(32, 0, true)); // TODO
         }
@@ -1018,7 +1041,11 @@ namespace kite
             // Create jump point
             //Value *default_val = ConstantInt::get(Type::getInt32Ty(getGlobalContext()), 0); // TODO
             
-            Value *jmpbuf = builder.CreateAlloca(Type::getInt8Ty(getGlobalContext()), ConstantInt::get(Type::getInt32Ty(getGlobalContext()), sizeof(jmp_buf)));
+            Value *jmpbuf = generate_debug_data(
+                builder.CreateAlloca(
+                    Type::getInt8Ty(getGlobalContext()), 
+                    ConstantInt::get(Type::getInt32Ty(getGlobalContext()), sizeof(jmp_buf))),
+                tree.position);
             std::vector<Type*> setjmp_params;
             setjmp_params.push_back(jmpbuf->getType());
             FunctionType *setjmp_type = FunctionType::get(Type::getInt32Ty(getGlobalContext()), ArrayRef<Type*>(setjmp_params), false);
@@ -1028,9 +1055,11 @@ namespace kite
                 setjmp_fun->eraseFromParent();
                 setjmp_fun = module->getFunction("setjmp");
             }
-            Value *setjmp_ret = builder.CreateCall(setjmp_fun, jmpbuf);
+            Value *setjmp_ret = generate_debug_data(builder.CreateCall(setjmp_fun, jmpbuf), tree.position);
             Value *setjmp_jumped = builder.CreateICmpEQ(setjmp_ret, ConstantInt::get(Type::getInt32Ty(getGlobalContext()), 1));
-            builder.CreateCondBr(setjmp_jumped, catch_block, run_block);
+            generate_debug_data(
+                builder.CreateCondBr(setjmp_jumped, catch_block, run_block),
+                tree.position);
             
             // Create run block
             builder.SetInsertPoint(run_block);
@@ -1041,11 +1070,11 @@ namespace kite
                 pushjmp_fun->eraseFromParent();
                 pushjmp_fun = module->getFunction("kite_exception_stack_push");
             }
-            builder.CreateCall(pushjmp_fun, jmpbuf);
+            generate_debug_data(builder.CreateCall(pushjmp_fun, jmpbuf), tree.position);
             Value *run_ret = boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
             std::vector<Value*> runRetList;
             runRetList.push_back(run_ret);
-            run_ret = generate_llvm_method_call(run_ret, "obj", runRetList);
+            run_ret = generate_llvm_method_call(run_ret, "obj", runRetList, tree);
             
             // Clear exception stack entry after successful completion of block.
             std::vector<Type*> pop_exc_params;
@@ -1056,10 +1085,10 @@ namespace kite
                 pop_exc_fun->eraseFromParent();
                 pop_exc_fun = module->getFunction("kite_exception_stack_pop");
             }
-            builder.CreateCall(pop_exc_fun);
+            generate_debug_data(builder.CreateCall(pop_exc_fun), tree.position);
             
             // Jump to end of run/catch statement.
-            builder.CreateBr(end_block);
+            generate_debug_data(builder.CreateBr(end_block), tree.position);
             run_block = builder.GetInsertBlock();
             
             // Create catch block
@@ -1075,17 +1104,25 @@ namespace kite
                 get_exc_fun->eraseFromParent();
                 get_exc_fun = module->getFunction("kite_exception_get");
             }
-            sym_stack["__exc"] = builder.CreateAlloca(kite_type_to_llvm_type(semantics::OBJECT));
-            builder.CreateStore(builder.CreateCall(get_exc_fun), sym_stack["__exc"]);
+            sym_stack["__exc"] = generate_debug_data(
+                builder.CreateAlloca(kite_type_to_llvm_type(semantics::OBJECT)),
+                tree.position);
+            generate_debug_data(
+                builder.CreateStore(builder.CreateCall(get_exc_fun), sym_stack["__exc"]),
+                tree.position);
             
             // Clear exception stack here to handle nested exceptions.
-            builder.CreateCall(pop_exc_fun);
+            generate_debug_data(
+                builder.CreateCall(pop_exc_fun),
+                tree.position);
             
             Value *catch_ret = boost::apply_visitor(llvm_node_codegen(state), tree.children[1]);
             std::vector<Value*> catchRetList;
             catchRetList.push_back(catch_ret);
-            catch_ret = generate_llvm_method_call(catch_ret, "obj", catchRetList);
-            builder.CreateBr(end_block);
+            catch_ret = generate_llvm_method_call(catch_ret, "obj", catchRetList, tree);
+            generate_debug_data(
+                builder.CreateBr(end_block),
+                tree.position);
             sym_stack.erase("__exc");
             catch_block = builder.GetInsertBlock();
             
@@ -1096,6 +1133,7 @@ namespace kite
             phi->addIncoming(catch_ret, catch_block);
             //phi->addIncoming(default_val, currentBB);
             builder.SetInsertPoint(end_block);
+            generate_debug_data(phi, tree.position);
             
             // Return result.
             return phi;
@@ -1116,15 +1154,15 @@ namespace kite
             semantics::syntax_tree &body = const_cast<semantics::syntax_tree&>(boost::get<semantics::syntax_tree>(tree.children[tree.children.size() - 1]));
             Value *method = generate_llvm_method(functionName, argnames, body);
             
-            Value *method_obj = generate_llvm_method_alloc(method);
-            Value *property = builder.CreateLoad(state.current_symbol_stack()["this"]);
+            Value *method_obj = generate_llvm_method_alloc(method, tree);
+            Value *property = generate_debug_data(builder.CreateLoad(state.current_symbol_stack()["this"]), tree.position);
             functionName += "__";
             for (int i = 0; i < numargs; i++)
             {
                functionName += "o";
             }
-            Value *prop_entry = generate_llvm_dynamic_object_get_property(property, functionName, true);
-            builder.CreateStore(method_obj, prop_entry);
+            Value *prop_entry = generate_llvm_dynamic_object_get_property(property, functionName, tree, true);
+            generate_debug_data(builder.CreateStore(method_obj, prop_entry), tree.position);
             
             state.current_symbol_stack()[functionName] = prop_entry;
             return method;
@@ -1144,7 +1182,7 @@ namespace kite
                 funPtrNewList->eraseFromParent();
                 funPtrNewList = module->getFunction("kite_list_new");
             }
-            Value *listObject = builder.CreateCall(funPtrNewList);
+            Value *listObject = generate_debug_data(builder.CreateCall(funPtrNewList), tree.position);
             
             parameterTypesNewList.push_back(kite_type_to_llvm_type(semantics::OBJECT));
             parameterTypesNewList.push_back(kite_type_to_llvm_type(semantics::OBJECT));
@@ -1164,16 +1202,18 @@ namespace kite
                 const Type *itemType = listItem->getType();
                 if (itemType == PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)))
                 {
-                    listItem = builder.CreateLoad(listItem);
+                    listItem = generate_debug_data(builder.CreateLoad(listItem), tree.position);
                 }
                 else if (itemType != kite_type_to_llvm_type(semantics::OBJECT))
                 {
                     std::vector<Value*> params;
                     params.push_back(listItem);
-                    listItem = generate_llvm_method_call(listItem, "obj", params);
+                    listItem = generate_llvm_method_call(listItem, "obj", params, tree);
                 }
                 paramValuesNewList[1] = listItem;
-                builder.CreateCall(funPtrAppendList, ArrayRef<Value*>(paramValuesNewList));
+                generate_debug_data(
+                    builder.CreateCall(funPtrAppendList, ArrayRef<Value*>(paramValuesNewList)),
+                    tree.position);
             }
 
             return listObject;
@@ -1189,11 +1229,15 @@ namespace kite
             semantics::syntax_tree &body = const_cast<semantics::syntax_tree&>(boost::get<semantics::syntax_tree>(tree.children[0]));
             Value *method = generate_llvm_method(functionName, argnames, body);
             
-            Value *method_obj = generate_llvm_method_alloc(method);
-            Value *property = builder.CreateLoad(state.current_symbol_stack()["this"]);
+            Value *method_obj = generate_llvm_method_alloc(method, tree);
+            Value *property = generate_debug_data(
+                builder.CreateLoad(state.current_symbol_stack()["this"]),
+                tree.position);
             functionName += "__o";
-            Value *prop_entry = generate_llvm_dynamic_object_get_property(property, functionName);
-            builder.CreateStore(method_obj, prop_entry);
+            Value *prop_entry = generate_llvm_dynamic_object_get_property(property, functionName, tree);
+            generate_debug_data(
+                builder.CreateStore(method_obj, prop_entry),
+                tree.position);
             
             state.current_symbol_stack()[functionName] = prop_entry;
             return method;
@@ -1220,23 +1264,29 @@ namespace kite
             semantics::syntax_tree &body = const_cast<semantics::syntax_tree&>(boost::get<semantics::syntax_tree>(tree.children[tree.children.size() - 1]));
             Value *method = generate_llvm_method(functionName, argnames, body);
             
-            Value *method_obj = generate_llvm_method_alloc(method);
-            Value *property = builder.CreateLoad(state.current_symbol_stack()["this"]);
+            Value *method_obj = generate_llvm_method_alloc(method, tree);
+            Value *property = generate_debug_data(
+                builder.CreateLoad(state.current_symbol_stack()["this"]),
+                tree.position);
             
             if (functionName != "__AnonMethod")
             {
                 functionName += "__";
                 for (int i = 0; i <= numargs; i++)
                     functionName += "o";
-                Value *prop_entry = generate_llvm_dynamic_object_get_property(property, functionName, true);
-                builder.CreateStore(method_obj, prop_entry);
+                Value *prop_entry = generate_llvm_dynamic_object_get_property(property, functionName, tree, true);
+                generate_debug_data(
+                    builder.CreateStore(method_obj, prop_entry),
+                    tree.position);
                 state.current_symbol_stack()[functionName] = prop_entry;
             }
             else
             {
                 Value *method_casted = builder.CreateBitCast(method_obj, get_method_type());
                 Value *this_loc = builder.CreateStructGEP(method_casted, 2);
-                builder.CreateStore(property, this_loc);
+                generate_debug_data(
+                    builder.CreateStore(property, this_loc),
+                    tree.position);
                 return method_obj;
             }
             
@@ -1249,15 +1299,17 @@ namespace kite
             Value *ret = boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
             if (ret->getType() == PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)))
             {
-                ret = builder.CreateLoad(ret);
+                ret = generate_debug_data(
+                    builder.CreateLoad(ret),
+                    tree.position);
             }
             else if (get_type(ret) != semantics::OBJECT)
             {
                 std::vector<Value*> params;
                 params.push_back(ret);
-                ret = generate_llvm_method_call(ret, "obj", params);
+                ret = generate_llvm_method_call(ret, "obj", params, tree);
             }
-            builder.CreateRet(ret);
+            generate_debug_data(builder.CreateRet(ret), tree.position);
             state.skip_remaining(true);
             return ret;
         }
@@ -1269,6 +1321,8 @@ namespace kite
             std::string functionName = state.identifier_prefix() + name;
             int numargs = argnames.size();
 
+            state.push_friendly_method_name(name);
+            
             functionName += "__o";
             argTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
             
@@ -1280,6 +1334,8 @@ namespace kite
                     argTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
                 }
             }
+            
+            state.push_c_method_name(functionName);
             
             Module *currentModule = state.current_module();
             FunctionType *FT = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), ArrayRef<Type*>(argTypes), false);
@@ -1303,9 +1359,14 @@ namespace kite
                     name = argnames[i - 1];
                 }
                 AI->setName(name.c_str());
-                symStack[name] = builder.CreateAlloca(kite_type_to_llvm_type(semantics::OBJECT));
-                builder.CreateStore(AI, symStack[name]);
+                symStack[name] = generate_debug_data(
+                    builder.CreateAlloca(kite_type_to_llvm_type(semantics::OBJECT)),
+                    body.position);
+                generate_debug_data(
+                    builder.CreateStore(AI, symStack[name]),
+                    body.position);
             }
+            
             Value *ret = llvm_node_codegen(state)(body);
             state.pop_symbol_stack();
             
@@ -1315,13 +1376,13 @@ namespace kite
             {
                 if (ret->getType() == PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)))
                 {
-                    ret = builder.CreateLoad(ret);
+                    ret = generate_debug_data(builder.CreateLoad(ret), body.position);
                 }
                 else if (get_type(ret) != semantics::OBJECT)
                 {
                     std::vector<Value*> params;
                     params.push_back(ret);
-                    ret = generate_llvm_method_call(ret, "obj", params);
+                    ret = generate_llvm_method_call(ret, "obj", params, body);
                 }
             }
             else
@@ -1329,14 +1390,17 @@ namespace kite
                 ret = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*), (uint64_t)0, true));
                 ret = builder.CreateIntToPtr(ret, PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)));
             }
-            builder.CreateRet(ret);
+            generate_debug_data(builder.CreateRet(ret), body.position);
             //}
             state.skip_remaining(false);
             if (currentBB) state.module_builder().SetInsertPoint(currentBB);
+            
+            state.pop_c_method_name();
+            state.pop_friendly_method_name();
             return F;
         }
         
-        Value *llvm_node_codegen::generate_llvm_method_call(Value *self, std::string name, std::vector<Value*> &params) const
+        Value *llvm_node_codegen::generate_llvm_method_call(Value *self, std::string name, std::vector<Value*> &params, const semantics::syntax_tree &tree) const
         {
             IRBuilder<> &builder = state.module_builder();
             Module *module = state.current_module();
@@ -1350,7 +1414,9 @@ namespace kite
             {
                 bool replaceParam = false;
                 if (params[0] == self) replaceParam = true;
-                self = builder.CreateLoad(self);
+                self = generate_debug_data(
+                    builder.CreateLoad(self),
+                    tree.position);
                 if (replaceParam) paramsCopy[0] = self;
             }
             
@@ -1407,7 +1473,7 @@ namespace kite
                             {
                                 std::vector<Value*> castParams;
                                 castParams.push_back(v);
-                                paramsCopy[i] = generate_llvm_method_call(v, std::string("obj"), castParams);
+                                paramsCopy[i] = generate_llvm_method_call(v, std::string("obj"), castParams, tree);
                                 parameterTypes[i] = kite_type_to_llvm_type(semantics::OBJECT);
                             }
                         }
@@ -1439,10 +1505,12 @@ namespace kite
                     paramValuesLookup.push_back(builder.CreateGlobalStringPtr(name.c_str()));
                     paramValuesLookup.push_back(ConstantInt::get(getGlobalContext(), APInt(32, paramsCopy.size(), true)));
                     fptr = builder.CreateBitCast(
-                        builder.CreateCall(
-                            funPtrLookup,
-                            ArrayRef<Value*>(paramValuesLookup)
-                        ),
+                        generate_debug_data(
+                            builder.CreateCall(
+                                funPtrLookup,
+                                ArrayRef<Value*>(paramValuesLookup)
+                            ),
+                            tree.position),
                         PointerType::getUnqual(ft)
                     );
                     
@@ -1454,14 +1522,20 @@ namespace kite
                         Function *currentFunc = currentBB->getParent();
                         BasicBlock *not_null = BasicBlock::Create(getGlobalContext(), "not_null", currentFunc);
                         BasicBlock *end_block = BasicBlock::Create(getGlobalContext(), "end_block", currentFunc);
-                        builder.CreateCondBr(validatePtr, not_null, end_block);
+                        generate_debug_data(
+                            builder.CreateCondBr(validatePtr, not_null, end_block),
+                            tree.position);
                         
                         builder.SetInsertPoint(not_null);
-                        builder.CreateCall(
-                            fptr,
-                            ArrayRef<Value*>(paramsCopy)
-                        );
-                        builder.CreateBr(end_block);
+                        generate_debug_data(
+                            builder.CreateCall(
+                                fptr,
+                                ArrayRef<Value*>(paramsCopy)
+                            ),
+                            tree.position);
+                        generate_debug_data(
+                            builder.CreateBr(end_block),
+                            tree.position);
                         
                         builder.SetInsertPoint(end_block);
                         return self;
@@ -1469,10 +1543,12 @@ namespace kite
                 }
             
             }
-            self = builder.CreateCall(
-                fptr,
-                ArrayRef<Value*>(paramsCopy)
-            );
+            self = generate_debug_data(
+                builder.CreateCall(
+                    fptr,
+                    ArrayRef<Value*>(paramsCopy)
+                ),
+                tree.position);
             return self;
         }
         
@@ -1490,21 +1566,27 @@ namespace kite
 
             // Initialize dynamic_object that will store the class and insert
             // LLVM code to call __static_init__ on this object.
-            Value *obj = generate_llvm_dynamic_object_alloc(NULL);
+            Value *obj = generate_llvm_dynamic_object_alloc(NULL, tree);
             if (tree.children.size() > 2)
             {
                 // Set child class parent.
                 Value *parent = boost::apply_visitor(llvm_node_codegen(state), tree.children[1]);
-                generate_llvm_dynamic_object_set_parent(obj, parent);
+                generate_llvm_dynamic_object_set_parent(obj, parent, tree);
             }
-            builder.CreateCall(ret, obj);
+            generate_debug_data(
+                builder.CreateCall(ret, obj),
+                tree.position);
             
-            generate_llvm_dynamic_object_set_name(obj);
+            generate_llvm_dynamic_object_set_name(obj, tree);
             state.pop_namespace_stack();
                         
-            Value *property = builder.CreateLoad(state.current_symbol_stack()["this"]);
-            Value *prop_entry = generate_llvm_dynamic_object_get_property(property, className);
-            builder.CreateStore(obj, prop_entry);
+            Value *property = generate_debug_data(
+                builder.CreateLoad(state.current_symbol_stack()["this"]),
+                tree.position);
+            Value *prop_entry = generate_llvm_dynamic_object_get_property(property, className, tree);
+            generate_debug_data(
+                builder.CreateStore(obj, prop_entry),
+                tree.position);
             
             state.current_symbol_stack()[className] = prop_entry;
             
@@ -1517,8 +1599,8 @@ namespace kite
             std::vector<Value*> params;
             Value *parent = boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
             
-            Value *obj = generate_llvm_dynamic_object_alloc(parent);
-            generate_llvm_dynamic_object_set_parent(obj, parent);
+            Value *obj = generate_llvm_dynamic_object_alloc(parent, tree);
+            generate_llvm_dynamic_object_set_parent(obj, parent, tree);
             
             params.push_back(obj);
             for(int i = 1; i < tree.children.size(); i++)
@@ -1527,16 +1609,18 @@ namespace kite
                 
                 if (v->getType() == PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)))
                 {
-                    v = builder.CreateLoad(v);
+                    v = generate_debug_data(
+                        builder.CreateLoad(v),
+                        tree.position);
                 }
                 params.push_back(v);
             }
             
-            generate_llvm_method_call(obj, semantics::Constants::Get().operator_map[semantics::CONSTRUCTOR], params);
+            generate_llvm_method_call(obj, semantics::Constants::Get().operator_map[semantics::CONSTRUCTOR], params, tree);
             return obj;
         }
         
-        Value *llvm_node_codegen::generate_llvm_dynamic_object_alloc(Value *orig) const
+        Value *llvm_node_codegen::generate_llvm_dynamic_object_alloc(Value *orig, const semantics::syntax_tree &tree) const
         {
             Module *module = state.current_module();
             IRBuilder<> &builder = state.module_builder();
@@ -1559,18 +1643,26 @@ namespace kite
             {
                 if (orig->getType() == PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)))
                 {
-                    orig = builder.CreateLoad(orig);
+                    orig = generate_debug_data(
+                        builder.CreateLoad(orig),
+                        tree.position);
                 }
                 orig = builder.CreateBitCast(orig, get_object_type()); // TODO
                 alloc_method = builder.CreateStructGEP(orig, 2);
-                alloc_method = builder.CreateBitCast(builder.CreateLoad(alloc_method), PointerType::getUnqual(ft));
+                alloc_method = builder.CreateBitCast(
+                    generate_debug_data(
+                        builder.CreateLoad(alloc_method),
+                        tree.position),
+                    PointerType::getUnqual(ft));
             }
             
-            Value *obj = builder.CreateCall(alloc_method);
+            Value *obj = generate_debug_data(
+                builder.CreateCall(alloc_method),
+                tree.position);
             return obj;
         }
         
-        void llvm_node_codegen::generate_llvm_dynamic_object_set_parent(Value *obj, Value *parent) const
+        void llvm_node_codegen::generate_llvm_dynamic_object_set_parent(Value *obj, Value *parent, const semantics::syntax_tree &tree) const
         {
             Module *module = state.current_module();
             IRBuilder<> &builder = state.module_builder();
@@ -1589,13 +1681,17 @@ namespace kite
             
             if (parent->getType() == PointerType::getUnqual(parameterTypes[0]))
             {
-                parent = builder.CreateLoad(parent);
+                parent = generate_debug_data(
+                    builder.CreateLoad(parent),
+                    tree.position);
             }
             
-            builder.CreateCall2(funPtr, obj, parent);
+            generate_debug_data(
+                builder.CreateCall2(funPtr, obj, parent),
+                tree.position);
         }
         
-        void llvm_node_codegen::generate_llvm_dynamic_object_set_name(Value *obj) const
+        void llvm_node_codegen::generate_llvm_dynamic_object_set_name(Value *obj, const semantics::syntax_tree &tree) const
         {
             Module *module = state.current_module();
             IRBuilder<> &builder = state.module_builder();
@@ -1614,10 +1710,12 @@ namespace kite
             
             // Form full class name.
             std::string fullName = state.full_class_name();
-            builder.CreateCall2(funPtr, obj, builder.CreateGlobalStringPtr(fullName.c_str()));
+            generate_debug_data(
+                builder.CreateCall2(funPtr, obj, builder.CreateGlobalStringPtr(fullName.c_str())),
+                tree.position);
         }
         
-        Value *llvm_node_codegen::generate_llvm_method_alloc(Value *method) const
+        Value *llvm_node_codegen::generate_llvm_method_alloc(Value *method, const semantics::syntax_tree &tree) const
         {
             Module *module = state.current_module();
             IRBuilder<> &builder = state.module_builder();
@@ -1635,10 +1733,17 @@ namespace kite
                 funPtr->eraseFromParent();
                 funPtr = module->getFunction("kite_method_alloc");
             }
-            return builder.CreateCall2(funPtr, builder.CreateBitCast(method, kite_type_to_llvm_type(semantics::OBJECT)), ConstantInt::get(kite_type_to_llvm_type(semantics::INTEGER), num_args));
+            return generate_debug_data(
+                builder.CreateCall2(
+                    funPtr, 
+                    builder.CreateBitCast(
+                        method, 
+                        kite_type_to_llvm_type(semantics::OBJECT)), 
+                    ConstantInt::get(kite_type_to_llvm_type(semantics::INTEGER), num_args)),
+                tree.position);
         }
         
-        Value *llvm_node_codegen::generate_llvm_dynamic_object_get_property(Value *obj, std::string name, bool set) const
+        Value *llvm_node_codegen::generate_llvm_dynamic_object_get_property(Value *obj, std::string name, const semantics::syntax_tree &tree, bool set) const
         {
             Module *module = state.current_module();
             IRBuilder<> &builder = state.module_builder();
@@ -1658,12 +1763,18 @@ namespace kite
             
             if (obj->getType() == PointerType::getUnqual(parameterTypes[0]))
             {
-                obj = builder.CreateLoad(obj);
+                obj = generate_debug_data(builder.CreateLoad(obj), tree.position);
             }
-            return builder.CreateCall3(funPtr, obj, builder.CreateGlobalStringPtr(name.c_str()), ConstantInt::get(kite_type_to_llvm_type(semantics::BOOLEAN), set));
+            return generate_debug_data(
+                builder.CreateCall3(
+                    funPtr, 
+                    obj, 
+                    builder.CreateGlobalStringPtr(name.c_str()), 
+                    ConstantInt::get(kite_type_to_llvm_type(semantics::BOOLEAN), set)),
+                tree.position);
         }
         
-        Value *llvm_node_codegen::generate_llvm_dynamic_object_get_root() const
+        Value *llvm_node_codegen::generate_llvm_dynamic_object_get_root(const semantics::syntax_tree &tree) const
         {
             Module *module = state.current_module();
             IRBuilder<> &builder = state.module_builder();
@@ -1677,7 +1788,7 @@ namespace kite
                 funPtr = module->getFunction("kite_dynamic_object_get_root");
             }
             
-            return builder.CreateCall(funPtr);
+            return generate_debug_data(builder.CreateCall(funPtr), tree.position);
         }
         
         semantics::builtin_types llvm_node_codegen::get_type(Value *val)
@@ -1863,6 +1974,74 @@ namespace kite
             }
         
             return returnValue;
+        }
+        
+        Instruction *llvm_node_codegen::generate_debug_data(Instruction *instruction, const semantics::syntax_tree_position &pos) const
+        {
+            const DebugLoc &debugLoc = instruction->getDebugLoc();
+            int LLVMDebugVersion = 8 << 16; // TODO
+            
+            if (debugLoc.getLine() == 0)
+            {
+                // Create compile unit
+                std::vector<Value*> compileUnitV;
+                compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 17 + LLVMDebugVersion, true)));
+                compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
+                compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0xAA35, true))); // DW_LANG_Kite 
+                
+                boost::filesystem::path p(pos.file);
+                compileUnitV.push_back(MDString::get(getGlobalContext(), p.filename().string()));
+                compileUnitV.push_back(MDString::get(getGlobalContext(), p.parent_path().string()));
+                compileUnitV.push_back(MDString::get(getGlobalContext(), "Kite version 2.0")); // TODO
+                compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(1, 1, true)));
+                compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(1, 0, true)));
+                compileUnitV.push_back(MDString::get(getGlobalContext(), ""));
+                compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
+                
+                MDNode *compileUnit = MDNode::get(getGlobalContext(), compileUnitV);
+                
+                // Create type for method
+                std::vector<Value*> subroutineTypeV;
+                subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 21 + LLVMDebugVersion, true)));
+                subroutineTypeV.push_back(compileUnit);
+                subroutineTypeV.push_back(MDString::get(getGlobalContext(), ""));
+                subroutineTypeV.push_back(NULL);
+                subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
+                subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(64, 0, true)));
+                subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(64, 0, true)));
+                subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(64, 0, true)));
+                subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
+                subroutineTypeV.push_back(NULL);
+                subroutineTypeV.push_back(MDNode::get(getGlobalContext(), NULL));
+                subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
+                MDNode *subroutineType = MDNode::get(getGlobalContext(), subroutineTypeV);
+                
+                // Create subprogram
+                std::vector<Value*> subprogramV;
+                subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 17 + LLVMDebugVersion, true)));
+                subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
+                subprogramV.push_back(compileUnit);
+                subprogramV.push_back(MDString::get(getGlobalContext(), state.current_c_method_name()));
+                subprogramV.push_back(MDString::get(getGlobalContext(), state.full_class_name() + "|" + state.current_friendly_method_name()));
+                subprogramV.push_back(MDString::get(getGlobalContext(), state.current_c_method_name()));
+                subprogramV.push_back(compileUnit);
+                subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 1, true))); // TODO: line number
+                subprogramV.push_back(subroutineType);
+                subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(1, 0, true)));
+                subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(1, 1, true)));
+                MDNode *subprogram = MDNode::get(getGlobalContext(), subprogramV);
+                
+                // Create lexical block.
+                std::vector<Value*> lexicalBlockV;
+                lexicalBlockV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 11 + LLVMDebugVersion, true)));
+                lexicalBlockV.push_back(subprogram);
+                MDNode *lexicalBlock = MDNode::get(getGlobalContext(), lexicalBlockV);
+                
+                // Create new debug location
+                DebugLoc newLoc = DebugLoc::get(pos.line, pos.column, lexicalBlock);
+                instruction->setDebugLoc(newLoc);
+            }
+            return instruction;
         }
     }
 }

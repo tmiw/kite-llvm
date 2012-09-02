@@ -13,6 +13,7 @@ GC_LIBS=-L/opt/local/lib -lgc
 GC_LDFLAGS=-L/usr/lib
 MATH_LIBS=-lm
 REGEX_LIBS=-lboost_regex-mt
+FILESYSTEM_LIBS=-lboost_filesystem-mt -lboost_system-mt
 OPENSSL_LIBS=-lssl -lcrypto
 
 ifeq ($(LLVM_VERSION),3.1)
@@ -65,10 +66,10 @@ clean:
 	rm -rf Makefile.bak `find ./ -name '*.o'` kite ikt
 
 kite: $(KITE_OBJS)
-	$(CC) $(CPPFLAGS) $(LDFLAGS) -o kite $(KITE_OBJS) $(LLVM_LDFLAGS) $(LLVM_LIBS) $(GC_LDFLAGS) $(GC_LIBS) $(MATH_LIBS) $(REGEX_LIBS) $(OPENSSL_LIBS)
+	$(CC) $(CPPFLAGS) $(LDFLAGS) -o kite $(KITE_OBJS) $(LLVM_LDFLAGS) $(LLVM_LIBS) $(GC_LDFLAGS) $(GC_LIBS) $(MATH_LIBS) $(REGEX_LIBS) $(FILESYSTEM_LIBS) $(OPENSSL_LIBS)
 
 ikt: $(IKT_OBJS)
-	$(CC) $(CPPFLAGS) $(LDFLAGS) -o ikt $(IKT_OBJS) $(LLVM_LDFLAGS) $(LLVM_LIBS) $(GC_LDFLAGS) $(GC_LIBS) $(MATH_LIBS) $(REGEX_LIBS) $(OPENSSL_LIBS)
+	$(CC) $(CPPFLAGS) $(LDFLAGS) -o ikt $(IKT_OBJS) $(LLVM_LDFLAGS) $(LLVM_LIBS) $(GC_LDFLAGS) $(GC_LIBS) $(MATH_LIBS) $(REGEX_LIBS) $(FILESYSTEM_LIBS) $(OPENSSL_LIBS)
 
 # DO NOT DELETE
 

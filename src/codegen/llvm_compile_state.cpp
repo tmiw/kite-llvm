@@ -73,6 +73,30 @@ namespace kite
 	        return returnValue;
 	    }
 	               
+        void llvm_compile_state::push_friendly_method_name(std::string name)
+	    {
+	        _methodStack.push_back(name);
+	    }
+	    
+	    std::string llvm_compile_state::pop_friendly_method_name()
+	    {
+            std::string returnValue = _methodStack.back();
+	        _methodStack.pop_back();
+	        return returnValue;
+	    }
+	    
+	    void llvm_compile_state::push_c_method_name(std::string name)
+	    {
+	        _cMethodStack.push_back(name);
+	    }
+	    
+	    std::string llvm_compile_state::pop_c_method_name()
+	    {
+            std::string returnValue = _cMethodStack.back();
+	        _cMethodStack.pop_back();
+	        return returnValue;
+	    }
+	              
         void llvm_compile_state::push_loop_end(BasicBlock *loop)
 	    {
 	        _loopEndStack.push_back(loop);
@@ -113,7 +137,10 @@ namespace kite
                 ret += (*i);
                 ret += ".";
             }
-            return ret.erase(ret.size() - 1, 1);
+            if (ret.size() > 0)
+                return ret.erase(ret.size() - 1, 1);
+            else
+                return "main"; // TODO: better name.
         }
     }
 }

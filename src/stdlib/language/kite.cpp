@@ -41,6 +41,7 @@
 #include <llvm/LLVMContext.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/Support/MemoryBuffer.h>
+//#include <llvm/ExecutionEngine/MCJIT.h>
 #include <llvm/ExecutionEngine/JIT.h>
 #include <llvm/PassManager.h>
 #include <llvm/Analysis/Verifier.h>
@@ -71,21 +72,11 @@ namespace kite
                 void kite::InitializeRuntimeSystem(int argc, char **argv)
                 {
                     InitializeNativeTarget();
+                    InitializeNativeTargetAsmPrinter();
                     llvm_start_multithreaded();
-#ifdef LLVM3_1
-                    llvm::TargetOptions targetOptions;
-                    targetOptions.JITEmitDebugInfo = true;
-#else
-                    llvm::JITEmitDebugInfo = true; // for not-weird stack traces in gdb
-#endif
 
                     current_module = new Module("__root_module", getGlobalContext());
                     state.push_module(current_module);
-                    EngineBuilder engineBuilder(current_module);
-#ifdef LLVM3_1
-                    engineBuilder.setTargetOptions(targetOptions);
-#endif
-                    execution_engine = engineBuilder.create();
                     
                     System::dynamic_object *system_obj = (System::dynamic_object*)root()->properties["System"];
                     system_obj->properties["float"] = &System::fpnum::class_object;
@@ -210,7 +201,19 @@ namespace kite
                 {
                     codegen::llvm_node_codegen cg(state);
                     std::vector<std::string> argNames;
-                    Function *function = (Function*)cg.generate_llvm_method("__static_init__", argNames, ast.ast);
+
+                    semantics::syntax_tree fake_ast;
+                    fake_ast.position.line = 1;
+                    fake_ast.position.column = 1;
+                    fake_ast.position.file = ast.ast.position.file;
+                    Function *function = (Function*)cg.generate_llvm_method("__static_init__", argNames, ast.ast, fake_ast);
+
+#ifdef LLVM3_1
+                    llvm::TargetOptions targetOptions;
+                    targetOptions.JITEmitDebugInfo = true;
+#else
+                    llvm::JITEmitDebugInfo = true; // for not-weird stack traces in gdb
+#endif
 
                     if (enable_optimizer)
                     {
@@ -236,10 +239,20 @@ namespace kite
 
                     //current_module->dump();
                     verifyFunction(*function);
-                    void *fptr = execution_engine->getPointerToFunction(function);
                     
                     if (!suppressExec)
                     {
+                        if (execution_engine == NULL)
+                        {
+                            EngineBuilder engineBuilder(current_module);
+#ifdef LLVM3_1
+                            engineBuilder.setTargetOptions(targetOptions);
+#endif
+                            //engineBuilder.setUseMCJIT(true);
+                            execution_engine = engineBuilder.create();
+                        }
+
+                        void *fptr = execution_engine->getPointerToFunction(function);
                         System::object *(*FP)(System::object *) = (System::object*(*)(System::object*))fptr;
                         return (*FP)(context);
                     }

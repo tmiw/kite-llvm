@@ -25,7 +25,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <llvm/support/Dwarf.h>
+#include <llvm/Support/Dwarf.h>
 #include <llvm/Analysis/DebugInfo.h>
 #include <setjmp.h>
 #include <boost/foreach.hpp>

@@ -37,7 +37,7 @@ namespace kite
                 | lit("null") [ _val = (void*)NULL ];
             
             list_statement = 
-                lit("[") [ at_c<0>(_val) = kite::semantics::LIST_VAL ] >>
+                lit("[") [ at_c<0>(_val) = kite::semantics::LIST_VAL ] >> iter_pos [ at_c<2>(_val) = phoenix::construct<semantics::syntax_tree_position>(_1) ] >>
                 -(or_statement [ push_back(at_c<1>(_val), _1) ] % ',') >>
                 lit("]");
             

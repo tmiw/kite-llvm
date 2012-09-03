@@ -27,6 +27,8 @@
 
 #include "kite.h"
 
+#define ENABLE_ENHANCED_JIT
+
 #include <algorithm>
 #include <sys/stat.h>
 #include <parser/parser.h>
@@ -41,7 +43,9 @@
 #include <llvm/LLVMContext.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/Support/MemoryBuffer.h>
-//#include <llvm/ExecutionEngine/MCJIT.h>
+#ifdef ENABLE_ENHANCED_JIT
+#include <llvm/ExecutionEngine/MCJIT.h>
+#endif
 #include <llvm/ExecutionEngine/JIT.h>
 #include <llvm/PassManager.h>
 #include <llvm/Analysis/Verifier.h>
@@ -250,7 +254,9 @@ namespace kite
 #ifdef LLVM3_1
                             engineBuilder.setTargetOptions(targetOptions);
 #endif
-                            //engineBuilder.setUseMCJIT(true);
+#ifdef ENABLE_ENHANCED_JIT
+                            engineBuilder.setUseMCJIT(true);
+#endif
                             execution_engine = engineBuilder.create();
                         }
 

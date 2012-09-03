@@ -46,12 +46,15 @@ namespace kite
 	    {
 	        Module *returnValue = _moduleStack.back();
 	        _moduleStack.pop_back();
+            debugBuilder->finalize(); // TODO: stackify
+            delete debugBuilder;
 	        return returnValue;
 	    }
 	               
         void llvm_compile_state::push_module(Module *module)
 	    {
 	        _moduleStack.push_back(module);
+            debugBuilder = new DIBuilder(*module); // TODO: stackify
 	    }
 	    
 	    BasicBlock *llvm_compile_state::pop_loop()

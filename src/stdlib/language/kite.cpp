@@ -244,6 +244,8 @@ namespace kite
                     {
                         if (execution_engine == NULL)
                         {
+                            state.debugBuilder->finalize();
+                            state.debugBuilder = NULL; // TODO: proper cleanup.
                             EngineBuilder engineBuilder(current_module);
 #ifdef LLVM3_1
                             engineBuilder.setTargetOptions(targetOptions);

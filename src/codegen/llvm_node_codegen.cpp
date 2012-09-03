@@ -25,6 +25,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include <llvm/support/Dwarf.h>
+#include <llvm/Analysis/DebugInfo.h>
 #include <setjmp.h>
 #include <boost/foreach.hpp>
 #include <boost/variant/apply_visitor.hpp>
@@ -36,6 +38,7 @@
 
 using namespace boost::assign;
 using namespace kite::stdlib;
+using namespace llvm::dwarf;
 
 namespace kite
 {
@@ -1974,111 +1977,72 @@ namespace kite
         Instruction *llvm_node_codegen::generate_debug_data(Instruction *instruction, const semantics::syntax_tree_position &pos) const
         {
             const DebugLoc &debugLoc = instruction->getDebugLoc();
-            int LLVMDebugVersion = 8 << 16; // TODO
             
             if (debugLoc.getLine() == 0)
             {
+                boost::filesystem::path p(pos.file);
+                
                 // Create compile unit
-                MDNode *compileUnit;
                 if (state.compileUnitCache.find(pos.file) == state.compileUnitCache.end())
                 {
-                    std::vector<Value*> compileUnitV;
-                    compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 17 + LLVMDebugVersion, true)));
-                    compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
-                    //compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0xAA35, true))); // DW_LANG_Kite 
-                    compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 12, true))); // DW_LANG_C99 for correct gdb behavior (for now) -- TODO 
-                
-                    boost::filesystem::path p(pos.file);
-                    compileUnitV.push_back(MDString::get(getGlobalContext(), p.filename().string()));
-                    compileUnitV.push_back(MDString::get(getGlobalContext(), p.parent_path().string()));
-                    compileUnitV.push_back(MDString::get(getGlobalContext(), "Kite version 2.0")); // TODO
-                    compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(1, 1, true)));
-                    compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(1, 0, true)));
-                    compileUnitV.push_back(MDString::get(getGlobalContext(), ""));
-                    compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
-
-                    std::vector<Value*> emptyList;
-                    compileUnitV.push_back(MDNode::get(getGlobalContext(), emptyList)); // enums
-                    compileUnitV.push_back(MDNode::get(getGlobalContext(), emptyList)); // retained types
-                    compileUnitV.push_back(MDNode::get(getGlobalContext(), emptyList)); // subprograms (idx 12)
-                    compileUnitV.push_back(MDNode::get(getGlobalContext(), emptyList)); // global vars
-                    
-                    compileUnit = MDNode::get(getGlobalContext(), compileUnitV);
-                    state.compileUnitCache[pos.file] = compileUnit;
-                
-                    // Add compile unit to named list
-                    NamedMDNode *cuNode = state.current_module()->getOrInsertNamedMetadata("llvm.dbg.cu");
-                    cuNode->addOperand(compileUnit);
-                }
-                else
-                {
-                    compileUnit = state.compileUnitCache[pos.file];
+                    // Note: createCompileUnit seems to create one compile unit per module.
+                    // Maybe we should look into this.
+                    state.debugBuilder->createCompileUnit (0xAA35, p.filename().string(), p.parent_path().string(), "Kite version 2.0", false, "", 0);
+                    state.compileUnitCache[pos.file] = const_cast<MDNode*>(state.debugBuilder->getCU());
                 }
 
-                std::map<std::string, Value*> &subroutineCache(state.subroutineCache[compileUnit]);
-                MDNode *subprogram;
+                DIFile file = state.debugBuilder->createFile(p.filename().string(), p.parent_path().string());
+
+                std::map<std::string, DISubprogram> &subroutineCache = state.subroutineCache;
+                DISubprogram subprogram;
                 if (subroutineCache.find(state.current_c_method_name()) == subroutineCache.end())
                 {
-                    // Create type for method
-                    std::vector<Value*> subroutineTypeV;
-                    subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 21 + LLVMDebugVersion, true)));
-                    subroutineTypeV.push_back(compileUnit);
-                    subroutineTypeV.push_back(MDString::get(getGlobalContext(), ""));
-                    subroutineTypeV.push_back(NULL);
-                    subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
-                    subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(64, 0, true)));
-                    subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(64, 0, true)));
-                    subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(64, 0, true)));
-                    subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
-                    subroutineTypeV.push_back(NULL);
-                    subroutineTypeV.push_back(MDNode::get(getGlobalContext(), NULL));
-                    subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
-                    MDNode *subroutineType = MDNode::get(getGlobalContext(), subroutineTypeV);
-                
-                    // Create subprogram
-                    std::vector<Value*> subprogramV;
-                    subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 46 + LLVMDebugVersion, true)));
-                    subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
-                    subprogramV.push_back(compileUnit);
-                    subprogramV.push_back(MDString::get(getGlobalContext(), state.current_c_method_name()));
-                    subprogramV.push_back(MDString::get(getGlobalContext(), state.full_class_name() + "|" + state.current_friendly_method_name()));
-                    subprogramV.push_back(MDString::get(getGlobalContext(), state.current_c_method_name()));
-                    subprogramV.push_back(compileUnit);
-                    subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 1, true))); // TODO: line number
-                    subprogramV.push_back(subroutineType);
-                    subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(1, 0, true)));
-                    subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(1, 1, true)));
-                    subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 1, true))); // TODO: line number
-                    subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true))); 
-                    subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true))); 
-                    subprogramV.push_back(NULL);
-                    subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true))); 
-                    subprogramV.push_back(NULL); // TODO: Function*
-                    subprogramV.push_back(NULL);
-                    subprogramV.push_back(NULL);
-                    subprogramV.push_back(NULL);
-                    subprogram = MDNode::get(getGlobalContext(), subprogramV);
+                    DIType basicType = state.debugBuilder->createBasicType("System::object", sizeof(void*)*8 /* TODO */, 0, DW_ATE_address);
+                    DIType pointerType = state.debugBuilder->createPointerType(basicType, sizeof(void*)*8);
+                    
+                    std::vector<Value*> fxnTypes;
+                    fxnTypes.push_back(pointerType);
+                    fxnTypes.push_back(pointerType);
+                    
+                    DIType type = state.debugBuilder->createSubroutineType(
+                        file,
+                        DIArray(MDNode::get(getGlobalContext(), fxnTypes))
+                        );
+                    
+                    subprogram = state.debugBuilder->createFunction(
+                        file,
+                        state.full_class_name() + "|" + state.current_friendly_method_name(), 
+                        state.current_c_method_name(),
+                        file,
+                        1 /* TODO: line# */,
+                        type,
+                        false,
+                        true,
+                        1 /* TODO: line# */
+                        );
+                    
+                    assert(subprogram.Verify());
+                    
                     subroutineCache[state.current_c_method_name()] = subprogram;
-
-                    // Update compile unit
-                    std::vector<Value*> newSubList;
-                    for (std::map<std::string, Value*>::iterator i = subroutineCache.begin(); i != subroutineCache.end(); i++)
-                    {
-                        newSubList.push_back(i->second);
-                    }
-                    compileUnit->replaceOperandWith(12, MDNode::get(getGlobalContext(), newSubList));
                 }
                 else
                 {
-                    subprogram = (MDNode*)subroutineCache[state.current_c_method_name()];
+                    subprogram = subroutineCache[state.current_c_method_name()];
                 }
 
                 // Create lexical block.
-                std::vector<Value*> lexicalBlockV;
-                lexicalBlockV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 11 + LLVMDebugVersion, true)));
-                lexicalBlockV.push_back(subprogram);
-                MDNode *lexicalBlock = MDNode::get(getGlobalContext(), lexicalBlockV);
-                
+                DILexicalBlock lexicalBlock;
+                if (state.lexicalBlockCache.find(state.current_c_method_name()) == state.lexicalBlockCache.end())
+                {
+                    lexicalBlock = state.debugBuilder->createLexicalBlock(subprogram, file, 1 /* TODO: line */, 1 /* TODO: col */);
+                    assert(lexicalBlock.Verify());
+                    state.lexicalBlockCache[state.current_c_method_name()] = lexicalBlock;
+                }
+                else
+                {
+                    lexicalBlock = state.lexicalBlockCache[state.current_c_method_name()];
+                }
+                               
                 // Create new debug location
                 DebugLoc newLoc = DebugLoc::get(pos.line, pos.column, lexicalBlock);
                 instruction->setDebugLoc(newLoc);

@@ -35,6 +35,8 @@
 #include <llvm/Module.h>
 #include <llvm/Analysis/Verifier.h>
 #include <llvm/Support/IRBuilder.h>
+#include <llvm/Analysis/DIBuilder.h>
+#include <llvm/Analysis/DebugInfo.h>
 using namespace llvm;
 
 namespace kite
@@ -86,7 +88,9 @@ namespace kite
             inline bool get_skip_remaining() { return _skipRemainingStatements; }
 
             std::map<std::string, MDNode*> compileUnitCache;            
-            std::map<MDNode*, std::map<std::string, Value*> > subroutineCache;
+            std::map<std::string, DISubprogram> subroutineCache;
+            std::map<std::string, DILexicalBlock> lexicalBlockCache;
+            DIBuilder *debugBuilder;
         private:
             std::vector<std::string> _namespaceStack;
             std::vector<Module*> _moduleStack;

@@ -68,7 +68,7 @@ namespace kite
             // For deref_filter
             Value *operator()(llvm_node_codegen_params &param) const;
             
-            Value *generate_llvm_method(std::string name, std::vector<std::string> &argnames, semantics::syntax_tree &body) const;
+            Value *generate_llvm_method(std::string name, std::vector<std::string> &argnames, semantics::syntax_tree &body, const semantics::syntax_tree &parent) const;
 
             static std::string type_to_code(semantics::builtin_types type);
             static semantics::builtin_types get_type(Value *val);

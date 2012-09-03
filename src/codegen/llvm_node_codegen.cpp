@@ -853,7 +853,7 @@ namespace kite
                     
                     builder.SetInsertPoint(has_var);
                     // TODO: check __root too.
-                    Value *createVar = generate_debug_data(builder.CreateAlloca(kite_type_to_llvm_type(semantics::OBJECT)), tree.position);
+                    Value *createVar = builder.CreateAlloca(kite_type_to_llvm_type(semantics::OBJECT));
                     generate_debug_data(builder.CreateStore(zeroPtr, createVar), tree.position);
                     generate_debug_data(builder.CreateBr(end_var), tree.position);
                     
@@ -882,9 +882,7 @@ namespace kite
                     if (lhs->getType() != rhs->getType())
                     {
                         sym_stack[i->first] = 
-                            generate_debug_data(
-                                state.module_builder().CreateAlloca(rhs->getType()),
-                                tree.position);
+                            state.module_builder().CreateAlloca(rhs->getType());
                         ptr = sym_stack[i->first];
                     }
                     generate_debug_data(state.module_builder().CreateStore(rhs, ptr), tree.position);
@@ -1041,11 +1039,10 @@ namespace kite
             // Create jump point
             //Value *default_val = ConstantInt::get(Type::getInt32Ty(getGlobalContext()), 0); // TODO
             
-            Value *jmpbuf = generate_debug_data(
+            Value *jmpbuf = 
                 builder.CreateAlloca(
                     Type::getInt8Ty(getGlobalContext()), 
-                    ConstantInt::get(Type::getInt32Ty(getGlobalContext()), sizeof(jmp_buf))),
-                tree.position);
+                    ConstantInt::get(Type::getInt32Ty(getGlobalContext()), sizeof(jmp_buf)));
             std::vector<Type*> setjmp_params;
             setjmp_params.push_back(jmpbuf->getType());
             FunctionType *setjmp_type = FunctionType::get(Type::getInt32Ty(getGlobalContext()), ArrayRef<Type*>(setjmp_params), false);
@@ -1104,9 +1101,8 @@ namespace kite
                 get_exc_fun->eraseFromParent();
                 get_exc_fun = module->getFunction("kite_exception_get");
             }
-            sym_stack["__exc"] = generate_debug_data(
-                builder.CreateAlloca(kite_type_to_llvm_type(semantics::OBJECT)),
-                tree.position);
+            sym_stack["__exc"] =
+                builder.CreateAlloca(kite_type_to_llvm_type(semantics::OBJECT));
             generate_debug_data(
                 builder.CreateStore(builder.CreateCall(get_exc_fun), sym_stack["__exc"]),
                 tree.position);
@@ -1152,7 +1148,7 @@ namespace kite
             }
         
             semantics::syntax_tree &body = const_cast<semantics::syntax_tree&>(boost::get<semantics::syntax_tree>(tree.children[tree.children.size() - 1]));
-            Value *method = generate_llvm_method(functionName, argnames, body);
+            Value *method = generate_llvm_method(functionName, argnames, body, tree);
             
             Value *method_obj = generate_llvm_method_alloc(method, tree);
             Value *property = generate_debug_data(builder.CreateLoad(state.current_symbol_stack()["this"]), tree.position);
@@ -1227,7 +1223,7 @@ namespace kite
             std::string functionName = semantics::Constants::Get().operator_map[tree.op];
         
             semantics::syntax_tree &body = const_cast<semantics::syntax_tree&>(boost::get<semantics::syntax_tree>(tree.children[0]));
-            Value *method = generate_llvm_method(functionName, argnames, body);
+            Value *method = generate_llvm_method(functionName, argnames, body, tree);
             
             Value *method_obj = generate_llvm_method_alloc(method, tree);
             Value *property = generate_debug_data(
@@ -1262,7 +1258,7 @@ namespace kite
             }
         
             semantics::syntax_tree &body = const_cast<semantics::syntax_tree&>(boost::get<semantics::syntax_tree>(tree.children[tree.children.size() - 1]));
-            Value *method = generate_llvm_method(functionName, argnames, body);
+            Value *method = generate_llvm_method(functionName, argnames, body, tree);
             
             Value *method_obj = generate_llvm_method_alloc(method, tree);
             Value *property = generate_debug_data(
@@ -1314,7 +1310,7 @@ namespace kite
             return ret;
         }
         
-        Value *llvm_node_codegen::generate_llvm_method(std::string name, std::vector<std::string> &argnames, semantics::syntax_tree &body) const
+        Value *llvm_node_codegen::generate_llvm_method(std::string name, std::vector<std::string> &argnames, semantics::syntax_tree &body, const semantics::syntax_tree &parent) const
         {
             BasicBlock *currentBB = state.module_builder().GetInsertBlock();
             std::vector<Type*> argTypes;
@@ -1359,12 +1355,11 @@ namespace kite
                     name = argnames[i - 1];
                 }
                 AI->setName(name.c_str());
-                symStack[name] = generate_debug_data(
-                    builder.CreateAlloca(kite_type_to_llvm_type(semantics::OBJECT)),
-                    body.position);
+                symStack[name] =
+                    builder.CreateAlloca(kite_type_to_llvm_type(semantics::OBJECT));
                 generate_debug_data(
                     builder.CreateStore(AI, symStack[name]),
-                    body.position);
+                    parent.position);
             }
             
             Value *ret = llvm_node_codegen(state)(body);
@@ -1562,7 +1557,7 @@ namespace kite
             state.push_namespace_stack(className);
             semantics::syntax_tree &body = const_cast<semantics::syntax_tree&>(boost::get<semantics::syntax_tree>(tree.children[tree.children.size() - 1]));
             std::vector<std::string> args;
-            ret = generate_llvm_method(std::string("__static_init__"), args, body);
+            ret = generate_llvm_method(std::string("__static_init__"), args, body, tree);
 
             // Initialize dynamic_object that will store the class and insert
             // LLVM code to call __static_init__ on this object.
@@ -2001,7 +1996,13 @@ namespace kite
                     compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(1, 0, true)));
                     compileUnitV.push_back(MDString::get(getGlobalContext(), ""));
                     compileUnitV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
-                
+
+                    std::vector<Value*> emptyList;
+                    compileUnitV.push_back(MDNode::get(getGlobalContext(), emptyList)); // enums
+                    compileUnitV.push_back(MDNode::get(getGlobalContext(), emptyList)); // retained types
+                    compileUnitV.push_back(MDNode::get(getGlobalContext(), emptyList)); // subprograms (idx 12)
+                    compileUnitV.push_back(MDNode::get(getGlobalContext(), emptyList)); // global vars
+                    
                     compileUnit = MDNode::get(getGlobalContext(), compileUnitV);
                     state.compileUnitCache[pos.file] = compileUnit;
                 
@@ -2014,37 +2015,64 @@ namespace kite
                     compileUnit = state.compileUnitCache[pos.file];
                 }
 
-                // Create type for method
-                std::vector<Value*> subroutineTypeV;
-                subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 21 + LLVMDebugVersion, true)));
-                subroutineTypeV.push_back(compileUnit);
-                subroutineTypeV.push_back(MDString::get(getGlobalContext(), ""));
-                subroutineTypeV.push_back(NULL);
-                subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
-                subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(64, 0, true)));
-                subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(64, 0, true)));
-                subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(64, 0, true)));
-                subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
-                subroutineTypeV.push_back(NULL);
-                subroutineTypeV.push_back(MDNode::get(getGlobalContext(), NULL));
-                subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
-                MDNode *subroutineType = MDNode::get(getGlobalContext(), subroutineTypeV);
+                std::map<std::string, Value*> &subroutineCache(state.subroutineCache[compileUnit]);
+                MDNode *subprogram;
+                if (subroutineCache.find(state.current_c_method_name()) == subroutineCache.end())
+                {
+                    // Create type for method
+                    std::vector<Value*> subroutineTypeV;
+                    subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 21 + LLVMDebugVersion, true)));
+                    subroutineTypeV.push_back(compileUnit);
+                    subroutineTypeV.push_back(MDString::get(getGlobalContext(), ""));
+                    subroutineTypeV.push_back(NULL);
+                    subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
+                    subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(64, 0, true)));
+                    subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(64, 0, true)));
+                    subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(64, 0, true)));
+                    subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
+                    subroutineTypeV.push_back(NULL);
+                    subroutineTypeV.push_back(MDNode::get(getGlobalContext(), NULL));
+                    subroutineTypeV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
+                    MDNode *subroutineType = MDNode::get(getGlobalContext(), subroutineTypeV);
                 
-                // Create subprogram
-                std::vector<Value*> subprogramV;
-                subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 46 + LLVMDebugVersion, true)));
-                subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
-                subprogramV.push_back(compileUnit);
-                subprogramV.push_back(MDString::get(getGlobalContext(), state.current_c_method_name()));
-                subprogramV.push_back(MDString::get(getGlobalContext(), state.full_class_name() + "|" + state.current_friendly_method_name()));
-                subprogramV.push_back(MDString::get(getGlobalContext(), state.current_c_method_name()));
-                subprogramV.push_back(compileUnit);
-                subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 1, true))); // TODO: line number
-                subprogramV.push_back(subroutineType);
-                subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(1, 0, true)));
-                subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(1, 1, true)));
-                MDNode *subprogram = MDNode::get(getGlobalContext(), subprogramV);
-                
+                    // Create subprogram
+                    std::vector<Value*> subprogramV;
+                    subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 46 + LLVMDebugVersion, true)));
+                    subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
+                    subprogramV.push_back(compileUnit);
+                    subprogramV.push_back(MDString::get(getGlobalContext(), state.current_c_method_name()));
+                    subprogramV.push_back(MDString::get(getGlobalContext(), state.full_class_name() + "|" + state.current_friendly_method_name()));
+                    subprogramV.push_back(MDString::get(getGlobalContext(), state.current_c_method_name()));
+                    subprogramV.push_back(compileUnit);
+                    subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 1, true))); // TODO: line number
+                    subprogramV.push_back(subroutineType);
+                    subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(1, 0, true)));
+                    subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(1, 1, true)));
+                    subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 1, true))); // TODO: line number
+                    subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true))); 
+                    subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true))); 
+                    subprogramV.push_back(NULL);
+                    subprogramV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 0, true))); 
+                    subprogramV.push_back(NULL); // TODO: Function*
+                    subprogramV.push_back(NULL);
+                    subprogramV.push_back(NULL);
+                    subprogramV.push_back(NULL);
+                    subprogram = MDNode::get(getGlobalContext(), subprogramV);
+                    subroutineCache[state.current_c_method_name()] = subprogram;
+
+                    // Update compile unit
+                    std::vector<Value*> newSubList;
+                    for (std::map<std::string, Value*>::iterator i = subroutineCache.begin(); i != subroutineCache.end(); i++)
+                    {
+                        newSubList.push_back(i->second);
+                    }
+                    compileUnit->replaceOperandWith(12, MDNode::get(getGlobalContext(), newSubList));
+                }
+                else
+                {
+                    subprogram = (MDNode*)subroutineCache[state.current_c_method_name()];
+                }
+
                 // Create lexical block.
                 std::vector<Value*> lexicalBlockV;
                 lexicalBlockV.push_back(ConstantInt::get(getGlobalContext(), APInt(32, 11 + LLVMDebugVersion, true)));

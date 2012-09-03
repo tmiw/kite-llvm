@@ -1164,7 +1164,7 @@ namespace kite
             generate_debug_data(builder.CreateStore(method_obj, prop_entry), tree.position);
             
             state.current_symbol_stack()[functionName] = prop_entry;
-            return method;
+            return method_obj;
         }
 
         Value *llvm_node_codegen::codegen_list_op(semantics::syntax_tree const &tree) const
@@ -1239,7 +1239,7 @@ namespace kite
                 tree.position);
             
             state.current_symbol_stack()[functionName] = prop_entry;
-            return method;
+            return method_obj;
         }
         
         Value *llvm_node_codegen::codegen_method_op(semantics::syntax_tree const &tree) const
@@ -1370,6 +1370,7 @@ namespace kite
             
             /*if (state.get_skip_remaining() == false)
             {*/
+            
             if (ret != NULL)
             {
                 if (ret->getType() == PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)))

@@ -193,6 +193,10 @@ namespace kite
                         context = the_object;
                     }
                     
+                    for (; size > 0; size--)
+                    {
+                        state.pop_namespace_stack();
+                    }
                     return context;
                 }
                 
@@ -246,23 +250,34 @@ namespace kite
                     
                     if (!suppressExec)
                     {
-                        if (execution_engine == NULL)
+                        if (state.identifier_prefix().size() > 0)
                         {
-                            state.current_debug_builder()->finalize();
-                            //state.current_debug_builder() = NULL; // TODO: proper cleanup.
-                            EngineBuilder engineBuilder(current_module);
+                            // Write LLVM code to manually call the generated function
+                            // to ensure correct initialization.
+                            Value *val = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*)*8, (uint64_t)context, true));
+                            val = state.module_builder().CreateIntToPtr(val, PointerType::getUnqual(Type::getInt32Ty(getGlobalContext())));
+                            state.module_builder().CreateCall(function, val);
+                        }
+                        else
+                        {
+                            if (execution_engine == NULL)
+                            {
+                                state.current_debug_builder()->finalize();
+                                //state.current_debug_builder() = NULL; // TODO: proper cleanup.
+                                EngineBuilder engineBuilder(current_module);
 #ifdef LLVM3_1
-                            engineBuilder.setTargetOptions(targetOptions);
+                                engineBuilder.setTargetOptions(targetOptions);
 #endif
 #ifdef ENABLE_ENHANCED_JIT
-                            engineBuilder.setUseMCJIT(true);
+                                engineBuilder.setUseMCJIT(true);
 #endif
-                            execution_engine = engineBuilder.create();
-                        }
+                                execution_engine = engineBuilder.create();
+                            }
 
-                        void *fptr = execution_engine->getPointerToFunction(function);
-                        System::object *(*FP)(System::object *) = (System::object*(*)(System::object*))fptr;
-                        return (*FP)(context);
+                            void *fptr = execution_engine->getPointerToFunction(function);
+                            System::object *(*FP)(System::object *) = (System::object*(*)(System::object*))fptr;
+                            return (*FP)(context);
+                        }
                     }
                     else
                     {

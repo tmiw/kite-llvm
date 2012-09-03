@@ -1386,8 +1386,15 @@ namespace kite
             }
             else
             {
-                ret = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*), (uint64_t)0, true));
-                ret = builder.CreateIntToPtr(ret, PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)));
+                if (symStack.find("this") != symStack.end())
+                {
+                    ret = generate_debug_data(builder.CreateLoad(symStack["this"]), parent.position);
+                }
+                else
+                {
+                    ret = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*), (uint64_t)0, true));
+                    ret = builder.CreateIntToPtr(ret, PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)));
+                }
             }
             generate_debug_data(builder.CreateRet(ret), body.position);
             //}

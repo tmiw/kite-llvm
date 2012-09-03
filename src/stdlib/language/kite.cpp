@@ -282,6 +282,7 @@ namespace kite
                 
                 std::string kite::GetMethodNameFromPointer(void *ptr, void **beginPointer)
                 {
+#ifndef ENABLE_ENHANCED_JIT
                     // We need to go through every function object in
                     // the LLVM Module object to find the correct function
                     // name. This might cause performance issues if called often.
@@ -346,6 +347,9 @@ namespace kite
                     }
                     
                     return retValue;
+#else
+                    return "";
+#endif
                 }
             }
         }

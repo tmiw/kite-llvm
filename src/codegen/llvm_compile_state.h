@@ -90,8 +90,13 @@ namespace kite
             std::map<std::string, MDNode*> compileUnitCache;            
             std::map<std::string, DISubprogram> subroutineCache;
             std::map<std::string, DILexicalBlock> lexicalBlockCache;
-            DIBuilder *debugBuilder;
+
+            inline DIBuilder *current_debug_builder() { return _debugBuilderStack.back(); }
         private:
+            void push_debug_builder(DIBuilder *builder); /*! Pushes new debug builder onto stack. */
+            DIBuilder *pop_debug_builder(); /*! Pops debug builder from top of stack. */
+            
+            std::vector<DIBuilder*> _debugBuilderStack;
             std::vector<std::string> _namespaceStack;
             std::vector<Module*> _moduleStack;
             std::vector<BasicBlock*> _loopStack;

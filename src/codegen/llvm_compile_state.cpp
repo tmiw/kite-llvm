@@ -41,20 +41,37 @@ namespace kite
 	    {
 	        // empty
 	    }
-	               
+	    
+	    void llvm_compile_state::push_debug_builder(DIBuilder *builder)
+	    {
+            _debugBuilderStack.push_back(builder);
+	    }
+	    
+        DIBuilder *llvm_compile_state::pop_debug_builder()
+        {
+            DIBuilder *returnValue = _debugBuilderStack.back();
+            _debugBuilderStack.pop_back();
+            return returnValue;
+        }
+        
 	    Module *llvm_compile_state::pop_module()
 	    {
 	        Module *returnValue = _moduleStack.back();
 	        _moduleStack.pop_back();
-            debugBuilder->finalize(); // TODO: stackify
+	        
+            DIBuilder *debugBuilder = pop_debug_builder();
+            debugBuilder->finalize(); // NOTE: top level is not popped at all.
+                                      // language.kite handles finalization.
             delete debugBuilder;
+            
 	        return returnValue;
 	    }
 	               
         void llvm_compile_state::push_module(Module *module)
 	    {
 	        _moduleStack.push_back(module);
-            debugBuilder = new DIBuilder(*module); // TODO: stackify
+            DIBuilder *debugBuilder = new DIBuilder(*module);
+            push_debug_builder(debugBuilder);
 	    }
 	    
 	    BasicBlock *llvm_compile_state::pop_loop()

@@ -1988,29 +1988,29 @@ namespace kite
                 {
                     // Note: createCompileUnit seems to create one compile unit per module.
                     // Maybe we should look into this.
-                    state.debugBuilder->createCompileUnit (0xAA35, p.filename().string(), p.parent_path().string(), "Kite version 2.0", false, "", 0);
-                    state.compileUnitCache[pos.file] = const_cast<MDNode*>(state.debugBuilder->getCU());
+                    state.current_debug_builder()->createCompileUnit (0xAA35, p.filename().string(), p.parent_path().string(), "Kite version 2.0", false, "", 0);
+                    state.compileUnitCache[pos.file] = const_cast<MDNode*>(state.current_debug_builder()->getCU());
                 }
 
-                DIFile file = state.debugBuilder->createFile(p.filename().string(), p.parent_path().string());
+                DIFile file = state.current_debug_builder()->createFile(p.filename().string(), p.parent_path().string());
 
                 std::map<std::string, DISubprogram> &subroutineCache = state.subroutineCache;
                 DISubprogram subprogram;
                 if (subroutineCache.find(state.current_c_method_name()) == subroutineCache.end())
                 {
-                    DIType basicType = state.debugBuilder->createBasicType("System::object", sizeof(void*)*8 /* TODO */, 0, DW_ATE_address);
-                    DIType pointerType = state.debugBuilder->createPointerType(basicType, sizeof(void*)*8);
+                    DIType basicType = state.current_debug_builder()->createBasicType("System::object", sizeof(void*)*8 /* TODO */, 0, DW_ATE_address);
+                    DIType pointerType = state.current_debug_builder()->createPointerType(basicType, sizeof(void*)*8);
                     
                     std::vector<Value*> fxnTypes;
                     fxnTypes.push_back(pointerType);
                     fxnTypes.push_back(pointerType);
                     
-                    DIType type = state.debugBuilder->createSubroutineType(
+                    DIType type = state.current_debug_builder()->createSubroutineType(
                         file,
                         DIArray(MDNode::get(getGlobalContext(), fxnTypes))
                         );
                     
-                    subprogram = state.debugBuilder->createFunction(
+                    subprogram = state.current_debug_builder()->createFunction(
                         file,
                         state.full_class_name() + "|" + state.current_friendly_method_name(), 
                         state.current_c_method_name(),
@@ -2035,7 +2035,7 @@ namespace kite
                 DILexicalBlock lexicalBlock;
                 if (state.lexicalBlockCache.find(state.current_c_method_name()) == state.lexicalBlockCache.end())
                 {
-                    lexicalBlock = state.debugBuilder->createLexicalBlock(subprogram, file, 1 /* TODO: line */, 1 /* TODO: col */);
+                    lexicalBlock = state.current_debug_builder()->createLexicalBlock(subprogram, file, 1 /* TODO: line */, 1 /* TODO: col */);
                     assert(lexicalBlock.Verify());
                     state.lexicalBlockCache[state.current_c_method_name()] = lexicalBlock;
                 }

@@ -27,7 +27,7 @@
 
 #include "kite.h"
 
-#define ENABLE_ENHANCED_JIT
+//#define ENABLE_ENHANCED_JIT
 
 #include <algorithm>
 #include <sys/stat.h>
@@ -248,8 +248,8 @@ namespace kite
                     {
                         if (execution_engine == NULL)
                         {
-                            state.debugBuilder->finalize();
-                            state.debugBuilder = NULL; // TODO: proper cleanup.
+                            state.current_debug_builder()->finalize();
+                            //state.current_debug_builder() = NULL; // TODO: proper cleanup.
                             EngineBuilder engineBuilder(current_module);
 #ifdef LLVM3_1
                             engineBuilder.setTargetOptions(targetOptions);

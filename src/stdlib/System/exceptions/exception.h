@@ -59,6 +59,8 @@ namespace kite
                     static void s_throw(exception *exc) { exc->throw_exception(); }
                 
                 public:
+                    static bool debugger_attach_on_uncaught_exception;
+                    
                     void throw_exception();
                     
                     BEGIN_KITE_CLASS_INITIALIZER

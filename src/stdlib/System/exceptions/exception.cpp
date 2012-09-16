@@ -29,6 +29,7 @@
 #include <execinfo.h>
 #include <dlfcn.h>
 #include <stdlib/language/kite.h> 
+#include <signal.h>
 #include "../exceptions.h"
 #include "exception.h"
 
@@ -40,6 +41,8 @@ namespace kite
         {
             namespace exceptions
             {
+                bool exception::debugger_attach_on_uncaught_exception = false;
+                
                 void exception::throw_exception()
                 {
                     #define NUM_TRACE 32
@@ -94,8 +97,19 @@ namespace kite
                         System::dynamic_object *real_exc_class = (System::dynamic_object*)this->parent;
                         std::cout << ((System::string*)real_exc_class->properties["__name"])->string_val << ": ";
                         properties["message"]->print();
-                        properties["trace"]->print();
-                        exit(-1);
+                        
+                        if (debugger_attach_on_uncaught_exception)
+                        {
+                            char buf[1024];
+                            snprintf(buf, 1024, "gdb %s %d", language::kite::kite::app_name, getpid());
+                            system(buf);
+                            exit(-1);
+                        }
+                        else
+                        {
+                            properties["trace"]->print();
+                            exit(-1);
+                        }
                     }
                 }
             }

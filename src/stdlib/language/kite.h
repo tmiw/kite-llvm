@@ -59,7 +59,7 @@ namespace kite
                         return root_object; 
                     }
 
-                    static void InitializeRuntimeSystem(int argc, char **argv);
+                    static void InitializeRuntimeSystem(char *appname, int argc, char **argv);
                     static System::object *ExecuteCode(syntax_tree &ast, System::object *context, bool suppressExec = false);
                     static System::object *ExecuteCode(syntax_tree &ast, bool suppressExec = false);
                     static System::object *ImportModule(std::string &module_name);
@@ -72,6 +72,7 @@ namespace kite
                     static std::vector<jmp_buf*> exception_stack;
                     static System::dynamic_object *last_exception;
                     static System::dynamic_object *root_object;   
+                    static char *app_name;
                     
                     private:
                         static llvm::Module *current_module;

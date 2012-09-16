@@ -30,6 +30,8 @@
 #include <stdlib/language/kite.h>
 #include <stdlib/language/kite/syntax_tree.h>
 #include <stdlib/System/dynamic_object.h>
+#include <stdlib/System/exceptions/exception.h>
+
 using namespace kite;
 using namespace std;
 using namespace kite::stdlib;
@@ -42,6 +44,7 @@ void usage(char *app_name)
     printf("       -o: optimize compiled code\n");
     printf("       -d: dump compiled code to stdout\n");
     printf("       -x: suppress execution of code\n");
+    printf("       -g: automatically attach debugger on uncaught exceptions\n");
     printf("     file: the Kite file to execute (default: standard input)\n");
     exit(0);
 }
@@ -53,8 +56,10 @@ int main(int argc, char **argv)
     bool optimize_code = false;
     bool dump_code = false;
     bool suppress_exec = false;
+    bool attach_debugger = false;
+    char *app_name = argv[0];
     
-    while ((ch = getopt(argc, argv, "haodx")) != -1)
+    while ((ch = getopt(argc, argv, "haodxg")) != -1)
     {
         switch(ch)
         {
@@ -70,18 +75,22 @@ int main(int argc, char **argv)
             case 'x':
                 suppress_exec = true;
                 break;
+            case 'g':
+                attach_debugger = true;
+                break;
             case 'h':
             default:
-                usage(argv[0]);
+                usage(app_name);
         }
     }
     
     argc -= optind;
     argv += optind;
          
-    language::kite::kite::InitializeRuntimeSystem(argc, argv);
+    language::kite::kite::InitializeRuntimeSystem(app_name, argc, argv);
     language::kite::kite::enable_optimizer = optimize_code;
-
+    System::exceptions::exception::debugger_attach_on_uncaught_exception = attach_debugger;
+    
     bool r;
     language::kite::syntax_tree ast; 
     

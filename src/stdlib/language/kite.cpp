@@ -72,9 +72,12 @@ namespace kite
                 bool kite::enable_optimizer = false;
                 std::vector<jmp_buf*> kite::exception_stack;
                 System::dynamic_object *kite::last_exception = NULL;
+                char *kite::app_name = NULL;
                 
-                void kite::InitializeRuntimeSystem(int argc, char **argv)
+                void kite::InitializeRuntimeSystem(char *appname, int argc, char **argv)
                 {
+                    app_name = appname;
+                    
                     InitializeNativeTarget();
                     InitializeNativeTargetAsmPrinter();
                     llvm_start_multithreaded();

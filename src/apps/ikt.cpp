@@ -47,6 +47,7 @@ int main(int argc, char **argv)
 {
     int ch;
     bool optimize_code = false;
+    char *app_name = argv[0];
     
     while ((ch = getopt(argc, argv, "ho")) != -1)
     {
@@ -57,14 +58,14 @@ int main(int argc, char **argv)
                 break;
             case 'h':
             default:
-                usage(argv[0]);
+                usage(app_name);
         }
     }
     
     argc -= optind;
     argv += optind;
          
-    language::kite::kite::InitializeRuntimeSystem(argc, argv);
+    language::kite::kite::InitializeRuntimeSystem(app_name, argc, argv);
     language::kite::kite::enable_optimizer = optimize_code;
 
     cout << "Interactive Kite console" << endl;

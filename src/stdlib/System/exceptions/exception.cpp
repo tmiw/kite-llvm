@@ -29,7 +29,7 @@
 #include <execinfo.h>
 #include <dlfcn.h>
 #include <stdlib/language/kite.h> 
-#include <signal.h>
+#include <stdio.h>
 #include "../exceptions.h"
 #include "exception.h"
 

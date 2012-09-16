@@ -27,7 +27,11 @@
 
 #include "kite.h"
 
-//#define ENABLE_ENHANCED_JIT
+// TODO: this causes all sorts of unit test failures on OSX, disable on that 
+// platform for now.
+#ifdef __linux__
+#define ENABLE_ENHANCED_JIT
+#endif
 
 #include <algorithm>
 #include <sys/stat.h>

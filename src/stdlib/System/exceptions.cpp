@@ -28,6 +28,4 @@
 #include "../System.h"
 #include "exceptions.h"
 
-
-// TODO: fix linker issues.
 REGISTER_KITE_CLASS(kite::stdlib::System::System, kite::stdlib::System::exceptions::exceptions)

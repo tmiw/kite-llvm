@@ -2,7 +2,7 @@
 
 lib_LTLIBRARIES = libkite.la
 libkite_la_CPPFLAGS = $(LLVM_CPPFLAGS) $(BOOST_CPPFLAGS) -fexceptions -frtti
-libkite_la_LDFLAGS = $(LLVM_LDFLAGS) $(BOOST_LDFLAGS) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB) $(BOOST_REGEX_LIB)
+libkite_la_LDFLAGS = $(LLVM_LDFLAGS) $(BOOST_LDFLAGS) $(OPENSSL_LDFLAGS) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB) $(BOOST_REGEX_LIB) $(OPENSSL_LIBS)
 
 libkite_la_SOURCES = codegen/llvm_compile_state.cpp codegen/llvm_node_codegen.cpp \
 	 codegen/syntax_tree_node_printer.cpp codegen/syntax_tree_printer.cpp \

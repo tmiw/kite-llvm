@@ -1,6 +1,10 @@
+src/ikt
+src/kite
+
 # http://www.gnu.org/software/automake
 
 Makefile.in
+Makefile
 
 # http://www.gnu.org/software/autoconf
 
@@ -11,6 +15,18 @@ configure
 depcomp
 install-sh
 missing
+config.guess
+config.log
+config.status
+config.h
+config.sub
+
+# http://www.gnu.org/software/libtool
+
+.deps
+.libs
+libtool
+stamp-h1
 
 # Compiled Object files
 *.slo

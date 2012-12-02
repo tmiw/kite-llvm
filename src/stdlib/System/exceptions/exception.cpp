@@ -48,7 +48,8 @@ namespace kite
                     #define NUM_TRACE 32
                     void *buf[NUM_TRACE];
                     
-                    // TODO
+                    // TODO: we really need to make this more reliable so that
+                    // gdb attach isn't needed to get a decent stack trace.
                     int num_traces = backtrace(buf, NUM_TRACE);
                     std::ostringstream ss;
                     for (int i = 0; i < num_traces; i++)
@@ -74,14 +75,6 @@ namespace kite
                                 ss << "    in " << friendlyName << " + 0x" << std::hex << ((size_t)buf[i] - (size_t)methodPointer) << std::dec << std::endl;
                                 if (breakOut) break;
                             }
-/*                            else
-                            {
-                                ss << sym_info.dli_sname << "(" << sym_info.dli_fbase << ")" << std::endl;
-                            }
-                        }
-                        else
-                        {
-                            ss << sym_info.dli_sname << "(" << sym_info.dli_fbase << ")" << std::endl;*/
                         }
                     }
                     properties["trace"] = new kite::stdlib::System::string(ss.str().c_str());
@@ -93,7 +86,6 @@ namespace kite
                     }
                     else
                     {
-                        // TODO
                         System::dynamic_object *real_exc_class = (System::dynamic_object*)this->parent;
                         std::cout << ((kite::stdlib::System::string*)real_exc_class->properties["__name"])->string_val << ": ";
                         properties["message"]->print();

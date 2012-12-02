@@ -196,7 +196,6 @@ namespace kite
                             }
                             else
                             {
-                                // TODO: throw exception for parse error.
                                 for (; index > 0; index--)
                                 {
                                     state.pop_namespace_stack();
@@ -279,7 +278,6 @@ namespace kite
                             if (execution_engine == NULL)
                             {
                                 state.current_debug_builder()->finalize();
-                                //state.current_debug_builder() = NULL; // TODO: proper cleanup.
                                 EngineBuilder engineBuilder(current_module);
 #ifdef LLVM3_1
                                 engineBuilder.setTargetOptions(targetOptions);

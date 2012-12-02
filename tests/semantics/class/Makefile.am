@@ -1,0 +1,21 @@
+EXTRA_DIST = \
+    ./basic_class.kt \
+    ./basic_class.kt.out \
+    ./call_base_methods.kt \
+    ./call_base_methods.kt.out \
+    ./class_name.kt \
+    ./class_name.kt.out \
+    ./constructor_call.kt \
+    ./constructor_call.kt.out \
+    ./constructor_keyword.kt \
+    ./constructor_keyword.kt.out \
+    ./constructor_no_default.kt \
+    ./constructor_no_default.kt.out \
+    ./constructor_set_property.kt \
+    ./constructor_set_property.kt.out \
+    ./empty_class.kt \
+    ./empty_class.kt.out \
+    ./nested_class.kt \
+    ./nested_class.kt.out \
+    ./operator_keyword.kt \
+    ./operator_keyword.kt.out

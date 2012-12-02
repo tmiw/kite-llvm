@@ -1,0 +1,1 @@
+SUBDIRS = boolean is isof map reduce

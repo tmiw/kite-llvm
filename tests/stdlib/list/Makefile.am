@@ -1,0 +1,27 @@
+EXTRA_DIST = \
+    ./append.kt \
+    ./append.kt.out \
+    ./count.kt \
+    ./count.kt.out \
+    ./get_index.kt \
+    ./get_index.kt.out \
+    ./head.kt \
+    ./head.kt.out \
+    ./list_eq.kt \
+    ./list_eq.kt.out \
+    ./list_neq.kt \
+    ./list_neq.kt.out \
+    ./prepend.kt \
+    ./prepend.kt.out \
+    ./print.kt \
+    ./print.kt.out \
+    ./remove_at.kt \
+    ./remove_at.kt.out \
+    ./str.kt \
+    ./str.kt.out \
+    ./sublist.kt \
+    ./sublist.kt.out \
+    ./syntax.kt \
+    ./syntax.kt.out \
+    ./tail.kt \
+    ./tail.kt.out

@@ -40,4 +40,33 @@ AC_FUNC_MKTIME
 AC_FUNC_MMAP
 AC_CHECK_FUNCS([getcwd gettimeofday memset mkdir munmap rmdir select setenv socket strtol])
 
-AC_OUTPUT(Makefile src/Makefile)
+AC_OUTPUT(_testdeps/Makefile
+Makefile
+src/Makefile
+stress/Makefile
+tests/algorithms/Makefile
+tests/Makefile
+tests/semantics/class/Makefile
+tests/semantics/deref/array/Makefile
+tests/semantics/deref/Makefile
+tests/semantics/deref/var/Makefile
+tests/semantics/exceptions/Makefile
+tests/semantics/import/Makefile
+tests/semantics/loop/Makefile
+tests/semantics/Makefile
+tests/semantics/method/Makefile
+tests/semantics/ops/boolean/Makefile
+tests/semantics/ops/is/Makefile
+tests/semantics/ops/isof/Makefile
+tests/semantics/ops/Makefile
+tests/semantics/ops/map/Makefile
+tests/semantics/ops/reduce/Makefile
+tests/stdlib/boolean/Makefile
+tests/stdlib/float/Makefile
+tests/stdlib/int/Makefile
+tests/stdlib/list/Makefile
+tests/stdlib/Makefile
+tests/stdlib/math/Makefile
+tests/stdlib/null/Makefile
+tests/stdlib/string/Makefile
+)

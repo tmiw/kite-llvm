@@ -24,9 +24,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
- 
+
+#include "config.h" 
 #include <stdarg.h>
-#include <ffi/ffi.h>
+#include FFI_HEADER
 #include "api.h"
 
 void *api_call_method(int numargs, void *obj, void *initptr, va_list vl)

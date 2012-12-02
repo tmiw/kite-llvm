@@ -14,7 +14,7 @@ AM_INIT_AUTOMAKE
 AC_PROG_CC
 
 # Checks for libraries.
-AX_BOOST_BASE([1.50])
+AX_BOOST_BASE([1.49])
 AX_BOOST_FILESYSTEM
 AX_BOOST_REGEX
 AX_BOOST_SYSTEM
@@ -24,6 +24,10 @@ AX_BOEHMGC
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h netdb.h sys/socket.h sys/time.h unistd.h])
+
+# We need both of these due to ffi.h being in different locations on different OSes.
+AC_CHECK_HEADER(ffi/ffi.h, AC_DEFINE(FFI_HEADER, ["ffi/ffi.h"], [Path to ffi.h]))
+AC_CHECK_HEADER(ffi.h, AC_DEFINE(FFI_HEADER, ["ffi.h"], [Path to ffi.h]))
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL

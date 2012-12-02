@@ -1,5 +1,8 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Path to ffi.h */
+#undef FFI_HEADER
+
 /* Define to 1 if you have the `alarm' function. */
 #undef HAVE_ALARM
 

@@ -31,7 +31,7 @@
 #include <unistd.h>
 #include "os.h"
 #include "exceptions/FileError.h"
-#include "exceptions/exception.h"
+#include "exceptions/OsError.h"
 
 static int wrap_chdir(const char *name)
 {
@@ -126,8 +126,7 @@ namespace kite
                         ss << "Could not set " << name->string_val << " to " << value->string_val 
                            << " (errno " << errno << ")";
                         
-                        // TODO: specific exception type.
-                        exceptions::exception *exc = exceptions::exception::Create(1, new string(ss.str().c_str()));
+                        exceptions::exception *exc = exceptions::OsError::Create(1, new string(ss.str().c_str()));
                         exc->throw_exception();
                     }
                     

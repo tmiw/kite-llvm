@@ -19,7 +19,7 @@ $ autoreconf
 $ ./configure --with-gc=/usr/local (or other path to libgc)
 $ make
 [wait several minutes]
-$ make test
+$ make check
 $ make install
 
 USAGE:

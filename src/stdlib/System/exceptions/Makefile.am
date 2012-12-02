@@ -19,6 +19,8 @@ libkitestdlib_System_exceptions_la_SOURCES = \
     ./NotImplemented.h \
     ./NullReference.cpp \
     ./NullReference.h \
+    ./OsError.cpp \
+    ./OsError.h \
     ./SocketError.cpp \
     ./SocketError.h \
     ./TypeMismatch.cpp \

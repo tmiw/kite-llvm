@@ -1,0 +1,1 @@
+/* Empty file, required by libtool/automake to properly build. */

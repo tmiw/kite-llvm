@@ -32,7 +32,7 @@
 #include <string>
 #include <stdlib/api.h>
 #include <stdlib/System/dynamic_object.h>
-#include <stdlib/System/string.h>
+#include <stdlib/System/string_type.h>
 
 namespace kite
 {

@@ -38,7 +38,7 @@
 #include "socket.h"
 #include "../boolean.h"
 #include "../integer.h"
-#include "../string.h"
+#include "../string_type.h"
 #include "../list.h"
 
 namespace kite

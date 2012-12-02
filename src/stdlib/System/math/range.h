@@ -28,7 +28,7 @@
 #ifndef KITE_STDLIB__SYSTEM__MATH__RANGE_H
 #define KITE_STDLIB__SYSTEM__MATH__RANGE_H
 
-#include "../math.h"
+#include "../math_type.h"
 #include "../integer.h"
 
 namespace kite

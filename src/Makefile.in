@@ -14,8 +14,6 @@
 
 @SET_MAKE@
 
-# TODO: split into multiple Makefile.am folders.
-
 
 VPATH = @srcdir@
 am__make_dryrun = \
@@ -100,56 +98,22 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-libkite_la_LIBADD =
-am_libkite_la_OBJECTS = libkite_la-llvm_compile_state.lo \
-	libkite_la-llvm_node_codegen.lo \
-	libkite_la-syntax_tree_node_printer.lo \
-	libkite_la-syntax_tree_printer.lo libkite_la-System.lo \
-	libkite_la-integer.lo libkite_la-string.lo \
-	libkite_la-boolean.lo libkite_la-float.lo libkite_la-object.lo \
-	libkite_la-dynamic_object.lo libkite_la-list.lo \
-	libkite_la-method.lo libkite_la-collections.lo \
-	libkite_la-array.lo libkite_la-queue.lo libkite_la-stack.lo \
-	libkite_la-binary_tree.lo libkite_la-date.lo \
-	libkite_la-hires.lo libkite_la-directory.lo libkite_la-file.lo \
-	libkite_la-math.lo libkite_la-range.lo libkite_la-network.lo \
-	libkite_la-socket.lo libkite_la-wrapper.lo \
-	libkite_la-TcpSocket.lo libkite_la-UdpSocket.lo \
-	libkite_la-kite.lo libkite_la-syntax_tree.lo \
-	libkite_la-exceptions.lo libkite_la-exception.lo \
-	libkite_la-NotImplemented.lo libkite_la-InvalidArgument.lo \
-	libkite_la-TypeMismatch.lo libkite_la-DivideByZero.lo \
-	libkite_la-NullReference.lo libkite_la-EmptyCollection.lo \
-	libkite_la-FileError.lo libkite_la-SocketError.lo \
-	libkite_la-DnsError.lo libkite_la-os.lo libkite_la-posix.lo \
-	libkite_la-regex.lo libkite_la-match_result.lo \
-	libkite_la-vm.lo libkite_la-compiler.lo libkite_la-loader.lo \
-	libkite_la-thread.lo libkite_la-digest.lo libkite_la-api.lo \
-	libkite_la-parser.lo libkite_la-constants.lo
-libkite_la_OBJECTS = $(am_libkite_la_OBJECTS)
-libkite_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(libkite_la_LDFLAGS) $(LDFLAGS) -o $@
+libkite_la_DEPENDENCIES = codegen/libkitecodegen.la \
+	parser/libkiteparser.la semantics/libkitesemantics.la \
+	stdlib/libkitestdlib.la
+libkite_la_SOURCES = libkite.c
+libkite_la_OBJECTS = libkite.lo
 PROGRAMS = $(bin_PROGRAMS)
-am_ikt_OBJECTS = ikt-ikt.$(OBJEXT)
+am_ikt_OBJECTS = ikt.$(OBJEXT)
 ikt_OBJECTS = $(am_ikt_OBJECTS)
 ikt_DEPENDENCIES = libkite.la
-am_kite_OBJECTS = kite-kite_app.$(OBJEXT)
+am_kite_OBJECTS = kite_app.$(OBJEXT)
 kite_OBJECTS = $(am_kite_OBJECTS)
 kite_DEPENDENCIES = libkite.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
-CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
-	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
-LTCXXCOMPILE = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
-	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
-CXXLD = $(CXX)
-CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
-	$(LDFLAGS) -o $@
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
@@ -159,16 +123,63 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libkite_la_SOURCES) $(ikt_SOURCES) $(kite_SOURCES)
-DIST_SOURCES = $(libkite_la_SOURCES) $(ikt_SOURCES) $(kite_SOURCES)
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
+SOURCES = libkite.c $(ikt_SOURCES) $(kite_SOURCES)
+DIST_SOURCES = libkite.c $(ikt_SOURCES) $(kite_SOURCES)
+RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
+	html-recursive info-recursive install-data-recursive \
+	install-dvi-recursive install-exec-recursive \
+	install-html-recursive install-info-recursive \
+	install-pdf-recursive install-ps-recursive install-recursive \
+	installcheck-recursive installdirs-recursive pdf-recursive \
+	ps-recursive uninstall-recursive
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
+RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
+  distclean-recursive maintainer-clean-recursive
+AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
+	$(RECURSIVE_CLEAN_TARGETS:-recursive=) tags TAGS ctags CTAGS \
+	distdir
 ETAGS = etags
 CTAGS = ctags
+DIST_SUBDIRS = $(SUBDIRS)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+am__relativize = \
+  dir0=`pwd`; \
+  sed_first='s,^\([^/]*\)/.*$$,\1,'; \
+  sed_rest='s,^[^/]*/*,,'; \
+  sed_last='s,^.*/\([^/]*\)$$,\1,'; \
+  sed_butlast='s,/*[^/]*$$,,'; \
+  while test -n "$$dir1"; do \
+    first=`echo "$$dir1" | sed -e "$$sed_first"`; \
+    if test "$$first" != "."; then \
+      if test "$$first" = ".."; then \
+        dir2=`echo "$$dir0" | sed -e "$$sed_last"`/"$$dir2"; \
+        dir0=`echo "$$dir0" | sed -e "$$sed_butlast"`; \
+      else \
+        first2=`echo "$$dir2" | sed -e "$$sed_first"`; \
+        if test "$$first2" = "$$first"; then \
+          dir2=`echo "$$dir2" | sed -e "$$sed_rest"`; \
+        else \
+          dir2="../$$dir2"; \
+        fi; \
+        dir0="$$dir0"/"$$first"; \
+      fi; \
+    fi; \
+    dir1=`echo "$$dir1" | sed -e "$$sed_rest"`; \
+  done; \
+  reldir="$$dir2"
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AR = @AR@
@@ -300,62 +311,24 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+SUBDIRS = codegen parser semantics stdlib
 lib_LTLIBRARIES = libkite.la
-libkite_la_CPPFLAGS = $(LLVM_CPPFLAGS) $(BOOST_CPPFLAGS) -fexceptions -frtti
-libkite_la_LDFLAGS = $(LLVM_LDFLAGS) $(BOOST_LDFLAGS) $(OPENSSL_LDFLAGS) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB) $(BOOST_REGEX_LIB) $(OPENSSL_LIBS)
-libkite_la_SOURCES = codegen/llvm_compile_state.cpp codegen/llvm_node_codegen.cpp \
-	 codegen/syntax_tree_node_printer.cpp codegen/syntax_tree_printer.cpp \
-	 stdlib/System.cpp stdlib/System/integer.cpp stdlib/System/string.cpp \
-	 stdlib/System/boolean.cpp stdlib/System/float.cpp stdlib/System/object.cpp \
-	 stdlib/System/dynamic_object.cpp stdlib/System/list.cpp stdlib/System/method.cpp \
-	 stdlib/System/collections.cpp stdlib/System/collections/array.cpp \
-	 stdlib/System/collections/queue.cpp stdlib/System/collections/stack.cpp \
-	 stdlib/System/collections/binary_tree.cpp stdlib/System/date.cpp stdlib/System/date/hires.cpp \
-	 stdlib/System/directory.cpp stdlib/System/file.cpp stdlib/System/math.cpp stdlib/System/math/range.cpp \
-	 stdlib/System/network.cpp stdlib/System/network/socket.cpp stdlib/System/network/wrapper.cpp \
-	 stdlib/System/network/wrapper/TcpSocket.cpp stdlib/System/network/wrapper/UdpSocket.cpp \
-	 stdlib/language/kite.cpp stdlib/language/kite/syntax_tree.cpp \
-	 stdlib/System/exceptions.cpp stdlib/System/exceptions/exception.cpp \
-	 stdlib/System/exceptions/NotImplemented.cpp stdlib/System/exceptions/InvalidArgument.cpp \
-	 stdlib/System/exceptions/TypeMismatch.cpp stdlib/System/exceptions/DivideByZero.cpp \
-	 stdlib/System/exceptions/NullReference.cpp stdlib/System/exceptions/EmptyCollection.cpp \
-	 stdlib/System/exceptions/FileError.cpp stdlib/System/exceptions/SocketError.cpp \
-	 stdlib/System/exceptions/DnsError.cpp stdlib/System/os.cpp stdlib/System/os/posix.cpp \
-	 stdlib/System/regex.cpp stdlib/System/regex/match_result.cpp \
-	 stdlib/System/vm.cpp stdlib/System/vm/compiler.cpp stdlib/System/vm/loader.cpp \
-	 stdlib/System/vm/thread.cpp stdlib/System/digest.cpp stdlib/api.cpp \
-	 parser/parser.cpp semantics/constants.cpp \
-	 codegen/llvm_compile_state.h codegen/llvm_node_codegen.h codegen/syntax_tree_printer.h \
-	 parser/grammar.h parser/parser.h semantics/constants.h semantics/syntax_tree.h \
-	 stdlib/api.h stdlib/language/kite.h stdlib/language/kite/syntax_tree.h stdlib/System.h \
-	 stdlib/System/boolean.h stdlib/System/collections/array.h stdlib/System/collections/binary_tree.h \
-     stdlib/System/collections/queue.h stdlib/System/collections/stack.h stdlib/System/collections.h \
-     stdlib/System/date/hires.h stdlib/System/date.h stdlib/System/digest.h stdlib/System/directory.h \
-     stdlib/System/dynamic_object.h stdlib/System/exceptions/DivideByZero.h stdlib/System/exceptions/DnsError.h \
-     stdlib/System/exceptions/EmptyCollection.h stdlib/System/exceptions/exception.h \
-     stdlib/System/exceptions/FileError.h stdlib/System/exceptions/InvalidArgument.h \
-     stdlib/System/exceptions/NotImplemented.h stdlib/System/exceptions/NullReference.h \
-     stdlib/System/exceptions/SocketError.h stdlib/System/exceptions/TypeMismatch.h \
-     stdlib/System/exceptions.h stdlib/System/file.h stdlib/System/float.h \
-     stdlib/System/integer.h stdlib/System/list.h stdlib/System/math/range.h \
-     stdlib/System/math.h stdlib/System/method.h stdlib/System/network/socket.h \
-     stdlib/System/network/wrapper/TcpSocket.h stdlib/System/network/wrapper/UdpSocket.h \
-     stdlib/System/network/wrapper.h stdlib/System/network.h \
-     stdlib/System/object.h stdlib/System/os/posix.h stdlib/System/os.h \
-     stdlib/System/regex/match_result.h stdlib/System/regex.h \
-     stdlib/System/string.h stdlib/System/vm/compiler.h \
-     stdlib/System/vm/loader.hstdlib/System/vm/thread.h stdlib/System/vm.h
+AM_CXXFLAGS = $(LLVM_CPPFLAGS) $(BOOST_CPPFLAGS) -fexceptions -frtti
+AM_LDFLAGS = $(LLVM_LDFLAGS) $(BOOST_LDFLAGS) $(OPENSSL_LDFLAGS) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB) $(BOOST_REGEX_LIB) $(OPENSSL_LIBS)
+libkite_la_LIBADD = \
+    codegen/libkitecodegen.la \
+    parser/libkiteparser.la \
+    semantics/libkitesemantics.la \
+    stdlib/libkitestdlib.la
 
-kite_SOURCES = apps/kite_app.cpp
+kite_SOURCES = kite_app.cpp
 kite_LDADD = libkite.la
-kite_CPPFLAGS = $(LLVM_CPPFLAGS) -frtti
-ikt_SOURCES = apps/ikt.cpp
+ikt_SOURCES = ikt.cpp
 ikt_LDADD = libkite.la
-ikt_CPPFLAGS = $(LLVM_CPPFLAGS) -frtti
-all: all-am
+all: all-recursive
 
 .SUFFIXES:
-.SUFFIXES: .cpp .lo .o .obj
+.SUFFIXES: .c .cpp .lo .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -365,9 +338,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu src/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign src/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu src/Makefile
+	  $(AUTOMAKE) --foreign src/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -421,7 +394,7 @@ clean-libLTLIBRARIES:
 	  rm -f $${locs}; \
 	}
 libkite.la: $(libkite_la_OBJECTS) $(libkite_la_DEPENDENCIES) $(EXTRA_libkite_la_DEPENDENCIES) 
-	$(libkite_la_LINK) -rpath $(libdir) $(libkite_la_OBJECTS) $(libkite_la_LIBADD) $(LIBS)
+	$(LINK) -rpath $(libdir) $(libkite_la_OBJECTS) $(libkite_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
@@ -481,62 +454,30 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ikt-ikt.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kite-kite_app.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-DivideByZero.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-DnsError.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-EmptyCollection.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-FileError.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-InvalidArgument.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-NotImplemented.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-NullReference.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-SocketError.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-System.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-TcpSocket.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-TypeMismatch.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-UdpSocket.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-api.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-array.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-binary_tree.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-boolean.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-collections.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-compiler.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-constants.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-date.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-digest.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-directory.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-dynamic_object.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-exception.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-exceptions.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-file.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-float.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-hires.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-integer.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-kite.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-list.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-llvm_compile_state.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-llvm_node_codegen.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-loader.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-match_result.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-math.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-method.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-network.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-object.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-os.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-parser.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-posix.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-queue.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-range.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-regex.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-socket.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-stack.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-string.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-syntax_tree.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-syntax_tree_node_printer.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-syntax_tree_printer.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-thread.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-vm.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite_la-wrapper.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ikt.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kite_app.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkite.Plo@am__quote@
+
+.c.o:
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c $<
+
+.c.obj:
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+
+.c.lo:
+@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -559,417 +500,58 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
 
-libkite_la-llvm_compile_state.lo: codegen/llvm_compile_state.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-llvm_compile_state.lo -MD -MP -MF $(DEPDIR)/libkite_la-llvm_compile_state.Tpo -c -o libkite_la-llvm_compile_state.lo `test -f 'codegen/llvm_compile_state.cpp' || echo '$(srcdir)/'`codegen/llvm_compile_state.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-llvm_compile_state.Tpo $(DEPDIR)/libkite_la-llvm_compile_state.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='codegen/llvm_compile_state.cpp' object='libkite_la-llvm_compile_state.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-llvm_compile_state.lo `test -f 'codegen/llvm_compile_state.cpp' || echo '$(srcdir)/'`codegen/llvm_compile_state.cpp
-
-libkite_la-llvm_node_codegen.lo: codegen/llvm_node_codegen.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-llvm_node_codegen.lo -MD -MP -MF $(DEPDIR)/libkite_la-llvm_node_codegen.Tpo -c -o libkite_la-llvm_node_codegen.lo `test -f 'codegen/llvm_node_codegen.cpp' || echo '$(srcdir)/'`codegen/llvm_node_codegen.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-llvm_node_codegen.Tpo $(DEPDIR)/libkite_la-llvm_node_codegen.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='codegen/llvm_node_codegen.cpp' object='libkite_la-llvm_node_codegen.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-llvm_node_codegen.lo `test -f 'codegen/llvm_node_codegen.cpp' || echo '$(srcdir)/'`codegen/llvm_node_codegen.cpp
-
-libkite_la-syntax_tree_node_printer.lo: codegen/syntax_tree_node_printer.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-syntax_tree_node_printer.lo -MD -MP -MF $(DEPDIR)/libkite_la-syntax_tree_node_printer.Tpo -c -o libkite_la-syntax_tree_node_printer.lo `test -f 'codegen/syntax_tree_node_printer.cpp' || echo '$(srcdir)/'`codegen/syntax_tree_node_printer.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-syntax_tree_node_printer.Tpo $(DEPDIR)/libkite_la-syntax_tree_node_printer.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='codegen/syntax_tree_node_printer.cpp' object='libkite_la-syntax_tree_node_printer.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-syntax_tree_node_printer.lo `test -f 'codegen/syntax_tree_node_printer.cpp' || echo '$(srcdir)/'`codegen/syntax_tree_node_printer.cpp
-
-libkite_la-syntax_tree_printer.lo: codegen/syntax_tree_printer.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-syntax_tree_printer.lo -MD -MP -MF $(DEPDIR)/libkite_la-syntax_tree_printer.Tpo -c -o libkite_la-syntax_tree_printer.lo `test -f 'codegen/syntax_tree_printer.cpp' || echo '$(srcdir)/'`codegen/syntax_tree_printer.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-syntax_tree_printer.Tpo $(DEPDIR)/libkite_la-syntax_tree_printer.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='codegen/syntax_tree_printer.cpp' object='libkite_la-syntax_tree_printer.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-syntax_tree_printer.lo `test -f 'codegen/syntax_tree_printer.cpp' || echo '$(srcdir)/'`codegen/syntax_tree_printer.cpp
-
-libkite_la-System.lo: stdlib/System.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-System.lo -MD -MP -MF $(DEPDIR)/libkite_la-System.Tpo -c -o libkite_la-System.lo `test -f 'stdlib/System.cpp' || echo '$(srcdir)/'`stdlib/System.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-System.Tpo $(DEPDIR)/libkite_la-System.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System.cpp' object='libkite_la-System.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-System.lo `test -f 'stdlib/System.cpp' || echo '$(srcdir)/'`stdlib/System.cpp
-
-libkite_la-integer.lo: stdlib/System/integer.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-integer.lo -MD -MP -MF $(DEPDIR)/libkite_la-integer.Tpo -c -o libkite_la-integer.lo `test -f 'stdlib/System/integer.cpp' || echo '$(srcdir)/'`stdlib/System/integer.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-integer.Tpo $(DEPDIR)/libkite_la-integer.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/integer.cpp' object='libkite_la-integer.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-integer.lo `test -f 'stdlib/System/integer.cpp' || echo '$(srcdir)/'`stdlib/System/integer.cpp
-
-libkite_la-string.lo: stdlib/System/string.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-string.lo -MD -MP -MF $(DEPDIR)/libkite_la-string.Tpo -c -o libkite_la-string.lo `test -f 'stdlib/System/string.cpp' || echo '$(srcdir)/'`stdlib/System/string.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-string.Tpo $(DEPDIR)/libkite_la-string.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/string.cpp' object='libkite_la-string.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-string.lo `test -f 'stdlib/System/string.cpp' || echo '$(srcdir)/'`stdlib/System/string.cpp
-
-libkite_la-boolean.lo: stdlib/System/boolean.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-boolean.lo -MD -MP -MF $(DEPDIR)/libkite_la-boolean.Tpo -c -o libkite_la-boolean.lo `test -f 'stdlib/System/boolean.cpp' || echo '$(srcdir)/'`stdlib/System/boolean.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-boolean.Tpo $(DEPDIR)/libkite_la-boolean.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/boolean.cpp' object='libkite_la-boolean.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-boolean.lo `test -f 'stdlib/System/boolean.cpp' || echo '$(srcdir)/'`stdlib/System/boolean.cpp
-
-libkite_la-float.lo: stdlib/System/float.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-float.lo -MD -MP -MF $(DEPDIR)/libkite_la-float.Tpo -c -o libkite_la-float.lo `test -f 'stdlib/System/float.cpp' || echo '$(srcdir)/'`stdlib/System/float.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-float.Tpo $(DEPDIR)/libkite_la-float.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/float.cpp' object='libkite_la-float.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-float.lo `test -f 'stdlib/System/float.cpp' || echo '$(srcdir)/'`stdlib/System/float.cpp
-
-libkite_la-object.lo: stdlib/System/object.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-object.lo -MD -MP -MF $(DEPDIR)/libkite_la-object.Tpo -c -o libkite_la-object.lo `test -f 'stdlib/System/object.cpp' || echo '$(srcdir)/'`stdlib/System/object.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-object.Tpo $(DEPDIR)/libkite_la-object.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/object.cpp' object='libkite_la-object.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-object.lo `test -f 'stdlib/System/object.cpp' || echo '$(srcdir)/'`stdlib/System/object.cpp
-
-libkite_la-dynamic_object.lo: stdlib/System/dynamic_object.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-dynamic_object.lo -MD -MP -MF $(DEPDIR)/libkite_la-dynamic_object.Tpo -c -o libkite_la-dynamic_object.lo `test -f 'stdlib/System/dynamic_object.cpp' || echo '$(srcdir)/'`stdlib/System/dynamic_object.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-dynamic_object.Tpo $(DEPDIR)/libkite_la-dynamic_object.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/dynamic_object.cpp' object='libkite_la-dynamic_object.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-dynamic_object.lo `test -f 'stdlib/System/dynamic_object.cpp' || echo '$(srcdir)/'`stdlib/System/dynamic_object.cpp
-
-libkite_la-list.lo: stdlib/System/list.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-list.lo -MD -MP -MF $(DEPDIR)/libkite_la-list.Tpo -c -o libkite_la-list.lo `test -f 'stdlib/System/list.cpp' || echo '$(srcdir)/'`stdlib/System/list.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-list.Tpo $(DEPDIR)/libkite_la-list.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/list.cpp' object='libkite_la-list.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-list.lo `test -f 'stdlib/System/list.cpp' || echo '$(srcdir)/'`stdlib/System/list.cpp
-
-libkite_la-method.lo: stdlib/System/method.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-method.lo -MD -MP -MF $(DEPDIR)/libkite_la-method.Tpo -c -o libkite_la-method.lo `test -f 'stdlib/System/method.cpp' || echo '$(srcdir)/'`stdlib/System/method.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-method.Tpo $(DEPDIR)/libkite_la-method.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/method.cpp' object='libkite_la-method.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-method.lo `test -f 'stdlib/System/method.cpp' || echo '$(srcdir)/'`stdlib/System/method.cpp
-
-libkite_la-collections.lo: stdlib/System/collections.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-collections.lo -MD -MP -MF $(DEPDIR)/libkite_la-collections.Tpo -c -o libkite_la-collections.lo `test -f 'stdlib/System/collections.cpp' || echo '$(srcdir)/'`stdlib/System/collections.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-collections.Tpo $(DEPDIR)/libkite_la-collections.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/collections.cpp' object='libkite_la-collections.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-collections.lo `test -f 'stdlib/System/collections.cpp' || echo '$(srcdir)/'`stdlib/System/collections.cpp
-
-libkite_la-array.lo: stdlib/System/collections/array.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-array.lo -MD -MP -MF $(DEPDIR)/libkite_la-array.Tpo -c -o libkite_la-array.lo `test -f 'stdlib/System/collections/array.cpp' || echo '$(srcdir)/'`stdlib/System/collections/array.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-array.Tpo $(DEPDIR)/libkite_la-array.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/collections/array.cpp' object='libkite_la-array.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-array.lo `test -f 'stdlib/System/collections/array.cpp' || echo '$(srcdir)/'`stdlib/System/collections/array.cpp
-
-libkite_la-queue.lo: stdlib/System/collections/queue.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-queue.lo -MD -MP -MF $(DEPDIR)/libkite_la-queue.Tpo -c -o libkite_la-queue.lo `test -f 'stdlib/System/collections/queue.cpp' || echo '$(srcdir)/'`stdlib/System/collections/queue.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-queue.Tpo $(DEPDIR)/libkite_la-queue.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/collections/queue.cpp' object='libkite_la-queue.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-queue.lo `test -f 'stdlib/System/collections/queue.cpp' || echo '$(srcdir)/'`stdlib/System/collections/queue.cpp
-
-libkite_la-stack.lo: stdlib/System/collections/stack.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-stack.lo -MD -MP -MF $(DEPDIR)/libkite_la-stack.Tpo -c -o libkite_la-stack.lo `test -f 'stdlib/System/collections/stack.cpp' || echo '$(srcdir)/'`stdlib/System/collections/stack.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-stack.Tpo $(DEPDIR)/libkite_la-stack.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/collections/stack.cpp' object='libkite_la-stack.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-stack.lo `test -f 'stdlib/System/collections/stack.cpp' || echo '$(srcdir)/'`stdlib/System/collections/stack.cpp
-
-libkite_la-binary_tree.lo: stdlib/System/collections/binary_tree.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-binary_tree.lo -MD -MP -MF $(DEPDIR)/libkite_la-binary_tree.Tpo -c -o libkite_la-binary_tree.lo `test -f 'stdlib/System/collections/binary_tree.cpp' || echo '$(srcdir)/'`stdlib/System/collections/binary_tree.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-binary_tree.Tpo $(DEPDIR)/libkite_la-binary_tree.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/collections/binary_tree.cpp' object='libkite_la-binary_tree.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-binary_tree.lo `test -f 'stdlib/System/collections/binary_tree.cpp' || echo '$(srcdir)/'`stdlib/System/collections/binary_tree.cpp
-
-libkite_la-date.lo: stdlib/System/date.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-date.lo -MD -MP -MF $(DEPDIR)/libkite_la-date.Tpo -c -o libkite_la-date.lo `test -f 'stdlib/System/date.cpp' || echo '$(srcdir)/'`stdlib/System/date.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-date.Tpo $(DEPDIR)/libkite_la-date.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/date.cpp' object='libkite_la-date.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-date.lo `test -f 'stdlib/System/date.cpp' || echo '$(srcdir)/'`stdlib/System/date.cpp
-
-libkite_la-hires.lo: stdlib/System/date/hires.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-hires.lo -MD -MP -MF $(DEPDIR)/libkite_la-hires.Tpo -c -o libkite_la-hires.lo `test -f 'stdlib/System/date/hires.cpp' || echo '$(srcdir)/'`stdlib/System/date/hires.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-hires.Tpo $(DEPDIR)/libkite_la-hires.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/date/hires.cpp' object='libkite_la-hires.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-hires.lo `test -f 'stdlib/System/date/hires.cpp' || echo '$(srcdir)/'`stdlib/System/date/hires.cpp
-
-libkite_la-directory.lo: stdlib/System/directory.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-directory.lo -MD -MP -MF $(DEPDIR)/libkite_la-directory.Tpo -c -o libkite_la-directory.lo `test -f 'stdlib/System/directory.cpp' || echo '$(srcdir)/'`stdlib/System/directory.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-directory.Tpo $(DEPDIR)/libkite_la-directory.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/directory.cpp' object='libkite_la-directory.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-directory.lo `test -f 'stdlib/System/directory.cpp' || echo '$(srcdir)/'`stdlib/System/directory.cpp
-
-libkite_la-file.lo: stdlib/System/file.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-file.lo -MD -MP -MF $(DEPDIR)/libkite_la-file.Tpo -c -o libkite_la-file.lo `test -f 'stdlib/System/file.cpp' || echo '$(srcdir)/'`stdlib/System/file.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-file.Tpo $(DEPDIR)/libkite_la-file.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/file.cpp' object='libkite_la-file.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-file.lo `test -f 'stdlib/System/file.cpp' || echo '$(srcdir)/'`stdlib/System/file.cpp
-
-libkite_la-math.lo: stdlib/System/math.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-math.lo -MD -MP -MF $(DEPDIR)/libkite_la-math.Tpo -c -o libkite_la-math.lo `test -f 'stdlib/System/math.cpp' || echo '$(srcdir)/'`stdlib/System/math.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-math.Tpo $(DEPDIR)/libkite_la-math.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/math.cpp' object='libkite_la-math.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-math.lo `test -f 'stdlib/System/math.cpp' || echo '$(srcdir)/'`stdlib/System/math.cpp
-
-libkite_la-range.lo: stdlib/System/math/range.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-range.lo -MD -MP -MF $(DEPDIR)/libkite_la-range.Tpo -c -o libkite_la-range.lo `test -f 'stdlib/System/math/range.cpp' || echo '$(srcdir)/'`stdlib/System/math/range.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-range.Tpo $(DEPDIR)/libkite_la-range.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/math/range.cpp' object='libkite_la-range.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-range.lo `test -f 'stdlib/System/math/range.cpp' || echo '$(srcdir)/'`stdlib/System/math/range.cpp
-
-libkite_la-network.lo: stdlib/System/network.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-network.lo -MD -MP -MF $(DEPDIR)/libkite_la-network.Tpo -c -o libkite_la-network.lo `test -f 'stdlib/System/network.cpp' || echo '$(srcdir)/'`stdlib/System/network.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-network.Tpo $(DEPDIR)/libkite_la-network.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/network.cpp' object='libkite_la-network.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-network.lo `test -f 'stdlib/System/network.cpp' || echo '$(srcdir)/'`stdlib/System/network.cpp
-
-libkite_la-socket.lo: stdlib/System/network/socket.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-socket.lo -MD -MP -MF $(DEPDIR)/libkite_la-socket.Tpo -c -o libkite_la-socket.lo `test -f 'stdlib/System/network/socket.cpp' || echo '$(srcdir)/'`stdlib/System/network/socket.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-socket.Tpo $(DEPDIR)/libkite_la-socket.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/network/socket.cpp' object='libkite_la-socket.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-socket.lo `test -f 'stdlib/System/network/socket.cpp' || echo '$(srcdir)/'`stdlib/System/network/socket.cpp
-
-libkite_la-wrapper.lo: stdlib/System/network/wrapper.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-wrapper.lo -MD -MP -MF $(DEPDIR)/libkite_la-wrapper.Tpo -c -o libkite_la-wrapper.lo `test -f 'stdlib/System/network/wrapper.cpp' || echo '$(srcdir)/'`stdlib/System/network/wrapper.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-wrapper.Tpo $(DEPDIR)/libkite_la-wrapper.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/network/wrapper.cpp' object='libkite_la-wrapper.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-wrapper.lo `test -f 'stdlib/System/network/wrapper.cpp' || echo '$(srcdir)/'`stdlib/System/network/wrapper.cpp
-
-libkite_la-TcpSocket.lo: stdlib/System/network/wrapper/TcpSocket.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-TcpSocket.lo -MD -MP -MF $(DEPDIR)/libkite_la-TcpSocket.Tpo -c -o libkite_la-TcpSocket.lo `test -f 'stdlib/System/network/wrapper/TcpSocket.cpp' || echo '$(srcdir)/'`stdlib/System/network/wrapper/TcpSocket.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-TcpSocket.Tpo $(DEPDIR)/libkite_la-TcpSocket.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/network/wrapper/TcpSocket.cpp' object='libkite_la-TcpSocket.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-TcpSocket.lo `test -f 'stdlib/System/network/wrapper/TcpSocket.cpp' || echo '$(srcdir)/'`stdlib/System/network/wrapper/TcpSocket.cpp
-
-libkite_la-UdpSocket.lo: stdlib/System/network/wrapper/UdpSocket.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-UdpSocket.lo -MD -MP -MF $(DEPDIR)/libkite_la-UdpSocket.Tpo -c -o libkite_la-UdpSocket.lo `test -f 'stdlib/System/network/wrapper/UdpSocket.cpp' || echo '$(srcdir)/'`stdlib/System/network/wrapper/UdpSocket.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-UdpSocket.Tpo $(DEPDIR)/libkite_la-UdpSocket.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/network/wrapper/UdpSocket.cpp' object='libkite_la-UdpSocket.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-UdpSocket.lo `test -f 'stdlib/System/network/wrapper/UdpSocket.cpp' || echo '$(srcdir)/'`stdlib/System/network/wrapper/UdpSocket.cpp
-
-libkite_la-kite.lo: stdlib/language/kite.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-kite.lo -MD -MP -MF $(DEPDIR)/libkite_la-kite.Tpo -c -o libkite_la-kite.lo `test -f 'stdlib/language/kite.cpp' || echo '$(srcdir)/'`stdlib/language/kite.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-kite.Tpo $(DEPDIR)/libkite_la-kite.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/language/kite.cpp' object='libkite_la-kite.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-kite.lo `test -f 'stdlib/language/kite.cpp' || echo '$(srcdir)/'`stdlib/language/kite.cpp
-
-libkite_la-syntax_tree.lo: stdlib/language/kite/syntax_tree.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-syntax_tree.lo -MD -MP -MF $(DEPDIR)/libkite_la-syntax_tree.Tpo -c -o libkite_la-syntax_tree.lo `test -f 'stdlib/language/kite/syntax_tree.cpp' || echo '$(srcdir)/'`stdlib/language/kite/syntax_tree.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-syntax_tree.Tpo $(DEPDIR)/libkite_la-syntax_tree.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/language/kite/syntax_tree.cpp' object='libkite_la-syntax_tree.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-syntax_tree.lo `test -f 'stdlib/language/kite/syntax_tree.cpp' || echo '$(srcdir)/'`stdlib/language/kite/syntax_tree.cpp
-
-libkite_la-exceptions.lo: stdlib/System/exceptions.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-exceptions.lo -MD -MP -MF $(DEPDIR)/libkite_la-exceptions.Tpo -c -o libkite_la-exceptions.lo `test -f 'stdlib/System/exceptions.cpp' || echo '$(srcdir)/'`stdlib/System/exceptions.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-exceptions.Tpo $(DEPDIR)/libkite_la-exceptions.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/exceptions.cpp' object='libkite_la-exceptions.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-exceptions.lo `test -f 'stdlib/System/exceptions.cpp' || echo '$(srcdir)/'`stdlib/System/exceptions.cpp
-
-libkite_la-exception.lo: stdlib/System/exceptions/exception.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-exception.lo -MD -MP -MF $(DEPDIR)/libkite_la-exception.Tpo -c -o libkite_la-exception.lo `test -f 'stdlib/System/exceptions/exception.cpp' || echo '$(srcdir)/'`stdlib/System/exceptions/exception.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-exception.Tpo $(DEPDIR)/libkite_la-exception.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/exceptions/exception.cpp' object='libkite_la-exception.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-exception.lo `test -f 'stdlib/System/exceptions/exception.cpp' || echo '$(srcdir)/'`stdlib/System/exceptions/exception.cpp
-
-libkite_la-NotImplemented.lo: stdlib/System/exceptions/NotImplemented.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-NotImplemented.lo -MD -MP -MF $(DEPDIR)/libkite_la-NotImplemented.Tpo -c -o libkite_la-NotImplemented.lo `test -f 'stdlib/System/exceptions/NotImplemented.cpp' || echo '$(srcdir)/'`stdlib/System/exceptions/NotImplemented.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-NotImplemented.Tpo $(DEPDIR)/libkite_la-NotImplemented.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/exceptions/NotImplemented.cpp' object='libkite_la-NotImplemented.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-NotImplemented.lo `test -f 'stdlib/System/exceptions/NotImplemented.cpp' || echo '$(srcdir)/'`stdlib/System/exceptions/NotImplemented.cpp
-
-libkite_la-InvalidArgument.lo: stdlib/System/exceptions/InvalidArgument.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-InvalidArgument.lo -MD -MP -MF $(DEPDIR)/libkite_la-InvalidArgument.Tpo -c -o libkite_la-InvalidArgument.lo `test -f 'stdlib/System/exceptions/InvalidArgument.cpp' || echo '$(srcdir)/'`stdlib/System/exceptions/InvalidArgument.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-InvalidArgument.Tpo $(DEPDIR)/libkite_la-InvalidArgument.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/exceptions/InvalidArgument.cpp' object='libkite_la-InvalidArgument.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-InvalidArgument.lo `test -f 'stdlib/System/exceptions/InvalidArgument.cpp' || echo '$(srcdir)/'`stdlib/System/exceptions/InvalidArgument.cpp
-
-libkite_la-TypeMismatch.lo: stdlib/System/exceptions/TypeMismatch.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-TypeMismatch.lo -MD -MP -MF $(DEPDIR)/libkite_la-TypeMismatch.Tpo -c -o libkite_la-TypeMismatch.lo `test -f 'stdlib/System/exceptions/TypeMismatch.cpp' || echo '$(srcdir)/'`stdlib/System/exceptions/TypeMismatch.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-TypeMismatch.Tpo $(DEPDIR)/libkite_la-TypeMismatch.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/exceptions/TypeMismatch.cpp' object='libkite_la-TypeMismatch.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-TypeMismatch.lo `test -f 'stdlib/System/exceptions/TypeMismatch.cpp' || echo '$(srcdir)/'`stdlib/System/exceptions/TypeMismatch.cpp
-
-libkite_la-DivideByZero.lo: stdlib/System/exceptions/DivideByZero.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-DivideByZero.lo -MD -MP -MF $(DEPDIR)/libkite_la-DivideByZero.Tpo -c -o libkite_la-DivideByZero.lo `test -f 'stdlib/System/exceptions/DivideByZero.cpp' || echo '$(srcdir)/'`stdlib/System/exceptions/DivideByZero.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-DivideByZero.Tpo $(DEPDIR)/libkite_la-DivideByZero.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/exceptions/DivideByZero.cpp' object='libkite_la-DivideByZero.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-DivideByZero.lo `test -f 'stdlib/System/exceptions/DivideByZero.cpp' || echo '$(srcdir)/'`stdlib/System/exceptions/DivideByZero.cpp
-
-libkite_la-NullReference.lo: stdlib/System/exceptions/NullReference.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-NullReference.lo -MD -MP -MF $(DEPDIR)/libkite_la-NullReference.Tpo -c -o libkite_la-NullReference.lo `test -f 'stdlib/System/exceptions/NullReference.cpp' || echo '$(srcdir)/'`stdlib/System/exceptions/NullReference.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-NullReference.Tpo $(DEPDIR)/libkite_la-NullReference.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/exceptions/NullReference.cpp' object='libkite_la-NullReference.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-NullReference.lo `test -f 'stdlib/System/exceptions/NullReference.cpp' || echo '$(srcdir)/'`stdlib/System/exceptions/NullReference.cpp
-
-libkite_la-EmptyCollection.lo: stdlib/System/exceptions/EmptyCollection.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-EmptyCollection.lo -MD -MP -MF $(DEPDIR)/libkite_la-EmptyCollection.Tpo -c -o libkite_la-EmptyCollection.lo `test -f 'stdlib/System/exceptions/EmptyCollection.cpp' || echo '$(srcdir)/'`stdlib/System/exceptions/EmptyCollection.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-EmptyCollection.Tpo $(DEPDIR)/libkite_la-EmptyCollection.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/exceptions/EmptyCollection.cpp' object='libkite_la-EmptyCollection.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-EmptyCollection.lo `test -f 'stdlib/System/exceptions/EmptyCollection.cpp' || echo '$(srcdir)/'`stdlib/System/exceptions/EmptyCollection.cpp
-
-libkite_la-FileError.lo: stdlib/System/exceptions/FileError.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-FileError.lo -MD -MP -MF $(DEPDIR)/libkite_la-FileError.Tpo -c -o libkite_la-FileError.lo `test -f 'stdlib/System/exceptions/FileError.cpp' || echo '$(srcdir)/'`stdlib/System/exceptions/FileError.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-FileError.Tpo $(DEPDIR)/libkite_la-FileError.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/exceptions/FileError.cpp' object='libkite_la-FileError.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-FileError.lo `test -f 'stdlib/System/exceptions/FileError.cpp' || echo '$(srcdir)/'`stdlib/System/exceptions/FileError.cpp
-
-libkite_la-SocketError.lo: stdlib/System/exceptions/SocketError.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-SocketError.lo -MD -MP -MF $(DEPDIR)/libkite_la-SocketError.Tpo -c -o libkite_la-SocketError.lo `test -f 'stdlib/System/exceptions/SocketError.cpp' || echo '$(srcdir)/'`stdlib/System/exceptions/SocketError.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-SocketError.Tpo $(DEPDIR)/libkite_la-SocketError.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/exceptions/SocketError.cpp' object='libkite_la-SocketError.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-SocketError.lo `test -f 'stdlib/System/exceptions/SocketError.cpp' || echo '$(srcdir)/'`stdlib/System/exceptions/SocketError.cpp
-
-libkite_la-DnsError.lo: stdlib/System/exceptions/DnsError.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-DnsError.lo -MD -MP -MF $(DEPDIR)/libkite_la-DnsError.Tpo -c -o libkite_la-DnsError.lo `test -f 'stdlib/System/exceptions/DnsError.cpp' || echo '$(srcdir)/'`stdlib/System/exceptions/DnsError.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-DnsError.Tpo $(DEPDIR)/libkite_la-DnsError.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/exceptions/DnsError.cpp' object='libkite_la-DnsError.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-DnsError.lo `test -f 'stdlib/System/exceptions/DnsError.cpp' || echo '$(srcdir)/'`stdlib/System/exceptions/DnsError.cpp
-
-libkite_la-os.lo: stdlib/System/os.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-os.lo -MD -MP -MF $(DEPDIR)/libkite_la-os.Tpo -c -o libkite_la-os.lo `test -f 'stdlib/System/os.cpp' || echo '$(srcdir)/'`stdlib/System/os.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-os.Tpo $(DEPDIR)/libkite_la-os.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/os.cpp' object='libkite_la-os.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-os.lo `test -f 'stdlib/System/os.cpp' || echo '$(srcdir)/'`stdlib/System/os.cpp
-
-libkite_la-posix.lo: stdlib/System/os/posix.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-posix.lo -MD -MP -MF $(DEPDIR)/libkite_la-posix.Tpo -c -o libkite_la-posix.lo `test -f 'stdlib/System/os/posix.cpp' || echo '$(srcdir)/'`stdlib/System/os/posix.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-posix.Tpo $(DEPDIR)/libkite_la-posix.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/os/posix.cpp' object='libkite_la-posix.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-posix.lo `test -f 'stdlib/System/os/posix.cpp' || echo '$(srcdir)/'`stdlib/System/os/posix.cpp
-
-libkite_la-regex.lo: stdlib/System/regex.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-regex.lo -MD -MP -MF $(DEPDIR)/libkite_la-regex.Tpo -c -o libkite_la-regex.lo `test -f 'stdlib/System/regex.cpp' || echo '$(srcdir)/'`stdlib/System/regex.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-regex.Tpo $(DEPDIR)/libkite_la-regex.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/regex.cpp' object='libkite_la-regex.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-regex.lo `test -f 'stdlib/System/regex.cpp' || echo '$(srcdir)/'`stdlib/System/regex.cpp
-
-libkite_la-match_result.lo: stdlib/System/regex/match_result.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-match_result.lo -MD -MP -MF $(DEPDIR)/libkite_la-match_result.Tpo -c -o libkite_la-match_result.lo `test -f 'stdlib/System/regex/match_result.cpp' || echo '$(srcdir)/'`stdlib/System/regex/match_result.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-match_result.Tpo $(DEPDIR)/libkite_la-match_result.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/regex/match_result.cpp' object='libkite_la-match_result.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-match_result.lo `test -f 'stdlib/System/regex/match_result.cpp' || echo '$(srcdir)/'`stdlib/System/regex/match_result.cpp
-
-libkite_la-vm.lo: stdlib/System/vm.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-vm.lo -MD -MP -MF $(DEPDIR)/libkite_la-vm.Tpo -c -o libkite_la-vm.lo `test -f 'stdlib/System/vm.cpp' || echo '$(srcdir)/'`stdlib/System/vm.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-vm.Tpo $(DEPDIR)/libkite_la-vm.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/vm.cpp' object='libkite_la-vm.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-vm.lo `test -f 'stdlib/System/vm.cpp' || echo '$(srcdir)/'`stdlib/System/vm.cpp
-
-libkite_la-compiler.lo: stdlib/System/vm/compiler.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-compiler.lo -MD -MP -MF $(DEPDIR)/libkite_la-compiler.Tpo -c -o libkite_la-compiler.lo `test -f 'stdlib/System/vm/compiler.cpp' || echo '$(srcdir)/'`stdlib/System/vm/compiler.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-compiler.Tpo $(DEPDIR)/libkite_la-compiler.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/vm/compiler.cpp' object='libkite_la-compiler.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-compiler.lo `test -f 'stdlib/System/vm/compiler.cpp' || echo '$(srcdir)/'`stdlib/System/vm/compiler.cpp
-
-libkite_la-loader.lo: stdlib/System/vm/loader.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-loader.lo -MD -MP -MF $(DEPDIR)/libkite_la-loader.Tpo -c -o libkite_la-loader.lo `test -f 'stdlib/System/vm/loader.cpp' || echo '$(srcdir)/'`stdlib/System/vm/loader.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-loader.Tpo $(DEPDIR)/libkite_la-loader.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/vm/loader.cpp' object='libkite_la-loader.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-loader.lo `test -f 'stdlib/System/vm/loader.cpp' || echo '$(srcdir)/'`stdlib/System/vm/loader.cpp
-
-libkite_la-thread.lo: stdlib/System/vm/thread.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-thread.lo -MD -MP -MF $(DEPDIR)/libkite_la-thread.Tpo -c -o libkite_la-thread.lo `test -f 'stdlib/System/vm/thread.cpp' || echo '$(srcdir)/'`stdlib/System/vm/thread.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-thread.Tpo $(DEPDIR)/libkite_la-thread.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/vm/thread.cpp' object='libkite_la-thread.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-thread.lo `test -f 'stdlib/System/vm/thread.cpp' || echo '$(srcdir)/'`stdlib/System/vm/thread.cpp
-
-libkite_la-digest.lo: stdlib/System/digest.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-digest.lo -MD -MP -MF $(DEPDIR)/libkite_la-digest.Tpo -c -o libkite_la-digest.lo `test -f 'stdlib/System/digest.cpp' || echo '$(srcdir)/'`stdlib/System/digest.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-digest.Tpo $(DEPDIR)/libkite_la-digest.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/System/digest.cpp' object='libkite_la-digest.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-digest.lo `test -f 'stdlib/System/digest.cpp' || echo '$(srcdir)/'`stdlib/System/digest.cpp
-
-libkite_la-api.lo: stdlib/api.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-api.lo -MD -MP -MF $(DEPDIR)/libkite_la-api.Tpo -c -o libkite_la-api.lo `test -f 'stdlib/api.cpp' || echo '$(srcdir)/'`stdlib/api.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-api.Tpo $(DEPDIR)/libkite_la-api.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='stdlib/api.cpp' object='libkite_la-api.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-api.lo `test -f 'stdlib/api.cpp' || echo '$(srcdir)/'`stdlib/api.cpp
-
-libkite_la-parser.lo: parser/parser.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-parser.lo -MD -MP -MF $(DEPDIR)/libkite_la-parser.Tpo -c -o libkite_la-parser.lo `test -f 'parser/parser.cpp' || echo '$(srcdir)/'`parser/parser.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-parser.Tpo $(DEPDIR)/libkite_la-parser.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='parser/parser.cpp' object='libkite_la-parser.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-parser.lo `test -f 'parser/parser.cpp' || echo '$(srcdir)/'`parser/parser.cpp
-
-libkite_la-constants.lo: semantics/constants.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libkite_la-constants.lo -MD -MP -MF $(DEPDIR)/libkite_la-constants.Tpo -c -o libkite_la-constants.lo `test -f 'semantics/constants.cpp' || echo '$(srcdir)/'`semantics/constants.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libkite_la-constants.Tpo $(DEPDIR)/libkite_la-constants.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='semantics/constants.cpp' object='libkite_la-constants.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libkite_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libkite_la-constants.lo `test -f 'semantics/constants.cpp' || echo '$(srcdir)/'`semantics/constants.cpp
-
-ikt-ikt.o: apps/ikt.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ikt_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ikt-ikt.o -MD -MP -MF $(DEPDIR)/ikt-ikt.Tpo -c -o ikt-ikt.o `test -f 'apps/ikt.cpp' || echo '$(srcdir)/'`apps/ikt.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/ikt-ikt.Tpo $(DEPDIR)/ikt-ikt.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='apps/ikt.cpp' object='ikt-ikt.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ikt_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ikt-ikt.o `test -f 'apps/ikt.cpp' || echo '$(srcdir)/'`apps/ikt.cpp
-
-ikt-ikt.obj: apps/ikt.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ikt_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ikt-ikt.obj -MD -MP -MF $(DEPDIR)/ikt-ikt.Tpo -c -o ikt-ikt.obj `if test -f 'apps/ikt.cpp'; then $(CYGPATH_W) 'apps/ikt.cpp'; else $(CYGPATH_W) '$(srcdir)/apps/ikt.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/ikt-ikt.Tpo $(DEPDIR)/ikt-ikt.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='apps/ikt.cpp' object='ikt-ikt.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ikt_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ikt-ikt.obj `if test -f 'apps/ikt.cpp'; then $(CYGPATH_W) 'apps/ikt.cpp'; else $(CYGPATH_W) '$(srcdir)/apps/ikt.cpp'; fi`
-
-kite-kite_app.o: apps/kite_app.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(kite_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT kite-kite_app.o -MD -MP -MF $(DEPDIR)/kite-kite_app.Tpo -c -o kite-kite_app.o `test -f 'apps/kite_app.cpp' || echo '$(srcdir)/'`apps/kite_app.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/kite-kite_app.Tpo $(DEPDIR)/kite-kite_app.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='apps/kite_app.cpp' object='kite-kite_app.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(kite_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o kite-kite_app.o `test -f 'apps/kite_app.cpp' || echo '$(srcdir)/'`apps/kite_app.cpp
-
-kite-kite_app.obj: apps/kite_app.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(kite_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT kite-kite_app.obj -MD -MP -MF $(DEPDIR)/kite-kite_app.Tpo -c -o kite-kite_app.obj `if test -f 'apps/kite_app.cpp'; then $(CYGPATH_W) 'apps/kite_app.cpp'; else $(CYGPATH_W) '$(srcdir)/apps/kite_app.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/kite-kite_app.Tpo $(DEPDIR)/kite-kite_app.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='apps/kite_app.cpp' object='kite-kite_app.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(kite_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o kite-kite_app.obj `if test -f 'apps/kite_app.cpp'; then $(CYGPATH_W) 'apps/kite_app.cpp'; else $(CYGPATH_W) '$(srcdir)/apps/kite_app.cpp'; fi`
-
 mostlyclean-libtool:
 	-rm -f *.lo
 
 clean-libtool:
 	-rm -rf .libs _libs
+
+# This directory's subdirectories are mostly independent; you can cd
+# into them and run 'make' without going through this Makefile.
+# To change the values of 'make' variables: instead of editing Makefiles,
+# (1) if the variable is set in 'config.status', edit 'config.status'
+#     (which will cause the Makefiles to be regenerated when you run 'make');
+# (2) otherwise, pass the desired values on the 'make' command line.
+$(RECURSIVE_TARGETS) $(RECURSIVE_CLEAN_TARGETS):
+	@fail= failcom='exit 1'; \
+	for f in x $$MAKEFLAGS; do \
+	  case $$f in \
+	    *=* | --[!k]*);; \
+	    *k*) failcom='fail=yes';; \
+	  esac; \
+	done; \
+	dot_seen=no; \
+	target=`echo $@ | sed s/-recursive//`; \
+	case "$@" in \
+	  distclean-* | maintainer-clean-*) list='$(DIST_SUBDIRS)' ;; \
+	  *) list='$(SUBDIRS)' ;; \
+	esac; \
+	for subdir in $$list; do \
+	  echo "Making $$target in $$subdir"; \
+	  if test "$$subdir" = "."; then \
+	    dot_seen=yes; \
+	    local_target="$$target-am"; \
+	  else \
+	    local_target="$$target"; \
+	  fi; \
+	  ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
+	  || eval $$failcom; \
+	done; \
+	if test "$$dot_seen" = "no"; then \
+	  $(MAKE) $(AM_MAKEFLAGS) "$$target-am" || exit 1; \
+	fi; test -z "$$fail"
+tags-recursive:
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  test "$$subdir" = . || ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) tags); \
+	done
+ctags-recursive:
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  test "$$subdir" = . || ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) ctags); \
+	done
+cscopelist-recursive:
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  test "$$subdir" = . || ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) cscopelist); \
+	done
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -981,10 +563,23 @@ ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	mkid -fID $$unique
 tags: TAGS
 
-TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+TAGS: tags-recursive $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 		$(TAGS_FILES) $(LISP)
 	set x; \
 	here=`pwd`; \
+	if ($(ETAGS) --etags-include --version) >/dev/null 2>&1; then \
+	  include_option=--etags-include; \
+	  empty_fix=.; \
+	else \
+	  include_option=--include; \
+	  empty_fix=; \
+	fi; \
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  if test "$$subdir" = .; then :; else \
+	    test ! -f $$subdir/TAGS || \
+	      set "$$@" "$$include_option=$$here/$$subdir/TAGS"; \
+	  fi; \
+	done; \
 	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
 	unique=`for i in $$list; do \
 	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
@@ -1003,7 +598,7 @@ TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 	  fi; \
 	fi
 ctags: CTAGS
-CTAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+CTAGS: ctags-recursive $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 		$(TAGS_FILES) $(LISP)
 	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
 	unique=`for i in $$list; do \
@@ -1020,7 +615,7 @@ GTAGS:
 	  && $(am__cd) $(top_srcdir) \
 	  && gtags -i $(GTAGS_ARGS) "$$here"
 
-cscopelist:  $(HEADERS) $(SOURCES) $(LISP)
+cscopelist: cscopelist-recursive $(HEADERS) $(SOURCES) $(LISP)
 	list='$(SOURCES) $(HEADERS) $(LISP)'; \
 	case "$(srcdir)" in \
 	  [\\/]* | ?:[\\/]*) sdir="$(srcdir)" ;; \
@@ -1067,24 +662,50 @@ distdir: $(DISTFILES)
 	    || exit 1; \
 	  fi; \
 	done
+	@list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
+	  if test "$$subdir" = .; then :; else \
+	    $(am__make_dryrun) \
+	      || test -d "$(distdir)/$$subdir" \
+	      || $(MKDIR_P) "$(distdir)/$$subdir" \
+	      || exit 1; \
+	    dir1=$$subdir; dir2="$(distdir)/$$subdir"; \
+	    $(am__relativize); \
+	    new_distdir=$$reldir; \
+	    dir1=$$subdir; dir2="$(top_distdir)"; \
+	    $(am__relativize); \
+	    new_top_distdir=$$reldir; \
+	    echo " (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) top_distdir="$$new_top_distdir" distdir="$$new_distdir" \\"; \
+	    echo "     am__remove_distdir=: am__skip_length_check=: am__skip_mode_fix=: distdir)"; \
+	    ($(am__cd) $$subdir && \
+	      $(MAKE) $(AM_MAKEFLAGS) \
+	        top_distdir="$$new_top_distdir" \
+	        distdir="$$new_distdir" \
+		am__remove_distdir=: \
+		am__skip_length_check=: \
+		am__skip_mode_fix=: \
+	        distdir) \
+	      || exit 1; \
+	  fi; \
+	done
 check-am: all-am
-check: check-am
+check: check-recursive
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
 install-binPROGRAMS: install-libLTLIBRARIES
 
-installdirs:
+installdirs: installdirs-recursive
+installdirs-am:
 	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: install-am
-install-exec: install-exec-am
-install-data: install-data-am
-uninstall: uninstall-am
+install: install-recursive
+install-exec: install-exec-recursive
+install-data: install-data-recursive
+uninstall: uninstall-recursive
 
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
 
-installcheck: installcheck-am
+installcheck: installcheck-recursive
 install-strip:
 	if test -z '$(STRIP)'; then \
 	  $(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
@@ -1106,93 +727,97 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-clean: clean-am
+clean: clean-recursive
 
 clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
 	clean-libtool mostlyclean-am
 
-distclean: distclean-am
+distclean: distclean-recursive
 	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
 
-dvi: dvi-am
+dvi: dvi-recursive
 
 dvi-am:
 
-html: html-am
+html: html-recursive
 
 html-am:
 
-info: info-am
+info: info-recursive
 
 info-am:
 
 install-data-am:
 
-install-dvi: install-dvi-am
+install-dvi: install-dvi-recursive
 
 install-dvi-am:
 
 install-exec-am: install-binPROGRAMS install-libLTLIBRARIES
 
-install-html: install-html-am
+install-html: install-html-recursive
 
 install-html-am:
 
-install-info: install-info-am
+install-info: install-info-recursive
 
 install-info-am:
 
 install-man:
 
-install-pdf: install-pdf-am
+install-pdf: install-pdf-recursive
 
 install-pdf-am:
 
-install-ps: install-ps-am
+install-ps: install-ps-recursive
 
 install-ps-am:
 
 installcheck-am:
 
-maintainer-clean: maintainer-clean-am
+maintainer-clean: maintainer-clean-recursive
 	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
-mostlyclean: mostlyclean-am
+mostlyclean: mostlyclean-recursive
 
 mostlyclean-am: mostlyclean-compile mostlyclean-generic \
 	mostlyclean-libtool
 
-pdf: pdf-am
+pdf: pdf-recursive
 
 pdf-am:
 
-ps: ps-am
+ps: ps-recursive
 
 ps-am:
 
 uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 
-.MAKE: install-am install-strip
+.MAKE: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) \
+	cscopelist-recursive ctags-recursive install-am install-strip \
+	tags-recursive
 
-.PHONY: CTAGS GTAGS all all-am check check-am clean clean-binPROGRAMS \
+.PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
+	all all-am check check-am clean clean-binPROGRAMS \
 	clean-generic clean-libLTLIBRARIES clean-libtool cscopelist \
-	ctags distclean distclean-compile distclean-generic \
-	distclean-libtool distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-binPROGRAMS \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-libLTLIBRARIES \
-	install-man install-pdf install-pdf-am install-ps \
-	install-ps-am install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
-	uninstall-am uninstall-binPROGRAMS uninstall-libLTLIBRARIES
+	cscopelist-recursive ctags ctags-recursive distclean \
+	distclean-compile distclean-generic distclean-libtool \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-binPROGRAMS install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-libLTLIBRARIES install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs installdirs-am \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags tags-recursive uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

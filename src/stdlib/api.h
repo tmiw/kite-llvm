@@ -29,7 +29,7 @@
 #define KITE_STDLIB__API_H
 
 #include <stdarg.h>
-#include "System/string.h"
+#include "System/string_type.h"
 #include "System/dynamic_object.h"
 #include "language/kite.h"
 
@@ -236,7 +236,7 @@ namespace kite { \
                 System::dynamic_object &class_obj = name::class_object(); \
                 System::dynamic_object &parent_class_obj = parent::class_object(); \
                 System::string_type full_name = name::class_name().c_str(); \
-                System::string_type full_parent_name = ((System::string*)parent_class_obj.properties["__name"])->string_val; \
+                System::string_type full_parent_name = ObjectRegistration<parent>::Get().full_class_name().c_str(); \
                 System::string_type combined_name = full_parent_name + "." + full_name; \
                 class_obj.properties["__name"] = new System::string(combined_name.c_str()); \
                 parent_class_obj.properties[full_name.c_str()] = &class_obj; \

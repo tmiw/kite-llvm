@@ -27,7 +27,7 @@
  
 #include <iostream>
 #include <boost/assign.hpp>
-#include "string.h"
+#include "string_type.h"
 #include "boolean.h"
 
 using namespace boost::assign;

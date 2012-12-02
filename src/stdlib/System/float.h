@@ -30,7 +30,7 @@
 
 #include "object.h"
 #include "dynamic_object.h"
-#include "string.h"
+#include "string_type.h"
 
 #define FLOAT_METHOD_PREFIX System__float__
 #define PREFIX_FLOAT_METHOD_NAME(name) System__float__ ## name

@@ -30,7 +30,7 @@
 
 #include "object.h"
 #include "dynamic_object.h"
-#include "string.h"
+#include "string_type.h"
 
 #define INTEGER_METHOD_PREFIX System__integer__
 #define PREFIX_INTEGER_METHOD_NAME(name) System__integer__ ## name

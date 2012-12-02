@@ -5,7 +5,7 @@ AC_PREREQ([2.69])
 AC_INIT(kite-llvm, 0.1.0, mooneer@kite-language.org)
 LT_INIT
 LT_LANG([C++])
-AC_CONFIG_SRCDIR([src/apps/ikt.cpp])
+AC_CONFIG_SRCDIR([src/ikt.cpp])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE
@@ -44,9 +44,26 @@ AC_FUNC_MKTIME
 AC_FUNC_MMAP
 AC_CHECK_FUNCS([getcwd gettimeofday memset mkdir munmap rmdir select setenv socket strtol])
 
-AC_OUTPUT(_testdeps/Makefile
+AC_OUTPUT(
+_testdeps/Makefile
 Makefile
+src/codegen/Makefile
 src/Makefile
+src/parser/Makefile
+src/semantics/Makefile
+src/stdlib/language/kite/Makefile
+src/stdlib/language/Makefile
+src/stdlib/Makefile
+src/stdlib/System/collections/Makefile
+src/stdlib/System/date/Makefile
+src/stdlib/System/exceptions/Makefile
+src/stdlib/System/Makefile
+src/stdlib/System/math/Makefile
+src/stdlib/System/network/Makefile
+src/stdlib/System/network/wrapper/Makefile
+src/stdlib/System/os/Makefile
+src/stdlib/System/regex/Makefile
+src/stdlib/System/vm/Makefile
 stress/Makefile
 tests/algorithms/Makefile
 tests/Makefile

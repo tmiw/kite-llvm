@@ -28,8 +28,9 @@
 #include <errno.h>
 #include <signal.h>
 #include <unistd.h>
+#include <sstream>
 #include "posix.h"
-#include "../exceptions/exception.h"
+#include "../exceptions/OsError.h"
 #include "../boolean.h"
 #include "../integer.h"
 
@@ -76,10 +77,12 @@ namespace kite
                     FILE *fp = wrap_popen(name->string_val.c_str(), mode->string_val.c_str());
                     if (fp == NULL)
                     {
-                        // TODO: specific exception type.
-                        exceptions::exception *exc = exceptions::exception::Create(
+                        std::stringstream ss;
+                        
+                        ss << "Could not open connection to executable (errno " << errno << ")";
+                        exceptions::exception *exc = exceptions::OsError::Create(
                             1,
-                            new string("Could not open connection to executable."));
+                            new string(ss.str().c_str()));
                         exc->throw_exception();
                     }
                     

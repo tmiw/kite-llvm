@@ -25,7 +25,9 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include <sstream>
 #include "thread.h"
+#include "../exceptions/OsError.h"
 
 namespace kite
 {
@@ -37,14 +39,24 @@ namespace kite
             {
                 object* thread::exit_thread()
                 {
-                    // TODO: error checking
-                    pthread_cancel(thread_id);
+                    int err = pthread_cancel(thread_id);
+                    if (err != 0)
+                    {
+                        std::stringstream ss;
+                        
+                        ss << "Could not exit thread (errno " << err << ")";
+                        kite::stdlib::System::exceptions::exception *exc = kite::stdlib::System::exceptions::OsError::Create(
+                            1,
+                            new kite::stdlib::System::string(
+                                ss.str().c_str()                                
+                            ));
+                        exc->throw_exception();
+                    }
                     return this;
                 }
                 
                 object* thread::getCurrent()
                 {
-                    // TODO: error checking
                     thread *t = new thread();
                     t->thread_id = pthread_self();
                     return t;
@@ -52,8 +64,19 @@ namespace kite
                 
                 object *thread::join()
                 {
-                    // TODO: error checking
-                    pthread_join(thread_id, NULL);
+                    int err = pthread_join(thread_id, NULL);
+                    if (err != 0)
+                    {
+                        std::stringstream ss;
+                        
+                        ss << "Could not join thread (errno " << err << ")";
+                        kite::stdlib::System::exceptions::exception *exc = kite::stdlib::System::exceptions::OsError::Create(
+                            1,
+                            new kite::stdlib::System::string(
+                                ss.str().c_str()                                
+                            ));
+                        exc->throw_exception();
+                    }
                     return this;
                 }
             }

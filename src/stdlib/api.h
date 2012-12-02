@@ -28,7 +28,6 @@
 #ifndef KITE_STDLIB__API_H
 #define KITE_STDLIB__API_H
 
-//#include <ffi.h>
 #include <stdarg.h>
 #include "System/string.h"
 #include "System/dynamic_object.h"

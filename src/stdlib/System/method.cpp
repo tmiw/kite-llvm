@@ -25,8 +25,9 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include "config.h"
 #include <stdarg.h>
-#include <ffi.h>
+#include FFI_HEADER
 #include <iostream>
 #include "method.h"
 #include "string.h"

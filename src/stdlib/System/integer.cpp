@@ -99,9 +99,24 @@ namespace kite
             
             System::object *integer::parse(System::object *t, System::string *str, System::integer *base)
             {
-                // TODO
-                assert(str->type == semantics::STRING);
-                assert(base->type == semantics::INTEGER);
+                if (str->type != semantics::STRING)
+                {
+                    System::exceptions::exception *exc = System::exceptions::TypeMismatch::Create(
+                        1,
+                        new System::string("arg 1: string expected")
+                    );
+                    exc->throw_exception();
+                }
+                
+                if (base->type != semantics::INTEGER)
+                {
+                    System::exceptions::exception *exc = System::exceptions::TypeMismatch::Create(
+                        1,
+                        new System::string("arg 2: integer expected")
+                    );
+                    exc->throw_exception();
+                }
+                
                 return new System::integer(strtol(str->string_val.c_str(), (char**)NULL, base->val));
             }
         }

@@ -97,8 +97,15 @@ namespace kite
             
             System::object *fpnum::parse(System::object *t, System::string *str)
             {
-                // TODO
-                assert(str->type == semantics::STRING);
+                if (str->type != semantics::STRING)
+                {
+                    System::exceptions::exception *exc = System::exceptions::TypeMismatch::Create(
+                        1,
+                        new System::string("string expected")
+                    );
+                    exc->throw_exception();
+                }
+                
                 return new System::fpnum(atof(str->string_val.c_str()));
             }
         }

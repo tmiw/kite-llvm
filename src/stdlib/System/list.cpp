@@ -29,6 +29,7 @@
 #include <cstring>
 #include <assert.h>
 #include "list.h"
+#include "exceptions/TypeMismatch.h"
 
 namespace kite
 {
@@ -51,8 +52,14 @@ namespace kite
             
             object *list::get_index(list *l, integer *index)
             {
-                // TODO
-                assert(index->type == semantics::INTEGER);
+                if (index->type != semantics::INTEGER)
+                {
+                    kite::stdlib::System::exceptions::exception *exc = kite::stdlib::System::exceptions::TypeMismatch::Create(
+                        1,
+                        new kite::stdlib::System::string("integer expected")
+                    );
+                    exc->throw_exception();
+                }
                 return l->list_contents[index->val];
             }
             
@@ -81,8 +88,14 @@ namespace kite
             
             object *list::remove_at(list *l, integer *index)
             {
-                // TODO
-                assert(index->type == semantics::INTEGER);
+                if (index->type != semantics::INTEGER)
+                {
+                    kite::stdlib::System::exceptions::exception *exc = kite::stdlib::System::exceptions::TypeMismatch::Create(
+                        1,
+                        new kite::stdlib::System::string("integer expected")
+                    );
+                    exc->throw_exception();
+                }
                 
                 list *new_list = new list();
                 new_list->list_contents = l->list_contents;
@@ -129,9 +142,24 @@ namespace kite
             
             object *list::sublist_with_length(list *l, integer *index_from, integer *count)
             {
-                // TODO
-                assert(index_from->type == semantics::INTEGER);
-                assert(count->type == semantics::INTEGER);
+                if (index_from->type != semantics::INTEGER)
+                {
+                    kite::stdlib::System::exceptions::exception *exc = kite::stdlib::System::exceptions::TypeMismatch::Create(
+                        1,
+                        new kite::stdlib::System::string("arg 1: integer expected")
+                    );
+                    exc->throw_exception();
+                }
+                
+                if (count->type != semantics::INTEGER)
+                {
+                    kite::stdlib::System::exceptions::exception *exc = kite::stdlib::System::exceptions::TypeMismatch::Create(
+                        1,
+                        new kite::stdlib::System::string("arg 2: integer expected")
+                    );
+                    exc->throw_exception();
+                }
+                
                 int length = count->val;
                 int start = index_from->val;
                 list_contents_type::iterator iter = l->list_contents.begin();

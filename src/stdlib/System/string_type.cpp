@@ -26,9 +26,11 @@
  ****************************************************************************/
  
 #include <iostream>
+#include <sstream>
 #include <boost/assign.hpp>
 #include "string_type.h"
 #include "boolean.h"
+#include "exceptions/InvalidArgument.h"
 
 using namespace boost::assign;
  
@@ -166,7 +168,19 @@ bool PREFIX_STRING_METHOD_NAME(bool__s)(const char* val)
 
 char* PREFIX_STRING_METHOD_NAME(charAt__si)(const char *val, int index)
 {
-    // TODO: exception for invalid input
+    if (val == NULL || index >= strlen(val) || index < 0)
+    {
+        std::stringstream ss;
+
+        ss << "Index " << index << " is outside the range [0, " << strlen(val) << ")";
+        kite::stdlib::System::exceptions::exception *exc = kite::stdlib::System::exceptions::InvalidArgument::Create(
+            1,
+            new kite::stdlib::System::string(
+                ss.str().c_str()                                
+            ));
+        exc->throw_exception();
+    }
+    
     char *ret = (char*)malloc(2);
     ret[0] = val[index];
     ret[1] = 0;

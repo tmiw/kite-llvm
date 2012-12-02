@@ -33,6 +33,7 @@
 #include "../vm.h"
 #include "../list.h"
 #include "../method.h"
+#include "../exceptions/OsError.h"
 
 namespace kite
 {
@@ -60,10 +61,21 @@ namespace kite
                     
                     static object* s_initialize_2(thread *t, method *start_m, list *args)
                     {
-                        // TODO: error checking
                         t->start_method = start_m;
                         t->args = args;
-                        pthread_create(&t->thread_id, NULL, &thread::thread_start, (void*)t);
+                        int err = pthread_create(&t->thread_id, NULL, &thread::thread_start, (void*)t);
+                        if (err != 0)
+                        {
+                            std::stringstream ss;
+
+                            ss << "Could not create thread (errno " << err << ")";
+                            kite::stdlib::System::exceptions::exception *exc = kite::stdlib::System::exceptions::OsError::Create(
+                                1,
+                                new kite::stdlib::System::string(
+                                    ss.str().c_str()                                
+                                ));
+                            exc->throw_exception();
+                        }
                         return t;
                     }
                     

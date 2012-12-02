@@ -27,5 +27,3 @@
 
 #include "../network.h"
 #include "wrapper.h"
-
-REGISTER_KITE_CLASS(kite::stdlib::System::network::network, kite::stdlib::System::network::wrapper::wrapper)

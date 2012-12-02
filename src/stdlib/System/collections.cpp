@@ -26,6 +26,3 @@
  ****************************************************************************/
  
 #include "collections.h"
-
-
-REGISTER_KITE_CLASS(kite::stdlib::System::System, kite::stdlib::System::collections::collections)

@@ -29,6 +29,7 @@
 #define KITE_STDLIB__SYSTEM_VM_H
 
 #include "stdlib/api.h"
+#include "../System.h"
 
 namespace kite
 {
@@ -47,5 +48,7 @@ namespace kite
         }
     }
 }
+
+REGISTER_KITE_CLASS(kite::stdlib::System::System, kite::stdlib::System::vm::vm)
 
 #endif

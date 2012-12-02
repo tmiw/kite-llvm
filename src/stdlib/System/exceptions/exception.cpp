@@ -84,7 +84,7 @@ namespace kite
                             ss << sym_info.dli_sname << "(" << sym_info.dli_fbase << ")" << std::endl;*/
                         }
                     }
-                    properties["trace"] = new System::string(ss.str().c_str());
+                    properties["trace"] = new kite::stdlib::System::string(ss.str().c_str());
                     
                     if (language::kite::kite::exception_stack.size() > 0)
                     {
@@ -95,7 +95,7 @@ namespace kite
                     {
                         // TODO
                         System::dynamic_object *real_exc_class = (System::dynamic_object*)this->parent;
-                        std::cout << ((System::string*)real_exc_class->properties["__name"])->string_val << ": ";
+                        std::cout << ((kite::stdlib::System::string*)real_exc_class->properties["__name"])->string_val << ": ";
                         properties["message"]->print();
                         
                         if (debugger_attach_on_uncaught_exception)

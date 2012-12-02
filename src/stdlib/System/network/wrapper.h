@@ -29,6 +29,7 @@
 #define KITE_STDLIB__SYSTEM__NETWORK__WRAPPER_H
 
 #include "stdlib/api.h"
+#include "../network.h"
 
 namespace kite
 {
@@ -50,5 +51,7 @@ namespace kite
         }
     }
 }
+
+REGISTER_KITE_CLASS(kite::stdlib::System::network::network, kite::stdlib::System::network::wrapper::wrapper)
 
 #endif

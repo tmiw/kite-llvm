@@ -105,4 +105,6 @@ namespace kite
     }
 }
 
+REGISTER_KITE_CLASS(kite::stdlib::System::System, kite::stdlib::System::regex::regex)
+
 #endif

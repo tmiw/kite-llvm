@@ -219,12 +219,7 @@ void *api_call_method(int numargs, void *obj, void *funcptr, va_list vl);
  */
 #define BEGIN_KITE_BASE_CLASS(name) BEGIN_KITE_CHILD_CLASS(name, kite::stdlib::System::dynamic_object)
 
-/**
- * Registers type with the Kite type system.
- * @param parent The parent namespace name (e.g. System).
- * @param name The current class name (e.g. string, not System::string or System.string).
- */
-#define REGISTER_KITE_CLASS(parent, name) \
+#define KITE_CLASS_PARENT(parent, name) \
 namespace kite { \
     namespace stdlib { \
         template<> \
@@ -253,8 +248,19 @@ namespace kite { \
                 return std::string(parent_reg.full_class_name()) + "." + name::class_name(); \
             } \
         }; \
-        \
-        static ObjectRegistration<name> & TOKENPASTE2(RegistrationHelper_, FILE_NO) = ObjectRegistration<name>::Get(); \
+    } \
+}
+
+/**
+ * Registers type with the Kite type system.
+ * @param parent The parent namespace name (e.g. System).
+ * @param name The current class name (e.g. string, not System::string or System.string).
+ */
+#define REGISTER_KITE_CLASS(parent, name) \
+KITE_CLASS_PARENT(parent, name) \
+namespace kite { \
+    namespace stdlib { \
+        static ObjectRegistration<name> & TOKENPASTE2(RegistrationHelper_, __LINE__) = ObjectRegistration<name>::Get(); \
     } \
 }
 
@@ -265,7 +271,7 @@ namespace kite { \
 #define REGISTER_KITE_CLASS_AT_ROOT(name) \
     namespace kite { \
         namespace stdlib { \
-            static ObjectRegistration<name> & TOKENPASTE2(RegistrationHelper_, FILE_NO) = ObjectRegistration<name>::Get(); \
+            static ObjectRegistration<name> & TOKENPASTE2(RegistrationHelper_, __LINE__) = ObjectRegistration<name>::Get(); \
         } \
     }
 

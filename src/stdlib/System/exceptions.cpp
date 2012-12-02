@@ -28,4 +28,3 @@
 #include "../System.h"
 #include "exceptions.h"
 
-REGISTER_KITE_CLASS(kite::stdlib::System::System, kite::stdlib::System::exceptions::exceptions)

@@ -28,6 +28,7 @@
 #ifndef KITE_STDLIB__SYSTEM__EXCEPTIONS_H
 #define KITE_STDLIB__SYSTEM__EXCEPTIONS_H
 
+#include "stdlib/System.h"
 #include "stdlib/api.h"
 
 namespace kite
@@ -47,5 +48,7 @@ namespace kite
         }
     }
 }
+
+REGISTER_KITE_CLASS(kite::stdlib::System::System, kite::stdlib::System::exceptions::exceptions)
 
 #endif

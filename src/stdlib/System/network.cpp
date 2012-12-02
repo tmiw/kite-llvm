@@ -27,5 +27,3 @@
 
 #include "../System.h"
 #include "network.h"
-
-REGISTER_KITE_CLASS(kite::stdlib::System::System, kite::stdlib::System::network::network)

@@ -30,22 +30,22 @@
 
 // HACK: random files are somehow being ignored by g++/ld, so there goes the
 // use of multiple .cpp files to try to reduce compile time due to Boost.
-#if 0
+#if 1
 #include "assignment.cpp"
 #include "bitwise.cpp"
 #include "classes.cpp"
 #include "comparison.cpp"
-#include "constants.cpp"
+#include "constants_decl.cpp"
 #include "decide.cpp"
 #include "deref.cpp"
 #include "grouping.cpp"
 #include "loop.cpp"
 #include "map_reduce.cpp"
-#include "math.cpp"
-#include "method.cpp"
+#include "math_ops.cpp"
+#include "method_decl.cpp"
 #include "statement.cpp"
 #include "make.cpp"
-#include "exceptions.cpp"
+#include "exceptions_decl.cpp"
 #include "constructor.cpp"
 #include "destructor.cpp"
 #endif

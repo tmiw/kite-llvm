@@ -28,7 +28,7 @@
 #ifndef KITE_STDLIB__API_H
 #define KITE_STDLIB__API_H
 
-#include <ffi.h>
+//#include <ffi.h>
 #include <stdarg.h>
 #include "System/string.h"
 #include "System/dynamic_object.h"
@@ -253,7 +253,7 @@ namespace kite { \
             } \
         }; \
         \
-        ObjectRegistration<name> & TOKENPASTE2(RegistrationHelper_, FILE_NO) = ObjectRegistration<name>::Get(); \
+        static ObjectRegistration<name> & TOKENPASTE2(RegistrationHelper_, FILE_NO) = ObjectRegistration<name>::Get(); \
     } \
 }
 
@@ -264,7 +264,7 @@ namespace kite { \
 #define REGISTER_KITE_CLASS_AT_ROOT(name) \
     namespace kite { \
         namespace stdlib { \
-            ObjectRegistration<name> & TOKENPASTE2(RegistrationHelper_, FILE_NO) = ObjectRegistration<name>::Get(); \
+            static ObjectRegistration<name> & TOKENPASTE2(RegistrationHelper_, FILE_NO) = ObjectRegistration<name>::Get(); \
         } \
     }
 

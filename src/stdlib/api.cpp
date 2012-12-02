@@ -26,7 +26,7 @@
  ****************************************************************************/
  
 #include <stdarg.h>
-#include <ffi.h>
+#include <ffi/ffi.h>
 #include "api.h"
 
 void *api_call_method(int numargs, void *obj, void *initptr, va_list vl)

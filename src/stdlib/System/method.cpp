@@ -26,7 +26,7 @@
  ****************************************************************************/
 
 #include <stdarg.h>
-#include <ffi.h>
+#include <ffi/ffi.h>
 #include <iostream>
 #include "method.h"
 #include "string.h"

@@ -27,6 +27,7 @@
 
 #include "grammar.h"
 #include "parser.h"
+#include "stdlib/System/exceptions/FileError.h"
 
 // HACK: random files are somehow being ignored by g++/ld, so there goes the
 // use of multiple .cpp files to try to reduce compile time due to Boost.
@@ -51,7 +52,8 @@
 #endif
 
 using namespace std;
- 
+using namespace kite::stdlib;
+
 namespace kite
 {
     namespace parser
@@ -79,12 +81,22 @@ namespace kite
             }
             catch (const qi::expectation_failure<pos_iterator_type> &e)
             {
-                const classic::file_position_base<std::string>& pos =
-    e.first.get_position();
-                cerr << "parse error at file " << pos.file
+                const classic::file_position_base<std::string>& pos = e.first.get_position();
+                std::stringstream ss;
+                
+                ss   << "parse error at file " << pos.file
                      << " line " << pos.line << " column " << pos.column << std::endl
                      << "'" << e.first.get_currentline() << "'" << std::endl
                      << std::setw(pos.column) << " " << "^- here" << std::endl;
+                     
+                System::exceptions::exception *exc = 
+                    System::exceptions::FileError::Create(
+                        1,
+                        new System::string(
+                            ss.str().c_str())
+                    );
+                exc->throw_exception();
+                
                 return false;
             }
         }

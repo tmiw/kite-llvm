@@ -42,6 +42,7 @@
 #include <stdlib/System/list.h>
 #include <stdlib/System/regex.h>
 #include <stdlib/System/vm/loader.h>
+#include <stdlib/System/exceptions/FileError.h>
 #include <codegen/syntax_tree_printer.h>
 #include <codegen/llvm_node_codegen.h>
 #include <llvm/LLVMContext.h>
@@ -169,12 +170,20 @@ namespace kite
                         if (full_path.size() == 0)
                         {
                             if (index == size - 1)
-                            {
-                                // TODO: throw exception for file not found.
+                            {        
                                 for (; index > 0; index--)
                                 {
                                     state.pop_namespace_stack();
                                 }
+                                System::exceptions::exception *exc = 
+                                    System::exceptions::FileError::Create(
+                                        1,
+                                        new System::string(
+                                            (std::string("Could not find ") + 
+                                             module_load_list[index] + 
+                                             " in load path.").c_str())
+                                    );
+                                exc->throw_exception();
                                 return NULL;
                             }
                         }
@@ -305,6 +314,13 @@ namespace kite
                 std::string kite::GetMethodNameFromPointer(void *ptr, void **beginPointer)
                 {
 #ifndef ENABLE_ENHANCED_JIT
+                    if (execution_engine == NULL)
+                    {
+                        // most likely thrown exception while trying to load
+                        // a module. Can't get any method names in that case.
+                        return "";
+                    }
+                    
                     // We need to go through every function object in
                     // the LLVM Module object to find the correct function
                     // name. This might cause performance issues if called often.

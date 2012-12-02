@@ -238,7 +238,6 @@ void *kite_find_funccall(void *obj, const char *name, int numargs)
             dyn_object = (System::dynamic_object*)dyn_object->parent;
         } while (dyn_object != NULL);
         
-        // TODO
 failed_to_find_method:
         std::string theName(name);
         if ((theName == "__init__" && numargs > 1) || (theName != "__init__"))
@@ -261,9 +260,13 @@ bool kite_object_isof(void *lhs, void *rhs, bool type)
     System::dynamic_object *rhsObj = (System::dynamic_object*)rhs;
     bool ret = false;
     
+    if (lhsObj->type == rhsObj->type && lhsObj->type != kite::semantics::OBJECT)
+    {
+        return true;
+    }
+    
     do
     {
-        // TODO: handle built-in types.
         if (lhsObj->parent == rhsObj)
         {
             ret = true;

@@ -65,7 +65,8 @@ namespace kite
                 static object *append_in_place(list *lhs, object *rhs);
                 static object *map(list *lhs, method *m);
                 static object *reduce(list *lhs, method *m);
-
+                static object *sort(list *lhs);
+                
                 static object *as_object(list *lhs) { return lhs; }
                 
                 BEGIN_KITE_CLASS_INITIALIZER
@@ -92,7 +93,7 @@ namespace kite
                     KITE_METHOD_DEFINE(print, 0, &list::print);
                     KITE_METHOD_DEFINE(removeAt, 1, &list::remove_at);
                     // TODO: reset
-                    // TOOD: sort
+                    KITE_METHOD_DEFINE(sort, 0, &list::sort);
                     KITE_METHOD_DEFINE(str, 0, &list::as_string);
                     KITE_METHOD_DEFINE(sublist, 1, &list::sublist);
                     KITE_METHOD_DEFINE(sublist, 2, &list::sublist_with_length);

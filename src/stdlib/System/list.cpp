@@ -50,6 +50,30 @@ namespace kite
                 return new integer(l->list_contents.size());
             }
             
+            struct sorter : public std::binary_function<object *, object *, bool>
+            {
+                bool operator()(object *l, object *r)
+                {
+                    object *res = l->invoke_operator(semantics::LESS_THAN, r);
+                    if (res->type != semantics::BOOLEAN)
+                    {
+                        kite::stdlib::System::exceptions::exception *exc = kite::stdlib::System::exceptions::TypeMismatch::Create(
+                            1,
+                            new kite::stdlib::System::string("Could not compare objects.")
+                        );
+                        exc->throw_exception();
+                    }
+                    
+                    return ((boolean*)res)->val;
+                }
+            };
+            
+            object *list::sort(list *l)
+            {
+                std::sort(l->list_contents.begin(), l->list_contents.end(), sorter());
+                return l;
+            }
+            
             object *list::get_index(list *l, integer *index)
             {
                 if (index->type != semantics::INTEGER)

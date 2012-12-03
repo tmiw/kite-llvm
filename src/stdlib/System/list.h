@@ -67,6 +67,10 @@ namespace kite
                 static object *reduce(list *lhs, method *m);
                 static object *sort(list *lhs);
                 
+                static object *cur(list *lhs);
+                static object *next(list *lhs);
+                static object *reset(list *lhs);
+                
                 static object *as_object(list *lhs) { return lhs; }
                 
                 BEGIN_KITE_CLASS_INITIALIZER
@@ -84,15 +88,15 @@ namespace kite
                     
                     KITE_METHOD_DEFINE(append, 1, &list::append);
                     KITE_METHOD_DEFINE(count, 0, &list::count);
-                    // TODO: cur
+                    KITE_METHOD_DEFINE(cur, 0, &list::cur);
                     KITE_METHOD_DEFINE(getIndex, 1, &list::get_index);
                     KITE_METHOD_DEFINE(head, 0, &list::head);
-                    // TODO: next
+                    KITE_METHOD_DEFINE(next, 0, &list::next);
                     KITE_METHOD_DEFINE(obj, 0, &list::as_object);
                     KITE_METHOD_DEFINE(prepend, 1, &list::prepend);
                     KITE_METHOD_DEFINE(print, 0, &list::print);
                     KITE_METHOD_DEFINE(removeAt, 1, &list::remove_at);
-                    // TODO: reset
+                    KITE_METHOD_DEFINE(reset, 0, &list::reset);
                     KITE_METHOD_DEFINE(sort, 0, &list::sort);
                     KITE_METHOD_DEFINE(str, 0, &list::as_string);
                     KITE_METHOD_DEFINE(sublist, 1, &list::sublist);
@@ -101,6 +105,8 @@ namespace kite
                 END_KITE_CLASS_INITIALIZER
                 
                 list_contents_type list_contents;
+                bool iter_initialized;
+                list_contents_type::iterator iter;
             };
         }
     }

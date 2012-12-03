@@ -30,6 +30,7 @@
 #include <assert.h>
 #include "list.h"
 #include "exceptions/TypeMismatch.h"
+#include "exceptions/InvalidArgument.h"
 
 namespace kite
 {
@@ -72,6 +73,52 @@ namespace kite
             {
                 std::sort(l->list_contents.begin(), l->list_contents.end(), sorter());
                 return l;
+            }
+            
+            object *list::reset(list *l)
+            {
+                l->iter_initialized = false;
+                return l;
+            }
+            
+            object *list::next(list *l)
+            {
+                if (!l->iter_initialized)
+                {
+                    l->iter = l->list_contents.begin();
+                    l->iter_initialized = true;
+                }
+                
+                bool ret = true;
+                if (l->iter == l->list_contents.end())
+                {
+                    ret = false;
+                }
+                else
+                {
+                    l->iter++;
+                    if (l->iter == l->list_contents.end())
+                    {
+                        ret = false;
+                    }
+                }
+
+                return new kite::stdlib::System::boolean(ret);
+            }
+            
+            object *list::cur(list *l)
+            {
+                if (l->iter_initialized && l->iter != l->list_contents.end())
+                {
+                    return *l->iter;
+                }
+
+                kite::stdlib::System::exceptions::exception *exc = kite::stdlib::System::exceptions::InvalidArgument::Create(
+                    1,
+                    new kite::stdlib::System::string("Iterator has gone past the end of the object.")
+                );
+                exc->throw_exception();
+                return NULL;
             }
             
             object *list::get_index(list *l, integer *index)

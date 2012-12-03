@@ -50,8 +50,7 @@ namespace kite
                     BEGIN_KITE_CLASS_INITIALIZER
                         KITE_METHOD_DEFINE(loadClass, 1, &loader::s_loadClass);
                         
-                        // TODO
-                        class_obj.properties["searchPath"] = new string("./");
+                        class_obj.properties["searchPath"] = new string(DATADIR ":./");
                     END_KITE_CLASS_INITIALIZER
                 END_KITE_CLASS
             }

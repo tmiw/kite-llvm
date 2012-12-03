@@ -37,7 +37,6 @@ namespace kite
 {
     namespace stdlib
     {
-        // TODO
         typedef std::pair<semantics::builtin_types, void*> function_semantics;
         typedef std::map<std::string, function_semantics> object_method_map;
         

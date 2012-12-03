@@ -29,7 +29,9 @@
 #include <stdarg.h>
 #include FFI_HEADER
 #include <iostream>
+#include <sstream>
 #include "method.h"
+#include "exceptions/InvalidArgument.h"
 #include "string.h"
 #include "list.h"
 
@@ -46,7 +48,7 @@ namespace kite
                 ffi_cif cif;
                 ffi_type *args[num_args + 1];
                 void *values[num_args + 1];
-                void **val_heap = (void**)malloc((num_args + 1) * sizeof(void*)); /*new void*[numargs + 1];*/
+                void **val_heap = (void**)malloc((num_args + 1) * sizeof(void*));
                 void *rv;
                 args[0] = &ffi_type_pointer;
                 values[0] = &val_heap[0];
@@ -71,7 +73,6 @@ namespace kite
                 ffi_call(&cif, (void(*)())method_ptr, &rv, values);
                 va_end(vl);
                 free(val_heap);
-                /*delete[] val_heap;*/
                 return (object*)rv;
             }
             
@@ -98,7 +99,6 @@ namespace kite
                 }
                 ffi_call(&cif, (void(*)())method_ptr, &rv, values);
                 free(val_heap);
-                /*delete[] val_heap;*/
                 return (object*)rv;
             }
             
@@ -122,6 +122,5 @@ void *kite_method_alloc(void *method_ptr, int args)
 void *kite_method_verify_semantics(void *method, int args)
 {
     System::method *methodObj = (System::method*)method;
-    // TODO: verify type and args.
     return methodObj->method_ptr;
 }

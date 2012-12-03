@@ -41,6 +41,60 @@ namespace kite
         {
             namespace collections
             {
+                object *binary_tree::reset()
+                {
+                    this->iter_initialized = false;
+                    return this;
+                }
+                
+                object *binary_tree::next()
+                {
+                    bool at_begin = false;
+                    if (!this->iter_initialized)
+                    {
+                        at_begin = true;
+                        this->iter = this->tree_contents.begin();
+                        this->iter_initialized = true;
+                    }
+
+                    bool ret = true;
+                    if (this->iter == this->tree_contents.end())
+                    {
+                        ret = false;
+                    }
+                    else
+                    {
+                        if (!at_begin)
+                        {
+                            this->iter++;
+                            if (this->iter == this->tree_contents.end())
+                            {
+                                ret = false;
+                            }
+                        }
+                    }
+
+                    return new kite::stdlib::System::boolean(ret);
+                }
+                
+                object *binary_tree::cur()
+                {
+                    if (this->iter_initialized && this->iter != this->tree_contents.end())
+                    {
+                        kite::stdlib::System::list *ret = kite::stdlib::System::list::Create(0);
+                        ret->list_contents.push_back(new string(this->iter->first.c_str()));
+                        ret->list_contents.push_back(this->iter->second);
+                        return ret;
+                    }
+
+                    kite::stdlib::System::exceptions::exception *exc = kite::stdlib::System::exceptions::InvalidArgument::Create(
+                        1,
+                        new kite::stdlib::System::string("Iterator has gone past the end of the object.")
+                    );
+                    exc->throw_exception();
+                    return NULL;
+                }
+                
                 object *binary_tree::count()
                 {
                     return new integer(tree_contents.size());

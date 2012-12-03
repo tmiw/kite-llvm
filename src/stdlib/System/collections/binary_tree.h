@@ -44,12 +44,14 @@ namespace kite
             
                 BEGIN_KITE_BASE_CLASS(binary_tree)
                     private:
-                        // TODO: iterator
                         static object *s_count(binary_tree *list) { return list->count(); }
                         static object *s_set(binary_tree *list, object *index, object *item) { return list->set(index, item); }
                         static object *s_get(binary_tree *list, object *index) { return list->get(index); }
                         static object *s_remove(binary_tree *list, object *index) { return list->remove(index); }
                         static object *s_keys(binary_tree *list) { return list->keys(); }
+                        static object *s_cur(binary_tree *list) { return list->cur(); }
+                        static object *s_next(binary_tree *list) { return list->next(); }
+                        static object *s_reset(binary_tree *list) { return list->reset(); }
                         
                     public:
                         object *count();
@@ -57,7 +59,10 @@ namespace kite
                         object *get(object *index);
                         object *remove(object *index);
                         object *keys();
-                                                
+                        object *cur();
+                        object *next();
+                        object *reset();
+                        
                     BEGIN_KITE_CLASS_INITIALIZER
                         KITE_OPERATOR_DEFINE(semantics::DEREF_ARRAY, &binary_tree::s_get);
 
@@ -66,9 +71,15 @@ namespace kite
                         KITE_METHOD_DEFINE(get, 1, &binary_tree::s_get);
                         KITE_METHOD_DEFINE(remove, 1, &binary_tree::s_remove);
                         KITE_METHOD_DEFINE(keys, 0, &binary_tree::s_keys);
+                        
+                        KITE_METHOD_DEFINE(cur, 0, &binary_tree::s_cur);
+                        KITE_METHOD_DEFINE(next, 0, &binary_tree::s_next);
+                        KITE_METHOD_DEFINE(reset, 0, &binary_tree::s_reset);
                     END_KITE_CLASS_INITIALIZER
                 
                     tree_contents_type tree_contents;
+                    bool iter_initialized;
+                    tree_contents_type::iterator iter;
                 END_KITE_CLASS
             }
         }

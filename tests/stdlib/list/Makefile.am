@@ -7,6 +7,8 @@ EXTRA_DIST = \
     ./get_index.kt.out \
     ./head.kt \
     ./head.kt.out \
+    ./iter.kt \
+    ./iter.kt.out \
     ./list_eq.kt \
     ./list_eq.kt.out \
     ./list_neq.kt \

@@ -83,8 +83,10 @@ namespace kite
             
             object *list::next(list *l)
             {
+                bool at_begin = false;
                 if (!l->iter_initialized)
                 {
+                    at_begin = true;
                     l->iter = l->list_contents.begin();
                     l->iter_initialized = true;
                 }
@@ -96,10 +98,13 @@ namespace kite
                 }
                 else
                 {
-                    l->iter++;
-                    if (l->iter == l->list_contents.end())
+                    if (!at_begin)
                     {
-                        ret = false;
+                        l->iter++;
+                        if (l->iter == l->list_contents.end())
+                        {
+                            ret = false;
+                        }
                     }
                 }
 

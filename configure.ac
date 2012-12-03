@@ -83,6 +83,8 @@ tests/semantics/ops/Makefile
 tests/semantics/ops/map/Makefile
 tests/semantics/ops/reduce/Makefile
 tests/stdlib/boolean/Makefile
+tests/stdlib/collections/Makefile
+tests/stdlib/collections/binary_tree/Makefile
 tests/stdlib/float/Makefile
 tests/stdlib/int/Makefile
 tests/stdlib/list/Makefile

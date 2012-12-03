@@ -66,10 +66,10 @@ namespace kite
             AND,
             MAP,
             REDUCE,
+            DEREF_ARRAY,
             __END_BINARY_OPS, // DO NOT USE
             UNARY_PLUS,
             UNARY_MINUS,
-            DEREF_ARRAY,
             __END_OVERRIDABLE_OPS, // DO NOT USE
             ITERATE,
             CONST,

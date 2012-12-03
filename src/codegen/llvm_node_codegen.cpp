@@ -914,6 +914,12 @@ namespace kite
             generate_debug_data(state.module_builder().CreateBr(BB), tree.position);
             state.module_builder().SetInsertPoint(BB);
             Value *condition = boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
+            if (get_type(condition) != semantics::BOOLEAN)
+            {
+                std::vector<Value*> params;
+                params.push_back(condition);
+                condition = generate_llvm_method_call(condition, "bool", params, tree);
+            }
             
             BasicBlock *bodyBB = BasicBlock::Create(getGlobalContext(), "loopbody", currentFunc);
             BasicBlock *afterLoopBB = BasicBlock::Create(getGlobalContext(), "loopend", currentFunc);

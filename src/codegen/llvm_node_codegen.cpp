@@ -1254,7 +1254,7 @@ namespace kite
         Value *llvm_node_codegen::codegen_eval_op(semantics::syntax_tree const &tree) const
         {
             IRBuilder<> &builder = state.module_builder();
-            std::map<std::string, Value*> symbolTable = state.current_symbol_stack();
+            std::map<std::string, Value*> &symbolTable = state.current_symbol_stack();
             
             // Cast all items on symbol table into System.object instances.
             // This is necessary in order to be able to modify variables
@@ -1279,7 +1279,7 @@ namespace kite
                 Value *val = i->second;
                 argNames.push_back(builder.CreateGlobalStringPtr(i->first.c_str()));
                 
-                if (get_type(val) != semantics::OBJECT)
+                if (val->getType() != PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)))
                 {
                     std::vector<Value*> params;
                     params.push_back(val);

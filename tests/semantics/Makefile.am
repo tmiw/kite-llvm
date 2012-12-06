@@ -1,1 +1,1 @@
-SUBDIRS = class deref exceptions import loop method ops
+SUBDIRS = class deref eval exceptions import loop method ops

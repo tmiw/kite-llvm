@@ -71,6 +71,7 @@ tests/semantics/class/Makefile
 tests/semantics/deref/array/Makefile
 tests/semantics/deref/Makefile
 tests/semantics/deref/var/Makefile
+tests/semantics/eval/Makefile
 tests/semantics/exceptions/Makefile
 tests/semantics/import/Makefile
 tests/semantics/loop/Makefile

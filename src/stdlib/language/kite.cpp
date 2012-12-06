@@ -240,6 +240,7 @@ namespace kite
                     fake_ast.position.file = st.ast.position.file;
                     Function *function = (Function*)cg.generate_llvm_eval_method(argNames, st.ast, fake_ast);
                     
+                    //current_module->dump();
                     return execution_engine->getPointerToFunction(function);
                 }
                 

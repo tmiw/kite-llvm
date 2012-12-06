@@ -885,11 +885,20 @@ namespace kite
             {
                 if (i->second == ptr)
                 {
-                    if (lhs->getType() != rhs->getType())
+                    if (lhs->getType() != rhs->getType() && 
+                        lhs->getType() != kite_type_to_llvm_type(semantics::OBJECT))
                     {
                         sym_stack[i->first] = 
                             state.module_builder().CreateAlloca(rhs->getType());
                         ptr = sym_stack[i->first];
+                    }
+                    else if (
+                        lhs->getType() != rhs->getType() && 
+                        lhs->getType() == kite_type_to_llvm_type(semantics::OBJECT))
+                    {
+                        std::vector<Value*> params;
+                        params.push_back(rhs);
+                        rhs = generate_llvm_method_call(rhs, "obj", params, tree);
                     }
                     generate_debug_data(state.module_builder().CreateStore(rhs, ptr), tree.position);
                     return rhs;
@@ -1005,6 +1014,14 @@ namespace kite
                     decideBlocks.push_back(condBB);
                     condBB = endBB;
                 }
+                
+                if (get_type(condition) != semantics::BOOLEAN)
+                {
+                    std::vector<Value*> emptyList;
+                    emptyList.push_back(condition);
+                    condition = generate_llvm_method_call(condition, "bool", emptyList, tree);
+                }
+                
                 generate_debug_data(builder.CreateCondBr(condition, actionBB, condBB), tree.position);
                 builder.SetInsertPoint(actionBB);
                 Value *result = boost::apply_visitor(llvm_node_codegen(state), tree.children[i]);

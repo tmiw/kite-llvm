@@ -156,6 +156,9 @@ namespace kite
                 case semantics::OPERATOR:
                     ret = codegen_method_op(tree);
                     break;
+                case semantics::EVAL:
+                    ret = codegen_eval_op(tree);
+                    break;
                 case semantics::DEREF_METHOD_RELATIVE_SELF:
                     ret = codegen_deref_method_relative_self_op(tree);
                     break;
@@ -1248,6 +1251,84 @@ namespace kite
             return method_obj;
         }
         
+        Value *llvm_node_codegen::codegen_eval_op(semantics::syntax_tree const &tree) const
+        {
+            IRBuilder<> &builder = state.module_builder();
+            std::map<std::string, Value*> symbolTable = state.current_symbol_stack();
+            
+            // Cast all items on symbol table into System.object instances.
+            // This is necessary in order to be able to modify variables
+            // while inside the anonymous method. We can also begin specifying
+            // the argument list for both the code generator and the actual
+            // function call.
+            std::vector<Type*> argNamesTypes;
+            std::vector<Value*> argNames;
+            std::vector<Value*> argValues;
+            std::vector<Type*> argValuesTypes;
+            
+            Value *numArgs = ConstantInt::get(getGlobalContext(), APInt(32, symbolTable.size(), true));
+            argNames.push_back(numArgs);
+            argNamesTypes.push_back(numArgs->getType());
+            
+            for (
+                std::map<std::string, Value*>::iterator i = symbolTable.begin();
+                i != symbolTable.end();
+                i++
+            )
+            {
+                Value *val = i->second;
+                argNames.push_back(builder.CreateGlobalStringPtr(i->first.c_str()));
+                
+                if (get_type(val) != semantics::OBJECT)
+                {
+                    std::vector<Value*> params;
+                    params.push_back(val);
+                    val = generate_llvm_method_call(val, "obj", params, tree);
+                    
+                    symbolTable[i->first] = 
+                            state.module_builder().CreateAlloca(val->getType());
+                    generate_debug_data(state.module_builder().CreateStore(val, symbolTable[i->first]), tree.position);
+                }
+                
+                argValues.push_back(i->second);
+                argValuesTypes.push_back(i->second->getType());
+            }
+            
+            // Retrieve string representation of code to execute, as an object.
+            Value *ret = boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
+            if (get_type(ret) != semantics::STRING)
+            {
+                std::vector<Value*> params;
+                params.push_back(ret);
+                ret = generate_llvm_method_call(ret, "str", params, tree);
+            }
+            if (get_type(ret) != semantics::OBJECT)
+            {
+                std::vector<Value*> params;
+                params.push_back(ret);
+                ret = generate_llvm_method_call(ret, "obj", params, tree);
+            }
+            argNames.insert(argNames.begin(), ret);
+            argNamesTypes.insert(argNamesTypes.begin(), ret->getType());
+            
+            // Call standard library helper to generate method.
+            Module *module = state.current_module();
+            std::vector<Value*> paramValuesNewList;
+            FunctionType *ftEvalType = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), ArrayRef<Type*>(argNamesTypes), true);
+            Function *funEval = Function::Create(ftEvalType, Function::ExternalLinkage, "kite_eval_code", module);
+            if (funEval->getName() != "kite_eval_code")
+            {
+                funEval->eraseFromParent();
+                funEval = module->getFunction("kite_eval_code");
+            }
+            Value *functionPointer = generate_debug_data(builder.CreateCall(funEval, argNames), tree.position);
+            
+            // Call method using the values from the symbol table.
+            FunctionType *ftPtrType = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), ArrayRef<Type*>(argValuesTypes), false);
+            Function *funPtr = (Function*)builder.CreateBitCast(functionPointer, PointerType::getUnqual(ftPtrType));
+            return builder.CreateCall(funPtr, argValues);
+        }
+        
         Value *llvm_node_codegen::codegen_method_op(semantics::syntax_tree const &tree) const
         {
             IRBuilder<> &builder = state.module_builder();
@@ -1317,6 +1398,84 @@ namespace kite
             generate_debug_data(builder.CreateRet(ret), tree.position);
             state.skip_remaining(true);
             return ret;
+        }
+        
+        Value *llvm_node_codegen::generate_llvm_eval_method(std::vector<std::string> &argnames, semantics::syntax_tree &body, const semantics::syntax_tree &parent) const
+        {
+            BasicBlock *currentBB = state.module_builder().GetInsertBlock();
+            std::vector<Type*> argTypes;
+            std::string functionName = state.identifier_prefix() + "__EvalBlock";
+            int numargs = argnames.size();
+
+            state.push_friendly_method_name("__EvalBlock");
+            
+            if (numargs > 0)
+            {
+                functionName += std::string(numargs, 'o');
+                for (int i = 0; i < numargs; i++)
+                {
+                    argTypes.push_back(PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)));
+                }
+            }
+            
+            state.push_c_method_name(functionName);
+            
+            Module *currentModule = state.current_module();
+            FunctionType *FT = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), ArrayRef<Type*>(argTypes), false);
+            Function *F = Function::Create(FT, Function::ExternalLinkage, functionName.c_str(), currentModule);
+            BasicBlock *BB = BasicBlock::Create(getGlobalContext(), "entry", F);
+            IRBuilder<> &builder = state.module_builder();
+            builder.SetInsertPoint(BB);
+            
+            state.push_symbol_stack();
+            int i = 0;
+            std::map<std::string, Value*> &symStack = state.current_symbol_stack();
+            for (Function::arg_iterator AI = F->arg_begin(); i < numargs; i++, ++AI)
+            {
+                std::string name = argnames[i];
+                AI->setName(name.c_str());
+                symStack[name] = AI;
+            }
+            
+            Value *ret = llvm_node_codegen(state)(body);
+            state.pop_symbol_stack();
+            
+            /*if (state.get_skip_remaining() == false)
+            {*/
+            
+            if (ret != NULL)
+            {
+                if (ret->getType() == PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)))
+                {
+                    ret = generate_debug_data(builder.CreateLoad(ret), body.position);
+                }
+                else if (get_type(ret) != semantics::OBJECT)
+                {
+                    std::vector<Value*> params;
+                    params.push_back(ret);
+                    ret = generate_llvm_method_call(ret, "obj", params, body);
+                }
+            }
+            else
+            {
+                if (symStack.find("this") != symStack.end())
+                {
+                    ret = generate_debug_data(builder.CreateLoad(symStack["this"]), parent.position);
+                }
+                else
+                {
+                    ret = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) << 3, (uint64_t)0, true));
+                    ret = builder.CreateIntToPtr(ret, PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)));
+                }
+            }
+            generate_debug_data(builder.CreateRet(ret), body.position);
+            //}
+            state.skip_remaining(false);
+            if (currentBB) state.module_builder().SetInsertPoint(currentBB);
+            
+            state.pop_c_method_name();
+            state.pop_friendly_method_name();
+            return F;
         }
         
         Value *llvm_node_codegen::generate_llvm_method(std::string name, std::vector<std::string> &argnames, semantics::syntax_tree &body, const semantics::syntax_tree &parent) const

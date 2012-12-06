@@ -69,7 +69,8 @@ namespace kite
             Value *operator()(llvm_node_codegen_params &param) const;
             
             Value *generate_llvm_method(std::string name, std::vector<std::string> &argnames, semantics::syntax_tree &body, const semantics::syntax_tree &parent) const;
-
+            Value *generate_llvm_eval_method(std::vector<std::string> &argnames, semantics::syntax_tree &body, const semantics::syntax_tree &parent) const;
+            
             static std::string type_to_code(semantics::builtin_types type);
             static semantics::builtin_types get_type(Value *val);
             static Type *kite_type_to_llvm_type(semantics::builtin_types type);
@@ -92,6 +93,7 @@ namespace kite
             Value *codegen_loop_op(semantics::syntax_tree const &tree) const;
             Value *codegen_decide_op(semantics::syntax_tree const &tree) const;
             Value *codegen_method_op(semantics::syntax_tree const &tree) const;
+            Value *codegen_eval_op(semantics::syntax_tree const &tree) const;
             Value *codegen_method_ref_op(semantics::syntax_tree const &tree) const;
             Value *codegen_constructor_op(semantics::syntax_tree const &tree) const;
             Value *codegen_destructor_op(semantics::syntax_tree const &tree) const;

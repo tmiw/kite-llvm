@@ -66,6 +66,7 @@ extern "C"
 {
     void *kite_method_alloc(void *method_ptr, int args);
     void *kite_method_verify_semantics(void *method, int args);
+    void *kite_eval_code(void *code, int args, ...);
 }
 
 #endif

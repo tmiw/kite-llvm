@@ -19,11 +19,15 @@ namespace kite
             import_statement = 
                 lit("import") [ at_c<0>(_val) = kite::semantics::IMPORT ] >> iter_pos [ at_c<2>(_val) = phoenix::construct<semantics::syntax_tree_position>(_1) ] > 
                 unesc_str [ push_back(at_c<1>(_val), _1) ];
-            
+            eval_statement = 
+                lit("eval") [ at_c<0>(_val) = kite::semantics::EVAL ] >> iter_pos [ at_c<2>(_val) = phoenix::construct<semantics::syntax_tree_position>(_1) ] > 
+                or_statement [ push_back(at_c<1>(_val), _1) ];
+                
             statement = 
                 ( loop_statement 
                 | decide_statement 
                 | method_statement 
+                | eval_statement
                 | operator_statement
                 | class_statement
                 | constructor_statement

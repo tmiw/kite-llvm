@@ -32,6 +32,8 @@
 #include <sstream>
 #include "method.h"
 #include "exceptions/InvalidArgument.h"
+#include "../language/kite/syntax_tree.h"
+#include "../language/kite.h"
 #include "string.h"
 #include "list.h"
 
@@ -123,4 +125,14 @@ void *kite_method_verify_semantics(void *method, int args)
 {
     System::method *methodObj = (System::method*)method;
     return methodObj->method_ptr;
+}
+
+void *kite_eval_code(void *code, int args, ...)
+{   
+    va_list vl;
+    va_start(vl, args);
+    void *ret = language::kite::kite::GenerateEvalMethod((System::object*)code, args, vl);
+    va_end(vl);
+    
+    return ret;    
 }

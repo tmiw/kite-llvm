@@ -215,6 +215,34 @@ namespace kite
                     return context;
                 }
                 
+                // Returns a pointer to a function.
+                void *kite::GenerateEvalMethod(System::object *code, int numArgs, va_list vl)
+                {
+                    codegen::llvm_node_codegen cg(state);
+                    System::string *codeString = (System::string*)code;
+
+                    // Create list of argument names.
+                    std::vector<std::string> argNames;
+                    for (int i = 0; i < numArgs; i++)
+                    {
+                        argNames.push_back(va_arg(vl, char*));
+                    }
+                    
+                    // Throws exception on parse error.
+                    syntax_tree st;
+                    std::string codeStr(codeString->string_val.c_str());
+                    st.from_string(codeStr);
+                    
+                    // Generate LLVM Function* object.
+                    semantics::syntax_tree fake_ast;
+                    fake_ast.position.line = 1;
+                    fake_ast.position.column = 1;
+                    fake_ast.position.file = st.ast.position.file;
+                    Function *function = (Function*)cg.generate_llvm_eval_method(argNames, st.ast, fake_ast);
+                    
+                    return execution_engine->getPointerToFunction(function);
+                }
+                
                 System::object *kite::ExecuteCode(syntax_tree &ast, bool suppressExec)
                 {
                     return ExecuteCode(ast, root_object, suppressExec);

@@ -63,6 +63,7 @@ namespace kite
                 ("print__o", function_semantics(semantics::OBJECT, (void*)&(PREFIX_STRING_METHOD_NAME(print__o))))
                 ("rtrim__s", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(rtrim__s))))
                 ("str__s", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(str__s))))
+                ("str__o", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(str__o))))
                 ("trim__s", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(trim__s))))
                 ("upper__s", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(upper__s))))
                 ("obj__s", function_semantics(semantics::OBJECT, (void*)&(PREFIX_STRING_METHOD_NAME(obj__s))))
@@ -259,6 +260,14 @@ char* PREFIX_STRING_METHOD_NAME(rtrim__s)(const char *val)
 char* PREFIX_STRING_METHOD_NAME(str__s)(const char *val)
 {
     return const_cast<char*>(val);
+}
+
+char* PREFIX_STRING_METHOD_NAME(str__o)(void *val)
+{
+    System::string *lhs_str = (System::string*)val;
+    char *ret = (char*)calloc(1, lhs_str->string_val.size() + 1);
+    strcpy(ret, lhs_str->string_val.c_str());
+    return ret;
 }
 
 char* PREFIX_STRING_METHOD_NAME(trim__s)(const char *val)

@@ -93,6 +93,7 @@ extern "C"
     char* PREFIX_STRING_METHOD_NAME(print__s)(const char *val);
     char* PREFIX_STRING_METHOD_NAME(rtrim__s)(const char *val);
     char* PREFIX_STRING_METHOD_NAME(str__s)(const char *val);
+    char* PREFIX_STRING_METHOD_NAME(str__o)(void *val);
     char* PREFIX_STRING_METHOD_NAME(trim__s)(const char *val);
     char* PREFIX_STRING_METHOD_NAME(upper__s)(const char *val);
     

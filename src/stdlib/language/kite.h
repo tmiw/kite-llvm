@@ -30,6 +30,7 @@
 
 #include <setjmp.h>
 #include <map>
+#include <stdarg.h>
 #include <stdlib/System/dynamic_object.h>
 #include <codegen/llvm_compile_state.h>
 #include <stdlib/language/kite/syntax_tree.h>

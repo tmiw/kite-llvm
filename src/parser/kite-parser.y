@@ -28,7 +28,7 @@
 %}
 
 %skeleton "lalr1.cc" /* -*- C++ -*- */
-%require "2.7"
+%require "2.6"
 %defines
 %define parser_class_name "kite_parser"
 %code requires {
@@ -127,10 +127,13 @@
 
 %%
 
+result_grabber: pre_input { driver.result = $<opValue>1; }
+    ;
+
 pre_input: 
-      DOCSTRING { /* TODO */ } input { $$ = $3; }
-    | VERSION_KEYWORD STRING_VALUE ';' { /* TODO */ } input { $$ = $5; }
-    | input { $$ = $1; }
+      DOCSTRING { /* TODO */ } input { $<opValue>$ = $<opValue>3; }
+    | VERSION_KEYWORD STRING_VALUE ';' { /* TODO */ } input { $<opValue>$ = $<opValue>5; }
+    | input { $<opValue>$ = $<opValue>1; }
     ;
 
 input:    /* empty */ {
@@ -138,10 +141,10 @@ input:    /* empty */ {
         $<opValue>$->op = kite::semantics::ITERATE;
     }
     | statement ';' input {
-        $$ = $3;
-        if ($1 != NULL)
+        $<opValue>$ = $<opValue>3;
+        if ($<opValue>1 != NULL)
         {
-            $<opValue>$->children.push_back(*$1);
+            $<opValue>$->children.push_back(*$<opValue>1);
         }
     }
     ;
@@ -150,7 +153,7 @@ statement:
     | data_manipulation_statement
     | options_set_statement
     | loop_statement
-    | from_statement
+    /*| from_statement*/ /* TODO: inheritance without explicit class define. */
     | import_statement
     | break_statement
     | continue_statement
@@ -208,7 +211,7 @@ method_declaration: METHOD SYMBOL_NAME optional_param_name_list optional_docstri
         /* TODO: docstring */
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::METHOD;
-        $<opValue>$->children.push_back(*$2);
+        $<opValue>$->children.push_back(*$<opValue>2);
         
         std::vector<kite::semantics::syntax_tree_node> &param_names = *$<listValue>3;
         for (std::vector<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
@@ -218,7 +221,7 @@ method_declaration: METHOD SYMBOL_NAME optional_param_name_list optional_docstri
             $<opValue>$->children.push_back(*i);
         }
     } '[' input ']' {
-        $<opValue>$->children.push_back(*$7);
+        $<opValue>$->children.push_back(*$<opValue>7);
     }
     ;
 
@@ -236,7 +239,7 @@ anon_method_declaration: METHOD optional_param_name_list     {
             $<opValue>$->children.push_back(*i);
         }
     } '[' input ']' {
-        $<opValue>$->children.push_back(*$5);
+        $<opValue>$->children.push_back(*$<opValue>5);
     }
     ;
         
@@ -252,7 +255,7 @@ optional_param_name_list:    {
         $<listValue>$ = new std::vector<kite::semantics::syntax_tree_node>();
     }
     | param_name_list    {
-        $$ = $1;
+        $<opValue>$ = $<opValue>1;
     }
     ;
     
@@ -260,7 +263,7 @@ param_name_list:    '(' ')'    {
         $<listValue>$ = new std::vector<kite::semantics::syntax_tree_node>();
     }
     | '(' param_elements ')'    {
-        $$ = $2;
+        $<opValue>$ = $<opValue>2;
     }
     ;
     
@@ -272,7 +275,7 @@ param_elements: SYMBOL_NAME optional_docstring   {
     | SYMBOL_NAME optional_docstring ',' param_elements {
         /* TODO: docstring */
         $<listValue>4->push_back(*$<stringValue>1);
-        $$ = $4;
+        $<opValue>$ = $<opValue>4;
     }
     ;
     
@@ -282,53 +285,70 @@ class_definition:    CLASS SYMBOL_NAME {
         $<opValue>$->children.push_back(*$<stringValue>2);
     } optional_from optional_docstring '[' class_body ']'    {
         /* TODO: docstring */
-        if ($4 != NULL)
+        if ($<opValue>4 != NULL)
         {
-            $<opValue>$->children.push_back(*$4);
+            $<opValue>$->children.push_back(*$<opValue>4);
         }
-        $<opValue>$->children.push_back(*$7);
+        $<opValue>$->children.push_back(*$<opValue>7);
     }
     ;
     
 optional_from:        {
         $<opValue>$ = NULL;
     }
-    | from_statement { $$ = $1; }
+    | from_statement { $<opValue>$ = $<opValue>1; }
     ;
 
 from_statement:
-    FROM deref_statement   {
-        $$ = $2;
+    FROM variable_immediate   {
+        $<opValue>$ = $<opValue>2;
     }
     ;
-    
+
+variable_immediate:     
+    variable_immediate '.' SYMBOL_NAME {
+        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$->op = kite::semantics::DEREF_FILTER;
+        $<opValue>$->children.push_back(*$<opValue>1);
+        
+        kite::semantics::syntax_tree deref_method;
+        deref_method.op = kite::semantics::DEREF_PROPERTY
+        deref_method.children.push_back(*$<stringValue>3);
+        $<opValue>$->children.push_back(deref_method);
+    }
+    | SYMBOL_NAME {
+        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$->op = kite::semantics::DEREF_FILTER;
+        $<opValue>$->children.push_back(*$<stringValue>1);
+    }
+
 class_body:    
     {
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::ITERATE; 
     }
-    | class_elements { $$ = $1; }
+    | class_elements { $<opValue>$ = $<opValue>1; }
     ;
 
 class_elements:    class_element
     {
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::ITERATE;
-        $<opValue>$->children.push_back(*$1);
+        $<opValue>$->children.push_back(*$<opValue>1);
     }
     | class_elements ',' class_element
     {
-        $$ = $1;
-        $<opValue>$->children.push_back(*$3);
+        $<opValue>$ = $<opValue>1;
+        $<opValue>$->children.push_back(*$<opValue>3);
     }
     ;
     
-class_element:    constructor_definition { $$ = $1; }
-    | destructor_definition { $$ = $1; }
-    | property_definition { $$ = $1; }
-    | operator_definition { $$ = $1; }
-    | class_definition { $$ = $1; }
-    | data_manipulation_statement { $$ = $1; }
+class_element:    constructor_definition { $<opValue>$ = $<opValue>1; }
+    | destructor_definition { $<opValue>$ = $<opValue>1; }
+    | property_definition { $<opValue>$ = $<opValue>1; }
+    | operator_definition { $<opValue>$ = $<opValue>1; }
+    | class_definition { $<opValue>$ = $<opValue>1; }
+    | data_manipulation_statement { $<opValue>$ = $<opValue>1; }
     ;
 
 constructor_definition:    CONSTRUCT optional_param_name_list {
@@ -344,7 +364,7 @@ constructor_definition:    CONSTRUCT optional_param_name_list {
         }
     } optional_docstring '[' input ']' {
         /* TODO: docstring */
-        $<opValue>$->children.push_back(*$6);
+        $<opValue>$->children.push_back(*$<opValue>6);
     }
     ;
     
@@ -353,7 +373,7 @@ destructor_definition: DESTRUCT {
         $<opValue>$->op = kite::semantics::DESTRUCTOR;
     } optional_docstring '[' input ']' {
         /* TODO: docstring */
-        $<opValue>$->children.push_back(*$5);
+        $<opValue>$->children.push_back(*$<opValue>5);
     }
     ;
     
@@ -371,7 +391,7 @@ property_definition:    optional_global PROPERTY SYMBOL_NAME optional_docstring 
 operator_definition:    OPERATOR operator_type param_name_list {
     $<opValue>$ = new kite::semantics::syntax_tree();
     $<opValue>$->op = kite::semantics::OPERATOR;
-    $<opValue>$->children.push_back(*$2);
+    $<opValue>$->children.push_back(*$<stringVal>2);
     
     std::vector<kite::semantics::syntax_tree_node> &param_names = *$<listValue>3;
     for (std::vector<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
@@ -382,240 +402,279 @@ operator_definition:    OPERATOR operator_type param_name_list {
     }
 } optional_docstring '[' input ']' {
     /* TODO: docstring */
-    $<opValue>$->children.push_back(*$7);
+    $<opValue>$->children.push_back(*$<opValue>7);
 }
     ;
     
 operator_type:    
-      PLUS              { $$ = $1; }
-    | MINUS             { $$ = $1; }
-    | MULTIPLY          { $$ = $1; }
-    | DIVIDE            { $$ = $1; }
-    | MOD               { $$ = $1; }
-    | UNARY_PLUS        { $$ = $1; }
-    | UNARY_MINUS       { $$ = $1; }
-    | MAP               { $$ = $1; }
-    | REDUCE            { $$ = $1; }
-    | ARRAY_DEREF       { $$ = $1; }
-    | ARRAY_SET         { $$ = $1; }
-    | EQUALS            { $$ = $1; }
-    | NOT_EQUALS        { $$ = $1; }
-    | LESS_THAN         { $$ = $1; }
-    | GREATER_THAN      { $$ = $1; }
-    | LESS_OR_EQUALS    { $$ = $1; }
-    | GREATER_OR_EQUALS { $$ = $1; }
-    | AND               { $$ = $1; }
-    | OR                { $$ = $1; }
-    | NOT               { $$ = $1; }
-    | XOR               { $$ = $1; }
-    | LEFT_SHIFT        { $$ = $1; }
-    | RIGHT_SHIFT       { $$ = $1; }
-    | METHOD_CALL       { $$ = $1; }
-    | PROPERTY          { $$ = $1; }
+      PLUS              { $<stringVal>$ = $<stringVal>1; }
+    | MINUS             { $<stringVal>$ = $<stringVal>1; }
+    | MULTIPLY          { $<stringVal>$ = $<stringVal>1; }
+    | DIVIDE            { $<stringVal>$ = $<stringVal>1; }
+    | MOD               { $<stringVal>$ = $<stringVal>1; }
+    | UNARY_PLUS        { $<stringVal>$ = $<stringVal>1; }
+    | UNARY_MINUS       { $<stringVal>$ = $<stringVal>1; }
+    | MAP               { $<stringVal>$ = $<stringVal>1; }
+    | REDUCE            { $<stringVal>$ = $<stringVal>1; }
+    | ARRAY_DEREF       { $<stringVal>$ = $<stringVal>1; }
+    | ARRAY_SET         { $<stringVal>$ = $<stringVal>1; }
+    | EQUALS            { $<stringVal>$ = $<stringVal>1; }
+    | NOT_EQUALS        { $<stringVal>$ = $<stringVal>1; }
+    | LESS_THAN         { $<stringVal>$ = $<stringVal>1; }
+    | GREATER_THAN      { $<stringVal>$ = $<stringVal>1; }
+    | LESS_OR_EQUALS    { $<stringVal>$ = $<stringVal>1; }
+    | GREATER_OR_EQUALS { $<stringVal>$ = $<stringVal>1; }
+    | AND               { $<stringVal>$ = $<stringVal>1; }
+    | OR                { $<stringVal>$ = $<stringVal>1; }
+    | NOT               { $<stringVal>$ = $<stringVal>1; }
+    | XOR               { $<stringVal>$ = $<stringVal>1; }
+    | LEFT_SHIFT        { $<stringVal>$ = $<stringVal>1; }
+    | RIGHT_SHIFT       { $<stringVal>$ = $<stringVal>1; }
+    | METHOD_CALL       { $<stringVal>$ = $<stringVal>1; }
+    | PROPERTY          { $<stringVal>$ = $<stringVal>1; }
     ;
 
 data_manipulation_statement:   
-      assignment_statement { $$ = $1; }
-    | method_declaration   { $$ = $1; }
-    | eval_statement       { $$ = $1; }
+      assignment_statement { $<opValue>$ = $<opValue>1; }
+    | method_declaration   { $<opValue>$ = $<opValue>1; }
+    | eval_statement       { $<opValue>$ = $<opValue>1; }
     ;
     
 assignment_statement:    deref_statement {
     $<opValue>$ = new kite::semantics::syntax_tree();
     $<opValue>$->op = kite::semantics::ASSIGN;
-    $<opValue>$->children.push_back(*$1);
+    $<opValue>$->children.push_back(*$<opValue>1);
 } '=' data_manipulation_statement {
-        $<opValue>$->children.push_back(*$4);
+        $<opValue>$->children.push_back(*$<opValue>4);
     }
-    | or_statement { $$ = $1; }
+    | or_statement { $<opValue>$ = $<opValue>1; }
     ;
     
 or_statement:        xor_statement {
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::OR;
-        $<opValue>$->children.push_back(*$1);
+        $<opValue>$->children.push_back(*$<opValue>1);
     } OR or_statement {
-        $<opValue>$->children.push_back(*$4);
+        $<opValue>$->children.push_back(*$<opValue>4);
     }
-    | xor_statement { $$ = $1; }
+    | xor_statement { $<opValue>$ = $<opValue>1; }
     ;
 
 xor_statement:    xor_statement XOR and_statement {
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::XOR;
-        $<opValue>$->children.push_back(*$1);
-        $<opValue>$->children.push_back(*$3);
+        $<opValue>$->children.push_back(*$<opValue>1);
+        $<opValue>$->children.push_back(*$<opValue>3);
     }
-    | and_statement { $$ = $1; }
+    | and_statement { $<opValue>$ = $<opValue>1; }
     ;
     
 and_statement:    bitwise_statement {
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::AND;
-        $<opValue>$->children.push_back(*$1);
+        $<opValue>$->children.push_back(*$<opValue>1);
     } AND and_statement {
-        $<opValue>$->children.push_back(*$4);
+        $<opValue>$->children.push_back(*$<opValue>4);
     }
-    | bitwise_statement { $$ = $1; }
+    | bitwise_statement { $<opValue>$ = $<opValue>1; }
     ;
 
 bitwise_statement:    bitwise_statement LEFT_SHIFT equality_statement {
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::LEFT_SHIFT;
-        $<opValue>$->children.push_back(*$1);
-        $<opValue>$->children.push_back(*$3);
+        $<opValue>$->children.push_back(*$<opValue>1);
+        $<opValue>$->children.push_back(*$<opValue>3);
     }
     | bitwise_statement RIGHT_SHIFT equality_statement {
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::RIGHT_SHIFT;
-        $<opValue>$->children.push_back(*$1);
-        $<opValue>$->children.push_back(*$3);
+        $<opValue>$->children.push_back(*$<opValue>1);
+        $<opValue>$->children.push_back(*$<opValue>3);
     }
-    | equality_statement { $$ = $1; }
+    | equality_statement { $<opValue>$ = $<opValue>1; }
     ;
     
 equality_statement:    equality_statement EQUALS less_greater_statement {
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::EQUALS;
-        $<opValue>$->children.push_back(*$1);
-        $<opValue>$->children.push_back(*$3);
+        $<opValue>$->children.push_back(*$<opValue>1);
+        $<opValue>$->children.push_back(*$<opValue>3);
     }
     | equality_statement NOT_EQUALS less_greater_statement {
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::NOT_EQUALS;
-        $<opValue>$->children.push_back(*$1);
-        $<opValue>$->children.push_back(*$3);
+        $<opValue>$->children.push_back(*$<opValue>1);
+        $<opValue>$->children.push_back(*$<opValue>3);
     }
     | equality_statement IS less_greater_statement {
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::IS_CLASS;
-        $<opValue>$->children.push_back(*$1);
-        $<opValue>$->children.push_back(*$3);
+        $<opValue>$->children.push_back(*$<opValue>1);
+        $<opValue>$->children.push_back(*$<opValue>3);
     }
     | equality_statement ISOF less_greater_statement {
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::ISOF_CLASS;
-        $<opValue>$->children.push_back(*$1);
-        $<opValue>$->children.push_back(*$3);
+        $<opValue>$->children.push_back(*$<opValue>1);
+        $<opValue>$->children.push_back(*$<opValue>3);
     }
-    | less_greater_statement { $$ = $1; }
+    | less_greater_statement { $<opValue>$ = $<opValue>1; }
     ;
     
 less_greater_statement:    less_greater_statement '<' add_sub_statement {
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::LESS_THAN;
-        $<opValue>$->children.push_back(*$1);
-        $<opValue>$->children.push_back(*$3);
+        $<opValue>$->children.push_back(*$<opValue>1);
+        $<opValue>$->children.push_back(*$<opValue>3);
     }
     | less_greater_statement '>' add_sub_statement {
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::GREATER_THAN;
-        $<opValue>$->children.push_back(*$1);
-        $<opValue>$->children.push_back(*$3);
+        $<opValue>$->children.push_back(*$<opValue>1);
+        $<opValue>$->children.push_back(*$<opValue>3);
     }
     | less_greater_statement LESS_OR_EQUALS add_sub_statement {
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::LESS_OR_EQUALS;
-        $<opValue>$->children.push_back(*$1);
-        $<opValue>$->children.push_back(*$3);
+        $<opValue>$->children.push_back(*$<opValue>1);
+        $<opValue>$->children.push_back(*$<opValue>3);
     }
     | less_greater_statement GREATER_OR_EQUALS add_sub_statement {
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::GREATER_OR_EQUALS;
-        $<opValue>$->children.push_back(*$1);
-        $<opValue>$->children.push_back(*$3);
+        $<opValue>$->children.push_back(*$<opValue>1);
+        $<opValue>$->children.push_back(*$<opValue>3);
     }
-    | add_sub_statement { $$ = $1; }
+    | add_sub_statement { $<opValue>$ = $<opValue>1; }
     ;
     
 add_sub_statement:    add_sub_statement '+' multdiv_statement {
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::ADD;
-        $<opValue>$->children.push_back(*$1);
-        $<opValue>$->children.push_back(*$3);
+        $<opValue>$->children.push_back(*$<opValue>1);
+        $<opValue>$->children.push_back(*$<opValue>3);
     }
     | add_sub_statement '-' multdiv_statement {
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::SUBTRACT;
-        $<opValue>$->children.push_back(*$1);
-        $<opValue>$->children.push_back(*$3);
+        $<opValue>$->children.push_back(*$<opValue>1);
+        $<opValue>$->children.push_back(*$<opValue>3);
     }
-    | multdiv_statement { $$ = $1; }
+    | multdiv_statement { $<opValue>$ = $<opValue>1; }
     ;
     
 multdiv_statement:    multdiv_statement '*' unary_statement {
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::MULTIPLY;
-        $<opValue>$->children.push_back(*$1);
-        $<opValue>$->children.push_back(*$3);
+        $<opValue>$->children.push_back(*$<opValue>1);
+        $<opValue>$->children.push_back(*$<opValue>3);
     }
     | multdiv_statement '/' unary_statement {
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::DIVIDE;
-        $<opValue>$->children.push_back(*$1);
-        $<opValue>$->children.push_back(*$3);
+        $<opValue>$->children.push_back(*$<opValue>1);
+        $<opValue>$->children.push_back(*$<opValue>3);
     }
     | multdiv_statement '%' unary_statement {
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::MODULO;
-        $<opValue>$->children.push_back(*$1);
-        $<opValue>$->children.push_back(*$3);
+        $<opValue>$->children.push_back(*$<opValue>1);
+        $<opValue>$->children.push_back(*$<opValue>3);
     }
-    | unary_statement { $$ = $1; }
+    | unary_statement { $<opValue>$ = $<opValue>1; }
     ;
     
 unary_statement: '+' unary_statement {
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::UNARY_PLUS;
-        $<opValue>$->children.push_back(*$2);
+        $<opValue>$->children.push_back(*$<opValue>2);
     }
     | '-' unary_statement {
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::UNARY_MINUS;
-        $<opValue>$->children.push_back(*$2);
+        $<opValue>$->children.push_back(*$<opValue>2);
     }
     | NOT unary_statement {
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::NOT;
-        $<opValue>$->children.push_back(*$2);
+        $<opValue>$->children.push_back(*$<opValue>2);
     }
-    | map_reduce_statement { $$ = $1; }
+    | map_reduce_statement { $<opValue>$ = $<opValue>1; }
     ;
     
 map_reduce_statement:    deref_statement MAP deref_statement {
-        (*kite_compiler_actions[COMPILE_MAP])((kite_compiler_t*)yyget_extra(parm), @2.first_line);
+        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$->op = kite::semantics::MAP;
+        $<opValue>$->children.push_back(*$<opValue>1);
+        $<opValue>$->children.push_back(*$<opValue>3);
     }
     | deref_statement REDUCE deref_statement {
-        (*kite_compiler_actions[COMPILE_REDUCE])((kite_compiler_t*)yyget_extra(parm), @2.first_line);
+        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$->op = kite::semantics::REDUCE;
+        $<opValue>$->children.push_back(*$<opValue>1);
+        $<opValue>$->children.push_back(*$<opValue>3);
     }
-    | SYMBOL_NAME { 
-        (*kite_compiler_actions[COMPILE_FUNC_CALL_BEGIN])((kite_compiler_t*)yyget_extra(parm), @1.first_line, $<stringValue>1);
-        free($<stringValue>1);
-    } param_list {
-        (*kite_compiler_actions[COMPILE_FUNC_CALL_ARGS])((kite_compiler_t*)yyget_extra(parm), @1.first_line);
+    | SYMBOL_NAME param_list { 
+        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$->op = kite::semantics::DEREF_FILTER;
+        $<opValue>$->children.push_back(std::string("this"));
+        
+        kite::semantics::syntax_tree deref_method;
+        deref_method.op = kite::semantics::DEREF_METHOD;
+        deref_method.children.push_back(*$<stringValue>1);
+        std::vector<kite::semantics::syntax_tree_node> &param_names = *$<listValue>2;
+        for (std::vector<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
+             i != param_names.end();
+             i++)
+        {
+            deref_method.children.push_back(*i);
+        }
+        $<opValue>$->children.push_back(deref_method);
     }
-    | deref_statement
+    | deref_statement { $<opValue>$ = $<opValue>1; }
     ;
     
-deref_statement:    deref_statement '|' SYMBOL_NAME {
-        (*kite_compiler_actions[COMPILE_DEREF_AND_CALL_BEGIN])((kite_compiler_t*)yyget_extra(parm), @2.first_line, $<stringValue>3);
-        free($<stringValue>3);
-    } optional_param_list {
-        (*kite_compiler_actions[COMPILE_DEREF_AND_CALL_ARGS])((kite_compiler_t*)yyget_extra(parm), @3.first_line, $<opValue>5);
-        $<opValue>$ = $<opValue>1;
+deref_statement:    deref_statement '|' SYMBOL_NAME optional_param_list {
+        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$->op = kite::semantics::DEREF_FILTER;
+        $<opValue>$->children.push_back(*$<opValue>1);
+        
+        kite::semantics::syntax_tree deref_method;
+        deref_method.op = kite::semantics::DEREF_METHOD;
+        deref_method.children.push_back(*$<stringValue>3);
+        std::vector<kite::semantics::syntax_tree_node> &param_names = *$<listValue>4;
+        for (std::vector<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
+             i != param_names.end();
+             i++)
+        {
+            deref_method.children.push_back(*i);
+        }
+        $<opValue>$->children.push_back(deref_method);
     }
     | deref_statement '[' data_manipulation_statement ']'    {
-        (*kite_compiler_actions[COMPILE_ARRAY_DEREF])((kite_compiler_t*)yyget_extra(parm), @3.first_line);
-        $<opValue>$ = $<opValue>1;
+        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$->op = kite::semantics::DEREF_FILTER;
+        $<opValue>$->children.push_back(*$<opValue>1);
+        
+        kite::semantics::syntax_tree deref_method;
+        deref_method.op = kite::semantics::DEREF_ARRAY
+        deref_method.children.push_back(*$<opValue>3);
+        $<opValue>$->children.push_back(deref_method);
     }
     | deref_statement '.' SYMBOL_NAME {
-        (*kite_compiler_actions[COMPILE_DEREF_2])((kite_compiler_t*)yyget_extra(parm), @3.first_line, $<stringValue>3);
-        free($<stringValue>3);
-        $<opValue>$ = $<opValue>1;
+        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$->op = kite::semantics::DEREF_FILTER;
+        $<opValue>$->children.push_back(*$<opValue>1);
+        
+        kite::semantics::syntax_tree deref_method;
+        deref_method.op = kite::semantics::DEREF_PROPERTY
+        deref_method.children.push_back(*$<stringValue>3);
+        $<opValue>$->children.push_back(deref_method);
     }
     | SYMBOL_NAME {
-        $<opValue>$ = (*kite_compiler_actions[COMPILE_DEREF_1])((kite_compiler_t*)yyget_extra(parm), @1.first_line, $<stringValue>1);
-        free($<stringValue>1);
+        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$->op = kite::semantics::DEREF_FILTER;
+        $<opValue>$->children.push_back(*$<stringValue>1);
     }
     | constant_statement {
         $<opValue>$ = $<opValue>1;
@@ -623,7 +682,7 @@ deref_statement:    deref_statement '|' SYMBOL_NAME {
     ;
 
 optional_param_list: {
-        $<opValue>$ = (*kite_compiler_actions[COMPILE_EMPTY_PARAM_LIST])((kite_compiler_t*)yyget_extra(parm), @0.first_line);
+        $<opValue>$ = new std::vector<kite::semantics::syntax_tree_node>;
     }
     | param_list {
         $<opValue>$ = $<opValue>1;
@@ -631,180 +690,189 @@ optional_param_list: {
     ;
 
 param_list:    '(' ')' {
-        $<opValue>$ = (*kite_compiler_actions[COMPILE_EMPTY_PARAM_LIST])((kite_compiler_t*)yyget_extra(parm), @1.first_line);
+        $<listValue>$ = new std::vector<kite::semantics::syntax_tree_node>;
     }
     | '(' params_list ')' {
-        $<opValue>$ = $<opValue>2;
+        $<listValue>$ = $<listValue>2;
     }
     ;
 
 params_list: data_manipulation_statement    {
-        $<opValue>$ = (*kite_compiler_actions[COMPILE_SINGLE_FUNC_PARAM])((kite_compiler_t*)yyget_extra(parm), @1.first_line);
+        $<listValue>$ = new std::vector<kite::semantics::syntax_tree_node>;
+        $<listValue>$->children.push_back(*$<opValue>1);
     }
     | data_manipulation_statement ',' params_list    {
-        $<opValue>$ = (*kite_compiler_actions[COMPILE_COMBINE_FUNC_PARAMS])((kite_compiler_t*)yyget_extra(parm), @2.first_line);
+        $<listValue>$ = $<listValue>3;
+        $<listValue>$->children.push_front(*$<opValue>1);
     }
     ;
     
 var_name:    SYMBOL_NAME {
-        /*kite_compiler_t *compiler = (kite_compiler_t*)yyget_extra(parm);
-        kite_thread_t *thd = compiler->thd;
-        kite_opcode_t *op = kite_compile_push(kite_new_ident(thd, $<stringValue>1));
-        COMPILE_INSTRUCTION(op, @1.first_line);
-        COMPILE_INSTRUCTION(kite_compile_deref_1(TRUE), @1.first_line);
-        free($<stringValue>1);
-        $<opValue>$ = op;*/
-        $<opValue>$ = (*kite_compiler_actions[COMPILE_DEREF_1])((kite_compiler_t*)yyget_extra(parm), @1.first_line, $<stringValue>1);
-        free($<stringValue>1);
+        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$->op = kite::semantics::DEREF_FILTER;
+        $<opValue>$->children.push_back(*$<stringValue>1);
     }
     | var_name '.' SYMBOL_NAME {
-        /*COMPILE_INSTRUCTION(kite_compile_push(kite_new_ident(thd, $<stringValue>3)),
-             @2.first_line);
-        COMPILE_INSTRUCTION(kite_compile_deref_2(), @2.first_line);
-        free($<stringValue>3);
-        $<opValue>$ = $<opValue>1;*/
-        (*kite_compiler_actions[COMPILE_DEREF_2])((kite_compiler_t*)yyget_extra(parm), @3.first_line, $<stringValue>3);
-        free($<stringValue>3);
-        $<opValue>$ = $<opValue>1;
+        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$->op = kite::semantics::DEREF_FILTER;
+        $<opValue>$->children.push_back(*$<opValue>1);
+        
+        kite::semantics::syntax_tree deref_method;
+        deref_method.op = kite::semantics::DEREF_PROPERTY
+        deref_method.children.push_back(*$<opValue>3);
+        $<opValue>$->children.push_back(deref_method);
     }
     ;
     
-constant_statement:    STRING_VALUE     {
-        $<opValue>$ = (*kite_compiler_actions[COMPILE_CONSTANT_STRING])((kite_compiler_t*)yyget_extra(parm), @1.first_line, $<stringValue>1);
-        free($<stringValue>1);
-    }
-    | INT_VALUE {
-        $<opValue>$ = (*kite_compiler_actions[COMPILE_CONSTANT_INTEGER])((kite_compiler_t*)yyget_extra(parm), @1.first_line, $<intValue>1);
-    }
-    | FLOAT_VALUE {
-        $<opValue>$ = (*kite_compiler_actions[COMPILE_CONSTANT_FLOAT])((kite_compiler_t*)yyget_extra(parm), @1.first_line, $<doubleValue>1);
-    }
-    | BOOL_VALUE {
-        $<opValue>$ = (*kite_compiler_actions[COMPILE_CONSTANT_BOOL])((kite_compiler_t*)yyget_extra(parm), @1.first_line, $<intValue>1);
-    }
-    | NULL_VALUE {
-        $<opValue>$ = (*kite_compiler_actions[COMPILE_CONSTANT_NULL])((kite_compiler_t*)yyget_extra(parm), @1.first_line);
-    }
+constant_statement:    
+      STRING_VALUE { $<stringValue>$ = $<stringValue>1; }
+    | INT_VALUE { $<intValue>$ = $<intValue>1; }
+    | FLOAT_VALUE { $<doubleValue>$ = $<doubleValue>1; }
+    | BOOL_VALUE { $<intValue>$ = $<intValue>1; }
+    | NULL_VALUE { $<opValue>$ = NULL; }
     | INT_VALUE ':' INT_VALUE
     {
-        $<opValue>$ = (*kite_compiler_actions[COMPILE_CONSTANT_RANGE])((kite_compiler_t*)yyget_extra(parm), @2.first_line, $<intValue>1, $<intValue>3, 1);
+        /* TODO: range */
     }
     | INT_VALUE ':' INT_VALUE ':' INT_VALUE
     {
-        $<opValue>$ = (*kite_compiler_actions[COMPILE_CONSTANT_RANGE])((kite_compiler_t*)yyget_extra(parm), @2.first_line, $<intValue>1, $<intValue>3, $<intValue>5);
+        /* TODO: range */
     }
     | REGEX_VALUE {
-        $<opValue>$ = (*kite_compiler_actions[COMPILE_CONSTANT_REGEX])((kite_compiler_t*)yyget_extra(parm), @1.first_line, $<stringValue>1, FALSE);
-        free($<stringValue>1);
+        /* TODO: regex */
     }
     | REGEX_VALUE_CI {
-        $<opValue>$ = (*kite_compiler_actions[COMPILE_CONSTANT_REGEX])((kite_compiler_t*)yyget_extra(parm), @1.first_line, $<stringValue>1, TRUE);
-        free($<stringValue>1);
+        /* TODO: regex */
     }
-    | list_value { $<opValue>$ = NULL; }
-    | construct_object_statement { $<opValue>$ = NULL; }
-    | anon_method_declaration { $<opValue>$ = NULL; }
-    | '(' data_manipulation_statement ')' { $<opValue>$ = NULL; }
+    | list_value { $<opValue>$ = $<opValue>1; }
+    | construct_object_statement { $<opValue>$ = $<opValue>1; }
+    | anon_method_declaration { $<opValue>$ = $<opValue>1; }
+    | '(' data_manipulation_statement ')' { $<opValue>$ = $<opValue>1; }
     ;
 
 construct_object_statement:    MAKE var_name param_list    {
-        (*kite_compiler_actions[COMPILE_MAKE])((kite_compiler_t*)yyget_extra(parm), @1.first_line);
+        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$->op = kite::semantics::MAKE;
+        $<opValue>$->children.push_back(*$<opValue>2);
+        std::vector<kite::semantics::syntax_tree_node> &param_names = *$<listValue>3;
+        for (std::vector<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
+             i != param_names.end();
+             i++)
+        {
+            $<opValue>$->children.push_back(*i);
+        }
     }
     ;
     
 list_value: '[' ']' {
-        (*kite_compiler_actions[COMPILE_ZERO_ELEMENT_LIST])((kite_compiler_t*)yyget_extra(parm), @1.first_line);
+        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$->op = kite::semantics::LIST_VAL;
     }
-    | '[' list_elements ']'
+    | '[' list_elements ']' { $<opValue>$ = $<opValue>2; }
     ;
     
 list_elements: list_element    {
-        (*kite_compiler_actions[COMPILE_ONE_ELEMENT_LIST])((kite_compiler_t*)yyget_extra(parm), @1.first_line);
+        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$->op = kite::semantics::LIST_VAL;
+        $<opValue>$->children.push_back(*$<opValue>1);
     }
     | list_element ',' list_elements    {
-        (*kite_compiler_actions[COMPILE_TWO_ELEMENT_LIST])((kite_compiler_t*)yyget_extra(parm), @2.first_line);
+        $<opValue>$ = $<opValue>3;
+        $<opValue>$->children.push_front(*$<opValue>1);
     }
     ;
 
-list_element:    or_statement
+list_element:    or_statement { $<opValue>$ = $<opValue>1; }
     ;
     
 decide_statement:    DECIDE {
-        (*kite_compiler_actions[COMPILE_DECIDE_BEGIN])((kite_compiler_t*)yyget_extra(parm), @1.first_line);
+        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$->op = kite::semantics::DECIDE;
     } '[' decide_contents ']' {
-        (*kite_compiler_actions[COMPILE_DECIDE_END])((kite_compiler_t*)yyget_extra(parm), @5.first_line);
+        std::vector<kite::semantics::syntax_tree_node> &param_names = *$<listValue>4;
+        for (std::vector<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
+             i != param_names.end();
+             i++)
+        {
+            $<opValue>$->children.push_back(*i);
+        }
     }
     ;
     
-decide_contents:    decide_condition
-    | decide_contents ',' decide_condition
+decide_contents:    
+      decide_condition {
+          $<listValue>$ = new std::vector<kite::semantics::syntax_tree_node>;
+          
+          std::vector<kite::semantics::syntax_tree_node> &param_names = *$<listValue>1;
+          for (std::vector<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
+               i != param_names.end();
+               i++)
+          {
+              $<listValue>$->push_back(*i);
+          }
+      }
+    | decide_contents ',' decide_condition {
+        $<listValue>$ = $<listValue>1;
+        std::vector<kite::semantics::syntax_tree_node> &param_names = *$<listValue>3;
+          for (std::vector<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
+               i != param_names.end();
+               i++)
+          {
+              $<listValue>$->push_back(*i);
+          }
+    }
     ;
     
 decide_condition:    constant_statement {
-        $<opValue>$ = (*kite_compiler_actions[COMPILE_DECIDE_CONDITION_BEGIN])((kite_compiler_t*)yyget_extra(parm), @1.first_line);
+        $<listValue>$ = new std::vector<kite::semantics::syntax_tree_node>;
+        $<listValue>$->push_back(*$<opValue>1);
     } '[' input ']'    {
-        (*kite_compiler_actions[COMPILE_DECIDE_CONDITION_END])((kite_compiler_t*)yyget_extra(parm), @5.first_line, $<opValue>2);
+        $<listValue>$->push_back(*$<opValue>4);
     }
     ;
     
-eval_statement:    EVAL {
-        (*kite_compiler_actions[COMPILE_EVAL_BEGIN])((kite_compiler_t*)yyget_extra(parm), @1.first_line);
-    } or_statement    {
-        (*kite_compiler_actions[COMPILE_EVAL_END])((kite_compiler_t*)yyget_extra(parm), @1.first_line);
+eval_statement:    EVAL or_statement {
+        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$->op = kite::semantics::EVAL;
+        $<opValue>$->children.push_back(*$<opValue>2);
     }
     ;
 
 loop_statement:    loop_type '[' input ']'    {
-        (*kite_compiler_actions[COMPILE_LOOP_WRAPPER])((kite_compiler_t*)yyget_extra(parm), @4.first_line, $<opValue>1);
+        $<opValue>$ = $<opValue>1;
+        $<opValue>$->children.push_back(*$<opValue>3);
     }
     ;
 
 loop_type:    WHILE {
-        $<opValue>$ = (*kite_compiler_actions[COMPILE_WHILE_BEGIN])((kite_compiler_t*)yyget_extra(parm), @1.first_line);
+        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$->op = kite::semantics::WHILE;
     } constant_statement    {
-        (*kite_compiler_actions[COMPILE_WHILE_END])((kite_compiler_t*)yyget_extra(parm), @1.first_line);
-        $<opValue>$ = $<opValue>2;
+        $<opValue>$->children.push_back(*$<opValue>3);
     }
     | UNTIL {
-        $<opValue>$ = (*kite_compiler_actions[COMPILE_UNTIL_BEGIN])((kite_compiler_t*)yyget_extra(parm), @1.first_line);
+        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$->op = kite::semantics::UNTIL;
     } constant_statement    {
-        (*kite_compiler_actions[COMPILE_UNTIL_END])((kite_compiler_t*)yyget_extra(parm), @1.first_line);
-        $<opValue>$ = $<opValue>2;
+        $<opValue>$->children.push_back(*$<opValue>3);
     }
     ;
 
 run_catch_statement: RUN {
-        $<opValue>$ = (*kite_compiler_actions[COMPILE_RUN_BEGIN])((kite_compiler_t*)yyget_extra(parm), @1.first_line);
+        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$->op = kite::semantics::RUN_CATCH;
     } '[' input ']' {
-        $<opValue>$ = (*kite_compiler_actions[COMPILE_RUN_END])((kite_compiler_t*)yyget_extra(parm), @1.first_line);
-    } CATCH {
-        (*kite_compiler_actions[COMPILE_CATCH_BEGIN])((kite_compiler_t*)yyget_extra(parm), @7.first_line, $<opValue>2);
-    } '[' input ']' {
-        (*kite_compiler_actions[COMPILE_CATCH_END])((kite_compiler_t*)yyget_extra(parm), @7.first_line, $<opValue>6);
+        $<opValue>$->children.push_back(*$<opValue>4);
+    } CATCH '[' input ']' {
+        $<opValue>$->children.push_back(*$<opValue>9);
     }
     ;
     
 %%
 
-void dirty_yyerror(void *yyparse_param, char *str) {
-    kite_object_t *exc;
-    kite_compiler_t *comp = (kite_compiler_t*)yyget_extra(yyparse_param);
-    kite_thread_t *thd = comp->thd;
-    
-    kite_funccall_info_t *entry = calloc(sizeof(kite_funccall_info_t), 1);
-    entry->this = NULL;
-    entry->file = comp->file;
-    entry->line = comp->currentLine;
-    kite_push_stack(&thd->func_stack, FALSE, entry);
-
-    exc = kite_new_exception(thd, "System.exceptions.SyntaxError", 
-                             str);
-    kite_vm_call_method(thd, exc, "throw", kite_new_list(thd), TRUE);    
-}
-
-void checkReserved(void *p, char *name) {
-    if (!strcmp(name, "__exc") ||
-        !strcmp(name, "this")) {
-        dirty_yyerror(p, "Cannot use reserved names for parameters.");
-    }
+void
+yy::kite_parser::error (const yy::kite_parser::location_type& l,
+                        const std::string& m)
+{
+    driver.error (l, m);
 }

@@ -1548,7 +1548,6 @@ namespace kite
             }
             
             Value *ret = llvm_node_codegen(state)(body);
-            state.pop_symbol_stack();
             
             /*if (state.get_skip_remaining() == false)
             {*/
@@ -1578,6 +1577,7 @@ namespace kite
                     ret = builder.CreateIntToPtr(ret, PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)));
                 }
             }
+            state.pop_symbol_stack();
             generate_debug_data(builder.CreateRet(ret), body.position);
             //}
             state.skip_remaining(false);

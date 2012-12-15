@@ -28,7 +28,7 @@
 %}
 
 %skeleton "lalr1.cc" /* -*- C++ -*- */
-%require "2.6"
+%require "2.5"
 %defines
 %define parser_class_name "kite_parser"
 

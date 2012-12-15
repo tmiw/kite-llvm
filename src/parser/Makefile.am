@@ -3,9 +3,16 @@ AM_LDFLAGS = $(LLVM_LDFLAGS) $(BOOST_LDFLAGS) $(OPENSSL_LDFLAGS) $(BOOST_SYSTEM_
 
 noinst_LTLIBRARIES = libkiteparser.la
 libkiteparser_la_SOURCES = \
-    kite-parser.ypp \
+    kite-parser.cpp \
     kite-lexer.lpp \
     kite-driver.hh \
     kite-driver.cpp \
     parser.cpp \
     parser.h
+
+# automake >= 1.12 uses a different file extension, breaking everything.
+kite-parser.cpp kite-parser.hpp: kite-parser.ypp
+	$(YACC) -v -o kite-parser.cpp --defines=kite-parser.hpp $<
+
+BUILT_SOURCES = kite-parser.hpp kite-parser.cpp
+CLEANFILES = $(BUILT_SOURCES)

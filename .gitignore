@@ -46,3 +46,12 @@ stamp-h1
 *.exe
 *.out
 *.app
+
+# bison files
+location.hh
+position.hh
+stack.hh
+kite-lexer.cpp
+kite-parser.hpp
+kite-parser.cpp
+kite-parser.output

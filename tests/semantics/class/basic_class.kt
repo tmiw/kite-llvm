@@ -1,5 +1,5 @@
 class X [
-    "initializing X"|print;
+    "initializing X"|print
 ];
 
 "inside main program"|print;

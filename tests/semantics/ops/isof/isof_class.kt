@@ -1,13 +1,13 @@
 class X [
-    construct() [ 1; ];
+    construct() [ 1; ]
 ];
 
 class Y from X [
-    construct() [ 1; ];
+    construct() [ 1; ]
 ];
 
 class Z [
-    construct() [ 1; ];
+    construct() [ 1; ]
 ];
 
 v = make Y();

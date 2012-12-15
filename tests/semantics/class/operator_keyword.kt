@@ -1,11 +1,11 @@
 class X [
     construct() [
         this.x = 1;
-    ];
+    ],
     
     operator plus(y) [
         (this.x + y);
-    ];
+    ]
 ];
 
 

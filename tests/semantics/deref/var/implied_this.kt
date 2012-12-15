@@ -1,6 +1,6 @@
 class X [
-    construct() [ this.i = 5; ];
-    method y() [ i; ];
+    construct() [ this.i = 5; ],
+    method y() [ i; ]
 ];
 
 v = make X();

@@ -82,6 +82,10 @@ namespace kite
             syntax_tree(PositionT &pos)
                 : position(pos)
                 { }
+            
+            syntax_tree(const syntax_tree &other)
+                : op(other.op), children(other.children), position(other.position)
+                { }
         };
     }
 }

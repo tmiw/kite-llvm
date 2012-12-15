@@ -98,12 +98,6 @@ namespace kite
             CONTINUE,
             RETURN_VAL,
             EVAL,
-            __END_NON_CONST_OPS, // DO NOT USE
-            STRING_VAL,
-            INTEGER_VAL,
-            FLOAT_VAL,
-            BOOL_VAL,
-            NULL_VAL
         };
         
         typedef std::map<semantics::code_operation, std::string> OperatorMethodsMap;

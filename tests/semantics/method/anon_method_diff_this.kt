@@ -1,9 +1,9 @@
 class X [
-    construct() [ this.y = 31336; ];
+    construct() [ this.y = 31336; ],
     method new_method()
     [
         (method() [ (this.y + 1); ]);
-    ];
+    ]
 ];
 
 y = 0;

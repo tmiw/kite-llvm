@@ -1,9 +1,9 @@
 class X [
-    "initializing X"|print;
+    "initializing X"|print,
 
     class Y [
-        "initializing Y"|print;
-    ];
+        "initializing Y"|print
+    ]
 ];
 
 "inside main program"|print;

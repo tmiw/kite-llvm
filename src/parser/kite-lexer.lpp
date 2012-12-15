@@ -74,6 +74,7 @@ blank [ \t]
 
 import                  return token::IMPORT;
 method                  return token::METHOD;
+method_ref              return token::METHOD_REF;
 from                    return token::FROM; 
 class                   return token::CLASS;
 construct               return token::CONSTRUCT;
@@ -161,9 +162,9 @@ false                   yylval->intValue = 0; return token::BOOL_VALUE;
 	yylval->stringValue->append(buf);
 }
 
-<str>\\\"               yylval->stringValue->append("\\\"");
+<str>\\\"               yylval->stringValue->append("\"");
 
-<str>\\\\               yylval->stringValue->append("\\\\");
+<str>\\\\               yylval->stringValue->append("\\");
 
 <str>[ \t]+             yylval->stringValue->append(yytext);
 
@@ -197,9 +198,9 @@ false                   yylval->intValue = 0; return token::BOOL_VALUE;
 	yylval->stringValue->append(buf);
 }
 
-<str2>\\\"              yylval->stringValue->append("\\\"");
+<str2>\\\"              yylval->stringValue->append("\"");
 
-<str2>\\\\              yylval->stringValue->append("\\\\");
+<str2>\\\\              yylval->stringValue->append("\\");
 
 <str2>[ \t]+            yylval->stringValue->append(yytext);
 

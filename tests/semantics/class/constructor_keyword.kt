@@ -1,6 +1,6 @@
 class X [
-    construct() [ this.elite = 1337|obj; 1; ];
-    construct(val) [ this.elite = val|obj; 1; ];
+    construct() [ this.elite = 1337|obj; 1; ],
+    construct(val) [ this.elite = val|obj; 1; ]
 ];
 
 x = make X();

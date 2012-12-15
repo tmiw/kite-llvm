@@ -197,6 +197,13 @@ namespace kite
                 case semantics::RETURN_VAL:
                     ret = codegen_return_op(tree);
                     break;
+                case semantics::STRING_VAL:
+                case semantics::INTEGER_VAL:
+                case semantics::FLOAT_VAL:
+                case semantics::BOOL_VAL:
+                case semantics::NULL_VAL:
+                    ret = boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
+                    break;
             }
             
             return ret;

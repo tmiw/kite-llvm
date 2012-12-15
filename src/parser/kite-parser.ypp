@@ -737,11 +737,31 @@ var_name:    SYMBOL_NAME {
     ;
     
 constant_statement:    
-      STRING_VALUE { $<stringValue>$ = $<stringValue>1; }
-    | INT_VALUE { $<intValue>$ = $<intValue>1; }
-    | FLOAT_VALUE { $<doubleValue>$ = $<doubleValue>1; }
-    | BOOL_VALUE { $<intValue>$ = $<intValue>1; }
-    | NULL_VALUE { $<opValue>$ = NULL; }
+      STRING_VALUE { 
+          $<opValue>$ = new kite::semantics::syntax_tree();
+          $<opValue>$->op = kite::semantics::STRING_VAL;
+          $<opValue>$->children.push_back(*$<stringValue>1); 
+      }
+    | INT_VALUE {
+        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$->op = kite::semantics::INTEGER_VAL;
+        $<opValue>$->children.push_back((int)$<intValue>1);
+    }
+    | FLOAT_VALUE {
+        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$->op = kite::semantics::FLOAT_VAL;
+        $<opValue>$->children.push_back($<doubleValue>1);
+    }
+    | BOOL_VALUE {
+        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$->op = kite::semantics::BOOL_VAL;
+        $<opValue>$->children.push_back((bool)$<intValue>1);
+    }
+    | NULL_VALUE {
+        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$->op = kite::semantics::NULL_VAL;
+        $<opValue>$->children.push_back((void*)NULL);
+    }
     | INT_VALUE ':' INT_VALUE
     {
         /* TODO: range */

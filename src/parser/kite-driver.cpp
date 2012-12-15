@@ -52,9 +52,8 @@ void kite_driver::error (const yy::location &l, const std::string &m)
 {
     std::stringstream ss;
     
-    ss   << "parse error at file " << l.begin.filename
-         << " line " << l.begin.line << " column " << l.begin.column
-         << ":" << m << std::endl;
+    ss   << m << " (" << *l.begin.filename
+         << " line " << l.begin.line << " column " << l.begin.column << ")";
          
     error(ss.str());
 }

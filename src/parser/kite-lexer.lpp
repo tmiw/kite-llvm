@@ -54,7 +54,10 @@ blank [ \t]
 %{
 #define YY_USER_ACTION  yylloc->columns (yyleng);
 #define YY_EXTRA_TYPE kite_driver*
-#define YY_INPUT(buf,result,max_size) (result = yyextra->stream.readsome(buf, max_size))
+#define YY_INPUT(buf,result,max_size) { \
+    yyextra->stream.read(buf, max_size); \
+    result = yyextra->stream.gcount(); \
+}
 %}
 
 %%

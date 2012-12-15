@@ -3,8 +3,8 @@ AM_LDFLAGS = $(LLVM_LDFLAGS) $(BOOST_LDFLAGS) $(OPENSSL_LDFLAGS) $(BOOST_SYSTEM_
 
 noinst_LTLIBRARIES = libkiteparser.la
 libkiteparser_la_SOURCES = \
-    kite-parser.y \
-    kite-lexer.l \
+    kite-parser.ypp \
+    kite-lexer.lpp \
     kite-driver.hh \
     kite-driver.cpp \
     parser.cpp \

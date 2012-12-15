@@ -38,7 +38,7 @@ namespace kite
         class kite_parser
         {
         public:
-            bool parse(std::istream &stream, semantics::syntax_tree &ast, std::string filename = "(stdin)");
+            bool parse(std::istream &stream, semantics::syntax_tree **ast, std::string filename = "(stdin)");
         };
     }
 }

@@ -42,7 +42,7 @@ namespace kite
             {
                 struct syntax_tree : System::dynamic_object
                 {
-                    semantics::syntax_tree ast;
+                    semantics::syntax_tree *ast;
 
                     bool from_file(std::string file);
                     bool from_stream(std::istream &stream, std::string filename);

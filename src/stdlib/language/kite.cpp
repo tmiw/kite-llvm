@@ -237,8 +237,8 @@ namespace kite
                     semantics::syntax_tree fake_ast;
                     fake_ast.position.line = 1;
                     fake_ast.position.column = 1;
-                    fake_ast.position.file = st.ast.position.file;
-                    Function *function = (Function*)cg.generate_llvm_eval_method(argNames, st.ast, fake_ast);
+                    fake_ast.position.file = st.ast->position.file;
+                    Function *function = (Function*)cg.generate_llvm_eval_method(argNames, *st.ast, fake_ast);
                     
                     //current_module->dump();
                     return execution_engine->getPointerToFunction(function);
@@ -257,8 +257,8 @@ namespace kite
                     semantics::syntax_tree fake_ast;
                     fake_ast.position.line = 1;
                     fake_ast.position.column = 1;
-                    fake_ast.position.file = ast.ast.position.file;
-                    Function *function = (Function*)cg.generate_llvm_method("__static_init__", argNames, ast.ast, fake_ast);
+                    fake_ast.position.file = ast.ast->position.file;
+                    Function *function = (Function*)cg.generate_llvm_method("__static_init__", argNames, *ast.ast, fake_ast);
 
 #ifdef LLVM3_1
                     llvm::TargetOptions targetOptions;

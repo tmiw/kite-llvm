@@ -25,31 +25,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "grammar.h"
+#include "kite-driver.hh"
 #include "parser.h"
-#include "stdlib/System/exceptions/FileError.h"
-
-// HACK: random files are somehow being ignored by g++/ld, so there goes the
-// use of multiple .cpp files to try to reduce compile time due to Boost.
-#if 1
-#include "assignment.cpp"
-#include "bitwise.cpp"
-#include "classes.cpp"
-#include "comparison.cpp"
-#include "constants_decl.cpp"
-#include "decide.cpp"
-#include "deref.cpp"
-#include "grouping.cpp"
-#include "loop.cpp"
-#include "map_reduce.cpp"
-#include "math_ops.cpp"
-#include "method_decl.cpp"
-#include "statement.cpp"
-#include "make.cpp"
-#include "exceptions_decl.cpp"
-#include "constructor.cpp"
-#include "destructor.cpp"
-#endif
 
 using namespace std;
 using namespace kite::stdlib;
@@ -58,47 +35,12 @@ namespace kite
 {
     namespace parser
     {
-        bool kite_parser::parse(std::istream &stream, semantics::syntax_tree &ast, std::string filename)
+        bool kite_parser::parse(std::istream &stream, semantics::syntax_tree **ast, std::string filename)
         {
-            using boost::spirit::ascii::space;
-            using boost::spirit::multi_pass;
-
-            std::istreambuf_iterator<char> stream_iter(stream);
-
-            forward_iterator_type fwd_begin =
-                boost::spirit::make_default_multi_pass(stream_iter);
-            forward_iterator_type fwd_end;
-
-            // wrap forward iterator with position iterator, to record the position
-            pos_iterator_type position_begin(fwd_begin, fwd_end, filename);
-            pos_iterator_type position_end;
-
-            kite_grammar<pos_iterator_type, BOOST_TYPEOF(KITE_SKIP_RULE)> grammar;
-            try
-            {
-                bool r = phrase_parse(position_begin, position_end, grammar, KITE_SKIP_RULE, ast);
-                return r && position_begin == position_end;
-            }
-            catch (const qi::expectation_failure<pos_iterator_type> &e)
-            {
-                const classic::file_position_base<std::string>& pos = e.first.get_position();
-                std::stringstream ss;
-                
-                ss   << "parse error at file " << pos.file
-                     << " line " << pos.line << " column " << pos.column << std::endl
-                     << "'" << e.first.get_currentline() << "'" << std::endl
-                     << std::setw(pos.column) << " " << "^- here" << std::endl;
-                     
-                System::exceptions::exception *exc = 
-                    System::exceptions::FileError::Create(
-                        1,
-                        new System::string(
-                            ss.str().c_str())
-                    );
-                exc->throw_exception();
-                
-                return false;
-            }
+            kite_driver driver(stream, filename);
+            int ret = driver.parse();
+            *ast = driver.result;
+            return ret == 0;
         }
     }
 }

@@ -32,21 +32,19 @@
 
 using namespace kite::stdlib;
  
-kite_driver::kite_driver()
-    : trace_scanning(false), trace_parsing(false)
+kite_driver::kite_driver(std::istream &s, const std::string &f)
+    : file(f), stream(s)
 { }
 
 kite_driver::~kite_driver()
 { }
 
-int kite_driver::parse (const std::string &f)
+int kite_driver::parse ()
 {
-    file = f;
-    scan_begin ();
-    yy::kite_parser parser (*this);
-    parser.set_debug_level (trace_parsing);
+    init_scanner();
+    yy::kite_parser parser (this);
     int res = parser.parse ();
-    scan_end ();
+    destroy_scanner();
     return res;
 }
 

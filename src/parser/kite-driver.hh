@@ -33,30 +33,26 @@
 #include <semantics/syntax_tree.h>
 #include "kite-parser.hpp"
 
-// Tell Flex the lexer's prototype.
 #define YY_DECL \
-    yy::kite_parser::token_type yylex( \
-        yy::kite_parser::semantic_type *yylval, \
-        yy::kite_parser::location_type *yylloc, \
-        kite_driver& driver)
+ int yylex(yy::kite_parser::semantic_type* yylval, yy::kite_parser::location_type* yylloc, void* yyscanner)
 YY_DECL;
-
+ 
 // Define parser driver.
 class kite_driver
 {
 public:
-    kite_driver();
+    kite_driver(std::istream &s, const std::string &f = "(stdin)");
     virtual ~kite_driver();
     
     // Scanner methods.
-    void scan_begin();
-    void scan_end();
-    bool trace_scanning;
+    void init_scanner();
+    void destroy_scanner();
+    void* scanner;
     
     // Parser methods.
-    int parse(const std::string &f);
+    int parse();
     std::string file;
-    bool trace_parsing;
+    std::istream &stream;
     kite::semantics::syntax_tree *result;
     
     // Error handling.

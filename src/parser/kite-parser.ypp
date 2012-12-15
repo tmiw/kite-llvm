@@ -46,14 +46,15 @@
 }
 
 // The parsing context.
-%parse-param { kite_driver& driver }
-%lex-param   { kite_driver& driver }
+%parse-param { kite_driver *driver }
+%lex-param   { void* scanner }
 
 %locations
+%pure-parser
 %initial-action
 {
     // Initialize the initial location.
-    @$.begin.filename = @$.end.filename = &driver.file;
+    @$.begin.filename = @$.end.filename = new std::string(driver->file);
 };
 
 %debug
@@ -61,6 +62,7 @@
 
 %code {
     #include "kite-driver.hh"
+    #define scanner driver->scanner
 }
 
 %union 
@@ -137,7 +139,7 @@
 
 %%
 
-result_grabber: pre_input { driver.result = $<opValue>1; }
+result_grabber: pre_input { driver->result = $<opValue>1; }
     ;
 
 pre_input: 
@@ -884,5 +886,5 @@ void
 yy::kite_parser::error (const yy::kite_parser::location_type& l,
                         const std::string& m)
 {
-    driver.error (l, m);
+    driver->error (l, m);
 }

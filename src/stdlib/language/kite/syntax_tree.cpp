@@ -49,7 +49,7 @@ namespace kite
 
                 bool syntax_tree::from_stream(std::istream &stream, std::string filename)
                 {
-                    return parser::kite_parser().parse(stream, ast, filename);
+                    return parser::kite_parser().parse(stream, &ast, filename);
                 }
 
                 bool syntax_tree::from_string(std::string &code)
@@ -61,7 +61,7 @@ namespace kite
                 void syntax_tree::print()
                 {
                     codegen::syntax_tree_printer printer;
-                    printer(ast);
+                    printer(*ast);
                 }
             }
         }

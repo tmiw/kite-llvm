@@ -12,6 +12,8 @@ AM_INIT_AUTOMAKE
 
 # Checks for programs.
 AC_PROG_CC
+AC_PROG_YACC
+AC_PROG_LEX
 
 # Checks for libraries.
 AX_BOOST_BASE([1.49])

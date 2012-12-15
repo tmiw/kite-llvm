@@ -25,9 +25,13 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include <sstream>
+#include <stdlib/System/exceptions/FileError.h>
 #include "kite-driver.hh"
-#include "kite-parser.hh"
+#include "kite-parser.hpp"
 
+using namespace kite::stdlib;
+ 
 kite_driver::kite_driver()
     : trace_scanning(false), trace_parsing(false)
 { }
@@ -50,8 +54,8 @@ void kite_driver::error (const yy::location &l, const std::string &m)
 {
     std::stringstream ss;
     
-    ss   << "parse error at file " << pos.begin.filename
-         << " line " << pos.begin.line << " column " << pos.begin.column
+    ss   << "parse error at file " << l.begin.filename
+         << " line " << l.begin.line << " column " << l.begin.column
          << ":" << m << std::endl;
          
     error(ss.str());

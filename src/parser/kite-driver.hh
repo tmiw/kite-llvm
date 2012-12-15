@@ -29,12 +29,13 @@
 #define KITE_DRIVER_HH
 
 #include <string>
-#include "semantics/syntax_tree.h"
-#include "kite-parser.hh"
+#include <boost/fusion/include/adapt_struct.hpp>
+#include <semantics/syntax_tree.h>
+#include "kite-parser.hpp"
 
 // Tell Flex the lexer's prototype.
 #define YY_DECL \
-    yy::kite_parser::token_type yylex(
+    yy::kite_parser::token_type yylex( \
         yy::kite_parser::semantic_type *yylval, \
         yy::kite_parser::location_type *yylloc, \
         kite_driver& driver)
@@ -62,5 +63,12 @@ public:
     void error(const yy::location &l, const std::string &m);
     void error(const std::string &m);
 };
+
+BOOST_FUSION_ADAPT_STRUCT(
+    kite::semantics::syntax_tree,
+    (kite::semantics::code_operation, op)
+    (std::deque<kite::semantics::syntax_tree_node>, children)
+    (kite::semantics::syntax_tree_position, position)
+)
 
 #endif

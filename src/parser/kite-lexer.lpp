@@ -31,7 +31,7 @@
 #include <climits>
 #include <string>
 #include "kite-driver.hh"
-#include "kite-parser.hh"
+#include "kite-parser.hpp"
 
 /* Work around an incompatibility in flex (at least versions
    2.5.31 through 2.5.33): it generates code that does
@@ -108,8 +108,8 @@ options[ \t\r\n]+set    return token::OPTIONS_SET;
 "<|"                    return token::REDUCE;
 "<-"                    return token::MAP;
 
-true                    yylval->intValue = 1; return BOOL_VALUE;
-false                   yylval->intValue = 0; return BOOL_VALUE;
+true                    yylval->intValue = 1; return token::BOOL_VALUE;
+false                   yylval->intValue = 0; return token::BOOL_VALUE;
 
 "r/"                    BEGIN(regex); yylval->stringValue = new std::string("");
 
@@ -223,7 +223,7 @@ false                   yylval->intValue = 0; return BOOL_VALUE;
 \||\. {
 	/* so reserved words can be used as valid symbols */ 
 	BEGIN(sym);
-	return yytext[0];
+	return (token::yytokentype)yytext[0];
 }
 
 <INITIAL,sym>[A-Za-z_][A-Za-z0-9_]* { 
@@ -232,33 +232,33 @@ false                   yylval->intValue = 0; return BOOL_VALUE;
 	return token::SYMBOL_NAME;
 }
 
-<sym,operator,INITIAL>.         if (YYSTATE == INITIAL) return yytext[0];
+<sym,operator,INITIAL>.         if (YYSTATE == INITIAL) return (token::yytokentype)yytext[0];
 
-<operator>"plus"                yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return PLUS;
-<operator>"minus"               yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return MINUS;
-<operator>"multiply"            yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return MULTIPLY;
-<operator>"divide"              yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return DIVIDE;
-<operator>"mod"                 yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return MOD;
-<operator>"unplus"              yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return UNARY_PLUS;
-<operator>"unminus"             yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return UNARY_MINUS;
-<operator>"map"                 yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return MAP;
-<operator>"reduce"              yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return REDUCE;
-<operator>"array"               yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return ARRAY_DEREF;
-<operator>"array_set"           yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return ARRAY_SET;
-<operator>"equals"              yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return EQUALS;
-<operator>"nequals"             yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return NOT_EQUALS;
-<operator>"lt"                  yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return LESS_THAN;
-<operator>"gt"                  yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return GREATER_THAN;
-<operator>"leq"                 yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return LESS_OR_EQUALS;
-<operator>"geq"                 yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return GREATER_OR_EQUALS;
-<operator>"and"                 yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return AND;
-<operator>"or"                  yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return OR;
-<operator>"not"                 yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return NOT;
-<operator>"xor"                 yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return XOR;
-<operator>"lshift"              yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return LEFT_SHIFT;
-<operator>"rshift"              yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return RIGHT_SHIFT;
-<operator>"call"                yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return METHOD_CALL;
-<operator>"property"            yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return PROPERTY;
+<operator>"plus"                yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return token::PLUS;
+<operator>"minus"               yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return token::MINUS;
+<operator>"multiply"            yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return token::MULTIPLY;
+<operator>"divide"              yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return token::DIVIDE;
+<operator>"mod"                 yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return token::MOD;
+<operator>"unplus"              yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return token::UNARY_PLUS;
+<operator>"unminus"             yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return token::UNARY_MINUS;
+<operator>"map"                 yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return token::MAP;
+<operator>"reduce"              yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return token::REDUCE;
+<operator>"array"               yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return token::ARRAY_DEREF;
+<operator>"array_set"           yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return token::ARRAY_SET;
+<operator>"equals"              yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return token::EQUALS;
+<operator>"nequals"             yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return token::NOT_EQUALS;
+<operator>"lt"                  yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return token::LESS_THAN;
+<operator>"gt"                  yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return token::GREATER_THAN;
+<operator>"leq"                 yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return token::LESS_OR_EQUALS;
+<operator>"geq"                 yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return token::GREATER_OR_EQUALS;
+<operator>"and"                 yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return token::AND;
+<operator>"or"                  yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return token::OR;
+<operator>"not"                 yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return token::NOT;
+<operator>"xor"                 yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return token::XOR;
+<operator>"lshift"              yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return token::LEFT_SHIFT;
+<operator>"rshift"              yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return token::RIGHT_SHIFT;
+<operator>"call"                yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return token::METHOD_CALL;
+<operator>"property"            yylval->stringValue = new std::string(yytext); BEGIN(INITIAL); return token::PROPERTY;
 
 %%
 

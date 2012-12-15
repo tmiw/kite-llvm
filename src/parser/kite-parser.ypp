@@ -31,9 +31,18 @@
 %require "2.6"
 %defines
 %define parser_class_name "kite_parser"
+
 %code requires {
     #include <string>
+    #include <semantics/syntax_tree.h>
+    #include "stdlib/System/object.h"
     class kite_driver;
+    
+    namespace kite {
+        namespace semantics {
+            class syntax_tree;
+        }
+    }
 }
 
 // The parsing context.
@@ -50,6 +59,10 @@
 %debug
 %error-verbose     
 
+%code {
+    #include "kite-driver.hh"
+}
+
 %union 
 {
     double doubleValue;
@@ -57,11 +70,7 @@
     std::string *stringValue;
     kite::stdlib::System::object *internalValue;
     kite::semantics::syntax_tree *opValue;
-    std::vector<kite::semantics::syntax_tree_node> *listValue;
-}
-
-%code {
-    #include "kite-driver.h"
+    std::deque<kite::semantics::syntax_tree_node> *listValue;
 }
 
 %token IMPORT
@@ -120,6 +129,7 @@
 %token REGEX_VALUE_CI
 %token ARRAY_SET
 %token OPTIONS_SET
+%token        END      0 "end of file"
 
 /* Needed since we can't quite lay out the associativity using the rules yet. */
 %left MAP
@@ -213,8 +223,8 @@ method_declaration: METHOD SYMBOL_NAME optional_param_name_list optional_docstri
         $<opValue>$->op = kite::semantics::METHOD;
         $<opValue>$->children.push_back(*$<opValue>2);
         
-        std::vector<kite::semantics::syntax_tree_node> &param_names = *$<listValue>3;
-        for (std::vector<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
+        std::deque<kite::semantics::syntax_tree_node> &param_names = *$<listValue>3;
+        for (std::deque<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
              i != param_names.end();
              i++)
         {
@@ -231,8 +241,8 @@ anon_method_declaration: METHOD optional_param_name_list     {
         $<opValue>$->op = kite::semantics::METHOD;
         $<opValue>$->children.push_back(std::string("__AnonMethod"));
         
-        std::vector<kite::semantics::syntax_tree_node> &param_names = *$<listValue>2;
-        for (std::vector<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
+        std::deque<kite::semantics::syntax_tree_node> &param_names = *$<listValue>2;
+        for (std::deque<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
              i != param_names.end();
              i++)
         {
@@ -252,7 +262,7 @@ optional_global:    {
     ;
     
 optional_param_name_list:    {
-        $<listValue>$ = new std::vector<kite::semantics::syntax_tree_node>();
+        $<listValue>$ = new std::deque<kite::semantics::syntax_tree_node>();
     }
     | param_name_list    {
         $<opValue>$ = $<opValue>1;
@@ -260,7 +270,7 @@ optional_param_name_list:    {
     ;
     
 param_name_list:    '(' ')'    {
-        $<listValue>$ = new std::vector<kite::semantics::syntax_tree_node>();
+        $<listValue>$ = new std::deque<kite::semantics::syntax_tree_node>();
     }
     | '(' param_elements ')'    {
         $<opValue>$ = $<opValue>2;
@@ -269,7 +279,7 @@ param_name_list:    '(' ')'    {
     
 param_elements: SYMBOL_NAME optional_docstring   {
         /* TODO: docstring */
-        $<listValue>$ = new std::vector<kite::semantics::syntax_tree_node>();
+        $<listValue>$ = new std::deque<kite::semantics::syntax_tree_node>();
         $<listValue>$->push_back(*$<stringValue>1);
     }
     | SYMBOL_NAME optional_docstring ',' param_elements {
@@ -312,7 +322,7 @@ variable_immediate:
         $<opValue>$->children.push_back(*$<opValue>1);
         
         kite::semantics::syntax_tree deref_method;
-        deref_method.op = kite::semantics::DEREF_PROPERTY
+        deref_method.op = kite::semantics::DEREF_PROPERTY;
         deref_method.children.push_back(*$<stringValue>3);
         $<opValue>$->children.push_back(deref_method);
     }
@@ -355,8 +365,8 @@ constructor_definition:    CONSTRUCT optional_param_name_list {
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::CONSTRUCTOR;
         
-        std::vector<kite::semantics::syntax_tree_node> &param_names = *$<listValue>2;
-        for (std::vector<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
+        std::deque<kite::semantics::syntax_tree_node> &param_names = *$<listValue>2;
+        for (std::deque<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
              i != param_names.end();
              i++)
         {
@@ -391,10 +401,10 @@ property_definition:    optional_global PROPERTY SYMBOL_NAME optional_docstring 
 operator_definition:    OPERATOR operator_type param_name_list {
     $<opValue>$ = new kite::semantics::syntax_tree();
     $<opValue>$->op = kite::semantics::OPERATOR;
-    $<opValue>$->children.push_back(*$<stringVal>2);
+    $<opValue>$->children.push_back(*$<stringValue>2);
     
-    std::vector<kite::semantics::syntax_tree_node> &param_names = *$<listValue>3;
-    for (std::vector<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
+    std::deque<kite::semantics::syntax_tree_node> &param_names = *$<listValue>3;
+    for (std::deque<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
          i != param_names.end();
          i++)
     {
@@ -407,31 +417,31 @@ operator_definition:    OPERATOR operator_type param_name_list {
     ;
     
 operator_type:    
-      PLUS              { $<stringVal>$ = $<stringVal>1; }
-    | MINUS             { $<stringVal>$ = $<stringVal>1; }
-    | MULTIPLY          { $<stringVal>$ = $<stringVal>1; }
-    | DIVIDE            { $<stringVal>$ = $<stringVal>1; }
-    | MOD               { $<stringVal>$ = $<stringVal>1; }
-    | UNARY_PLUS        { $<stringVal>$ = $<stringVal>1; }
-    | UNARY_MINUS       { $<stringVal>$ = $<stringVal>1; }
-    | MAP               { $<stringVal>$ = $<stringVal>1; }
-    | REDUCE            { $<stringVal>$ = $<stringVal>1; }
-    | ARRAY_DEREF       { $<stringVal>$ = $<stringVal>1; }
-    | ARRAY_SET         { $<stringVal>$ = $<stringVal>1; }
-    | EQUALS            { $<stringVal>$ = $<stringVal>1; }
-    | NOT_EQUALS        { $<stringVal>$ = $<stringVal>1; }
-    | LESS_THAN         { $<stringVal>$ = $<stringVal>1; }
-    | GREATER_THAN      { $<stringVal>$ = $<stringVal>1; }
-    | LESS_OR_EQUALS    { $<stringVal>$ = $<stringVal>1; }
-    | GREATER_OR_EQUALS { $<stringVal>$ = $<stringVal>1; }
-    | AND               { $<stringVal>$ = $<stringVal>1; }
-    | OR                { $<stringVal>$ = $<stringVal>1; }
-    | NOT               { $<stringVal>$ = $<stringVal>1; }
-    | XOR               { $<stringVal>$ = $<stringVal>1; }
-    | LEFT_SHIFT        { $<stringVal>$ = $<stringVal>1; }
-    | RIGHT_SHIFT       { $<stringVal>$ = $<stringVal>1; }
-    | METHOD_CALL       { $<stringVal>$ = $<stringVal>1; }
-    | PROPERTY          { $<stringVal>$ = $<stringVal>1; }
+      PLUS              { $<stringValue>$ = $<stringValue>1; }
+    | MINUS             { $<stringValue>$ = $<stringValue>1; }
+    | MULTIPLY          { $<stringValue>$ = $<stringValue>1; }
+    | DIVIDE            { $<stringValue>$ = $<stringValue>1; }
+    | MOD               { $<stringValue>$ = $<stringValue>1; }
+    | UNARY_PLUS        { $<stringValue>$ = $<stringValue>1; }
+    | UNARY_MINUS       { $<stringValue>$ = $<stringValue>1; }
+    | MAP               { $<stringValue>$ = $<stringValue>1; }
+    | REDUCE            { $<stringValue>$ = $<stringValue>1; }
+    | ARRAY_DEREF       { $<stringValue>$ = $<stringValue>1; }
+    | ARRAY_SET         { $<stringValue>$ = $<stringValue>1; }
+    | EQUALS            { $<stringValue>$ = $<stringValue>1; }
+    | NOT_EQUALS        { $<stringValue>$ = $<stringValue>1; }
+    | LESS_THAN         { $<stringValue>$ = $<stringValue>1; }
+    | GREATER_THAN      { $<stringValue>$ = $<stringValue>1; }
+    | LESS_OR_EQUALS    { $<stringValue>$ = $<stringValue>1; }
+    | GREATER_OR_EQUALS { $<stringValue>$ = $<stringValue>1; }
+    | AND               { $<stringValue>$ = $<stringValue>1; }
+    | OR                { $<stringValue>$ = $<stringValue>1; }
+    | NOT               { $<stringValue>$ = $<stringValue>1; }
+    | XOR               { $<stringValue>$ = $<stringValue>1; }
+    | LEFT_SHIFT        { $<stringValue>$ = $<stringValue>1; }
+    | RIGHT_SHIFT       { $<stringValue>$ = $<stringValue>1; }
+    | METHOD_CALL       { $<stringValue>$ = $<stringValue>1; }
+    | PROPERTY          { $<stringValue>$ = $<stringValue>1; }
     ;
 
 data_manipulation_statement:   
@@ -622,8 +632,8 @@ map_reduce_statement:    deref_statement MAP deref_statement {
         kite::semantics::syntax_tree deref_method;
         deref_method.op = kite::semantics::DEREF_METHOD;
         deref_method.children.push_back(*$<stringValue>1);
-        std::vector<kite::semantics::syntax_tree_node> &param_names = *$<listValue>2;
-        for (std::vector<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
+        std::deque<kite::semantics::syntax_tree_node> &param_names = *$<listValue>2;
+        for (std::deque<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
              i != param_names.end();
              i++)
         {
@@ -642,8 +652,8 @@ deref_statement:    deref_statement '|' SYMBOL_NAME optional_param_list {
         kite::semantics::syntax_tree deref_method;
         deref_method.op = kite::semantics::DEREF_METHOD;
         deref_method.children.push_back(*$<stringValue>3);
-        std::vector<kite::semantics::syntax_tree_node> &param_names = *$<listValue>4;
-        for (std::vector<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
+        std::deque<kite::semantics::syntax_tree_node> &param_names = *$<listValue>4;
+        for (std::deque<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
              i != param_names.end();
              i++)
         {
@@ -657,7 +667,7 @@ deref_statement:    deref_statement '|' SYMBOL_NAME optional_param_list {
         $<opValue>$->children.push_back(*$<opValue>1);
         
         kite::semantics::syntax_tree deref_method;
-        deref_method.op = kite::semantics::DEREF_ARRAY
+        deref_method.op = kite::semantics::DEREF_ARRAY;
         deref_method.children.push_back(*$<opValue>3);
         $<opValue>$->children.push_back(deref_method);
     }
@@ -667,7 +677,7 @@ deref_statement:    deref_statement '|' SYMBOL_NAME optional_param_list {
         $<opValue>$->children.push_back(*$<opValue>1);
         
         kite::semantics::syntax_tree deref_method;
-        deref_method.op = kite::semantics::DEREF_PROPERTY
+        deref_method.op = kite::semantics::DEREF_PROPERTY;
         deref_method.children.push_back(*$<stringValue>3);
         $<opValue>$->children.push_back(deref_method);
     }
@@ -682,15 +692,15 @@ deref_statement:    deref_statement '|' SYMBOL_NAME optional_param_list {
     ;
 
 optional_param_list: {
-        $<opValue>$ = new std::vector<kite::semantics::syntax_tree_node>;
+        $<listValue>$ = new std::deque<kite::semantics::syntax_tree_node>;
     }
     | param_list {
-        $<opValue>$ = $<opValue>1;
+        $<listValue>$ = $<listValue>1;
     }
     ;
 
 param_list:    '(' ')' {
-        $<listValue>$ = new std::vector<kite::semantics::syntax_tree_node>;
+        $<listValue>$ = new std::deque<kite::semantics::syntax_tree_node>;
     }
     | '(' params_list ')' {
         $<listValue>$ = $<listValue>2;
@@ -698,12 +708,12 @@ param_list:    '(' ')' {
     ;
 
 params_list: data_manipulation_statement    {
-        $<listValue>$ = new std::vector<kite::semantics::syntax_tree_node>;
-        $<listValue>$->children.push_back(*$<opValue>1);
+        $<listValue>$ = new std::deque<kite::semantics::syntax_tree_node>;
+        $<listValue>$->push_back(*$<opValue>1);
     }
     | data_manipulation_statement ',' params_list    {
         $<listValue>$ = $<listValue>3;
-        $<listValue>$->children.push_front(*$<opValue>1);
+        $<listValue>$->push_front(*$<opValue>1);
     }
     ;
     
@@ -718,7 +728,7 @@ var_name:    SYMBOL_NAME {
         $<opValue>$->children.push_back(*$<opValue>1);
         
         kite::semantics::syntax_tree deref_method;
-        deref_method.op = kite::semantics::DEREF_PROPERTY
+        deref_method.op = kite::semantics::DEREF_PROPERTY;
         deref_method.children.push_back(*$<opValue>3);
         $<opValue>$->children.push_back(deref_method);
     }
@@ -754,8 +764,8 @@ construct_object_statement:    MAKE var_name param_list    {
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::MAKE;
         $<opValue>$->children.push_back(*$<opValue>2);
-        std::vector<kite::semantics::syntax_tree_node> &param_names = *$<listValue>3;
-        for (std::vector<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
+        std::deque<kite::semantics::syntax_tree_node> &param_names = *$<listValue>3;
+        for (std::deque<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
              i != param_names.end();
              i++)
         {
@@ -789,8 +799,8 @@ decide_statement:    DECIDE {
         $<opValue>$ = new kite::semantics::syntax_tree();
         $<opValue>$->op = kite::semantics::DECIDE;
     } '[' decide_contents ']' {
-        std::vector<kite::semantics::syntax_tree_node> &param_names = *$<listValue>4;
-        for (std::vector<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
+        std::deque<kite::semantics::syntax_tree_node> &param_names = *$<listValue>4;
+        for (std::deque<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
              i != param_names.end();
              i++)
         {
@@ -801,10 +811,10 @@ decide_statement:    DECIDE {
     
 decide_contents:    
       decide_condition {
-          $<listValue>$ = new std::vector<kite::semantics::syntax_tree_node>;
+          $<listValue>$ = new std::deque<kite::semantics::syntax_tree_node>;
           
-          std::vector<kite::semantics::syntax_tree_node> &param_names = *$<listValue>1;
-          for (std::vector<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
+          std::deque<kite::semantics::syntax_tree_node> &param_names = *$<listValue>1;
+          for (std::deque<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
                i != param_names.end();
                i++)
           {
@@ -813,8 +823,8 @@ decide_contents:
       }
     | decide_contents ',' decide_condition {
         $<listValue>$ = $<listValue>1;
-        std::vector<kite::semantics::syntax_tree_node> &param_names = *$<listValue>3;
-          for (std::vector<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
+        std::deque<kite::semantics::syntax_tree_node> &param_names = *$<listValue>3;
+          for (std::deque<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
                i != param_names.end();
                i++)
           {
@@ -824,7 +834,7 @@ decide_contents:
     ;
     
 decide_condition:    constant_statement {
-        $<listValue>$ = new std::vector<kite::semantics::syntax_tree_node>;
+        $<listValue>$ = new std::deque<kite::semantics::syntax_tree_node>;
         $<listValue>$->push_back(*$<opValue>1);
     } '[' input ']'    {
         $<listValue>$->push_back(*$<opValue>4);

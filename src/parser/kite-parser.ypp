@@ -54,7 +54,7 @@
 %initial-action
 {
     // Initialize the initial location.
-    @$.begin.filename = @$.end.filename = new std::string(driver->file);
+    @$.begin.filename = @$.end.filename = &driver->file;
 };
 
 %debug
@@ -149,7 +149,7 @@ pre_input:
     ;
 
 input:    /* empty */ {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::ITERATE;
     }
     | statement ';' input {
@@ -184,7 +184,7 @@ options_set_statement:  OPTIONS_SET STRING_VALUE STRING_VALUE {
 };
 
 import_statement:    IMPORT STRING_VALUE     {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::IMPORT;
         $<opValue>$->children.push_back(*$<stringValue>2);
     }
@@ -192,14 +192,14 @@ import_statement:    IMPORT STRING_VALUE     {
 
 break_statement:    BREAK
     {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::BREAK;
     }
     ;
 
 continue_statement: CONTINUE
     {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::CONTINUE;
     }
     ;
@@ -221,7 +221,7 @@ optional_docstring:
         
 method_declaration: METHOD SYMBOL_NAME optional_param_name_list optional_docstring {
         /* TODO: docstring */
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::METHOD;
         $<opValue>$->children.push_back(*$<opValue>2);
         
@@ -239,7 +239,7 @@ method_declaration: METHOD SYMBOL_NAME optional_param_name_list optional_docstri
 
 anon_method_declaration: METHOD optional_param_name_list     {
         /* TODO: docstring */
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::METHOD;
         $<opValue>$->children.push_back(std::string("__AnonMethod"));
         
@@ -292,7 +292,7 @@ param_elements: SYMBOL_NAME optional_docstring   {
     ;
     
 class_definition:    CLASS SYMBOL_NAME {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::CLASS;
         $<opValue>$->children.push_back(*$<stringValue>2);
     } optional_from optional_docstring '[' class_body ']'    {
@@ -319,24 +319,24 @@ from_statement:
 
 variable_immediate:     
     variable_immediate '.' SYMBOL_NAME {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::DEREF_FILTER;
         $<opValue>$->children.push_back(*$<opValue>1);
         
-        kite::semantics::syntax_tree deref_method;
+        kite::semantics::syntax_tree deref_method(@$);
         deref_method.op = kite::semantics::DEREF_PROPERTY;
         deref_method.children.push_back(*$<stringValue>3);
         $<opValue>$->children.push_back(deref_method);
     }
     | SYMBOL_NAME {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::DEREF_FILTER;
         $<opValue>$->children.push_back(*$<stringValue>1);
     }
 
 class_body:    
     {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::ITERATE; 
     }
     | class_elements { $<opValue>$ = $<opValue>1; }
@@ -344,7 +344,7 @@ class_body:
 
 class_elements:    class_element
     {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::ITERATE;
         $<opValue>$->children.push_back(*$<opValue>1);
     }
@@ -364,7 +364,7 @@ class_element:    constructor_definition { $<opValue>$ = $<opValue>1; }
     ;
 
 constructor_definition:    CONSTRUCT optional_param_name_list {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::CONSTRUCTOR;
         
         std::deque<kite::semantics::syntax_tree_node> &param_names = *$<listValue>2;
@@ -381,7 +381,7 @@ constructor_definition:    CONSTRUCT optional_param_name_list {
     ;
     
 destructor_definition: DESTRUCT {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::DESTRUCTOR;
     } optional_docstring '[' input ']' {
         /* TODO: docstring */
@@ -401,7 +401,7 @@ property_definition:    optional_global PROPERTY SYMBOL_NAME optional_docstring 
     ;
 
 operator_definition:    OPERATOR operator_type param_name_list {
-    $<opValue>$ = new kite::semantics::syntax_tree();
+    $<opValue>$ = new kite::semantics::syntax_tree(@$);
     $<opValue>$->op = kite::semantics::OPERATOR;
     $<opValue>$->children.push_back(*$<stringValue>2);
     
@@ -453,7 +453,7 @@ data_manipulation_statement:
     ;
     
 assignment_statement:    deref_statement {
-    $<opValue>$ = new kite::semantics::syntax_tree();
+    $<opValue>$ = new kite::semantics::syntax_tree(@$);
     $<opValue>$->op = kite::semantics::ASSIGN;
     $<opValue>$->children.push_back(*$<opValue>1);
 } '=' data_manipulation_statement {
@@ -463,7 +463,7 @@ assignment_statement:    deref_statement {
     ;
     
 or_statement:        xor_statement {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::OR;
         $<opValue>$->children.push_back(*$<opValue>1);
     } OR or_statement {
@@ -473,7 +473,7 @@ or_statement:        xor_statement {
     ;
 
 xor_statement:    xor_statement XOR and_statement {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::XOR;
         $<opValue>$->children.push_back(*$<opValue>1);
         $<opValue>$->children.push_back(*$<opValue>3);
@@ -482,7 +482,7 @@ xor_statement:    xor_statement XOR and_statement {
     ;
     
 and_statement:    bitwise_statement {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::AND;
         $<opValue>$->children.push_back(*$<opValue>1);
     } AND and_statement {
@@ -492,13 +492,13 @@ and_statement:    bitwise_statement {
     ;
 
 bitwise_statement:    bitwise_statement LEFT_SHIFT equality_statement {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::LEFT_SHIFT;
         $<opValue>$->children.push_back(*$<opValue>1);
         $<opValue>$->children.push_back(*$<opValue>3);
     }
     | bitwise_statement RIGHT_SHIFT equality_statement {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::RIGHT_SHIFT;
         $<opValue>$->children.push_back(*$<opValue>1);
         $<opValue>$->children.push_back(*$<opValue>3);
@@ -507,25 +507,25 @@ bitwise_statement:    bitwise_statement LEFT_SHIFT equality_statement {
     ;
     
 equality_statement:    equality_statement EQUALS less_greater_statement {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::EQUALS;
         $<opValue>$->children.push_back(*$<opValue>1);
         $<opValue>$->children.push_back(*$<opValue>3);
     }
     | equality_statement NOT_EQUALS less_greater_statement {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::NOT_EQUALS;
         $<opValue>$->children.push_back(*$<opValue>1);
         $<opValue>$->children.push_back(*$<opValue>3);
     }
     | equality_statement IS less_greater_statement {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::IS_CLASS;
         $<opValue>$->children.push_back(*$<opValue>1);
         $<opValue>$->children.push_back(*$<opValue>3);
     }
     | equality_statement ISOF less_greater_statement {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::ISOF_CLASS;
         $<opValue>$->children.push_back(*$<opValue>1);
         $<opValue>$->children.push_back(*$<opValue>3);
@@ -534,25 +534,25 @@ equality_statement:    equality_statement EQUALS less_greater_statement {
     ;
     
 less_greater_statement:    less_greater_statement '<' add_sub_statement {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::LESS_THAN;
         $<opValue>$->children.push_back(*$<opValue>1);
         $<opValue>$->children.push_back(*$<opValue>3);
     }
     | less_greater_statement '>' add_sub_statement {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::GREATER_THAN;
         $<opValue>$->children.push_back(*$<opValue>1);
         $<opValue>$->children.push_back(*$<opValue>3);
     }
     | less_greater_statement LESS_OR_EQUALS add_sub_statement {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::LESS_OR_EQUALS;
         $<opValue>$->children.push_back(*$<opValue>1);
         $<opValue>$->children.push_back(*$<opValue>3);
     }
     | less_greater_statement GREATER_OR_EQUALS add_sub_statement {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::GREATER_OR_EQUALS;
         $<opValue>$->children.push_back(*$<opValue>1);
         $<opValue>$->children.push_back(*$<opValue>3);
@@ -561,13 +561,13 @@ less_greater_statement:    less_greater_statement '<' add_sub_statement {
     ;
     
 add_sub_statement:    add_sub_statement '+' multdiv_statement {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::ADD;
         $<opValue>$->children.push_back(*$<opValue>1);
         $<opValue>$->children.push_back(*$<opValue>3);
     }
     | add_sub_statement '-' multdiv_statement {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::SUBTRACT;
         $<opValue>$->children.push_back(*$<opValue>1);
         $<opValue>$->children.push_back(*$<opValue>3);
@@ -576,19 +576,19 @@ add_sub_statement:    add_sub_statement '+' multdiv_statement {
     ;
     
 multdiv_statement:    multdiv_statement '*' unary_statement {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::MULTIPLY;
         $<opValue>$->children.push_back(*$<opValue>1);
         $<opValue>$->children.push_back(*$<opValue>3);
     }
     | multdiv_statement '/' unary_statement {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::DIVIDE;
         $<opValue>$->children.push_back(*$<opValue>1);
         $<opValue>$->children.push_back(*$<opValue>3);
     }
     | multdiv_statement '%' unary_statement {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::MODULO;
         $<opValue>$->children.push_back(*$<opValue>1);
         $<opValue>$->children.push_back(*$<opValue>3);
@@ -597,17 +597,17 @@ multdiv_statement:    multdiv_statement '*' unary_statement {
     ;
     
 unary_statement: '+' unary_statement {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::UNARY_PLUS;
         $<opValue>$->children.push_back(*$<opValue>2);
     }
     | '-' unary_statement {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::UNARY_MINUS;
         $<opValue>$->children.push_back(*$<opValue>2);
     }
     | NOT unary_statement {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::NOT;
         $<opValue>$->children.push_back(*$<opValue>2);
     }
@@ -615,23 +615,23 @@ unary_statement: '+' unary_statement {
     ;
     
 map_reduce_statement:    deref_statement MAP deref_statement {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::MAP;
         $<opValue>$->children.push_back(*$<opValue>1);
         $<opValue>$->children.push_back(*$<opValue>3);
     }
     | deref_statement REDUCE deref_statement {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::REDUCE;
         $<opValue>$->children.push_back(*$<opValue>1);
         $<opValue>$->children.push_back(*$<opValue>3);
     }
     | SYMBOL_NAME param_list { 
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::DEREF_FILTER;
         $<opValue>$->children.push_back(std::string("this"));
         
-        kite::semantics::syntax_tree deref_method;
+        kite::semantics::syntax_tree deref_method(@$);
         deref_method.op = kite::semantics::DEREF_METHOD;
         deref_method.children.push_back(*$<stringValue>1);
         std::deque<kite::semantics::syntax_tree_node> &param_names = *$<listValue>2;
@@ -647,11 +647,11 @@ map_reduce_statement:    deref_statement MAP deref_statement {
     ;
     
 deref_statement:    deref_statement '|' SYMBOL_NAME optional_param_list {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::DEREF_FILTER;
         $<opValue>$->children.push_back(*$<opValue>1);
         
-        kite::semantics::syntax_tree deref_method;
+        kite::semantics::syntax_tree deref_method(@$);
         deref_method.op = kite::semantics::DEREF_METHOD;
         deref_method.children.push_back(*$<stringValue>3);
         std::deque<kite::semantics::syntax_tree_node> &param_names = *$<listValue>4;
@@ -664,27 +664,27 @@ deref_statement:    deref_statement '|' SYMBOL_NAME optional_param_list {
         $<opValue>$->children.push_back(deref_method);
     }
     | deref_statement '[' data_manipulation_statement ']'    {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::DEREF_FILTER;
         $<opValue>$->children.push_back(*$<opValue>1);
         
-        kite::semantics::syntax_tree deref_method;
+        kite::semantics::syntax_tree deref_method(@$);
         deref_method.op = kite::semantics::DEREF_ARRAY;
         deref_method.children.push_back(*$<opValue>3);
         $<opValue>$->children.push_back(deref_method);
     }
     | deref_statement '.' SYMBOL_NAME {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::DEREF_FILTER;
         $<opValue>$->children.push_back(*$<opValue>1);
         
-        kite::semantics::syntax_tree deref_method;
+        kite::semantics::syntax_tree deref_method(@$);
         deref_method.op = kite::semantics::DEREF_PROPERTY;
         deref_method.children.push_back(*$<stringValue>3);
         $<opValue>$->children.push_back(deref_method);
     }
     | SYMBOL_NAME {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::DEREF_FILTER;
         $<opValue>$->children.push_back(*$<stringValue>1);
     }
@@ -720,16 +720,16 @@ params_list: data_manipulation_statement    {
     ;
     
 var_name:    SYMBOL_NAME {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::DEREF_FILTER;
         $<opValue>$->children.push_back(*$<stringValue>1);
     }
     | var_name '.' SYMBOL_NAME {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::DEREF_FILTER;
         $<opValue>$->children.push_back(*$<opValue>1);
         
-        kite::semantics::syntax_tree deref_method;
+        kite::semantics::syntax_tree deref_method(@$);
         deref_method.op = kite::semantics::DEREF_PROPERTY;
         deref_method.children.push_back(*$<opValue>3);
         $<opValue>$->children.push_back(deref_method);
@@ -738,27 +738,27 @@ var_name:    SYMBOL_NAME {
     
 constant_statement:    
       STRING_VALUE { 
-          $<opValue>$ = new kite::semantics::syntax_tree();
+          $<opValue>$ = new kite::semantics::syntax_tree(@$);
           $<opValue>$->op = kite::semantics::STRING_VAL;
           $<opValue>$->children.push_back(*$<stringValue>1); 
       }
     | INT_VALUE {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::INTEGER_VAL;
         $<opValue>$->children.push_back((int)$<intValue>1);
     }
     | FLOAT_VALUE {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::FLOAT_VAL;
         $<opValue>$->children.push_back($<doubleValue>1);
     }
     | BOOL_VALUE {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::BOOL_VAL;
         $<opValue>$->children.push_back((bool)$<intValue>1);
     }
     | NULL_VALUE {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::NULL_VAL;
         $<opValue>$->children.push_back((void*)NULL);
     }
@@ -783,7 +783,7 @@ constant_statement:
     ;
 
 construct_object_statement:    MAKE var_name param_list    {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::MAKE;
         $<opValue>$->children.push_back(*$<opValue>2);
         std::deque<kite::semantics::syntax_tree_node> &param_names = *$<listValue>3;
@@ -797,14 +797,14 @@ construct_object_statement:    MAKE var_name param_list    {
     ;
     
 list_value: '[' ']' {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::LIST_VAL;
     }
     | '[' list_elements ']' { $<opValue>$ = $<opValue>2; }
     ;
     
 list_elements: list_element    {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::LIST_VAL;
         $<opValue>$->children.push_back(*$<opValue>1);
     }
@@ -818,7 +818,7 @@ list_element:    or_statement { $<opValue>$ = $<opValue>1; }
     ;
     
 decide_statement:    DECIDE {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::DECIDE;
     } '[' decide_contents ']' {
         std::deque<kite::semantics::syntax_tree_node> &param_names = *$<listValue>4;
@@ -864,7 +864,7 @@ decide_condition:    constant_statement {
     ;
     
 eval_statement:    EVAL or_statement {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::EVAL;
         $<opValue>$->children.push_back(*$<opValue>2);
     }
@@ -877,13 +877,13 @@ loop_statement:    loop_type '[' input ']'    {
     ;
 
 loop_type:    WHILE {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::WHILE;
     } constant_statement    {
         $<opValue>$->children.push_back(*$<opValue>3);
     }
     | UNTIL {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::UNTIL;
     } constant_statement    {
         $<opValue>$->children.push_back(*$<opValue>3);
@@ -891,7 +891,7 @@ loop_type:    WHILE {
     ;
 
 run_catch_statement: RUN {
-        $<opValue>$ = new kite::semantics::syntax_tree();
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::RUN_CATCH;
     } '[' input ']' {
         $<opValue>$->children.push_back(*$<opValue>4);

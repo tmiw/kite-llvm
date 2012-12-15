@@ -57,7 +57,7 @@ namespace kite
             
             template<typename PositionT>
             syntax_tree_position(PositionT &pos)
-                : line(pos.get_position().line), column(pos.get_position().column), file(pos.get_position().file)
+                : line(pos.begin.line), column(pos.begin.column), file(*pos.begin.filename)
             {
                 // empty
             }
@@ -75,6 +75,13 @@ namespace kite
             std::deque<syntax_tree_node> children;
             
             syntax_tree_position position;
+            
+            syntax_tree() { }
+            
+            template<typename PositionT>
+            syntax_tree(PositionT &pos)
+                : position(pos)
+                { }
         };
     }
 }

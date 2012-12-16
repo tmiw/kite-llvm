@@ -43,6 +43,10 @@
             class syntax_tree;
         }
     }
+    
+    // Pre-define helper functions.
+    template<typename T>
+    kite::semantics::syntax_tree *generate_range_object(T location, int from, int to, int step = 1);
 }
 
 // The parsing context.
@@ -782,42 +786,11 @@ constant_statement:
     }
     | INT_VALUE ':' INT_VALUE
     {
-        $<opValue>$ = new kite::semantics::syntax_tree(@$);
-        $<opValue>$->op = kite::semantics::MAKE;
-        
-        kite::semantics::syntax_tree deref_filter(@$);
-        deref_filter.op = kite::semantics::DEREF_FILTER;
-        
-        kite::semantics::syntax_tree variable(@$);
-        variable.op = kite::semantics::VARIABLE;
-        variable.children.push_back(std::string("System"));
-        deref_filter.children.push_back(variable);
-        
-        kite::semantics::syntax_tree deref_property_1(@$);
-        deref_property_1.op = kite::semantics::DEREF_PROPERTY;
-        deref_property_1.children.push_back(std::string("math"));
-        deref_filter.children.push_back(deref_property_1);
-        
-        kite::semantics::syntax_tree deref_property_2(@$);
-        deref_property_2.op = kite::semantics::DEREF_PROPERTY;
-        deref_property_2.children.push_back(std::string("range"));
-        deref_filter.children.push_back(deref_property_2);
-        
-        $<opValue>$->children.push_back(deref_filter);
-        
-        kite::semantics::syntax_tree from_range(@$);
-        from_range.op = kite::semantics::CONST;
-        from_range.children.push_back((int)$<intValue>1);
-        $<opValue>$->children.push_back(from_range);
-        
-        kite::semantics::syntax_tree to_range(@$);
-        to_range.op = kite::semantics::CONST;
-        to_range.children.push_back((int)$<intValue>3);
-        $<opValue>$->children.push_back(to_range);
+        $<opValue>$ = generate_range_object(@$, $<intValue>1, $<intValue>3);
     }
     | INT_VALUE ':' INT_VALUE ':' INT_VALUE
     {
-        /* TODO: range */
+        $<opValue>$ = generate_range_object(@$, $<intValue>1, $<intValue>3, $<intValue>5);
     }
     | REGEX_VALUE {
         /* TODO: regex */
@@ -943,4 +916,48 @@ yy::kite_parser::error (const yy::kite_parser::location_type& l,
                         const std::string& m)
 {
     driver->error (l, m);
+}
+
+template<typename T>
+kite::semantics::syntax_tree *generate_range_object(T location, int from, int to, int step = 1)
+{
+    kite::semantics::syntax_tree *ret = new kite::semantics::syntax_tree(location);
+    ret->op = kite::semantics::MAKE;
+    
+    kite::semantics::syntax_tree deref_filter(location);
+    deref_filter.op = kite::semantics::DEREF_FILTER;
+    
+    kite::semantics::syntax_tree variable(location);
+    variable.op = kite::semantics::VARIABLE;
+    variable.children.push_back(std::string("System"));
+    deref_filter.children.push_back(variable);
+    
+    kite::semantics::syntax_tree deref_property_1(location);
+    deref_property_1.op = kite::semantics::DEREF_PROPERTY;
+    deref_property_1.children.push_back(std::string("math"));
+    deref_filter.children.push_back(deref_property_1);
+    
+    kite::semantics::syntax_tree deref_property_2(location);
+    deref_property_2.op = kite::semantics::DEREF_PROPERTY;
+    deref_property_2.children.push_back(std::string("range"));
+    deref_filter.children.push_back(deref_property_2);
+    
+    ret->children.push_back(deref_filter);
+    
+    kite::semantics::syntax_tree from_range(location);
+    from_range.op = kite::semantics::CONST;
+    from_range.children.push_back(from);
+    ret->children.push_back(from_range);
+    
+    kite::semantics::syntax_tree to_range(location);
+    to_range.op = kite::semantics::CONST;
+    to_range.children.push_back(to);
+    ret->children.push_back(to_range);
+    
+    kite::semantics::syntax_tree step_range(location);
+    step_range.op = kite::semantics::CONST;
+    step_range.children.push_back(step);
+    ret->children.push_back(step_range);
+    
+    return ret;
 }

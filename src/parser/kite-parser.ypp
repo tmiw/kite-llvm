@@ -207,7 +207,8 @@ continue_statement: CONTINUE
 
 return_statement: RETURN
     {
-        /* TODO */
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
+        $<opValue>$->op = kite::semantics::RETURN_VAL;
     }
     ;
         
@@ -781,7 +782,38 @@ constant_statement:
     }
     | INT_VALUE ':' INT_VALUE
     {
-        /* TODO: range */
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
+        $<opValue>$->op = kite::semantics::MAKE;
+        
+        kite::semantics::syntax_tree deref_filter(@$);
+        deref_filter.op = kite::semantics::DEREF_FILTER;
+        
+        kite::semantics::syntax_tree variable(@$);
+        variable.op = kite::semantics::VARIABLE;
+        variable.children.push_back(std::string("System"));
+        deref_filter.children.push_back(variable);
+        
+        kite::semantics::syntax_tree deref_property_1(@$);
+        deref_property_1.op = kite::semantics::DEREF_PROPERTY;
+        deref_property_1.children.push_back(std::string("math"));
+        deref_filter.children.push_back(deref_property_1);
+        
+        kite::semantics::syntax_tree deref_property_2(@$);
+        deref_property_2.op = kite::semantics::DEREF_PROPERTY;
+        deref_property_2.children.push_back(std::string("range"));
+        deref_filter.children.push_back(deref_property_2);
+        
+        $<opValue>$->children.push_back(deref_filter);
+        
+        kite::semantics::syntax_tree from_range(@$);
+        from_range.op = kite::semantics::CONST;
+        from_range.children.push_back((int)$<intValue>1);
+        $<opValue>$->children.push_back(from_range);
+        
+        kite::semantics::syntax_tree to_range(@$);
+        to_range.op = kite::semantics::CONST;
+        to_range.children.push_back((int)$<intValue>3);
+        $<opValue>$->children.push_back(to_range);
     }
     | INT_VALUE ':' INT_VALUE ':' INT_VALUE
     {

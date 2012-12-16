@@ -47,6 +47,8 @@
     // Pre-define helper functions.
     template<typename T>
     kite::semantics::syntax_tree *generate_range_object(T location, int from, int to, int step = 1);
+    template<typename T>
+    kite::semantics::syntax_tree *generate_regex_object(T location, std::string regex, bool icase = false);
 }
 
 // The parsing context.
@@ -793,10 +795,10 @@ constant_statement:
         $<opValue>$ = generate_range_object(@$, $<intValue>1, $<intValue>3, $<intValue>5);
     }
     | REGEX_VALUE {
-        /* TODO: regex */
+        $<opValue>$ = generate_regex_object(@$, *$<stringValue>1);
     }
     | REGEX_VALUE_CI {
-        /* TODO: regex */
+        $<opValue>$ = generate_regex_object(@$, *$<stringValue>1, true);
     }
     | list_value { $<opValue>$ = $<opValue>1; }
     | construct_object_statement { $<opValue>$ = $<opValue>1; }
@@ -959,5 +961,39 @@ kite::semantics::syntax_tree *generate_range_object(T location, int from, int to
     step_range.children.push_back(step);
     ret->children.push_back(step_range);
     
+    return ret;
+}
+
+template<typename T>
+kite::semantics::syntax_tree *generate_regex_object(T location, std::string regex, bool icase)
+{
+    kite::semantics::syntax_tree *ret = new kite::semantics::syntax_tree(location);
+    ret->op = kite::semantics::MAKE;
+    
+    kite::semantics::syntax_tree deref_filter(location);
+    deref_filter.op = kite::semantics::DEREF_FILTER;
+    
+    kite::semantics::syntax_tree variable(location);
+    variable.op = kite::semantics::VARIABLE;
+    variable.children.push_back(std::string("System"));
+    deref_filter.children.push_back(variable);
+    
+    kite::semantics::syntax_tree deref_property_1(location);
+    deref_property_1.op = kite::semantics::DEREF_PROPERTY;
+    deref_property_1.children.push_back(std::string("regex"));
+    deref_filter.children.push_back(deref_property_1);
+
+    ret->children.push_back(deref_filter);
+    
+    kite::semantics::syntax_tree from_range(location);
+    from_range.op = kite::semantics::CONST;
+    from_range.children.push_back(regex);
+    ret->children.push_back(from_range);
+    
+    kite::semantics::syntax_tree to_range(location);
+    to_range.op = kite::semantics::CONST;
+    to_range.children.push_back(icase);
+    ret->children.push_back(to_range);
+        
     return ret;
 }

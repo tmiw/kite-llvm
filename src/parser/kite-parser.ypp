@@ -34,7 +34,9 @@
 
 %code requires {
     #include <string>
+    #include <sstream>
     #include <semantics/syntax_tree.h>
+    #include "config.h"
     #include "stdlib/System/object.h"
     class kite_driver;
     
@@ -151,7 +153,9 @@ result_grabber: pre_input { driver->result = $<opValue>1; }
 
 pre_input: 
       DOCSTRING { /* TODO */ } input { $<opValue>$ = $<opValue>3; }
-    | VERSION_KEYWORD STRING_VALUE ';' { /* TODO */ } input { $<opValue>$ = $<opValue>5; }
+    | VERSION_KEYWORD STRING_VALUE ';' { 
+        driver->verify_version_less_than(@$, *$<stringValue>2, std::string(PACKAGE_VERSION));
+      } input { $<opValue>$ = $<opValue>5; }
     | input { $<opValue>$ = $<opValue>1; }
     ;
 
@@ -245,7 +249,6 @@ method_declaration: METHOD SYMBOL_NAME optional_param_name_list optional_docstri
     ;
 
 anon_method_declaration: METHOD optional_param_name_list '[' input ']' {
-        /* TODO: docstring */
         $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::METHOD;
         $<opValue>$->children.push_back(std::string("__AnonMethod"));
@@ -918,6 +921,37 @@ yy::kite_parser::error (const yy::kite_parser::location_type& l,
                         const std::string& m)
 {
     driver->error (l, m);
+}
+
+void kite_driver::verify_version_less_than(
+    const yy::kite_parser::location_type& l,
+    std::string version1, 
+    std::string version2)
+{
+    // Could probably be more efficient.
+    std::stringstream v1(version1);
+    std::stringstream v2(version2);
+    
+    while (!v1.eof() && !v2.eof())
+    {
+        int component1;
+        int component2;
+        
+        v1 >> component1;
+        v2 >> component2;
+        
+        if (component1 > component2)
+        {
+            // Invalid version.
+            std::stringstream output;
+            output << "Version " << version1 << " code is not supported by this version of Kite.";
+            error(l, output.str());
+        }
+        
+        char tmp;
+        v1 >> tmp;
+        v2 >> tmp;
+    }
 }
 
 template<typename T>

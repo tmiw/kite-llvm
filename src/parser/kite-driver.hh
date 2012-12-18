@@ -58,6 +58,12 @@ public:
     // Error handling.
     void error(const yy::location &l, const std::string &m);
     void error(const std::string &m);
+    
+    // Version checking.
+    void verify_version_less_than(
+        const yy::kite_parser::location_type& l,
+        std::string version1,
+        std::string version2);
 };
 
 BOOST_FUSION_ADAPT_STRUCT(

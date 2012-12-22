@@ -39,7 +39,7 @@ namespace kite
         {
             struct list;
             
-            struct method : System::object
+            struct method : System::dynamic_object
             {
                 typedef std::map<std::string, std::string> method_arg_doc_map;
                 
@@ -52,9 +52,9 @@ namespace kite
                 method_arg_doc_map arg_map;
                 
                 method(void *ptr) :
-                    System::object(semantics::METHOD_TY), method_ptr(ptr), this_ptr(NULL) 
+                    System::dynamic_object(), method_ptr(ptr), this_ptr(NULL) 
                 {
-                     // empty
+                    type = semantics::METHOD_TY;
                 }
                 
                 static object *get_param_names(method *method);

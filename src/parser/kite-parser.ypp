@@ -152,7 +152,10 @@ result_grabber: pre_input { driver->result = $<opValue>1; }
     ;
 
 pre_input: 
-      DOCSTRING { /* TODO */ } input { $<opValue>$ = $<opValue>3; }
+      DOCSTRING input {
+          $<opValue>$ = $<opValue>2; 
+          $<opValue>$->doc_string = *$<stringValue>1;
+      }
     | VERSION_KEYWORD STRING_VALUE ';' { 
         driver->verify_version_less_than(@$, *$<stringValue>2, std::string(PACKAGE_VERSION));
       } input { $<opValue>$ = $<opValue>5; }
@@ -232,11 +235,11 @@ optional_docstring:
     ;
         
 method_declaration: METHOD SYMBOL_NAME optional_param_name_list optional_docstring '[' input ']' {
-        /* TODO: docstring */
         $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::METHOD;
         $<opValue>$->children.push_back(*$<stringValue>2);
-    
+        $<opValue>$->doc_string = *$<stringValue>4;
+        
         std::deque<kite::semantics::syntax_tree_node> &param_names = *$<listValue>3;
         for (std::deque<kite::semantics::syntax_tree_node>::iterator i = param_names.begin();
              i != param_names.end();
@@ -312,8 +315,8 @@ class_definition:    CLASS SYMBOL_NAME optional_from optional_docstring '[' clas
         $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::CLASS;
         $<opValue>$->children.push_back(*$<stringValue>2);
-    
-        /* TODO: docstring */
+        $<opValue>$->doc_string = *$<stringValue>4;
+        
         if ($<opValue>3 != NULL)
         {
             $<opValue>$->children.push_back(*$<opValue>3);
@@ -396,7 +399,7 @@ constructor_definition:    CONSTRUCT optional_param_name_list optional_docstring
             $<opValue>$->children.push_back(*i);
         }
         
-        /* TODO: docstring */
+        $<opValue>$->doc_string = *$<stringValue>3;
         $<opValue>$->children.push_back(*$<opValue>5);
     }
     ;
@@ -405,7 +408,7 @@ destructor_definition: DESTRUCT optional_docstring '[' input ']' {
         $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::DESTRUCTOR;
         
-        /* TODO: docstring */
+        $<opValue>$->doc_string = *$<stringValue>2;
         $<opValue>$->children.push_back(*$<opValue>4);
     }
     ;
@@ -434,7 +437,7 @@ operator_definition:    OPERATOR operator_type param_name_list optional_docstrin
         $<opValue>$->children.push_back(*i);
     }
     
-    /* TODO: docstring */
+    $<opValue>$->doc_string = *$<stringValue>4;
     $<opValue>$->children.push_back(*$<opValue>6);
 }
     ;

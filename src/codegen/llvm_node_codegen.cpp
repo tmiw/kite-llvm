@@ -1190,6 +1190,7 @@ namespace kite
             generate_debug_data(builder.CreateStore(method_obj, prop_entry), tree.position);
             
             state.current_symbol_stack()[functionName] = prop_entry;
+            generate_llvm_dynamic_object_set_doc_string(method_obj, tree.doc_string, tree);
             return method_obj;
         }
 
@@ -1265,6 +1266,7 @@ namespace kite
                 tree.position);
             
             state.current_symbol_stack()[functionName] = prop_entry;
+            generate_llvm_dynamic_object_set_doc_string(method_obj, tree.doc_string, tree);
             return method_obj;
         }
         
@@ -1393,6 +1395,7 @@ namespace kite
                 return method_obj;
             }
             
+            generate_llvm_dynamic_object_set_doc_string(method_obj, tree.doc_string, tree);
             return method_obj;
         }
 
@@ -1778,6 +1781,7 @@ namespace kite
             
             state.current_symbol_stack()[className] = prop_entry;
             
+            generate_llvm_dynamic_object_set_doc_string(obj, tree.doc_string, tree);
             return obj;
         }
 
@@ -1900,6 +1904,28 @@ namespace kite
             std::string fullName = state.full_class_name();
             generate_debug_data(
                 builder.CreateCall2(funPtr, obj, builder.CreateGlobalStringPtr(fullName.c_str())),
+                tree.position);
+        }
+        
+        void llvm_node_codegen::generate_llvm_dynamic_object_set_doc_string(Value *obj, std::string doc, const semantics::syntax_tree &tree) const
+        {
+            Module *module = state.current_module();
+            IRBuilder<> &builder = state.module_builder();
+            
+            std::vector<Type*> parameterTypes;
+            parameterTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
+            parameterTypes.push_back(kite_type_to_llvm_type(semantics::STRING));
+            
+            FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), ArrayRef<Type*>(parameterTypes), false);
+            Function *funPtr = Function::Create(ft, Function::ExternalLinkage, "kite_set_docstring", module);
+            if (funPtr->getName() != "kite_set_docstring")
+            {
+                funPtr->eraseFromParent();
+                funPtr = module->getFunction("kite_set_docstring");
+            }
+            
+            generate_debug_data(
+                builder.CreateCall2(funPtr, obj, builder.CreateGlobalStringPtr(doc.c_str())),
                 tree.position);
         }
         

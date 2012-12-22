@@ -137,7 +137,7 @@ false                   yylval->intValue = 0; return token::BOOL_VALUE;
 
 <docstr>\n              yylval->stringValue->append(yytext); yylloc->lines(1); yylloc->step();
 
-<docstr>"]/"            BEGIN(INITIAL); yylval->stringValue->append(yytext); return token::DOCSTRING;
+<docstr>"]/"            BEGIN(INITIAL); return token::DOCSTRING;
 
 <str>\"                 BEGIN(INITIAL); return token::STRING_VALUE;
 

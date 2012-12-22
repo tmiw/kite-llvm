@@ -75,6 +75,7 @@ namespace kite
             std::deque<syntax_tree_node> children;
             
             syntax_tree_position position;
+            std::string doc_string;
             
             syntax_tree() { }
             
@@ -84,7 +85,7 @@ namespace kite
                 { }
             
             syntax_tree(const syntax_tree &other)
-                : op(other.op), children(other.children), position(other.position)
+                : op(other.op), children(other.children), position(other.position), doc_string(other.doc_string)
                 { }
         };
     }

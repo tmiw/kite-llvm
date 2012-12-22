@@ -76,6 +76,7 @@ extern "C"
 {
     void *kite_find_funccall(void *obj, const char *name, int numargs);
     bool kite_object_isof(void *lhs, void *rhs, bool type);
+    void *kite_set_docstring(void *obj, const char *str);
     void *obj__o(void *obj);
     void *get_property_string__oo(void *obj, void *prop);
     void *doc__o(void *obj);

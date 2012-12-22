@@ -308,6 +308,12 @@ void *get_property_string__oo(void *obj, void *prop)
     return new System::string(val.c_str());
 }
 
+void *kite_set_docstring(void *obj, const char *str)
+{
+    ((System::object*)obj)->doc_string = str;
+    return obj;
+}
+
 void *doc__o(void *obj)
 {
     System::object *object = (System::object*)obj;

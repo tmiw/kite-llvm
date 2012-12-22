@@ -52,7 +52,6 @@ namespace kite
 
                 void print();
                 std::string as_string();
-                std::string doc_string;
                 
                 // For Boehm GC. Not using gc_cleanup to avoid the memory
                 // penalty that virtual methods cause.

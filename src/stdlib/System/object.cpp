@@ -310,12 +310,12 @@ void *get_property_string__oo(void *obj, void *prop)
 
 void *kite_set_docstring(void *obj, const char *str)
 {
-    ((System::object*)obj)->doc_string = str;
+    ((System::dynamic_object*)obj)->doc_string = str;
     return obj;
 }
 
 void *doc__o(void *obj)
 {
-    System::object *object = (System::object*)obj;
+    System::dynamic_object *object = (System::dynamic_object*)obj;
     return new System::string(object->doc_string.c_str());
 }

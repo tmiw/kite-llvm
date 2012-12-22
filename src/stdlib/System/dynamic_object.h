@@ -61,6 +61,7 @@ namespace kite
                 void *obj_alloc_method;
                 property_map properties;
                 property_doc_map property_docs;
+                std::string doc_string;
                 
                 dynamic_object() 
                 : object(semantics::OBJECT), 

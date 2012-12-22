@@ -236,6 +236,14 @@ namespace kite
         {
             Value *ret = NULL;
             
+            if (tree.doc_string.size() > 0)
+            {
+                // Doc string at the beginning of the file. Set doc for "this".
+                IRBuilder<> &builder = state.module_builder();
+                Value *obj = builder.CreateLoad(state.current_symbol_stack()["this"]);
+                generate_llvm_dynamic_object_set_doc_string(obj, tree.doc_string, tree);
+            }
+            
             BOOST_FOREACH(semantics::syntax_tree_node const &node, tree.children)
             {
                 ret = boost::apply_visitor(llvm_node_codegen(state), node);

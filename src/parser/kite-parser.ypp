@@ -305,8 +305,8 @@ param_elements: SYMBOL_NAME optional_docstring   {
         $<listValue>$->push_back(*$<stringValue>2);
     }
     | SYMBOL_NAME optional_docstring ',' param_elements {
-        $<listValue>4->push_front(*$<stringValue>1);
         $<listValue>4->push_front(*$<stringValue>2);
+        $<listValue>4->push_front(*$<stringValue>1);
         $<listValue>$ = $<listValue>4;
     }
     ;

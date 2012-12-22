@@ -1176,7 +1176,7 @@ namespace kite
         {
             // TODO: refactor
             IRBuilder<> &builder = state.module_builder();
-            int numargs = tree.children.size();
+            int numargs = 1;
             std::vector<std::string> argnames;
             std::vector<std::string> argdocs;
             std::string functionName = semantics::Constants::Get().operator_map[tree.op];
@@ -1184,8 +1184,9 @@ namespace kite
             {
                 argnames.push_back(boost::get<std::string>(tree.children[i]));
                 argdocs.push_back(boost::get<std::string>(tree.children[i + 1]));
+                numargs++;
             }
-        
+
             semantics::syntax_tree &body = const_cast<semantics::syntax_tree&>(boost::get<semantics::syntax_tree>(tree.children[tree.children.size() - 1]));
             Value *method = generate_llvm_method(functionName, argnames, body, tree);
             
@@ -1361,7 +1362,7 @@ namespace kite
         Value *llvm_node_codegen::codegen_method_op(semantics::syntax_tree const &tree) const
         {
             IRBuilder<> &builder = state.module_builder();
-            int numargs = tree.children.size() - 2;
+            int numargs = 0;
             std::string functionName = boost::get<std::string>(tree.children[0]);
             std::vector<std::string> argnames;
             std::vector<std::string> argdocs;
@@ -1371,11 +1372,11 @@ namespace kite
                 functionName = semantics::Constants::Get().operator_name_map[functionName];
             }
             
-            if (numargs < 0) numargs = 0;
             for (int i = 1; i < tree.children.size() - 1; i += 2)
             {
                 argnames.push_back(boost::get<std::string>(tree.children[i]));
                 argdocs.push_back(boost::get<std::string>(tree.children[i + 1]));
+                numargs++;
             }
         
             semantics::syntax_tree &body = const_cast<semantics::syntax_tree&>(boost::get<semantics::syntax_tree>(tree.children[tree.children.size() - 1]));

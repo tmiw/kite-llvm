@@ -121,6 +121,7 @@ namespace kite
             Value *generate_llvm_method_alloc(Value *method, const semantics::syntax_tree &tree) const;
             Value *generate_llvm_dynamic_object_get_root(const semantics::syntax_tree &tree) const;
             void generate_llvm_dynamic_object_set_doc_string(Value *obj, std::string doc, const semantics::syntax_tree &tree) const;
+            void generate_llvm_dynamic_object_set_doc_string_arg(Value *obj, std::string name, std::string doc, const semantics::syntax_tree &tree) const;
             
             Type *get_method_type() const;
             Type *get_object_type() const;

@@ -1408,6 +1408,13 @@ namespace kite
             }
             
             generate_llvm_dynamic_object_set_doc_string(method_obj, tree.doc_string, tree);
+            for (int i = 0; i < argdocs.size(); i++)
+            {
+                if (argdocs[i].size() > 0)
+                {
+                    generate_llvm_dynamic_object_set_doc_string_arg(method_obj, argnames[i], argdocs[i], tree);
+                }
+            }
             return method_obj;
         }
 
@@ -1942,6 +1949,33 @@ namespace kite
                     builder.CreateCall2(funPtr, obj, builder.CreateGlobalStringPtr(doc.c_str())),
                     tree.position);
             }
+        }
+        
+        void llvm_node_codegen::generate_llvm_dynamic_object_set_doc_string_arg(Value *obj, std::string name, std::string doc, const semantics::syntax_tree &tree) const
+        {
+            Module *module = state.current_module();
+            IRBuilder<> &builder = state.module_builder();
+        
+            std::vector<Type*> parameterTypes;
+            parameterTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
+            parameterTypes.push_back(kite_type_to_llvm_type(semantics::STRING));
+            parameterTypes.push_back(kite_type_to_llvm_type(semantics::STRING));
+        
+            FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), ArrayRef<Type*>(parameterTypes), false);
+            Function *funPtr = Function::Create(ft, Function::ExternalLinkage, "kite_set_docstring_arg", module);
+            if (funPtr->getName() != "kite_set_docstring_arg")
+            {
+                funPtr->eraseFromParent();
+                funPtr = module->getFunction("kite_set_docstring_arg");
+            }
+        
+            generate_debug_data(
+                builder.CreateCall3(
+                    funPtr,
+                    obj, 
+                    builder.CreateGlobalStringPtr(name.c_str()),
+                    builder.CreateGlobalStringPtr(doc.c_str())),
+                tree.position);
         }
         
         Value *llvm_node_codegen::generate_llvm_method_alloc(Value *method, const semantics::syntax_tree &tree) const

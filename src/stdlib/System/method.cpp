@@ -151,6 +151,13 @@ void *kite_method_verify_semantics(void *method, int args)
     return methodObj->method_ptr;
 }
 
+void *kite_set_docstring_arg(void *obj, const char *name, const char *str)
+{
+    System::method *methodObj = (System::method*)obj;
+    methodObj->arg_map[name] = str;
+    return obj;
+}
+
 void *kite_eval_code(void *code, int args, ...)
 {   
     va_list vl;

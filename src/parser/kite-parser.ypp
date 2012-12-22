@@ -295,7 +295,7 @@ param_name_list:    '(' ')'    {
         $<listValue>$ = new std::deque<kite::semantics::syntax_tree_node>();
     }
     | '(' param_elements ')'    {
-        $<opValue>$ = $<opValue>2;
+        $<listValue>$ = $<listValue>2;
     }
     ;
     
@@ -305,9 +305,9 @@ param_elements: SYMBOL_NAME optional_docstring   {
         $<listValue>$->push_back(*$<stringValue>2);
     }
     | SYMBOL_NAME optional_docstring ',' param_elements {
-        $<listValue>4->push_back(*$<stringValue>1);
-        $<listValue>4->push_back(*$<stringValue>2);
-        $<opValue>$ = $<opValue>4;
+        $<listValue>4->push_front(*$<stringValue>1);
+        $<listValue>4->push_front(*$<stringValue>2);
+        $<listValue>$ = $<listValue>4;
     }
     ;
     

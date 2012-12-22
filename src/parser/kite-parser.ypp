@@ -300,13 +300,13 @@ param_name_list:    '(' ')'    {
     ;
     
 param_elements: SYMBOL_NAME optional_docstring   {
-        /* TODO: docstring */
         $<listValue>$ = new std::deque<kite::semantics::syntax_tree_node>();
         $<listValue>$->push_back(*$<stringValue>1);
+        $<listValue>$->push_back(*$<stringValue>2);
     }
     | SYMBOL_NAME optional_docstring ',' param_elements {
-        /* TODO: docstring */
         $<listValue>4->push_back(*$<stringValue>1);
+        $<listValue>4->push_back(*$<stringValue>2);
         $<opValue>$ = $<opValue>4;
     }
     ;

@@ -43,8 +43,11 @@ namespace kite
     {
         namespace System
         {
-            System::dynamic_object method::class_object;
-            
+            System::dynamic_object method::class_obj;
+            object_method_map method::method_map = map_list_of
+                ("get_param_names__o", function_semantics(semantics::OBJECT, (void*)&method::get_param_names))
+                ("get_param_doc__o", function_semantics(semantics::OBJECT, (void*)&method::get_param_doc));
+                
             object *method::invoke(object *param1, ...)
             {
                 ffi_cif cif;
@@ -104,9 +107,30 @@ namespace kite
                 return (object*)rv;
             }
             
+            object *method::get_param_names(method *method)
+            {
+                list *result = list::Create(0);
+                for (
+                    method_arg_doc_map::iterator i = method->arg_map.begin();
+                    i != method->arg_map.end();
+                    i++)
+                {
+                    result->list_contents.push_back(new string(i->first.c_str()));
+                }
+                return result;
+            }
+            
+            object *method::get_param_doc(method *method, string *name)
+            {
+                return new string(method->arg_map[name->string_val.c_str()].c_str());
+            }
+            
             void method::InitializeClass()
             {
-                class_object.properties["__name"] = new string("System.method");
+                KITE_METHOD_DEFINE(get_param_names, 0, &method::get_param_names);
+                KITE_METHOD_DEFINE(get_param_doc, 1, &method::get_param_doc);
+                
+                class_obj.properties["__name"] = new string("System.method");
             }
         }
     }

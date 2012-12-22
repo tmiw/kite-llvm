@@ -94,7 +94,7 @@ namespace kite
                     system_obj->properties["float"] = &System::fpnum::class_object;
                     system_obj->properties["integer"] = &System::integer::class_object;
                     system_obj->properties["boolean"] = &System::boolean::class_object;
-                    system_obj->properties["method"] = &System::method::class_object;
+                    system_obj->properties["method"] = &System::method::class_obj;
                     system_obj->properties["string"] = &System::string::class_object;
                     System::fpnum::InitializeClass();
                     System::integer::InitializeClass();

@@ -29,6 +29,7 @@
 #define KITE_STDLIB__SYSTEM__METHOD_H
 
 #include "dynamic_object.h"
+#include "string_type.h"
 
 namespace kite
 {
@@ -40,17 +41,24 @@ namespace kite
             
             struct method : System::object
             {
-                static System::dynamic_object class_object;
+                typedef std::map<std::string, std::string> method_arg_doc_map;
+                
+                static System::dynamic_object class_obj;
+                static object_method_map method_map;
                 
                 void *method_ptr;
                 System::object *this_ptr;
                 int num_args;
-
+                method_arg_doc_map arg_map;
+                
                 method(void *ptr) :
                     System::object(semantics::METHOD_TY), method_ptr(ptr), this_ptr(NULL) 
                 {
                      // empty
                 }
+                
+                static object *get_param_names(method *method);
+                static object *get_param_doc(method *method, string *name);
                 
                 object *invoke() { return invoke(NULL); }
                 object *invoke(object *param1, ...);

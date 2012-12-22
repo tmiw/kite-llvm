@@ -53,7 +53,9 @@ namespace kite
                 ("float__o", function_semantics(semantics::FLOAT, (void*)0))
                 ("print__o", function_semantics(semantics::OBJECT, (void*)0))
                 ("str__o", function_semantics(semantics::STRING, (void*)0))
-                ("obj__o", function_semantics(semantics::OBJECT, (void*)&obj__o));
+                ("obj__o", function_semantics(semantics::OBJECT, (void*)&obj__o))
+                ("doc__o", function_semantics(semantics::OBJECT, (void*)&doc__o))
+                ("get_property_string__oo", function_semantics(semantics::OBJECT, (void*)&get_property_string__oo));
 
             void object::finalizer_setup()
             {
@@ -195,6 +197,9 @@ void *kite_find_funccall(void *obj, const char *name, int numargs)
             case kite::semantics::BOOLEAN:
                 method_map = &System::boolean::method_map;
                 break;
+            case kite::semantics::METHOD_TY:
+                method_map = &System::method::method_map;
+                break;
             default:
                 assert(0);
         }
@@ -282,4 +287,29 @@ bool kite_object_isof(void *lhs, void *rhs, bool type)
 void *obj__o(void *obj)
 {
     return obj;
+}
+
+void *get_property_string__oo(void *obj, void *prop)
+{
+    System::dynamic_object *object = (System::dynamic_object*)obj;
+    if (object->type != kite::semantics::OBJECT)
+    {
+        return new System::string("");
+    }
+    
+    System::string *key = (System::string*)prop;
+    std::string val;
+    do
+    {
+        val = object->property_docs[key->string_val.c_str()];
+        object = (System::dynamic_object*)object->parent;
+    } while (object && val.size() == 0);
+    
+    return new System::string(val.c_str());
+}
+
+void *doc__o(void *obj)
+{
+    System::object *object = (System::object*)obj;
+    return new System::string(object->doc_string.c_str());
 }

@@ -52,6 +52,7 @@ namespace kite
 
                 void print();
                 std::string as_string();
+                std::string doc_string;
                 
                 // For Boehm GC. Not using gc_cleanup to avoid the memory
                 // penalty that virtual methods cause.
@@ -76,6 +77,8 @@ extern "C"
     void *kite_find_funccall(void *obj, const char *name, int numargs);
     bool kite_object_isof(void *lhs, void *rhs, bool type);
     void *obj__o(void *obj);
+    void *get_property_string__oo(void *obj, void *prop);
+    void *doc__o(void *obj);
 }
 
 #endif

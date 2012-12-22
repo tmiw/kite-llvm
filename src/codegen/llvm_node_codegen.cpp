@@ -1392,7 +1392,6 @@ namespace kite
                 generate_debug_data(
                     builder.CreateStore(property, this_loc),
                     tree.position);
-                return method_obj;
             }
             
             generate_llvm_dynamic_object_set_doc_string(method_obj, tree.doc_string, tree);

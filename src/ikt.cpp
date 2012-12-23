@@ -81,30 +81,23 @@ int main(int argc, char **argv)
 
         if (code.size() > 0)
         {
-            bool r;
-            language::kite::syntax_tree ast; 
-            r = ast.from_string(code);
+            KITE_EXCEPTION_RUN
+                bool r;
+                language::kite::syntax_tree ast; 
+                r = ast.from_string(code);
 
-            if (!r)
-            {
-                cout << "Parse failed!" << endl;
-            }
-            else
-            {
-                KITE_EXCEPTION_RUN
-                    System::object *retValue = language::kite::kite::ExecuteCode(ast);
-                    cout << "---> ";
-                    if (retValue) retValue->print();
-                    else cout << "null" << endl;
-                KITE_EXCEPTION_CATCH
-                    System::exceptions::exception *exc = 
-                        (System::exceptions::exception *)language::kite::kite::last_exception;
-                    System::dynamic_object *real_exc_class = (System::dynamic_object*)exc->parent;
-                    std::cout << ((System::string*)real_exc_class->properties["__name"])->string_val << ": ";
-                    exc->properties["message"]->print();
-                    exc->properties["trace"]->print();
-                KITE_EXCEPTION_END
-            }
+                System::object *retValue = language::kite::kite::ExecuteCode(ast);
+                cout << "---> ";
+                if (retValue) retValue->print();
+                else cout << "null" << endl;
+            KITE_EXCEPTION_CATCH
+                System::exceptions::exception *exc = 
+                    (System::exceptions::exception *)language::kite::kite::last_exception;
+                System::dynamic_object *real_exc_class = (System::dynamic_object*)exc->parent;
+                std::cout << ((System::string*)real_exc_class->properties["__name"])->string_val << ": ";
+                exc->properties["message"]->print();
+                exc->properties["trace"]->print();
+            KITE_EXCEPTION_END
         }
     }
 

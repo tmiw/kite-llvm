@@ -333,6 +333,13 @@ void *kite_set_docstring(void *obj, const char *str)
     return obj;
 }
 
+void *kite_set_docstring_prop(void *obj, const char *name, const char *str)
+{
+    System::dynamic_object *objPtr = (System::dynamic_object*)obj;
+    objPtr->property_docs[name] = str;
+    return obj;
+}
+
 void *doc__o(void *obj)
 {
     System::dynamic_object *object = (System::dynamic_object*)obj;

@@ -937,6 +937,15 @@ namespace kite
                 rhs = generate_llvm_method_call(rhs, "obj", params, tree);
             }
             generate_debug_data(state.module_builder().CreateStore(rhs, lhs), tree.position);
+            
+            // Set documentation string for property if needed.
+            if (tree.doc_string.size() > 0)
+            {
+                Value *this_obj = generate_debug_data(
+                    state.module_builder().CreateLoad(state.current_symbol_stack()["this"]),
+                    tree.position);
+                generate_llvm_dynamic_object_set_doc_string_prop(this_obj, tree.prop_name, tree.doc_string, tree);
+            }
             return rhs;
         }
         
@@ -1982,6 +1991,33 @@ namespace kite
             {
                 funPtr->eraseFromParent();
                 funPtr = module->getFunction("kite_set_docstring_arg");
+            }
+        
+            generate_debug_data(
+                builder.CreateCall3(
+                    funPtr,
+                    obj, 
+                    builder.CreateGlobalStringPtr(name.c_str()),
+                    builder.CreateGlobalStringPtr(doc.c_str())),
+                tree.position);
+        }
+        
+        void llvm_node_codegen::generate_llvm_dynamic_object_set_doc_string_prop(Value *obj, std::string name, std::string doc, const semantics::syntax_tree &tree) const
+        {
+            Module *module = state.current_module();
+            IRBuilder<> &builder = state.module_builder();
+        
+            std::vector<Type*> parameterTypes;
+            parameterTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
+            parameterTypes.push_back(kite_type_to_llvm_type(semantics::STRING));
+            parameterTypes.push_back(kite_type_to_llvm_type(semantics::STRING));
+        
+            FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), ArrayRef<Type*>(parameterTypes), false);
+            Function *funPtr = Function::Create(ft, Function::ExternalLinkage, "kite_set_docstring_prop", module);
+            if (funPtr->getName() != "kite_set_docstring_prop")
+            {
+                funPtr->eraseFromParent();
+                funPtr = module->getFunction("kite_set_docstring_prop");
             }
         
             generate_debug_data(

@@ -76,6 +76,7 @@ namespace kite
             
             syntax_tree_position position;
             std::string doc_string;
+            std::string prop_name; // for property doc strings.
             
             syntax_tree() { }
             
@@ -85,7 +86,7 @@ namespace kite
                 { }
             
             syntax_tree(const syntax_tree &other)
-                : op(other.op), children(other.children), position(other.position), doc_string(other.doc_string)
+                : op(other.op), children(other.children), position(other.position), doc_string(other.doc_string), prop_name(other.prop_name)
                 { }
         };
     }

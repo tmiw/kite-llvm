@@ -441,6 +441,7 @@ property_definition:    optional_global PROPERTY SYMBOL_NAME optional_docstring 
         const_null.children.push_back((void*)NULL);
         $<opValue>$->children.push_back(const_null);
         $<opValue>$->doc_string = *$<stringValue>4;
+        $<opValue>$->prop_name = *$<stringValue>3;
     }
     | optional_global PROPERTY SYMBOL_NAME optional_docstring '=' data_manipulation_statement {
         /* TODO: global does nothing here. */
@@ -463,6 +464,7 @@ property_definition:    optional_global PROPERTY SYMBOL_NAME optional_docstring 
         
         $<opValue>$->children.push_back(*$<opValue>6);
         $<opValue>$->doc_string = *$<stringValue>4;
+        $<opValue>$->prop_name = *$<stringValue>3;
     }
     ;
 

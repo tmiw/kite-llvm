@@ -1,0 +1,2 @@
+property x;
+x|print;

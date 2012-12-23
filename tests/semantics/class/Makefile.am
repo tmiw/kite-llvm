@@ -20,4 +20,8 @@ EXTRA_DIST = \
     ./operator_keyword.kt \
     ./operator_keyword.kt.out \
     ./from_outside_class.kt \
-    ./from_outside_class.kt.out
+    ./from_outside_class.kt.out \
+    ./property_assignment.kt \
+    ./property_assignment.kt.out \
+    ./property_default.kt \
+    ./property_default.kt.out

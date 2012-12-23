@@ -419,13 +419,51 @@ destructor_definition: DESTRUCT optional_docstring '[' input ']' {
     
 property_definition:    optional_global PROPERTY SYMBOL_NAME optional_docstring   {
         /* TODO: global does nothing here. */
-        /* TODO: docstring */
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
+        $<opValue>$->op = kite::semantics::ASSIGN;
+        
+        kite::semantics::syntax_tree deref_filter(@$);
+        deref_filter.op = kite::semantics::DEREF_FILTER;
+
+        kite::semantics::syntax_tree deref_method(@$);
+        deref_method.op = kite::semantics::VARIABLE;
+        deref_method.children.push_back(std::string("this"));
+        deref_filter.children.push_back(deref_method);        
+        
+        kite::semantics::syntax_tree deref_prop(@$);
+        deref_prop.op = kite::semantics::DEREF_PROPERTY;
+        deref_prop.children.push_back(*$<stringValue>3);
+        deref_filter.children.push_back(deref_prop);
+        $<opValue>$->children.push_back(deref_filter);
+        
+        kite::semantics::syntax_tree const_null(@$);
+        const_null.op = kite::semantics::CONST;
+        const_null.children.push_back((void*)NULL);
+        $<opValue>$->children.push_back(const_null);
+        $<opValue>$->doc_string = *$<stringValue>4;
     }
-    | optional_global PROPERTY SYMBOL_NAME optional_docstring '=' {
-        /* TODO: implementation */
-        } data_manipulation_statement {
-            /* TODO: implementation */
-        }
+    | optional_global PROPERTY SYMBOL_NAME optional_docstring '=' data_manipulation_statement {
+        /* TODO: global does nothing here. */
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
+        $<opValue>$->op = kite::semantics::ASSIGN;
+        
+        kite::semantics::syntax_tree deref_filter(@$);
+        deref_filter.op = kite::semantics::DEREF_FILTER;
+
+        kite::semantics::syntax_tree deref_method(@$);
+        deref_method.op = kite::semantics::VARIABLE;
+        deref_method.children.push_back(std::string("this"));
+        deref_filter.children.push_back(deref_method);        
+        
+        kite::semantics::syntax_tree deref_prop(@$);
+        deref_prop.op = kite::semantics::DEREF_PROPERTY;
+        deref_prop.children.push_back(*$<stringValue>3);
+        deref_filter.children.push_back(deref_prop);
+        $<opValue>$->children.push_back(deref_filter);
+        
+        $<opValue>$->children.push_back(*$<opValue>6);
+        $<opValue>$->doc_string = *$<stringValue>4;
+    }
     ;
 
 operator_definition:    OPERATOR operator_type param_name_list optional_docstring '[' input ']' {

@@ -18,4 +18,6 @@ EXTRA_DIST = \
     ./nested_class.kt \
     ./nested_class.kt.out \
     ./operator_keyword.kt \
-    ./operator_keyword.kt.out
+    ./operator_keyword.kt.out \
+    ./from_outside_class.kt \
+    ./from_outside_class.kt.out

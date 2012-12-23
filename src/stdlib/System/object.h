@@ -78,6 +78,7 @@ extern "C"
     void *kite_set_docstring(void *obj, const char *str);
     void *obj__o(void *obj);
     void *get_property_string__oo(void *obj, void *prop);
+    void *get_property_string__os(void *obj, char *prop);
     void *doc__o(void *obj);
 }
 

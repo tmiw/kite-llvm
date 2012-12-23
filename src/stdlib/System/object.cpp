@@ -55,8 +55,9 @@ namespace kite
                 ("str__o", function_semantics(semantics::STRING, (void*)0))
                 ("obj__o", function_semantics(semantics::OBJECT, (void*)&obj__o))
                 ("doc__o", function_semantics(semantics::OBJECT, (void*)&doc__o))
-                ("get_property_string__oo", function_semantics(semantics::OBJECT, (void*)&get_property_string__oo));
-
+                ("get_property_string__oo", function_semantics(semantics::OBJECT, (void*)&get_property_string__oo))
+                ("get_property_string__os", function_semantics(semantics::OBJECT, (void*)&get_property_string__os));
+                
             void object::finalizer_setup()
             {
                 // Taken from gc_cpp.h. This seems to be to take into account
@@ -302,6 +303,24 @@ void *get_property_string__oo(void *obj, void *prop)
     do
     {
         val = object->property_docs[key->string_val.c_str()];
+        object = (System::dynamic_object*)object->parent;
+    } while (object && val.size() == 0);
+    
+    return new System::string(val.c_str());
+}
+
+void *get_property_string__os(void *obj, char *prop)
+{
+    System::dynamic_object *object = (System::dynamic_object*)obj;
+    if (object->type != kite::semantics::OBJECT)
+    {
+        return new System::string("");
+    }
+    
+    std::string val;
+    do
+    {
+        val = object->property_docs[prop];
         object = (System::dynamic_object*)object->parent;
     } while (object && val.size() == 0);
     

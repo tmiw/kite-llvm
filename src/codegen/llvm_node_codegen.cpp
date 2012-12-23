@@ -197,6 +197,9 @@ namespace kite
                 case semantics::RETURN_VAL:
                     ret = codegen_return_op(tree);
                     break;
+                case semantics::FROM_TOP:
+                    ret = codegen_from_op(tree);
+                    break;
             }
             
             return ret;
@@ -230,6 +233,18 @@ namespace kite
         Value *llvm_node_codegen::operator()(std::string const &val) const
         {
             return state.module_builder().CreateGlobalStringPtr(val.c_str());
+        }
+        
+        Value *llvm_node_codegen::codegen_from_op(semantics::syntax_tree const &tree) const
+        {
+            IRBuilder<> &builder = state.module_builder();
+            Value *this_obj = generate_debug_data(
+                builder.CreateLoad(state.current_symbol_stack()["this"]),
+                tree.position);
+            Value *parent = boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
+            generate_llvm_dynamic_object_set_parent(this_obj, parent, tree);
+            
+            return this_obj;
         }
         
         Value *llvm_node_codegen::codegen_iterate_op(semantics::syntax_tree const &tree) const

@@ -98,6 +98,7 @@ namespace kite
             CONTINUE,
             RETURN_VAL,
             EVAL,
+            FROM_TOP, // "from" keyword used at the top of the file
         };
         
         typedef std::map<semantics::code_operation, std::string> OperatorMethodsMap;

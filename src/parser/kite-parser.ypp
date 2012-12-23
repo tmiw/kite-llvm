@@ -179,7 +179,11 @@ statement: { $<opValue>$ = NULL; }
     | data_manipulation_statement { $<opValue>$ = $<opValue>1; }
     | options_set_statement { $<opValue>$ = $<opValue>1; }
     | loop_statement { $<opValue>$ = $<opValue>1; }
-    /*| from_statement*/ /* TODO: inheritance without explicit class define. */
+    | from_statement {
+        $<opValue>$ = new kite::semantics::syntax_tree(@$);
+        $<opValue>$->op = kite::semantics::FROM_TOP;
+        $<opValue>$->children.push_back(*$<opValue>1);
+    }
     | import_statement { $<opValue>$ = $<opValue>1; }
     | break_statement { $<opValue>$ = $<opValue>1; }
     | continue_statement { $<opValue>$ = $<opValue>1; }

@@ -31,6 +31,7 @@
 #include <fstream>
 #include <parser/parser.h>
 #include <stdlib/System/dynamic_object.h>
+#include <stdlib/System/exceptions/FileError.h>
 #include <codegen/syntax_tree_printer.h>
 
 namespace kite
@@ -44,6 +45,19 @@ namespace kite
                 bool syntax_tree::from_file(std::string file)
                 {
                     std::ifstream stream(file.c_str());
+                    if (stream.fail())
+                    {
+                        std::stringstream ss;
+
+                        ss   << "Could not open " << file << " for parsing.";
+                        System::exceptions::exception *exc = 
+                            System::exceptions::FileError::Create(
+                                1,
+                                new System::string(
+                                    ss.str().c_str())
+                            );
+                        exc->throw_exception();
+                    }
                     return from_stream(stream, file);
                 }
 

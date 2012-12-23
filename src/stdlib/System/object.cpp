@@ -55,6 +55,7 @@ namespace kite
                 ("str__o", function_semantics(semantics::STRING, (void*)0))
                 ("obj__o", function_semantics(semantics::OBJECT, (void*)&obj__o))
                 ("doc__o", function_semantics(semantics::OBJECT, (void*)&doc__o))
+                ("type__o", function_semantics(semantics::OBJECT, (void*)&type__o))
                 ("get_property_string__oo", function_semantics(semantics::OBJECT, (void*)&get_property_string__oo))
                 ("get_property_string__os", function_semantics(semantics::OBJECT, (void*)&get_property_string__os));
                 
@@ -344,4 +345,10 @@ void *doc__o(void *obj)
 {
     System::dynamic_object *object = (System::dynamic_object*)obj;
     return new System::string(object->doc_string.c_str());
+}
+
+void *type__o(void *obj)
+{
+    System::dynamic_object *object = (System::dynamic_object*)obj;
+    return *kite_dynamic_object_get_property(obj, "__name", false);
 }

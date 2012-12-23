@@ -46,7 +46,7 @@ namespace kite
             System::dynamic_object method::class_obj;
             object_method_map method::method_map = map_list_of
                 ("get_param_names__o", function_semantics(semantics::OBJECT, (void*)&method::get_param_names))
-                ("get_param_doc__o", function_semantics(semantics::OBJECT, (void*)&method::get_param_doc));
+                ("get_param_doc__oo", function_semantics(semantics::OBJECT, (void*)&method::get_param_doc));
                 
             object *method::invoke(object *param1, ...)
             {

@@ -420,7 +420,7 @@ destructor_definition: DESTRUCT optional_docstring '[' input ']' {
 property_definition:    optional_global PROPERTY SYMBOL_NAME optional_docstring   {
         /* TODO: global does nothing here. */
         $<opValue>$ = new kite::semantics::syntax_tree(@$);
-        $<opValue>$->op = kite::semantics::ASSIGN;
+        $<opValue>$->op = kite::semantics::PROP_ASSIGN;
         
         kite::semantics::syntax_tree deref_filter(@$);
         deref_filter.op = kite::semantics::DEREF_FILTER;
@@ -446,7 +446,7 @@ property_definition:    optional_global PROPERTY SYMBOL_NAME optional_docstring 
     | optional_global PROPERTY SYMBOL_NAME optional_docstring '=' data_manipulation_statement {
         /* TODO: global does nothing here. */
         $<opValue>$ = new kite::semantics::syntax_tree(@$);
-        $<opValue>$->op = kite::semantics::ASSIGN;
+        $<opValue>$->op = kite::semantics::PROP_ASSIGN;
         
         kite::semantics::syntax_tree deref_filter(@$);
         deref_filter.op = kite::semantics::DEREF_FILTER;

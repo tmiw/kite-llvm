@@ -143,6 +143,7 @@ namespace kite
                     ret = codegen_variable_op(tree);
                     break;
                 case semantics::ASSIGN:
+                case semantics::PROP_ASSIGN:
                     ret = codegen_assign_op(tree);
                     break;
                 case semantics::WHILE:
@@ -275,11 +276,24 @@ namespace kite
             if (tree.op == semantics::VARIABLE)
             {
                 std::string var_name = boost::get<std::string>(tree.children[0]);
-                vars[var_name] = tree;
+                if (vars.find(var_name) == vars.end())
+                {
+                    vars[var_name] = tree;
+                }
+            }
+            else if (tree.op == semantics::PROP_ASSIGN)
+            {
+                // property assignments should also be near the top of the method.
+                // This also results in 'x' automatically pointing to this.x.
+                if (vars.find(tree.prop_name) == vars.end())
+                {
+                    vars[tree.prop_name] = tree;
+                }
             }
             
+            int index = 0;
             BOOST_FOREACH(semantics::syntax_tree_node const &node, tree.children)
-            {
+            {                
                 if ( const semantics::syntax_tree *childTree = boost::get<semantics::syntax_tree>(&node) )
                 {
                     find_used_variable_names(*childTree, vars);
@@ -967,6 +981,16 @@ namespace kite
                     tree.position);
                 generate_llvm_dynamic_object_set_doc_string_prop(this_obj, tree.prop_name, tree.doc_string, tree);
             }
+            
+            if (tree.op == semantics::PROP_ASSIGN)
+            {
+                std::map<std::string, Value*> &symStack = state.current_symbol_stack();
+                if (symStack.find(tree.prop_name) == symStack.end())
+                {
+                    symStack[tree.prop_name] = lhs;
+                }
+            }
+            
             return rhs;
         }
         
@@ -1622,7 +1646,10 @@ namespace kite
                 i != vars.end();
                 i++)
             {
-                (*this)(i->second);
+                if (symStack.find(i->first) == symStack.end())
+                {
+                    (*this)(i->second);
+                }
             }
             
             // Generate body.

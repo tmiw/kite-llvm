@@ -79,6 +79,7 @@ namespace kite
             DEREF_METHOD_RELATIVE_SELF, // xyz(...) without '|'.
             VARIABLE,
             ASSIGN,
+            PROP_ASSIGN, // property .. = ...
             WHILE,
             UNTIL,
             DECIDE,

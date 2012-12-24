@@ -10,3 +10,8 @@ libkitestdlib_la_SOURCES = \
     System.cpp \
     System.h
 libkitestdlib_la_LIBADD = System/libkitestdlib_System.la language/libkitestdlib_language.la
+
+nobase_dist_pkgdata_DATA = System/doc.kt System/doc/outputters.kt
+
+install-exec-hook:
+	mkdir -p $(DESTDIR)$(pkglibdir)/local-pkgs

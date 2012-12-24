@@ -1045,7 +1045,7 @@ namespace kite
                     Value *zero = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) << 3, (uint64_t)0, true));
                     zero = builder.CreateIntToPtr(zero, kite_type_to_llvm_type(semantics::OBJECT));
                     decideResults.push_back(zero);
-                    decideBlocks.push_back(condBB);
+                    decideBlocks.push_back(builder.GetInsertBlock());
                     condBB = endBB;
                 }
                 
@@ -1068,7 +1068,7 @@ namespace kite
                         result = generate_llvm_method_call(result, "obj", emptyList, tree);
                     }
                     decideResults.push_back(result);
-                    decideBlocks.push_back(actionBB);
+                    decideBlocks.push_back(builder.GetInsertBlock());
                 }
                 actionBB = builder.GetInsertBlock();
                 if (!state.get_skip_remaining()) generate_debug_data(builder.CreateBr(endBB), tree.position);

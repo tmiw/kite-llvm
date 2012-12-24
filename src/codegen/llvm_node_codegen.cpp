@@ -268,6 +268,25 @@ namespace kite
             return ret;
         }
         
+        void llvm_node_codegen::find_used_variable_names(const semantics::syntax_tree &tree, std::map<std::string, semantics::syntax_tree> &vars) const
+        {
+            // Variables should all be defined at the top of the method. This function
+            // extracts all VARIABLE nodes from the AST.
+            if (tree.op == semantics::VARIABLE)
+            {
+                std::string var_name = boost::get<std::string>(tree.children[0]);
+                vars[var_name] = tree;
+            }
+            
+            BOOST_FOREACH(semantics::syntax_tree_node const &node, tree.children)
+            {
+                if ( const semantics::syntax_tree *childTree = boost::get<semantics::syntax_tree>(&node) )
+                {
+                    find_used_variable_names(*childTree, vars);
+                }
+            }
+        }
+        
         Value *llvm_node_codegen::codegen_const_op(semantics::syntax_tree const &tree) const
         {
             return boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
@@ -1595,6 +1614,18 @@ namespace kite
                     parent.position);
             }
             
+            // Define all variables at the top of the method.
+            std::map<std::string, semantics::syntax_tree> vars;
+            find_used_variable_names(body, vars);
+            for (
+                std::map<std::string, semantics::syntax_tree>::iterator i = vars.begin();
+                i != vars.end();
+                i++)
+            {
+                (*this)(i->second);
+            }
+            
+            // Generate body.
             Value *ret = llvm_node_codegen(state)(body);
             
             /*if (state.get_skip_remaining() == false)

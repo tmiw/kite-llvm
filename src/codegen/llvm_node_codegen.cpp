@@ -449,12 +449,13 @@ namespace kite
                 if (rhs_type != kite_type_to_llvm_type(semantics::OBJECT))
                 {
                     params.push_back(rhs);
-                    rhs = generate_llvm_method_call(lhs, "obj", params, tree);
+                    rhs = generate_llvm_method_call(rhs, "obj", params, tree);
                     params.clear();
                 }
                 params.push_back(lhs);
                 params.push_back(rhs);
-                ret = generate_llvm_method_call(lhs, semantics::Constants::Get().operator_map[tree.op], params, tree);
+                std::string funcName = semantics::Constants::Get().operator_map[tree.op];
+                ret = generate_llvm_method_call(lhs, funcName, params, tree);
             }
 
             return ret;
@@ -887,7 +888,8 @@ namespace kite
                     generate_debug_data(builder.CreateBr(end_var), tree.position);
                     
                     builder.SetInsertPoint(end_var);
-                    PHINode *phi = builder.CreatePHI(PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)), 2);
+                    PHINode *phi = builder.CreatePHI(getProp->getType(), 2);
+                    assert(getProp->getType() == createVar->getType());
                     phi->addIncoming(getProp, sym_block);
                     phi->addIncoming(createVar, has_var);
                     sym_stack[var_name] = phi;
@@ -1185,7 +1187,7 @@ namespace kite
             
             // Create cleanup block
             builder.SetInsertPoint(end_block);
-            PHINode *phi = builder.CreatePHI(kite_type_to_llvm_type(semantics::OBJECT), 2);
+            PHINode *phi = builder.CreatePHI(run_ret->getType(), 2);
             phi->addIncoming(run_ret, run_block);
             phi->addIncoming(catch_ret, catch_block);
             //phi->addIncoming(default_val, currentBB);

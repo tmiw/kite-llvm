@@ -153,7 +153,7 @@ namespace kite
                             struct stat st;
                             
                             // TODO: support C based Kite modules.
-                            full_path = std::string(((System::string*)(*pos))->string_val.c_str()) + module_load_list[index] + ".kt";
+                            full_path = std::string(((System::string*)(*pos))->string_val.c_str()) + "/" + module_load_list[index] + ".kt";
                             if (stat(full_path.c_str(), &st) == 0)
                             {
                                 break;

@@ -83,6 +83,7 @@ extern "C"
     void *doc__o(void *obj);
     void *type__o(void *obj);
     void *get_base_object__o(void *obj);
+    void *list_properties__o(void *obj);
 }
 
 #endif

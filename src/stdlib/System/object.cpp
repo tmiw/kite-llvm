@@ -34,6 +34,7 @@
 #include "float.h"
 #include "boolean.h"
 #include "method.h"
+#include "list.h"
 #include "dynamic_object.h"
 #include "exceptions/NotImplemented.h"
 #include "exceptions/InvalidArgument.h"
@@ -57,6 +58,7 @@ namespace kite
                 ("doc__o", function_semantics(semantics::OBJECT, (void*)&doc__o))
                 ("type__o", function_semantics(semantics::OBJECT, (void*)&type__o))
                 ("get_base_object__o", function_semantics(semantics::OBJECT, (void*)&get_base_object__o))
+                ("list_properties__o", function_semantics(semantics::OBJECT, (void*)&list_properties__o))
                 ("get_property_string__oo", function_semantics(semantics::OBJECT, (void*)&get_property_string__oo))
                 ("get_property_string__os", function_semantics(semantics::OBJECT, (void*)&get_property_string__os));
                 
@@ -359,4 +361,19 @@ void *type__o(void *obj)
 {
     System::dynamic_object *object = (System::dynamic_object*)obj;
     return *kite_dynamic_object_get_property(obj, "__name", false);
+}
+
+void *list_properties__o(void *obj)
+{
+    System::dynamic_object *object = (System::dynamic_object*)obj;
+    System::list *retValue = System::list::Create(0);
+    
+    for (System::property_map::iterator i = object->properties.begin();
+         i != object->properties.end();
+         i++)
+    {
+        retValue->list_contents.push_back(new System::string(i->first.c_str()));
+    }
+    
+    return retValue;
 }

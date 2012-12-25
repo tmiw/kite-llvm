@@ -82,6 +82,7 @@ extern "C"
     void *get_property_string__os(void *obj, char *prop);
     void *doc__o(void *obj);
     void *type__o(void *obj);
+    void *get_base_object__o(void *obj);
 }
 
 #endif

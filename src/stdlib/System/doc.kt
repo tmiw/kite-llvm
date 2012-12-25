@@ -68,7 +68,7 @@ class method_argument_node from doc_node
         description /[Description of method argument.]/
     ) /[Construct new method argument node.]/
     [
-        base|__construct__(name);
+        base|__init__(name);
         this.description = description;
     ]
 ];
@@ -81,7 +81,7 @@ class method_node from doc_node
         description /[Description of method.]/
     ) /[Construct new method node.]/
     [
-        base|__construct__(name);
+        base|__init__(name);
         this.description = description;
     ],
     
@@ -128,7 +128,7 @@ class property_node from doc_node
         description /[Description of property.]/
     ) /[Construct new method node.]/
     [
-        base|__construct__(name);
+        base|__init__(name);
         this.description = description;
     ],
     
@@ -149,7 +149,7 @@ class constructor_node from method_node
         description /[Description of constructor.]/
     ) /[Construct new constructor node.]/
     [
-        base|__construct__("make " + name, description);
+        base|__init__("make " + name, description);
     ]
 ];
 
@@ -161,7 +161,7 @@ class destructor_node from method_node
         description /[Description of destructor.]/
     ) /[Construct new destructor node.]/
     [
-        base|__construct__("destruct " + name);
+        base|__init__("destruct " + name);
         this.description = description;
     ]
 ];
@@ -174,7 +174,7 @@ class operator_node from method_node
         description /[Description of operator.]/
     ) /[Construct new operator node.]/
     [
-        base|__construct__("operator " + name);
+        base|__init__("operator " + name);
         this.description = description;
     ]
 ];
@@ -189,7 +189,7 @@ class class_node from doc_node
         inherits /[Inherited class name]/
     ) /[Construct new class node.]/
     [
-        base|__construct__(name);
+        base|__init__(name);
         this.inherits = inherits;
     ],
     

@@ -84,6 +84,7 @@ extern "C"
     void *get_property__os(void *obj, char *prop);
     void *doc__o(void *obj);
     void *type__o(void *obj);
+    void *is_class__o(void *obj);
     void *get_base_object__o(void *obj);
     void *list_properties__o(void *obj);
 }

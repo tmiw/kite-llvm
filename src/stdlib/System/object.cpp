@@ -57,6 +57,7 @@ namespace kite
                 ("obj__o", function_semantics(semantics::OBJECT, (void*)&obj__o))
                 ("doc__o", function_semantics(semantics::OBJECT, (void*)&doc__o))
                 ("type__o", function_semantics(semantics::OBJECT, (void*)&type__o))
+                ("is_class__o", function_semantics(semantics::OBJECT, (void*)&is_class__o))
                 ("get_base_object__o", function_semantics(semantics::OBJECT, (void*)&get_base_object__o))
                 ("list_properties__o", function_semantics(semantics::OBJECT, (void*)&list_properties__o))
                 ("get_property__oo", function_semantics(semantics::OBJECT, (void*)&get_property__oo))
@@ -419,4 +420,13 @@ void *list_properties__o(void *obj)
     }
     
     return retValue;
+}
+
+void *is_class__o(void *obj)
+{
+    System::dynamic_object *object = (System::dynamic_object*)obj;
+    return new System::boolean(
+        object != NULL &&
+        object->type == kite::semantics::OBJECT &&
+        object->properties.find("__name") != object->properties.end());
 }

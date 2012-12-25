@@ -372,7 +372,10 @@ void *list_properties__o(void *obj)
          i != object->properties.end();
          i++)
     {
-        retValue->list_contents.push_back(new System::string(i->first.c_str()));
+        if (i->second->type != kite::semantics::METHOD_TY)
+        {
+            retValue->list_contents.push_back(new System::string(i->first.c_str()));
+        }
     }
     
     return retValue;

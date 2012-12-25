@@ -59,6 +59,8 @@ namespace kite
                 ("type__o", function_semantics(semantics::OBJECT, (void*)&type__o))
                 ("get_base_object__o", function_semantics(semantics::OBJECT, (void*)&get_base_object__o))
                 ("list_properties__o", function_semantics(semantics::OBJECT, (void*)&list_properties__o))
+                ("get_property__oo", function_semantics(semantics::OBJECT, (void*)&get_property__oo))
+                ("get_property__os", function_semantics(semantics::OBJECT, (void*)&get_property__os))
                 ("get_property_string__oo", function_semantics(semantics::OBJECT, (void*)&get_property_string__oo))
                 ("get_property_string__os", function_semantics(semantics::OBJECT, (void*)&get_property_string__os));
                 
@@ -332,6 +334,44 @@ void *get_property_string__os(void *obj, char *prop)
     return new System::string(val.c_str());
 }
 
+void *get_property__oo(void *obj, void *prop)
+{
+    System::dynamic_object *object = (System::dynamic_object*)obj;
+    if (object->type != kite::semantics::OBJECT)
+    {
+        return new System::string("");
+    }
+    
+    System::string *key = (System::string*)prop;
+    
+    System::object *val;
+    do
+    {
+        val = object->properties[key->string_val.c_str()];
+        object = (System::dynamic_object*)object->parent;
+    } while (object && object->properties.find(key->string_val.c_str()) != object->properties.end());
+    
+    return val;
+}
+
+void *get_property__os(void *obj, char *prop)
+{
+    System::dynamic_object *object = (System::dynamic_object*)obj;
+    if (object->type != kite::semantics::OBJECT)
+    {
+        return new System::string("");
+    }
+    
+    System::object *val;
+    do
+    {
+        val = object->properties[prop];
+        object = (System::dynamic_object*)object->parent;
+    } while (object && object->properties.find(prop) != object->properties.end());
+    
+    return val;
+}
+
 void *kite_set_docstring(void *obj, const char *str)
 {
     ((System::dynamic_object*)obj)->doc_string = str;
@@ -372,7 +412,7 @@ void *list_properties__o(void *obj)
          i != object->properties.end();
          i++)
     {
-        if (i->second->type != kite::semantics::METHOD_TY)
+        if (i->second == NULL || i->second->type != kite::semantics::METHOD_TY)
         {
             retValue->list_contents.push_back(new System::string(i->first.c_str()));
         }

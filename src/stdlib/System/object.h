@@ -80,6 +80,8 @@ extern "C"
     void *obj__o(void *obj);
     void *get_property_string__oo(void *obj, void *prop);
     void *get_property_string__os(void *obj, char *prop);
+    void *get_property__oo(void *obj, void *prop);
+    void *get_property__os(void *obj, char *prop);
     void *doc__o(void *obj);
     void *type__o(void *obj);
     void *get_base_object__o(void *obj);

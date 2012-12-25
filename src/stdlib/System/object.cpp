@@ -267,7 +267,8 @@ bool kite_object_isof(void *lhs, void *rhs, bool type)
     System::dynamic_object *rhsObj = (System::dynamic_object*)rhs;
     bool ret = false;
     
-    if (lhsObj->type == rhsObj->type && lhsObj->type != kite::semantics::OBJECT)
+    if (lhsObj == rhsObj ||
+       (lhsObj != NULL && rhsObj != NULL && lhsObj->type == rhsObj->type && lhsObj->type != kite::semantics::OBJECT))
     {
         return true;
     }

@@ -59,12 +59,12 @@ using namespace boost::assign;
 #define FORMAT(out, type, formatted_object, val) \
     fmtstr = (char*)GC_malloc_atomic(length + 1); \
     strncpy(fmtstr, cur - length + 1, length); \
+    fmtstr[length]= 0; \
     asprintf(&out, fmtstr, \
         (type)formatted_object->val); \
     GC_free(fmtstr);
 
-#ifndef HAVE_ASPRINTF
-void asprintf(char **out, char *fmt, ...)
+static void asprintf(char **out, char *fmt, ...)
 {
     va_list ap;
     char *ret;
@@ -75,14 +75,14 @@ void asprintf(char **out, char *fmt, ...)
         case 's':
         {
             char *ptr = va_arg(ap, char*);
-            ret = (char*)GC_malloc_atomic(strlen(ptr) + 1);
-            strcpy(ret, ptr);
+            ret = (char*)GC_malloc_atomic(strlen(ptr) + strlen(fmt) + 1);
+            sprintf(ret, fmt, ptr);
             break;
         }
         default:
         {
             /* Really, we need to do this better to avoid buffer overflows. */
-            ret = (char*)GC_malloc_atomic(256);
+            ret = (char*)GC_malloc_atomic(strlen(fmt) + 256);
             vsprintf(ret, fmt, ap);
             break;
         }
@@ -91,7 +91,6 @@ void asprintf(char **out, char *fmt, ...)
     va_end(ap);
     *out = ret;
 }
-#endif
 
 namespace kite
 {
@@ -288,11 +287,13 @@ cont_parse:
                         if (ret_string == NULL) {
                             ret_string = GC_strdup(output);
                             GC_free(output);
+                            output = NULL;
                         } else {
                             ret_string = (char*)GC_realloc(ret_string, strlen(ret_string) + 
                                                  strlen(output) + 1);
                             strcat(ret_string, output);
                             GC_free(output);
+                            output = NULL;
                         }
                         cur++;
                         cur_fmt++;
@@ -318,9 +319,11 @@ cont_parse:
                             (char*)GC_realloc(ret_string, strlen(ret_string) + strlen(output) + 1);
                         strcat(ret_string, output);
                         GC_free(output);
+                        output = NULL;
                     } else {
                         ret_string = GC_strdup(output);
                         GC_free(output);
+                        output = NULL;
                     }
                 } else if (!ret_string) {
                     ret_string = (char*)GC_malloc_atomic(1);

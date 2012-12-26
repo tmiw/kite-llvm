@@ -97,6 +97,11 @@ void kite_dynamic_object_set_parent(void *object, void *parent)
         System::method *method = (System::method*)*ptr;
         kite_dynamic_object_enable_finalizer(object, method->method_ptr);
     }
+    else
+    {
+        // Erase the item get_property created.
+        ((System::dynamic_object*)object)->properties.erase("__destruct____o");
+    }
 }
 
 void kite_dynamic_object_set_name(void *object, char *name)

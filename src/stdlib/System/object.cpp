@@ -325,17 +325,20 @@ void *get_property__oo(void *obj, void *prop)
     System::dynamic_object *object = (System::dynamic_object*)obj;
     if (object->type != kite::semantics::OBJECT)
     {
-        return new System::string("");
+        return NULL;
     }
     
     System::string *key = (System::string*)prop;
     
-    System::object *val;
+    System::object *val = NULL;
     do
     {
-        val = object->properties[key->string_val.c_str()];
+        if (object->properties.count(key->string_val) > 0)
+        {
+            val = object->properties[key->string_val];
+        }
         object = (System::dynamic_object*)object->parent;
-    } while (object && object->properties.find(key->string_val.c_str()) != object->properties.end());
+    } while (object && object->properties.count(key->string_val) == 0);
     
     return val;
 }
@@ -345,15 +348,18 @@ void *get_property__os(void *obj, const char *prop)
     System::dynamic_object *object = (System::dynamic_object*)obj;
     if (object->type != kite::semantics::OBJECT)
     {
-        return new System::string("");
+        return NULL;
     }
     
-    System::object *val;
+    System::object *val = NULL;
     do
     {
-        val = object->properties[prop];
+        if (object->properties.count(prop) > 0)
+        {
+            val = object->properties[prop];
+        }
         object = (System::dynamic_object*)object->parent;
-    } while (object && object->properties.find(prop) != object->properties.end());
+    } while (object && object->properties.count(prop) == 0);
     
     return val;
 }

@@ -135,7 +135,7 @@ namespace kite
                         break;
                     default:
                         char *(*funcptr)(object *) = (char *(*)(object *))kite_find_funccall((void*)this, "str", 1);
-                        std::cout << (*funcptr)(this) << std::endl;
+                        res << (*funcptr)(this);
                         break;
                 }
                 

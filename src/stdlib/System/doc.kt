@@ -438,7 +438,7 @@ method generate_doc_helper(
                 tmp_method = tmp[i + 1];
                 while (j < tmp_method|count) [
                     decide [
-                        (tmp[i] == "__construct__") [
+                        (tmp[i] == "__init__") [
                             ret|add(System.doc|generate_constructor(cls|type, cls|get_method(tmp[i], tmp_method[j])));
                         ],
                         true [

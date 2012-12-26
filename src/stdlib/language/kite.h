@@ -71,7 +71,7 @@ namespace kite
                     static std::string GetMethodNameFromPointer(void *ptr, void **beginPointer);
                     
                     static bool enable_optimizer;
-                    static std::vector<jmp_buf*> exception_stack;
+                    static semantics::gc_vector<jmp_buf*>::type exception_stack;
                     static System::dynamic_object *last_exception;
                     static System::dynamic_object *root_object;   
                     static char *app_name;

@@ -5,4 +5,5 @@ noinst_LTLIBRARIES = libkitesemantics.la
 libkitesemantics_la_SOURCES = \
     constants.cpp \
     constants.h \
-    syntax_tree.h
+    syntax_tree.h \
+    gc_helper.h

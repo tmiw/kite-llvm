@@ -69,7 +69,7 @@ namespace kite
             {
                 System::dynamic_object *root = language::kite::kite::root();
                 T::class_object().properties["__name"] = new System::string(T::class_name().c_str());
-                root->properties[T::class_name()] = &T::class_object();
+                root->properties[T::class_name().c_str()] = &T::class_object();
             }
 
             static ObjectRegistration<T> &Get()

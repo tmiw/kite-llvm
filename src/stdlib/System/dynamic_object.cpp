@@ -49,7 +49,7 @@ namespace kite
                 
                 System::method *method = new System::method(ptr);
                 method->num_args = numargs;
-                properties[real_name] = method;
+                properties[real_name.c_str()] = method;
             }
             
             void dynamic_object::add_operator(semantics::code_operation op, void *ptr)

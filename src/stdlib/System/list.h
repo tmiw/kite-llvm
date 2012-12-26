@@ -40,7 +40,7 @@ namespace kite
     {
         namespace System
         {
-            typedef std::deque<object*, gc_allocator<object*> > list_contents_type;
+            typedef semantics::gc_deque<object*>::type list_contents_type;
             
             BEGIN_KITE_BASE_CLASS(list)
             public:

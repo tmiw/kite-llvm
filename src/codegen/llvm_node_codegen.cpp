@@ -1748,13 +1748,13 @@ namespace kite
 
             function_semantics semantics;
             Type *tmpType;
-            if (method_map.find(method_name) == method_map.end())
+            if (method_map.find(method_name.c_str()) == method_map.end())
             {
                 tmpType = const_cast<Type*>(kite_type_to_llvm_type(semantics::OBJECT));
             }
             else
             {
-                semantics = method_map[method_name];
+                semantics = method_map[method_name.c_str()];
                 tmpType = const_cast<Type*>(kite_type_to_llvm_type(semantics.first));
             }
             FunctionType *ft = FunctionType::get(tmpType, ArrayRef<Type*>(parameterTypes), false);

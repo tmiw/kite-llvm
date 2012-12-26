@@ -39,7 +39,7 @@ namespace kite
         {
             namespace collections
             {
-                typedef std::deque<object*, gc_allocator<object*> > queue_contents_type;
+                typedef semantics::gc_deque<object*>::type queue_contents_type;
 
                 BEGIN_KITE_BASE_CLASS(queue)
                     private:

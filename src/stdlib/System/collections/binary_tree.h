@@ -29,6 +29,7 @@
 #define KITE_STDLIB__SYSTEM_COLLECTIONS__binary_tree_H
 
 #include <vector>
+#include <semantics/gc_helper.h>
 #include "stdlib/System/collections.h"
 #include "../integer.h"
 
@@ -40,7 +41,7 @@ namespace kite
         {
             namespace collections
             {
-                typedef std::map<std::string, object*, std::less<std::string>, gc_allocator<object*> > tree_contents_type;
+                typedef semantics::gc_map<semantics::gc_string, object*>::type tree_contents_type;
             
                 BEGIN_KITE_BASE_CLASS(binary_tree)
                     private:

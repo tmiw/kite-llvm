@@ -148,6 +148,7 @@ namespace kite
 }
 
 using namespace kite::stdlib;
+using namespace kite::semantics;
 
 void System::object::print()
 {
@@ -215,7 +216,7 @@ void *kite_find_funccall(void *obj, const char *name, int numargs)
                 assert(0);
         }
         
-        object_method_map::iterator iter = method_map->find(method_name);
+        object_method_map::iterator iter = method_map->find(method_name.c_str());
         if (iter != method_map->end())
         {
             return (void*)((*iter).second.second);
@@ -230,7 +231,7 @@ void *kite_find_funccall(void *obj, const char *name, int numargs)
         dyn_object = (System::dynamic_object*)obj;
         do
         {
-            System::property_map::iterator item = dyn_object->properties.find(method_name);
+            System::property_map::iterator item = dyn_object->properties.find(method_name.c_str());
                 
             if (item != dyn_object->properties.end())
             {
@@ -310,14 +311,14 @@ void *get_property_string__oo(void *obj, void *prop)
     }
     
     System::string *key = (System::string*)prop;
-    std::string val;
+    gc_string *val;
     do
     {
-        val = object->property_docs[key->string_val.c_str()];
+        val = &object->property_docs[key->string_val.c_str()];
         object = (System::dynamic_object*)object->parent;
-    } while (object && val.size() == 0);
+    } while (object && val->size() == 0);
     
-    return new System::string(val.c_str());
+    return new System::string(*val);
 }
 
 void *get_property_string__os(void *obj, char *prop)
@@ -328,14 +329,14 @@ void *get_property_string__os(void *obj, char *prop)
         return new System::string("");
     }
     
-    std::string val;
+    gc_string *val;
     do
     {
-        val = object->property_docs[prop];
+        val = &object->property_docs[prop];
         object = (System::dynamic_object*)object->parent;
-    } while (object && val.size() == 0);
+    } while (object && val->size() == 0);
     
-    return new System::string(val.c_str());
+    return new System::string(*val);
 }
 
 void *get_property__oo(void *obj, void *prop)
@@ -429,7 +430,7 @@ void *list_methods__o(void *obj)
 {
     System::dynamic_object *object = (System::dynamic_object*)obj;
     System::list *retValue = System::list::Create(0);
-    std::map<std::string, std::vector<int> > funcMap;
+    gc_map<gc_string, gc_vector<int>::type>::type funcMap;
     
     for (System::property_map::iterator i = object->properties.begin();
          i != object->properties.end();
@@ -440,9 +441,9 @@ void *list_methods__o(void *obj)
             size_t pos = i->first.rfind("__");
             if (pos != std::string::npos)
             {
-                std::string fName = i->first.substr(0, pos);
+                std::string fName = i->first.substr(0, pos).c_str();
                 int numArgs = i->first.substr(pos + 2).size() - 1;
-                std::vector<int> &argList = funcMap[fName];
+                semantics:gc_vector<int>::type &argList = funcMap[fName.c_str()];
                 if (std::find(argList.begin(), argList.end(), numArgs) == argList.end())
                 {
                     argList.push_back(numArgs);
@@ -451,13 +452,13 @@ void *list_methods__o(void *obj)
         }
     }
     
-    for (std::map<std::string, std::vector<int> >::iterator i = funcMap.begin();
+    for (gc_map<gc_string, gc_vector<int>::type>::type::iterator i = funcMap.begin();
          i != funcMap.end();
          i++)
     {
         retValue->list_contents.push_back(new System::string(i->first.c_str()));
         System::list *argCounts = System::list::Create(0);
-        for (std::vector<int>::iterator j = i->second.begin();
+        for (gc_vector<int>::type::iterator j = i->second.begin();
              j != i->second.end();
              j++)
         {

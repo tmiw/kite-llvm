@@ -57,7 +57,7 @@ using namespace boost::assign;
     }
 
 #define FORMAT(out, type, formatted_object, val) \
-    fmtstr = (char*)GC_malloc(length + 1); \
+    fmtstr = (char*)GC_malloc_atomic(length + 1); \
     strncpy(fmtstr, cur - length + 1, length); \
     asprintf(&out, fmtstr, \
         (type)formatted_object->val); \
@@ -75,14 +75,14 @@ void asprintf(char **out, char *fmt, ...)
         case 's':
         {
             char *ptr = va_arg(ap, char*);
-            ret = (char*)GC_malloc(strlen(ptr) + 1);
+            ret = (char*)GC_malloc_atomic(strlen(ptr) + 1);
             strcpy(ret, ptr);
             break;
         }
         default:
         {
             /* Really, we need to do this better to avoid buffer overflows. */
-            ret = (char*)GC_malloc(256);
+            ret = (char*)GC_malloc_atomic(256);
             vsprintf(ret, fmt, ap);
             break;
         }
@@ -321,7 +321,7 @@ cont_parse:
                         ret_string = output;
                     }
                 } else if (!ret_string) {
-                    ret_string = (char*)GC_malloc(1);
+                    ret_string = (char*)GC_malloc_atomic(1);
                     ret_string[0] = 0;
                 }
 
@@ -350,7 +350,7 @@ int PREFIX_STRING_METHOD_NAME(asc__s)(const char *val)
 
 char* PREFIX_STRING_METHOD_NAME(append__ss)(const char* val, char* rhs)
 {
-    char *ret = (char*)GC_malloc(strlen(val) + strlen(rhs) + 1);
+    char *ret = (char*)GC_malloc_atomic(strlen(val) + strlen(rhs) + 1);
     strcpy(ret, val);
     strcat(ret, rhs);
     return ret;
@@ -376,7 +376,7 @@ char* PREFIX_STRING_METHOD_NAME(charAt__si)(const char *val, int index)
         exc->throw_exception();
     }
     
-    char *ret = (char*)GC_malloc(2);
+    char *ret = (char*)GC_malloc_atomic(2);
     ret[0] = val[index];
     ret[1] = 0;
     return ret;
@@ -399,7 +399,7 @@ int PREFIX_STRING_METHOD_NAME(length__s)(const char* val)
 
 char* PREFIX_STRING_METHOD_NAME(lower__s)(const char *val)
 {
-    char *ret = (char*)GC_malloc(strlen(val) + 1);
+    char *ret = (char*)GC_malloc_atomic(strlen(val) + 1);
     char *tmp = ret;
     for ( ; *val != 0; val++, tmp++)
     {
@@ -413,7 +413,7 @@ char* PREFIX_STRING_METHOD_NAME(ltrim__s)(const char *val)
 {
     while (isspace(*val)) { val++; }
     
-    char *ret = (char*)GC_malloc(strlen(val) + 1);
+    char *ret = (char*)GC_malloc_atomic(strlen(val) + 1);
     strcpy(ret, val);
     return ret;
 }
@@ -443,7 +443,7 @@ void* PREFIX_STRING_METHOD_NAME(print__o)(void *val)
 
 char* PREFIX_STRING_METHOD_NAME(rtrim__s)(const char *val)
 {
-    char *ret = (char*)GC_malloc(strlen(val) + 1);
+    char *ret = (char*)GC_malloc_atomic(strlen(val) + 1);
     char *tmp = ret + strlen(val) - 1;
     
     strcpy(ret, val);
@@ -459,7 +459,7 @@ char* PREFIX_STRING_METHOD_NAME(str__s)(const char *val)
 char* PREFIX_STRING_METHOD_NAME(str__o)(void *val)
 {
     System::string *lhs_str = (System::string*)val;
-    char *ret = (char*)GC_malloc(lhs_str->string_val.size() + 1);
+    char *ret = (char*)GC_malloc_atomic(lhs_str->string_val.size() + 1);
     strcpy(ret, lhs_str->string_val.c_str());
     return ret;
 }
@@ -472,7 +472,7 @@ char* PREFIX_STRING_METHOD_NAME(trim__s)(const char *val)
 
 char* PREFIX_STRING_METHOD_NAME(upper__s)(const char *val)
 {
-    char *ret = (char*)GC_malloc(strlen(val) + 1);
+    char *ret = (char*)GC_malloc_atomic(strlen(val) + 1);
     char *tmp = ret;
     for ( ; *val != 0; val++, tmp++)
     {
@@ -487,7 +487,7 @@ void *PREFIX_STRING_METHOD_NAME(__op_plus____oo)(void *lhs, void *rhs)
     System::string *lhs_str = (System::string*)lhs;
     System::string *rhs_str = (System::string*)rhs;
     
-    return new System::string(lhs_str->string_val + rhs_str->string_val);
+    return new System::string((lhs_str->string_val + rhs_str->string_val).c_str());
 }
 
 void *PREFIX_STRING_METHOD_NAME(__op_equals____oo)(void *lhs, void *rhs)

@@ -50,7 +50,7 @@ namespace kite
                     static object* s_setSignalHandler(os *, integer *sig, method *f) { return posix::setSignalHandler(sig, f); }
                                         
                 public:
-                    static std::map<int, method*> signal_handlers;
+                    static semantics::gc_map<int, method*>::type signal_handlers;
                     
                     static object* pclose(file *pipe);
                     static object* popen(string *name, string *mode);

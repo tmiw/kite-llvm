@@ -30,8 +30,8 @@
 
 #include <map>
 #include <semantics/constants.h>
+#include <semantics/gc_helper.h>
 #include "object.h"
-#include <gc/gc_allocator.h>
 
 extern "C"
 {
@@ -48,10 +48,8 @@ namespace kite
     {
         namespace System
         {
-            typedef gc_allocator<std::pair<const std::string, object*> > map_allocator;
-            typedef std::less<std::string> map_compare;
-            typedef std::map<std::string, object*, map_compare, map_allocator> property_map;
-            typedef std::map<std::string, std::string> property_doc_map;
+            typedef semantics::gc_map<semantics::gc_string, object*>::type property_map;
+            typedef semantics::gc_map<semantics::gc_string, semantics::gc_string>::type property_doc_map;
             
             struct dynamic_object : object
             {

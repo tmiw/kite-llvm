@@ -40,7 +40,7 @@ namespace kite
         {
             namespace collections
             {
-                typedef std::vector<object*, gc_allocator<object*> > array_contents_type;
+                typedef semantics::gc_vector<object*>::type array_contents_type;
             
                 BEGIN_KITE_BASE_CLASS(array)
                     private:

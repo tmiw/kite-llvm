@@ -75,7 +75,7 @@ namespace kite
                 codegen::llvm_compile_state kite::state;
                 ExecutionEngine *kite::execution_engine = NULL;
                 bool kite::enable_optimizer = false;
-                std::vector<jmp_buf*> kite::exception_stack;
+                semantics::gc_vector<jmp_buf*>::type kite::exception_stack;
                 System::dynamic_object *kite::last_exception = NULL;
                 char *kite::app_name = NULL;
                 
@@ -151,7 +151,7 @@ namespace kite
                         System::dynamic_object *the_object = new System::dynamic_object();
                         the_object->properties["__name"] = new System::string(state.full_class_name().c_str());
                         
-                        for (std::deque<System::object*>::iterator pos = search_path->list_contents.begin(); pos != search_path->list_contents.end(); pos++)
+                        for (System::list_contents_type::iterator pos = search_path->list_contents.begin(); pos != search_path->list_contents.end(); pos++)
                         {
                             struct stat st;
                             
@@ -164,9 +164,9 @@ namespace kite
                             full_path = "";
                         }
                         
-                        if (context->properties[module_name_list[index]] != NULL) 
+                        if (context->properties[module_name_list[index].c_str()] != NULL) 
                         {
-                            context = (System::dynamic_object*)context->properties[module_name_list[index]];
+                            context = (System::dynamic_object*)context->properties[module_name_list[index].c_str()];
                             continue;
                         }
                         
@@ -190,14 +190,14 @@ namespace kite
                                 exc->throw_exception();
                                 return NULL;
                             }
-                            context->properties[module_name_list[index]] = the_object;
+                            context->properties[module_name_list[index].c_str()] = the_object;
                         }
                         else
                         {
                             language::kite::syntax_tree ast;
                             if (ast.from_file(full_path))
                             {
-                                context->properties[module_name_list[index]] = the_object;
+                                context->properties[module_name_list[index].c_str()] = the_object;
                                 ExecuteCode(ast, the_object);
                             }
                             else

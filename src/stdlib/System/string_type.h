@@ -42,7 +42,7 @@ namespace kite
     {
         namespace System
         {
-            typedef std::basic_string<char, std::char_traits<char>, gc_allocator<char> > string_type;
+            typedef semantics::gc_string string_type;
             
             class list;
             
@@ -54,7 +54,7 @@ namespace kite
                 
                 string() : System::object(semantics::STRING), string_val("") { }
                 string(const char *val) : System::object(semantics::STRING), string_val(val) { }
-                string(string_type val) : System::object(semantics::STRING), string_val(val) { }
+                string(string_type &val) : System::object(semantics::STRING), string_val(val) { }
                 
                 static object_method_map method_map;
                 int asc();

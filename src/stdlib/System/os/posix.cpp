@@ -65,7 +65,7 @@ namespace kite
         {
             namespace os
             {
-                std::map<int, method*> posix::signal_handlers;
+                semantics::gc_map<int, method*>::type posix::signal_handlers;
                 
                 object* posix::pclose(file *pipe)
                 {

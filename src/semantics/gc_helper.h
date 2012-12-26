@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011, Mooneer Salem
+ * Copyright (c) 2012, Mooneer Salem
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,57 +25,41 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
  
-#ifndef KITE_STDLIB__SYSTEM__METHOD_H
-#define KITE_STDLIB__SYSTEM__METHOD_H
+#ifndef KITE_SEMANTICS__GC_HELPER_H
+#define KITE_SEMANTICS__GC_HELPER_H
 
-#include "dynamic_object.h"
-#include "string_type.h"
+// Just some helper typedefs to ensure we use garbage collected objects.
+
+#include <string>
+#include <gc/gc_allocator.h>
+#include <map>
+#include <vector>
+#include <deque>
 
 namespace kite
 {
-    namespace stdlib
+    namespace semantics
     {
-        namespace System
+        typedef std::basic_string<char, std::char_traits<char>, gc_allocator<char> > gc_string;
+        
+        template<typename K, typename V>
+        struct gc_map
         {
-            struct list;
-            
-            struct method : System::dynamic_object
-            {
-                typedef semantics::gc_map<semantics::gc_string, semantics::gc_string>::type method_arg_doc_map;
-                
-                static System::dynamic_object class_obj;
-                static object_method_map method_map;
-                
-                void *method_ptr;
-                System::object *this_ptr;
-                int num_args;
-                method_arg_doc_map arg_map;
-                
-                method(void *ptr) :
-                    System::dynamic_object(), method_ptr(ptr), this_ptr(NULL) 
-                {
-                    type = semantics::METHOD_TY;
-                }
-                
-                static object *get_param_names(method *method);
-                static object *get_param_doc(method *method, string *name);
-                
-                object *invoke() { return invoke(NULL); }
-                object *invoke(object *param1, ...);
-                object *invoke_with_arg_list(list *l);
-                
-                static void InitializeClass();
-            };
-        }
+            typedef std::map<K, V, std::less<K>, gc_allocator<std::pair<const K, V> > > type;
+        };
+        
+        template<typename V>
+        struct gc_vector
+        {
+            typedef std::vector<V, gc_allocator<V> > type;
+        };
+        
+        template<typename V>
+        struct gc_deque
+        {
+            typedef std::deque<V, gc_allocator<V> > type;
+        };
     }
 }
 
-extern "C"
-{
-    void *kite_method_alloc(void *method_ptr, int args);
-    void *kite_method_verify_semantics(void *method, int args);
-    void *kite_eval_code(void *code, int args, ...);
-    void *kite_set_docstring_arg(void *obj, const char *name, const char *str);
-}
-
-#endif
+#endif // !KITE_SEMANTICS__GC_HELPER_H

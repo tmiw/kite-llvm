@@ -28,17 +28,17 @@
 #ifndef KITE_STDLIB__SYSTEM__OBJECT_H
 #define KITE_STDLIB__SYSTEM__OBJECT_H
 
-#include <gc.h>
 #include <string>
 #include <map>
 #include <semantics/constants.h>
+#include <semantics/gc_helper.h>
 
 namespace kite
 {
     namespace stdlib
     {
         typedef std::pair<semantics::builtin_types, void*> function_semantics;
-        typedef std::map<std::string, function_semantics> object_method_map;
+        typedef semantics::gc_map<semantics::gc_string, function_semantics>::type object_method_map;
         
         namespace System
         {

@@ -35,7 +35,7 @@ void *api_call_method(int numargs, void *obj, void *initptr, va_list vl)
     ffi_cif cif;
     ffi_type *args[numargs + 1];
     void *values[numargs + 1];
-    void **val_heap = (void**)malloc((numargs + 1) * sizeof(void*)); /*new void*[numargs + 1];*/
+    void **val_heap = (void**)GC_malloc((numargs + 1) * sizeof(void*)); /*new void*[numargs + 1];*/
     void *rv;
     args[0] = &ffi_type_pointer;
     values[0] = &val_heap[0];
@@ -53,7 +53,7 @@ void *api_call_method(int numargs, void *obj, void *initptr, va_list vl)
     }
     ffi_call(&cif, (void(*)())initptr, &rv, values);
     va_end(vl);
-    free(val_heap);
+    GC_free(val_heap);
     /*delete[] val_heap;*/
     return rv;
 }

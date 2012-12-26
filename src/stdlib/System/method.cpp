@@ -53,7 +53,7 @@ namespace kite
                 ffi_cif cif;
                 ffi_type *args[num_args + 1];
                 void *values[num_args + 1];
-                void **val_heap = (void**)malloc((num_args + 1) * sizeof(void*));
+                void **val_heap = (void**)GC_malloc((num_args + 1) * sizeof(void*));
                 void *rv;
                 args[0] = &ffi_type_pointer;
                 values[0] = &val_heap[0];
@@ -77,7 +77,7 @@ namespace kite
                 }
                 ffi_call(&cif, (void(*)())method_ptr, &rv, values);
                 va_end(vl);
-                free(val_heap);
+                GC_free(val_heap);
                 return (object*)rv;
             }
             
@@ -86,7 +86,7 @@ namespace kite
                 ffi_cif cif;
                 ffi_type *args[num_args + 1];
                 void *values[num_args + 1];
-                void **val_heap = (void**)malloc((num_args + 1) * sizeof(void*)); /*new void*[numargs + 1];*/
+                void **val_heap = (void**)GC_malloc((num_args + 1) * sizeof(void*)); /*new void*[numargs + 1];*/
                 void *rv;
                 args[0] = &ffi_type_pointer;
                 values[0] = &val_heap[0];
@@ -103,7 +103,7 @@ namespace kite
                     val_heap[i + 1] = (void*)l->list_contents[i];
                 }
                 ffi_call(&cif, (void(*)())method_ptr, &rv, values);
-                free(val_heap);
+                GC_free(val_heap);
                 return (object*)rv;
             }
             

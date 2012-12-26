@@ -560,7 +560,7 @@ namespace kite
                 builder.CreateCall2(funPtr, builder.CreateBitCast(fptr, kite_type_to_llvm_type(semantics::OBJECT)), ConstantInt::get(kite_type_to_llvm_type(semantics::INTEGER), args + 0)),
                 tree.position);
             generate_debug_data(
-                builder.CreateStore(this_ptr, builder.CreateStructGEP(builder.CreateBitCast(method, get_method_type()), 2)),
+                builder.CreateStore(this_ptr, builder.CreateStructGEP(builder.CreateBitCast(method, get_method_type()), 5)),
                 tree.position);
             
             return method;
@@ -801,7 +801,7 @@ namespace kite
                         builder.CreateLoad(sym_stack[method_name]), tree.position),
                     get_method_type());
                 parameters[0] = generate_debug_data(
-                    builder.CreateLoad(builder.CreateStructGEP(method_obj, 2)),
+                    builder.CreateLoad(builder.CreateStructGEP(method_obj, 5)),
                     tree.position);
                 
                 std::vector<Type*> parameterTypesLookup;
@@ -1470,7 +1470,7 @@ namespace kite
             else
             {
                 Value *method_casted = builder.CreateBitCast(method_obj, get_method_type());
-                Value *this_loc = builder.CreateStructGEP(method_casted, 2);
+                Value *this_loc = builder.CreateStructGEP(method_casted, 5);
                 generate_debug_data(
                     builder.CreateStore(property, this_loc),
                     tree.position);
@@ -2197,20 +2197,41 @@ namespace kite
         Type *llvm_node_codegen::get_object_type() const
         {
             std::vector<Type*> struct_types;
-            struct_types.push_back(Type::getIntNTy(getGlobalContext(), sizeof(semantics::builtin_types) * 8));
-            struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT));
+            struct_types.push_back(Type::getIntNTy(getGlobalContext(), sizeof(semantics::builtin_types) * 8)); // type
+            struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT)); // parent
             struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT)); // alloc method
-            struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT)); // placeholder
+            struct_types.push_back(
+                ArrayType::get(
+                    Type::getIntNTy(
+                        getGlobalContext(), 
+                        8),
+                    sizeof(kite::stdlib::System::property_map) +
+                    sizeof(kite::stdlib::System::property_doc_map) +
+                    sizeof(std::string))); // placeholder
+                        
             return PointerType::getUnqual(StructType::get(getGlobalContext(), ArrayRef<Type*>(struct_types)));
         }
 
         Type *llvm_node_codegen::get_method_type() const
         {
             std::vector<Type*> struct_types;
-            struct_types.push_back(kite_type_to_llvm_type(semantics::INTEGER));
-            struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT));
-            struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT));
-            struct_types.push_back(kite_type_to_llvm_type(semantics::INTEGER));
+            // dynamic_object stuff
+            struct_types.push_back(Type::getIntNTy(getGlobalContext(), sizeof(semantics::builtin_types) * 8)); // type
+            struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT)); // parent
+            struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT)); // alloc method
+            struct_types.push_back(
+                ArrayType::get(
+                    Type::getIntNTy(
+                        getGlobalContext(), 
+                        8),
+                    sizeof(kite::stdlib::System::property_map) +
+                    sizeof(kite::stdlib::System::property_doc_map) +
+                    sizeof(std::string))); // placeholder
+            
+            // method specific stuff
+            struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT)); // method pointer
+            struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT)); // this pointer
+            struct_types.push_back(kite_type_to_llvm_type(semantics::INTEGER)); // number of arguments
             return PointerType::getUnqual(StructType::get(getGlobalContext(), ArrayRef<Type*>(struct_types)));
         }
 

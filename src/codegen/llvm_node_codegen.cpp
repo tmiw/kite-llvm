@@ -276,7 +276,7 @@ namespace kite
             if (tree.op == semantics::VARIABLE)
             {
                 std::string var_name = boost::get<std::string>(tree.children[0]);
-                if (vars.find(var_name) == vars.end())
+                if (vars.find(var_name) == vars.end() && var_name != "base" && var_name != "__root" && var_name != "__exc")
                 {
                     vars[var_name] = tree;
                 }

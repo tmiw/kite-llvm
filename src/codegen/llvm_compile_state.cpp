@@ -36,6 +36,7 @@ namespace kite
 	    {
 	        // Initially we're not inheriting anything.
             push_class_from(NULL);
+            _importNamespaceStack.push_back(std::vector<std::string>());
 	    }
 	               
 	    llvm_compile_state::~llvm_compile_state()
@@ -138,9 +139,9 @@ namespace kite
         std::string llvm_compile_state::identifier_prefix() const
         {
             std::string ret;
-            std::vector<std::string>::const_iterator i = _namespaceStack.begin();
+            std::vector<std::string>::const_iterator i = _importNamespaceStack.back().begin();
 
-            for (; i != _namespaceStack.end(); i++)
+            for (; i != _importNamespaceStack.back().end(); i++)
             {
                 ret += (*i);
                 ret += "__";
@@ -151,9 +152,9 @@ namespace kite
         std::string llvm_compile_state::full_class_name() const
         {
             std::string ret;
-            std::vector<std::string>::const_iterator i = _namespaceStack.begin();
+            std::vector<std::string>::const_iterator i = _importNamespaceStack.back().begin();
 
-            for (; i != _namespaceStack.end(); i++)
+            for (; i != _importNamespaceStack.back().end(); i++)
             {
                 ret += (*i);
                 ret += ".";

@@ -41,7 +41,7 @@ class base_outputter
     ]
 ];
 
-class html_outputter from base_outputter
+class html_outputter from System.doc.outputters.base_outputter
     /[Output HTML documents to file.]/
 [
     method new_document(
@@ -140,7 +140,7 @@ class base_document
     ]
 ];
 
-class html_document from base_document
+class html_document from System.doc.outputters.base_document
     /[HTML document class.]/
 [
     property filehandle /[HTML document's file object.]/,

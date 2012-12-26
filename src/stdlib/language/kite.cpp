@@ -122,7 +122,7 @@ namespace kite
                     size_t begin_pos = 0;
                     while (split_pos != std::string::npos)
                     {
-                        std::string tmp_string(module_name, 0, split_pos - begin_pos);
+                        std::string tmp_string(module_name, 0, split_pos);
                         std::replace(tmp_string.begin(), tmp_string.end(), '.', '/');
                         module_load_list.push_back(tmp_string);
                         module_name_list.push_back(std::string(module_name, begin_pos, split_pos - begin_pos));
@@ -139,6 +139,7 @@ namespace kite
                     System::list *search_path = (System::list*)rgx->split((System::string*)System::vm::loader::class_object().properties["searchPath"]);
                     
                     // Load each module in the list.
+                    state.push_import_namespace_stack();
                     int size = module_name_list.size();
                     for (int index = 0; index < size; index++)
                     {
@@ -175,6 +176,7 @@ namespace kite
                                 {
                                     state.pop_namespace_stack();
                                 }
+                                state.pop_import_namespace_stack();
                                 System::exceptions::exception *exc = 
                                     System::exceptions::FileError::Create(
                                         1,
@@ -186,12 +188,14 @@ namespace kite
                                 exc->throw_exception();
                                 return NULL;
                             }
+                            context->properties[module_name_list[index]] = the_object;
                         }
                         else
                         {
                             language::kite::syntax_tree ast;
                             if (ast.from_file(full_path))
                             {
+                                context->properties[module_name_list[index]] = the_object;
                                 ExecuteCode(ast, the_object);
                             }
                             else
@@ -200,11 +204,11 @@ namespace kite
                                 {
                                     state.pop_namespace_stack();
                                 }
+                                state.pop_import_namespace_stack();
                                 return NULL;
                             }
                         }
                         
-                        context->properties[module_name_list[index]] = the_object;
                         context = the_object;
                     }
                     
@@ -212,6 +216,7 @@ namespace kite
                     {
                         state.pop_namespace_stack();
                     }
+                    state.pop_import_namespace_stack();
                     return context;
                 }
                 
@@ -298,7 +303,7 @@ namespace kite
                         {
                             // Write LLVM code to manually call the generated function
                             // to ensure correct initialization.
-                            Value *val = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*)*8, (uint64_t)context, true));
+                            Value *val = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*)*8, (uint64_t)context, false));
                             val = state.module_builder().CreateIntToPtr(val, PointerType::getUnqual(Type::getInt32Ty(getGlobalContext())));
                             state.module_builder().CreateCall(function, val);
                         }

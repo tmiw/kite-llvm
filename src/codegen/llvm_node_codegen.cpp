@@ -295,7 +295,24 @@ namespace kite
             
             int index = 0;
             BOOST_FOREACH(semantics::syntax_tree_node const &node, tree.children)
-            {                
+            {
+                index++;
+                if (tree.op == semantics::CLASS && (index - 1) > 0)
+                {
+                    // Class inheritance/contents should not appear at the beginning of the method.
+                    continue;
+                }
+                else if (tree.op == semantics::MAKE && (index - 1) == 0)
+                {
+                    // neither should classes referenced by make.
+                    continue;
+                }
+                else if (tree.op == semantics::METHOD)
+                {
+                    // or methods.
+                    continue;
+                }
+                
                 if ( const semantics::syntax_tree *childTree = boost::get<semantics::syntax_tree>(&node) )
                 {
                     find_used_variable_names(*childTree, vars);
@@ -1858,12 +1875,18 @@ namespace kite
             BasicBlock *currentBlock = builder.GetInsertBlock();
             std::string className = boost::get<std::string>(tree.children[0]);
             
-            state.push_namespace_stack(className);
             semantics::syntax_tree &body = const_cast<semantics::syntax_tree&>(boost::get<semantics::syntax_tree>(tree.children[tree.children.size() - 1]));
             std::vector<std::string> args;
             
+            // Initialize dynamic_object that will store the class and insert
+            // LLVM code to call __static_init__ on this object.
+            Value *obj = generate_llvm_dynamic_object_alloc(NULL, tree);
             if (tree.children.size() > 2)
             {
+                // Set child class parent.
+                Value *parent = boost::apply_visitor(llvm_node_codegen(state), tree.children[1]);
+                generate_llvm_dynamic_object_set_parent(obj, parent, tree);
+
                 semantics::syntax_tree &base_tree = const_cast<semantics::syntax_tree&>(
                     boost::get<semantics::syntax_tree>(tree.children[1]));
                 state.push_class_from(&base_tree);
@@ -1873,25 +1896,7 @@ namespace kite
                 state.push_class_from(NULL);
             }
             
-            ret = generate_llvm_method(std::string("__static_init__"), args, body, tree);
-
-            // Initialize dynamic_object that will store the class and insert
-            // LLVM code to call __static_init__ on this object.
-            Value *obj = generate_llvm_dynamic_object_alloc(NULL, tree);
-            if (tree.children.size() > 2)
-            {
-                // Set child class parent.
-                Value *parent = boost::apply_visitor(llvm_node_codegen(state), tree.children[1]);
-                generate_llvm_dynamic_object_set_parent(obj, parent, tree);
-            }
-            generate_debug_data(
-                builder.CreateCall(ret, obj),
-                tree.position);
-            
-            generate_llvm_dynamic_object_set_name(obj, tree);
-            state.pop_namespace_stack();
-            state.pop_class_from();
-            
+            // Store object in parent so it's accessible during child(ren)'s static init.
             Value *property = generate_debug_data(
                 builder.CreateLoad(state.current_symbol_stack()["this"]),
                 tree.position);
@@ -1899,6 +1904,17 @@ namespace kite
             generate_debug_data(
                 builder.CreateStore(obj, prop_entry),
                 tree.position);
+            
+            state.push_namespace_stack(className);
+            ret = generate_llvm_method(std::string("__static_init__"), args, body, tree);
+            state.pop_namespace_stack();
+            
+            generate_debug_data(
+                builder.CreateCall(ret, obj),
+                tree.position);
+            
+            generate_llvm_dynamic_object_set_name(obj, tree);
+            state.pop_class_from();
             
             state.current_symbol_stack()[className] = prop_entry;
             

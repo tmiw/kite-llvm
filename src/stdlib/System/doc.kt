@@ -60,7 +60,7 @@ class doc_node
     ]
 ];
 
-class method_argument_node from doc_node
+class method_argument_node from System.doc.doc_node
     /[Document node corresponding to a method argument.]/
 [
     construct(
@@ -73,7 +73,7 @@ class method_argument_node from doc_node
     ]
 ];
 
-class method_node from doc_node
+class method_node from System.doc.doc_node
     /[Document node corresponding to a method.]/
 [
     construct(
@@ -120,7 +120,7 @@ class method_node from doc_node
     ]
 ];
 
-class property_node from doc_node
+class property_node from System.doc.doc_node
     /[Document node corresponding to a property.]/
 [
     construct(
@@ -141,7 +141,7 @@ class property_node from doc_node
     ]
 ];
 
-class constructor_node from method_node
+class constructor_node from System.doc.method_node
     /[Document node corresponding to a constructor.]/
 [
     construct(
@@ -153,7 +153,7 @@ class constructor_node from method_node
     ]
 ];
 
-class destructor_node from method_node
+class destructor_node from System.doc.method_node
     /[Document node corresponding to a destructor.]/
 [
     construct(
@@ -166,7 +166,7 @@ class destructor_node from method_node
     ]
 ];
 
-class operator_node from method_node
+class operator_node from System.doc.method_node
     /[Document node corresponding to an operator.]/
 [
     construct(
@@ -179,7 +179,7 @@ class operator_node from method_node
     ]
 ];
 
-class class_node from doc_node 
+class class_node from System.doc.doc_node 
     /[Documentation node corresponding to a class.]/
 [
     property inherits /[Name of inherited class]/,

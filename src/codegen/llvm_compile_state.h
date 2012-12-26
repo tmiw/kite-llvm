@@ -81,9 +81,12 @@ namespace kite
             inline std::map<std::string, Value*> &current_symbol_stack() { return *_symbolTableStack.back(); }
             inline std::vector<std::map<std::string, Value*> *> &symbol_stack() { return _symbolTableStack; }
             void pop_symbol_stack();
-           
-            void push_namespace_stack(std::string name) { _namespaceStack.push_back(name); }
-            void pop_namespace_stack() { _namespaceStack.pop_back(); }
+            
+            void push_import_namespace_stack() { _importNamespaceStack.push_back(std::vector<std::string>()); }
+            void pop_import_namespace_stack() { _importNamespaceStack.pop_back(); }
+            
+            void push_namespace_stack(std::string name) { _importNamespaceStack.back().push_back(name); }
+            void pop_namespace_stack() { _importNamespaceStack.back().pop_back(); }
             std::string identifier_prefix() const;
             std::string full_class_name() const;
 
@@ -103,7 +106,7 @@ namespace kite
             DIBuilder *pop_debug_builder(); /*! Pops debug builder from top of stack. */
             
             std::vector<DIBuilder*> _debugBuilderStack;
-            std::vector<std::string> _namespaceStack;
+            std::vector<std::vector<std::string> > _importNamespaceStack;
             std::vector<Module*> _moduleStack;
             std::vector<BasicBlock*> _loopStack;
             std::vector<BasicBlock*> _loopEndStack;

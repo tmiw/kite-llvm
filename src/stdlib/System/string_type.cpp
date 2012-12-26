@@ -286,7 +286,8 @@ cont_parse:
 
                         length = 0;
                         if (ret_string == NULL) {
-                            ret_string = output;
+                            ret_string = GC_strdup(output);
+                            GC_free(output);
                         } else {
                             ret_string = (char*)GC_realloc(ret_string, strlen(ret_string) + 
                                                  strlen(output) + 1);
@@ -318,7 +319,8 @@ cont_parse:
                         strcat(ret_string, output);
                         GC_free(output);
                     } else {
-                        ret_string = output;
+                        ret_string = GC_strdup(output);
+                        GC_free(output);
                     }
                 } else if (!ret_string) {
                     ret_string = (char*)GC_malloc_atomic(1);

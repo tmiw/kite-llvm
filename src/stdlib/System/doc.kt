@@ -89,12 +89,6 @@ class method_node from System.doc.doc_node
         formatter /[The System.doc.outputters object to use.]/
     ) /[Outputs documentation for the given method.]/
     [   
-        property names;
-        property descrs;
-        property name_str;
-        property i;
-        property child;
-        
         names = [];
         descrs = [];
         name_str = this.name + "(";
@@ -197,9 +191,6 @@ class class_node from System.doc.doc_node
         formatter /[The System.doc.outputters object to use.]/
     ) /[Outputs documentation for the given class.]/
     [
-        property doc;
-        property i;
-        
         doc = formatter|new_document(name, "Class documentation: " + name);
         
         doc|paragraph(description);
@@ -325,9 +316,6 @@ method generate_method_arguments(
     method_obj /[System.method object corresponding to the method to generate arguments for.]/
 ) /[Generate documentation for method arguments.]/
 [
-    property args;
-    property i;
-    
     args = method_obj|get_param_names;
     i = 0;
     while (i < args|count) [
@@ -346,8 +334,6 @@ method generate_constructor(
     method_obj /[System.method object corresponding to constructor.]/
 ) /[Generate documentation for a constructor.]/
 [
-    property ret;
-    
     ret = make System.doc.constructor_node(class_name, method_obj|doc);
     generate_method_arguments(ret, method_obj);
     ret;
@@ -358,8 +344,6 @@ method generate_method(
     method_obj /[System.method object corresponding to a method.]/
 ) /[Generate documentation for a method.]/
 [
-    property ret;
-    
     ret = make System.doc.method_node(method_name, method_obj|doc);
     generate_method_arguments(ret, method_obj);
     ret;
@@ -370,8 +354,6 @@ method generate_destructor(
     method_obj /[System.method object corresponding to destructor.]/
 ) /[Generate documentation for a destructor.]/
 [
-    property ret;
-    
     ret = make System.doc.destructor_node(class_name, method_obj|doc);
     ret;
 ];
@@ -381,8 +363,6 @@ method generate_operator(
     op_method /[System.method object corresponding to operator.]/
 ) /[Generate documentation for an operator.]/
 [
-    property ret;
-    
     ret = make System.doc.operator_node(op_name, op_method|doc);
     generate_method_arguments(ret, op_method);
     ret;
@@ -395,12 +375,6 @@ method generate_doc_helper(
 [
     decide [
         (done_list[cls|type] is System.null) [
-            property ret;
-            property tmp;
-            property i;
-            property j;
-            property tmp_method;
-
             decide [
                 (cls|get_base_object is System.null) [
                     ret = make System.doc.class_node(cls|type, null);
@@ -478,8 +452,6 @@ method generate_doc(
     cls /[Class object to generate documentation for.]/
 ) /[Generate documentation objects for the given class.]/ 
 [
-    property tmp;
-    
     tmp = make System.collections.binary_tree();
     generate_doc_helper(cls, tmp);
 ];

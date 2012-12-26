@@ -300,17 +300,20 @@ namespace kite
                 if (tree.op == semantics::CLASS && (index - 1) > 0)
                 {
                     // Class inheritance/contents should not appear at the beginning of the method.
-                    continue;
+                    break;
                 }
                 else if (tree.op == semantics::MAKE && (index - 1) == 0)
                 {
                     // neither should classes referenced by make.
-                    continue;
+                    break;
                 }
-                else if (tree.op == semantics::METHOD)
+                else if (
+                    tree.op == semantics::METHOD_REF || tree.op == semantics::CONSTRUCTOR ||
+                    tree.op == semantics::DESTRUCTOR || tree.op == semantics::OPERATOR ||
+                    tree.op == semantics::METHOD)
                 {
                     // or methods.
-                    continue;
+                    break;
                 }
                 
                 if ( const semantics::syntax_tree *childTree = boost::get<semantics::syntax_tree>(&node) )

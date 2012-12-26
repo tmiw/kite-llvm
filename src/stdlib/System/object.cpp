@@ -60,6 +60,7 @@ namespace kite
                 ("is_class__o", function_semantics(semantics::OBJECT, (void*)&is_class__o))
                 ("get_base_object__o", function_semantics(semantics::OBJECT, (void*)&get_base_object__o))
                 ("list_properties__o", function_semantics(semantics::OBJECT, (void*)&list_properties__o))
+                ("list_methods__o", function_semantics(semantics::OBJECT, (void*)&list_methods__o))
                 ("get_property__oo", function_semantics(semantics::OBJECT, (void*)&get_property__oo))
                 ("get_property__os", function_semantics(semantics::OBJECT, (void*)&get_property__os))
                 ("get_property_string__oo", function_semantics(semantics::OBJECT, (void*)&get_property_string__oo))
@@ -417,6 +418,50 @@ void *list_properties__o(void *obj)
         {
             retValue->list_contents.push_back(new System::string(i->first.c_str()));
         }
+    }
+    
+    return retValue;
+}
+
+void *list_methods__o(void *obj)
+{
+    System::dynamic_object *object = (System::dynamic_object*)obj;
+    System::list *retValue = System::list::Create(0);
+    std::map<std::string, std::vector<int> > funcMap;
+    
+    for (System::property_map::iterator i = object->properties.begin();
+         i != object->properties.end();
+         i++)
+    {
+        if (i->second != NULL && i->second->type == kite::semantics::METHOD_TY)
+        {
+            size_t pos = i->first.rfind("__");
+            if (pos != std::string::npos)
+            {
+                std::string fName = i->first.substr(0, pos);
+                int numArgs = i->first.substr(pos + 2).size() - 1;
+                std::vector<int> &argList = funcMap[fName];
+                if (std::find(argList.begin(), argList.end(), numArgs) == argList.end())
+                {
+                    argList.push_back(numArgs);
+                }
+            }
+        }
+    }
+    
+    for (std::map<std::string, std::vector<int> >::iterator i = funcMap.begin();
+         i != funcMap.end();
+         i++)
+    {
+        retValue->list_contents.push_back(new System::string(i->first.c_str()));
+        System::list *argCounts = System::list::Create(0);
+        for (std::vector<int>::iterator j = i->second.begin();
+             j != i->second.end();
+             j++)
+        {
+            argCounts->list_contents.push_back(new System::integer(*j));
+        }
+        retValue->list_contents.push_back(argCounts);
     }
     
     return retValue;

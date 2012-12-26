@@ -87,6 +87,7 @@ extern "C"
     void *is_class__o(void *obj);
     void *get_base_object__o(void *obj);
     void *list_properties__o(void *obj);
+    void *list_methods__o(void *obj);
 }
 
 #endif

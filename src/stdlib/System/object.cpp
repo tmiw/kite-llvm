@@ -61,6 +61,7 @@ namespace kite
                 ("get_base_object__o", function_semantics(semantics::OBJECT, (void*)&get_base_object__o))
                 ("list_properties__o", function_semantics(semantics::OBJECT, (void*)&list_properties__o))
                 ("list_methods__o", function_semantics(semantics::OBJECT, (void*)&list_methods__o))
+                ("get_destructor__o", function_semantics(semantics::OBJECT, (void*)&get_destructor__o))
                 ("get_method__ooo", function_semantics(semantics::OBJECT, (void*)&get_method__ooo))
                 ("get_property__oo", function_semantics(semantics::OBJECT, (void*)&get_property__oo))
                 ("get_property__os", function_semantics(semantics::OBJECT, (void*)&get_property__os))
@@ -487,4 +488,9 @@ void *get_method__ooo(void *obj, void *prop, void *numargs)
     fullName += std::string(numArgs->val + 1, 'o');
     
     return get_property__os(obj, fullName.c_str());
+}
+
+void *get_destructor__o(void *obj)
+{
+    return get_method__ooo(obj, new System::string("__destruct__"), new System::integer(0));
 }

@@ -26,7 +26,7 @@
  ****************************************************************************/
 
 #include "dynamic_object.h"
-#include "string.h"
+#include "string_type.h"
 #include "method.h"
 #include "../language/kite.h"
 #include "exceptions/NullReference.h"
@@ -63,6 +63,18 @@ namespace kite
                 {
                     add_method(semantics::Constants::Get().operator_map[op].c_str(), 0, ptr);
                 }
+            }
+            
+            void dynamic_object::InitializeClass()
+            {
+                t_class_object.properties["__name"] = new System::string("System.object");
+                t_class_object.add_method("str", 0, (void*)&s_as_string);
+            }
+            
+            const char *dynamic_object::s_as_string(dynamic_object *obj)
+            {
+                System::string *str = (System::string*)obj->properties["__name"];
+                return str->string_val.c_str();
             }
         }
     }

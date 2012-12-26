@@ -52,6 +52,7 @@ namespace kite
             typedef std::less<std::string> map_compare;
             typedef std::map<std::string, object*, map_compare, map_allocator> property_map;
             typedef std::map<std::string, std::string> property_doc_map;
+            
             struct dynamic_object : object
             {
                 static dynamic_object t_class_object;
@@ -74,6 +75,8 @@ namespace kite
                 
                 void add_method(const char *name, int numargs, void *ptr);
                 void add_operator(semantics::code_operation op, void *ptr);
+                static const char *s_as_string(dynamic_object *obj);
+                static void InitializeClass();
             };
         }
     }

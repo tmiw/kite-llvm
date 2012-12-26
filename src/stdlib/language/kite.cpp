@@ -95,11 +95,13 @@ namespace kite
                     system_obj->properties["integer"] = &System::integer::class_object;
                     system_obj->properties["boolean"] = &System::boolean::class_object;
                     system_obj->properties["method"] = &System::method::class_obj;
+                    system_obj->properties["object"] = &System::dynamic_object::class_object();
                     system_obj->properties["string"] = &System::string::class_object;
                     System::fpnum::InitializeClass();
                     System::integer::InitializeClass();
                     System::boolean::InitializeClass();
                     System::method::InitializeClass();
+                    System::dynamic_object::InitializeClass();
                     System::string::InitializeClass();
                     
                     // Initialize args array

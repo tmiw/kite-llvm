@@ -67,7 +67,7 @@ namespace kite
                 ("get_property__os", function_semantics(semantics::OBJECT, (void*)&get_property__os))
                 ("get_property_string__oo", function_semantics(semantics::OBJECT, (void*)&get_property_string__oo))
                 ("get_property_string__os", function_semantics(semantics::OBJECT, (void*)&get_property_string__os));
-                
+
             void object::finalizer_setup()
             {
                 // Taken from gc_cpp.h. This seems to be to take into account

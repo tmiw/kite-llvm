@@ -44,6 +44,8 @@ namespace kite
         {
             typedef std::basic_string<char, std::char_traits<char>, gc_allocator<char> > string_type;
             
+            class list;
+            
             struct string : System::object
             {
                 static System::dynamic_object class_object;
@@ -66,6 +68,7 @@ namespace kite
                 char* ltrim();
                 char* rtrim();
                 char* str();
+                char* format(list *args);
                 char* trim();
                 char* upper();
                 System::object *to_object();
@@ -83,6 +86,8 @@ extern "C"
     bool PREFIX_STRING_METHOD_NAME(bool__s)(const char* val);
     char* PREFIX_STRING_METHOD_NAME(charAt__si)(const char *val, int index);
     double PREFIX_STRING_METHOD_NAME(float__s)(const char* val);
+    char* PREFIX_STRING_METHOD_NAME(format__oo)(void *val, void *args);
+    char* PREFIX_STRING_METHOD_NAME(format__so)(const char *val, void *args);
     int PREFIX_STRING_METHOD_NAME(int__s)(const char* val);
     int PREFIX_STRING_METHOD_NAME(length__s)(const char* val);
     char* PREFIX_STRING_METHOD_NAME(lower__s)(const char *val);

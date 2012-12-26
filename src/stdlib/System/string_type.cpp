@@ -30,10 +30,69 @@
 #include <boost/assign.hpp>
 #include "string_type.h"
 #include "boolean.h"
+#include "integer.h"
+#include "float.h"
 #include "exceptions/InvalidArgument.h"
+#include "exceptions/TypeMismatch.h"
+#include "list.h"
+#include "config.h"
 
 using namespace boost::assign;
- 
+
+#define CHECK_TYPE(object, t) \
+    if (object == NULL) { \
+        exc = kite::stdlib::System::exceptions::InvalidArgument::Create(1, \
+            new kite::stdlib::System::string( \
+                "Not enough objects have been passed in for the format string given.")); \
+        exc->throw_exception(); \
+        return NULL; \
+    } \
+    if (object->type != t) { \
+        exc = kite::stdlib::System::exceptions::TypeMismatch::Create(1, \
+            new kite::stdlib::System::string( \
+                "Object passed to format is of invalid type for the format " \
+                "specifier provided.")); \
+        exc->throw_exception(); \
+        return NULL; \
+    }
+
+#define FORMAT(out, type, formatted_object, val) \
+    fmtstr = (char*)GC_malloc(length + 1); \
+    strncpy(fmtstr, cur - length + 1, length); \
+    asprintf(&out, fmtstr, \
+        (type)formatted_object->val); \
+    GC_free(fmtstr);
+
+#ifndef HAVE_ASPRINTF
+void asprintf(char **out, char *fmt, ...)
+{
+    va_list ap;
+    char *ret;
+
+    va_start(ap, fmt);
+    switch(*(fmt+1))
+    {    
+        case 's':
+        {
+            char *ptr = va_arg(ap, char*);
+            ret = (char*)GC_malloc(strlen(ptr) + 1);
+            strcpy(ret, ptr);
+            break;
+        }
+        default:
+        {
+            /* Really, we need to do this better to avoid buffer overflows. */
+            ret = (char*)GC_malloc(256);
+            vsprintf(ret, fmt, ap);
+            break;
+        }
+    }
+
+    va_end(ap);
+    *out = ret;
+}
+#endif
+
 namespace kite
 {
     namespace stdlib
@@ -55,6 +114,8 @@ namespace kite
                 ("bool__s", function_semantics(semantics::BOOLEAN, (void*)&(PREFIX_STRING_METHOD_NAME(bool__s))))
                 ("charAt__si", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(charAt__si))))
                 ("float__s", function_semantics(semantics::FLOAT, (void*)&(PREFIX_STRING_METHOD_NAME(float__s))))
+                ("format__so", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(format__so))))
+                ("format__oo", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(format__oo))))
                 ("int__s", function_semantics(semantics::INTEGER, (void*)&(PREFIX_STRING_METHOD_NAME(int__s))))
                 ("length__s", function_semantics(semantics::INTEGER, (void*)&(PREFIX_STRING_METHOD_NAME(length__s))))
                 ("lower__s", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(lower__s))))
@@ -134,6 +195,139 @@ namespace kite
                 return PREFIX_STRING_METHOD_NAME(upper__s)(string_val.c_str());
             }
             
+            char* string::format(list *format_list)
+            {
+                char *output = NULL, *ret_string = NULL, *cur, *fmtstr;
+                int length = 0;
+                kite::stdlib::System::exceptions::exception *exc;
+
+                if (format_list == NULL)
+                {
+                    format_list = list::Create(0);
+                }
+
+                cur = const_cast<char*>(string_val.c_str());
+                list_contents_type::iterator cur_fmt = format_list->list_contents.begin();
+                while(*cur && cur_fmt != format_list->list_contents.end()) {
+                    if (*cur == '%') {
+                        cur++;
+                        length++;
+cont_parse:
+                        while(*cur && *cur != '%' && !isalpha(*cur)) {
+                            cur++;
+                            length++;
+                        }
+                        if (*cur == '%') goto cont_parse;
+
+                        length++;
+                        switch(*cur) {
+                            case 'd':
+                            case 'i':
+                            case 'o':
+                            case 'u':
+                            case 'x':
+                            case 'X':
+                            {
+                                /* Integer conversion. */
+                                kite::stdlib::System::integer *intVal = (kite::stdlib::System::integer*)*cur_fmt;
+                                CHECK_TYPE(intVal, kite::semantics::INTEGER);
+                                FORMAT(output, int, intVal, val);
+                                break;
+                            }
+                            case 'D':
+                            case 'O':
+                            case 'U':
+                            {
+                                /* Long conversion. */
+                                kite::stdlib::System::integer *intVal = (kite::stdlib::System::integer*)*cur_fmt;
+                                CHECK_TYPE(intVal, kite::semantics::INTEGER);
+                                FORMAT(output, long, intVal, val);
+                                break;
+                            }
+                            case 'e':
+                            case 'E':
+                            case 'F':
+                            case 'f':
+                            case 'G':
+                            case 'g':
+                            case 'A':
+                            case 'a':
+                            {
+                                /* Double conversion. */
+                                kite::stdlib::System::fpnum *fp = (kite::stdlib::System::fpnum*)*cur_fmt;
+                                CHECK_TYPE(fp, kite::semantics::FLOAT);
+                                FORMAT(output, double, fp, val);
+                                break;
+                            }
+                            case 's':
+                            {
+                                /* String conversion */
+                                kite::stdlib::System::string *str = (kite::stdlib::System::string*)*cur_fmt;
+                                CHECK_TYPE(str, kite::semantics::STRING);
+                                FORMAT(output, char*, str, string_val.c_str());
+                                break;
+                            }
+                            case 'c':
+                            {
+                                /* Character conversion */
+                                kite::stdlib::System::integer *intVal = (kite::stdlib::System::integer*)*cur_fmt;
+                                CHECK_TYPE(intVal, kite::semantics::INTEGER);
+                                FORMAT(output, int, intVal, val);
+                                break;
+                            }
+                            default:
+                                /* Invalid format string. */
+                                exc = kite::stdlib::System::exceptions::InvalidArgument::Create(
+                                    1,
+                                    new kite::stdlib::System::string("Provided format string is invalid."));
+                                exc->throw_exception();
+                                return NULL;
+                        }
+
+                        length = 0;
+                        if (ret_string == NULL) {
+                            ret_string = output;
+                        } else {
+                            ret_string = (char*)GC_realloc(ret_string, strlen(ret_string) + 
+                                                 strlen(output) + 1);
+                            strcat(ret_string, output);
+                            GC_free(output);
+                        }
+                        cur++;
+                        cur_fmt++;
+                        continue;
+                    }
+
+                    cur++;
+                    length++;
+                }
+
+                if (cur_fmt != format_list->list_contents.end() && !*cur) {
+                    exc = kite::stdlib::System::exceptions::InvalidArgument::Create(
+                        1,
+                        new kite::stdlib::System::string(
+                                        "Provided format string has fewer format "
+                                        "specifiers than required."));
+                    exc->throw_exception();
+                    return NULL;
+                } else if (length > 0 || *cur) {
+                    asprintf(&output, cur - length);
+                    if (ret_string != NULL) {
+                        ret_string = 
+                            (char*)GC_realloc(ret_string, strlen(ret_string) + strlen(output) + 1);
+                        strcat(ret_string, output);
+                        GC_free(output);
+                    } else {
+                        ret_string = output;
+                    }
+                } else if (!ret_string) {
+                    ret_string = (char*)GC_malloc(1);
+                    ret_string[0] = 0;
+                }
+
+                return ret_string;
+            }
+            
             System::object *string::to_object()
             {
                 return (System::object*)(PREFIX_STRING_METHOD_NAME(obj__s)(string_val.c_str()));
@@ -141,7 +335,7 @@ namespace kite
             
             void string::InitializeClass()
             {
-                class_object.properties["__name"] = new System::string("System.string");
+                class_object.properties["__name"] = new kite::stdlib::System::string("System.string");
             }
         }
     }
@@ -156,7 +350,7 @@ int PREFIX_STRING_METHOD_NAME(asc__s)(const char *val)
 
 char* PREFIX_STRING_METHOD_NAME(append__ss)(const char* val, char* rhs)
 {
-    char *ret = (char*)malloc(strlen(val) + strlen(rhs) + 1);
+    char *ret = (char*)GC_malloc(strlen(val) + strlen(rhs) + 1);
     strcpy(ret, val);
     strcat(ret, rhs);
     return ret;
@@ -182,7 +376,7 @@ char* PREFIX_STRING_METHOD_NAME(charAt__si)(const char *val, int index)
         exc->throw_exception();
     }
     
-    char *ret = (char*)malloc(2);
+    char *ret = (char*)GC_malloc(2);
     ret[0] = val[index];
     ret[1] = 0;
     return ret;
@@ -205,7 +399,7 @@ int PREFIX_STRING_METHOD_NAME(length__s)(const char* val)
 
 char* PREFIX_STRING_METHOD_NAME(lower__s)(const char *val)
 {
-    char *ret = (char*)malloc(strlen(val) + 1);
+    char *ret = (char*)GC_malloc(strlen(val) + 1);
     char *tmp = ret;
     for ( ; *val != 0; val++, tmp++)
     {
@@ -219,7 +413,7 @@ char* PREFIX_STRING_METHOD_NAME(ltrim__s)(const char *val)
 {
     while (isspace(*val)) { val++; }
     
-    char *ret = (char*)malloc(strlen(val) + 1);
+    char *ret = (char*)GC_malloc(strlen(val) + 1);
     strcpy(ret, val);
     return ret;
 }
@@ -249,7 +443,7 @@ void* PREFIX_STRING_METHOD_NAME(print__o)(void *val)
 
 char* PREFIX_STRING_METHOD_NAME(rtrim__s)(const char *val)
 {
-    char *ret = (char*)calloc(1, strlen(val) + 1);
+    char *ret = (char*)GC_malloc(strlen(val) + 1);
     char *tmp = ret + strlen(val) - 1;
     
     strcpy(ret, val);
@@ -265,7 +459,7 @@ char* PREFIX_STRING_METHOD_NAME(str__s)(const char *val)
 char* PREFIX_STRING_METHOD_NAME(str__o)(void *val)
 {
     System::string *lhs_str = (System::string*)val;
-    char *ret = (char*)calloc(1, lhs_str->string_val.size() + 1);
+    char *ret = (char*)GC_malloc(lhs_str->string_val.size() + 1);
     strcpy(ret, lhs_str->string_val.c_str());
     return ret;
 }
@@ -278,7 +472,7 @@ char* PREFIX_STRING_METHOD_NAME(trim__s)(const char *val)
 
 char* PREFIX_STRING_METHOD_NAME(upper__s)(const char *val)
 {
-    char *ret = (char*)malloc(strlen(val) + 1);
+    char *ret = (char*)GC_malloc(strlen(val) + 1);
     char *tmp = ret;
     for ( ; *val != 0; val++, tmp++)
     {
@@ -342,4 +536,16 @@ void *PREFIX_STRING_METHOD_NAME(__op_geq____oo)(void *lhs, void *rhs)
     System::string *rhs_str = (System::string*)rhs;
     
     return new System::boolean(lhs_str->string_val >= rhs_str->string_val);
+}
+
+char* PREFIX_STRING_METHOD_NAME(format__oo)(void *val, void *args)
+{
+    System::list *argList = (System::list*)args;
+    System::string *stringVal = (System::string*)val;
+    return stringVal->format(argList);
+}
+
+char* PREFIX_STRING_METHOD_NAME(format__so)(const char *val, void *args)
+{
+    return PREFIX_STRING_METHOD_NAME(format__oo)(new System::string(val), args);
 }

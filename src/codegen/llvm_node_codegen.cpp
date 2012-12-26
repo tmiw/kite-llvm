@@ -1611,7 +1611,7 @@ namespace kite
             return F;
         }
         
-        Value *llvm_node_codegen::generate_llvm_method(std::string name, std::vector<std::string> &argnames, semantics::syntax_tree &body, const semantics::syntax_tree &parent) const
+        Value *llvm_node_codegen::generate_llvm_method(const std::string &name, std::vector<std::string> &argnames, semantics::syntax_tree &body, const semantics::syntax_tree &parent) const
         {
             BasicBlock *currentBB = state.module_builder().GetInsertBlock();
             std::vector<Type*> argTypes;
@@ -1719,7 +1719,7 @@ namespace kite
             return F;
         }
         
-        Value *llvm_node_codegen::generate_llvm_method_call(Value *self, std::string name, std::vector<Value*> &params, const semantics::syntax_tree &tree) const
+        Value *llvm_node_codegen::generate_llvm_method_call(Value *self, const std::string &name, std::vector<Value*> &params, const semantics::syntax_tree &tree) const
         {
             IRBuilder<> &builder = state.module_builder();
             Module *module = state.current_module();
@@ -2047,7 +2047,7 @@ namespace kite
                 tree.position);
         }
         
-        void llvm_node_codegen::generate_llvm_dynamic_object_set_doc_string(Value *obj, std::string doc, const semantics::syntax_tree &tree) const
+        void llvm_node_codegen::generate_llvm_dynamic_object_set_doc_string(Value *obj, const std::string &doc, const semantics::syntax_tree &tree) const
         {
             if (doc.size() > 0)
             {
@@ -2072,7 +2072,7 @@ namespace kite
             }
         }
         
-        void llvm_node_codegen::generate_llvm_dynamic_object_set_doc_string_arg(Value *obj, std::string name, std::string doc, const semantics::syntax_tree &tree) const
+        void llvm_node_codegen::generate_llvm_dynamic_object_set_doc_string_arg(Value *obj, const std::string &name, const std::string &doc, const semantics::syntax_tree &tree) const
         {
             Module *module = state.current_module();
             IRBuilder<> &builder = state.module_builder();
@@ -2099,7 +2099,7 @@ namespace kite
                 tree.position);
         }
         
-        void llvm_node_codegen::generate_llvm_dynamic_object_set_doc_string_prop(Value *obj, std::string name, std::string doc, const semantics::syntax_tree &tree) const
+        void llvm_node_codegen::generate_llvm_dynamic_object_set_doc_string_prop(Value *obj, const std::string &name, const std::string &doc, const semantics::syntax_tree &tree) const
         {
             Module *module = state.current_module();
             IRBuilder<> &builder = state.module_builder();
@@ -2154,7 +2154,7 @@ namespace kite
                 tree.position);
         }
         
-        Value *llvm_node_codegen::generate_llvm_dynamic_object_get_property(Value *obj, std::string name, const semantics::syntax_tree &tree, bool set) const
+        Value *llvm_node_codegen::generate_llvm_dynamic_object_get_property(Value *obj, const std::string &name, const semantics::syntax_tree &tree, bool set) const
         {
             Module *module = state.current_module();
             IRBuilder<> &builder = state.module_builder();

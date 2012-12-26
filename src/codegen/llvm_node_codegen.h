@@ -68,7 +68,7 @@ namespace kite
             // For deref_filter
             Value *operator()(llvm_node_codegen_params &param) const;
             
-            Value *generate_llvm_method(std::string name, std::vector<std::string> &argnames, semantics::syntax_tree &body, const semantics::syntax_tree &parent) const;
+            Value *generate_llvm_method(const std::string &name, std::vector<std::string> &argnames, semantics::syntax_tree &body, const semantics::syntax_tree &parent) const;
             Value *generate_llvm_eval_method(std::vector<std::string> &argnames, semantics::syntax_tree &body, const semantics::syntax_tree &parent) const;
             
             static std::string type_to_code(semantics::builtin_types type);
@@ -114,16 +114,16 @@ namespace kite
             Value *codegen_from_op(semantics::syntax_tree const &tree) const;
             
             stdlib::object_method_map &get_method_map(semantics::builtin_types type) const;
-            Value *generate_llvm_method_call(Value *self, std::string name, std::vector<Value*> &params, const semantics::syntax_tree &tree) const;
+            Value *generate_llvm_method_call(Value *self, const std::string &name, std::vector<Value*> &params, const semantics::syntax_tree &tree) const;
             Value *generate_llvm_dynamic_object_alloc(Value *orig, const semantics::syntax_tree &tree) const;
             void generate_llvm_dynamic_object_set_parent(Value *obj, Value *parent, const semantics::syntax_tree &tree) const;
             void generate_llvm_dynamic_object_set_name(Value *obj, const semantics::syntax_tree &tree) const;
-            Value *generate_llvm_dynamic_object_get_property(Value *obj, std::string name, const semantics::syntax_tree &tree, bool set = false) const;
+            Value *generate_llvm_dynamic_object_get_property(Value *obj, const std::string &name, const semantics::syntax_tree &tree, bool set = false) const;
             Value *generate_llvm_method_alloc(Value *method, const semantics::syntax_tree &tree) const;
             Value *generate_llvm_dynamic_object_get_root(const semantics::syntax_tree &tree) const;
-            void generate_llvm_dynamic_object_set_doc_string(Value *obj, std::string doc, const semantics::syntax_tree &tree) const;
-            void generate_llvm_dynamic_object_set_doc_string_arg(Value *obj, std::string name, std::string doc, const semantics::syntax_tree &tree) const;
-            void generate_llvm_dynamic_object_set_doc_string_prop(Value *obj, std::string name, std::string doc, const semantics::syntax_tree &tree) const;
+            void generate_llvm_dynamic_object_set_doc_string(Value *obj, const std::string &doc, const semantics::syntax_tree &tree) const;
+            void generate_llvm_dynamic_object_set_doc_string_arg(Value *obj, const std::string &name, const std::string &doc, const semantics::syntax_tree &tree) const;
+            void generate_llvm_dynamic_object_set_doc_string_prop(Value *obj, const std::string &name, const std::string &doc, const semantics::syntax_tree &tree) const;
             void find_used_variable_names(const semantics::syntax_tree &tree, std::map<std::string, semantics::syntax_tree> &vars) const;
             
             Type *get_method_type() const;

@@ -1916,13 +1916,13 @@ namespace kite
             
             state.push_namespace_stack(className);
             ret = generate_llvm_method(std::string("__static_init__"), args, body, tree);
-            state.pop_namespace_stack();
             
             generate_debug_data(
                 builder.CreateCall(ret, obj),
                 tree.position);
             
             generate_llvm_dynamic_object_set_name(obj, tree);
+            state.pop_namespace_stack();
             state.pop_class_from();
             
             state.current_symbol_stack()[className] = prop_entry;

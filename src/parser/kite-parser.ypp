@@ -343,9 +343,7 @@ from_statement:
 
 variable_immediate:     
     variable_immediate '.' SYMBOL_NAME {
-        $<opValue>$ = new kite::semantics::syntax_tree(@$);
-        $<opValue>$->op = kite::semantics::DEREF_FILTER;
-        $<opValue>$->children.push_back(*$<opValue>1);
+        $<opValue>$ = $<opValue>1;
         
         kite::semantics::syntax_tree deref_method(@$);
         deref_method.op = kite::semantics::DEREF_PROPERTY;
@@ -418,9 +416,9 @@ destructor_definition: DESTRUCT optional_docstring '[' input ']' {
     ;
     
 property_definition:    optional_global PROPERTY SYMBOL_NAME optional_docstring   {
-        /* TODO: global does nothing here. */
         $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::PROP_ASSIGN;
+        $<opValue>$->is_global = $<intValue>$;
         
         kite::semantics::syntax_tree deref_filter(@$);
         deref_filter.op = kite::semantics::DEREF_FILTER;
@@ -444,9 +442,9 @@ property_definition:    optional_global PROPERTY SYMBOL_NAME optional_docstring 
         $<opValue>$->prop_name = *$<stringValue>3;
     }
     | optional_global PROPERTY SYMBOL_NAME optional_docstring '=' data_manipulation_statement {
-        /* TODO: global does nothing here. */
         $<opValue>$ = new kite::semantics::syntax_tree(@$);
         $<opValue>$->op = kite::semantics::PROP_ASSIGN;
+        $<opValue>$->is_global = $<intValue>$;
         
         kite::semantics::syntax_tree deref_filter(@$);
         deref_filter.op = kite::semantics::DEREF_FILTER;
@@ -695,9 +693,7 @@ map_reduce_statement:    deref_statement MAP deref_statement {
     ;
     
 deref_statement:    deref_statement '|' SYMBOL_NAME optional_param_list {
-        $<opValue>$ = new kite::semantics::syntax_tree(@$);
-        $<opValue>$->op = kite::semantics::DEREF_FILTER;
-        $<opValue>$->children.push_back(*$<opValue>1);
+        $<opValue>$ = $<opValue>1;
         
         kite::semantics::syntax_tree deref_method(@$);
         deref_method.op = kite::semantics::DEREF_METHOD;
@@ -712,9 +708,7 @@ deref_statement:    deref_statement '|' SYMBOL_NAME optional_param_list {
         $<opValue>$->children.push_back(deref_method);
     }
     | deref_statement '[' data_manipulation_statement ']'    {
-        $<opValue>$ = new kite::semantics::syntax_tree(@$);
-        $<opValue>$->op = kite::semantics::DEREF_FILTER;
-        $<opValue>$->children.push_back(*$<opValue>1);
+        $<opValue>$ = $<opValue>1;
         
         kite::semantics::syntax_tree deref_method(@$);
         deref_method.op = kite::semantics::DEREF_ARRAY;
@@ -722,9 +716,7 @@ deref_statement:    deref_statement '|' SYMBOL_NAME optional_param_list {
         $<opValue>$->children.push_back(deref_method);
     }
     | deref_statement '.' SYMBOL_NAME {
-        $<opValue>$ = new kite::semantics::syntax_tree(@$);
-        $<opValue>$->op = kite::semantics::DEREF_FILTER;
-        $<opValue>$->children.push_back(*$<opValue>1);
+        $<opValue>$ = $<opValue>1;
         
         kite::semantics::syntax_tree deref_method(@$);
         deref_method.op = kite::semantics::DEREF_PROPERTY;
@@ -799,9 +791,7 @@ var_name:    SYMBOL_NAME {
         $<opValue>$->children.push_back(deref_method);
     }
     | var_name '.' SYMBOL_NAME {
-        $<opValue>$ = new kite::semantics::syntax_tree(@$);
-        $<opValue>$->op = kite::semantics::DEREF_FILTER;
-        $<opValue>$->children.push_back(*$<opValue>1);
+        $<opValue>$ = $<opValue>1;
         
         kite::semantics::syntax_tree deref_method(@$);
         deref_method.op = kite::semantics::DEREF_PROPERTY;

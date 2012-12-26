@@ -77,6 +77,7 @@ namespace kite
             syntax_tree_position position;
             std::string doc_string;
             std::string prop_name; // for property doc strings.
+            bool is_global;
             
             syntax_tree() { }
             

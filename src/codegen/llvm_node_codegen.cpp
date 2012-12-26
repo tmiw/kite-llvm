@@ -774,6 +774,7 @@ namespace kite
             IRBuilder<> &builder = state.module_builder();
             
             parameters.push_back(prev);
+            bool overrideOverloaded = state.overrideOverloadedProperties();
             for (int i = 1; i < tree.children.size(); i++)
             {
                 Value *param_val = boost::apply_visitor(llvm_node_codegen(state), tree.children[i]);
@@ -784,7 +785,7 @@ namespace kite
                 parameters.push_back(param_val);
             }
             
-            if (state.overrideOverloadedProperties())
+            if (overrideOverloaded)
             {
                 state.overrideOverloadedProperties(false);
                 parameters[0] = generate_debug_data(builder.CreateLoad(sym_stack["this"]), tree.position);
@@ -904,7 +905,6 @@ namespace kite
             }
             else if (var_name == "base")
             {
-                state.overrideOverloadedProperties(true);
                 semantics::syntax_tree *baseTree = state.class_from();
                 Value *this_obj = NULL;
                 if (baseTree != NULL)
@@ -915,6 +915,7 @@ namespace kite
                 {
                     this_obj = (*this)((void*)NULL);
                 }
+                state.overrideOverloadedProperties(true);
                 return this_obj;
             }
             else
@@ -959,44 +960,57 @@ namespace kite
         
         Value *llvm_node_codegen::codegen_assign_op(semantics::syntax_tree const &tree) const
         {
-            Value *lhs = boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
             Value *rhs = boost::apply_visitor(llvm_node_codegen(state), tree.children[1]);
-            std::map<std::string, Value*> &sym_stack = state.current_symbol_stack();
             
-            Value *ptr = ((LoadInst*)lhs)->getPointerOperand();
-            for (std::map<std::string, Value*>::iterator i = sym_stack.begin(); i != sym_stack.end(); i++)
+            if (tree.is_global || tree.op != semantics::PROP_ASSIGN)
             {
-                if (i->second == ptr)
+                Value *lhs = boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
+                std::map<std::string, Value*> &sym_stack = state.current_symbol_stack();
+            
+                Value *ptr = ((LoadInst*)lhs)->getPointerOperand();
+                for (std::map<std::string, Value*>::iterator i = sym_stack.begin(); i != sym_stack.end(); i++)
                 {
-                    if (lhs->getType() != rhs->getType() && 
-                        lhs->getType() != kite_type_to_llvm_type(semantics::OBJECT))
+                    if (i->second == ptr)
                     {
-                        sym_stack[i->first] = 
-                            state.module_builder().CreateAlloca(rhs->getType());
-                        ptr = sym_stack[i->first];
+                        if (lhs->getType() != rhs->getType() && 
+                            lhs->getType() != kite_type_to_llvm_type(semantics::OBJECT))
+                        {
+                            sym_stack[i->first] = 
+                                state.module_builder().CreateAlloca(rhs->getType());
+                            ptr = sym_stack[i->first];
+                        }
+                        else if (
+                            lhs->getType() != rhs->getType() && 
+                            lhs->getType() == kite_type_to_llvm_type(semantics::OBJECT))
+                        {
+                            std::vector<Value*> params;
+                            params.push_back(rhs);
+                            rhs = generate_llvm_method_call(rhs, "obj", params, tree);
+                        }
+                        generate_debug_data(state.module_builder().CreateStore(rhs, ptr), tree.position);
+                        return rhs;
                     }
-                    else if (
-                        lhs->getType() != rhs->getType() && 
-                        lhs->getType() == kite_type_to_llvm_type(semantics::OBJECT))
+                }
+            
+                // Else, just a simple store into a property.
+                // TODO
+                if (rhs->getType() != kite_type_to_llvm_type(semantics::OBJECT))
+                {
+                    std::vector<Value*> params;
+                    params.push_back(rhs);
+                    rhs = generate_llvm_method_call(rhs, "obj", params, tree);
+                }
+                generate_debug_data(state.module_builder().CreateStore(rhs, lhs), tree.position);
+                
+                if (tree.op == semantics::PROP_ASSIGN && tree.is_global)
+                {
+                    std::map<std::string, Value*> &symStack = state.current_symbol_stack();
+                    if (symStack.find(tree.prop_name) == symStack.end())
                     {
-                        std::vector<Value*> params;
-                        params.push_back(rhs);
-                        rhs = generate_llvm_method_call(rhs, "obj", params, tree);
+                        symStack[tree.prop_name] = lhs;
                     }
-                    generate_debug_data(state.module_builder().CreateStore(rhs, ptr), tree.position);
-                    return rhs;
                 }
             }
-            
-            // Else, just a simple store into a property.
-            // TODO
-            if (rhs->getType() != kite_type_to_llvm_type(semantics::OBJECT))
-            {
-                std::vector<Value*> params;
-                params.push_back(rhs);
-                rhs = generate_llvm_method_call(rhs, "obj", params, tree);
-            }
-            generate_debug_data(state.module_builder().CreateStore(rhs, lhs), tree.position);
             
             // Set documentation string for property if needed.
             if (tree.doc_string.size() > 0)
@@ -1005,15 +1019,6 @@ namespace kite
                     state.module_builder().CreateLoad(state.current_symbol_stack()["this"]),
                     tree.position);
                 generate_llvm_dynamic_object_set_doc_string_prop(this_obj, tree.prop_name, tree.doc_string, tree);
-            }
-            
-            if (tree.op == semantics::PROP_ASSIGN)
-            {
-                std::map<std::string, Value*> &symStack = state.current_symbol_stack();
-                if (symStack.find(tree.prop_name) == symStack.end())
-                {
-                    symStack[tree.prop_name] = lhs;
-                }
             }
             
             return rhs;

@@ -50,7 +50,23 @@ namespace kite
         public:
             llvm_compile_state();
             virtual ~llvm_compile_state();
-            
+            llvm_compile_state(const llvm_compile_state &other)
+                : _debugBuilderStack(other._debugBuilderStack)
+                , _importNamespaceStack(other._importNamespaceStack)
+                , _moduleStack(other._moduleStack)
+                , _loopStack(other._loopStack)
+                , _loopEndStack(other._loopEndStack)
+                , _methodStack(other._methodStack)
+                , _cMethodStack(other._cMethodStack)
+                , _classInheritStack(other._classInheritStack)
+                , _symbolTableStack(other._symbolTableStack)
+                , _moduleBuilder(other._moduleBuilder)
+                , _overrideOverloadedProperties(other._overrideOverloadedProperties)
+                , _skipRemainingStatements(other._skipRemainingStatements)
+            {
+                // empty
+            }
+                
             void push_module(Module *module); /*! Pushes new module onto stack. */
             inline Module *current_module() { return _moduleStack.back(); }
             Module *pop_module(); /*! Pops module from top of stack. */

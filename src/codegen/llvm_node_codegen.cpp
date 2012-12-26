@@ -1372,6 +1372,7 @@ namespace kite
             
             state.current_symbol_stack()[functionName] = prop_entry;
             generate_llvm_dynamic_object_set_doc_string(method_obj, tree.doc_string, tree);
+            generate_llvm_dynamic_object_enable_finalizer(method, tree);
             return method_obj;
         }
         
@@ -2182,6 +2183,35 @@ namespace kite
                     obj, 
                     builder.CreateGlobalStringPtr(name.c_str()), 
                     ConstantInt::get(kite_type_to_llvm_type(semantics::BOOLEAN), set)),
+                tree.position);
+        }
+        
+        Value *llvm_node_codegen::generate_llvm_dynamic_object_enable_finalizer(Value *method, const semantics::syntax_tree &tree) const
+        {
+            Module *module = state.current_module();
+            IRBuilder<> &builder = state.module_builder();
+            
+            std::vector<Type*> parameterTypes;
+            parameterTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
+            parameterTypes.push_back(kite_type_to_llvm_type(semantics::OBJECT));
+            
+            FunctionType *ft = FunctionType::get(PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)), ArrayRef<Type*>(parameterTypes), false);
+            Function *funPtr = Function::Create(ft, Function::ExternalLinkage, "kite_dynamic_object_enable_finalizer", module);
+            if (funPtr->getName() != "kite_dynamic_object_enable_finalizer")
+            {
+                funPtr->eraseFromParent();
+                funPtr = module->getFunction("kite_dynamic_object_enable_finalizer");
+            }
+            
+            Value *obj = generate_debug_data(
+                builder.CreateLoad(state.current_symbol_stack()["this"]),
+                tree.position);
+                
+            return generate_debug_data(
+                builder.CreateCall2(
+                    funPtr, 
+                    obj, 
+                    method),
                 tree.position);
         }
         

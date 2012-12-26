@@ -55,12 +55,10 @@ namespace kite
                 
                 // For Boehm GC. Not using gc_cleanup to avoid the memory
                 // penalty that virtual methods cause.
-                void finalizer_setup();
                 static void cleanup( void* obj, void* displ );
                 inline void* operator new (std::size_t size)
                 {
                     System::object *obj = (System::object*)GC_MALLOC(size);
-                    obj->finalizer_setup();
                     return (void*)obj;
                 }
                 

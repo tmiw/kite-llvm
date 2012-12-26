@@ -89,6 +89,14 @@ void *kite_dynamic_object_alloc()
 void kite_dynamic_object_set_parent(void *object, void *parent)
 {
     ((System::dynamic_object*)object)->parent = (System::object*)parent;
+    
+    // Enable finalizer if needed.
+    void **ptr = kite_dynamic_object_get_property(object, "__destruct____o", false);
+    if (*ptr != NULL)
+    {
+        System::method *method = (System::method*)*ptr;
+        kite_dynamic_object_enable_finalizer(object, method->method_ptr);
+    }
 }
 
 void kite_dynamic_object_set_name(void *object, char *name)
@@ -146,4 +154,23 @@ void **kite_dynamic_object_get_property(void *object, char *name, bool set)
 void *kite_dynamic_object_get_root()
 {
     return language::kite::kite::root_object;
+}
+
+void kite_dynamic_object_enable_finalizer(void *object, void *func)
+{
+    // Taken from gc_cpp.h. This seems to be to take into account
+    // operator[] new.
+    GC_finalization_proc proc = (GC_finalization_proc)&System::object::cleanup;
+    GC_finalization_proc oldProc;
+    void* oldData;
+    void* base = GC_base( (void *) object );
+    if ( base != 0 )
+    {
+        GC_register_finalizer_ignore_self( base, proc, (void*) ((char*) object - (char*) base), &oldProc, &oldData );
+
+        if ( oldProc != 0 )
+        {
+            GC_register_finalizer_ignore_self( base, oldProc, oldData, 0, 0 );
+        }
+    }
 }

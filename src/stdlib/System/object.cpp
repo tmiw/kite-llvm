@@ -68,25 +68,6 @@ namespace kite
                 ("get_property_string__oo", function_semantics(semantics::OBJECT, (void*)&get_property_string__oo))
                 ("get_property_string__os", function_semantics(semantics::OBJECT, (void*)&get_property_string__os));
 
-            void object::finalizer_setup()
-            {
-                // Taken from gc_cpp.h. This seems to be to take into account
-                // operator[] new.
-                GC_finalization_proc proc = (GC_finalization_proc)cleanup;
-                GC_finalization_proc oldProc;
-                void* oldData;
-                void* base = GC_base( (void *) this );
-                if ( base != 0 )
-                {
-                    GC_register_finalizer_ignore_self( base, proc, (void*) ((char*) this - (char*) base), &oldProc, &oldData );
-
-                    if ( oldProc != 0 )
-                    {
-                        GC_register_finalizer_ignore_self( base, oldProc, oldData, 0, 0 );
-                    }
-                }
-            }
-
             void object::cleanup( void* obj, void* displ )
             {
                 System::object *real_this = (System::object*)((char*) obj + (ptrdiff_t) displ);

@@ -120,6 +120,7 @@ namespace kite
             void generate_llvm_dynamic_object_set_name(Value *obj, const semantics::syntax_tree &tree) const;
             Value *generate_llvm_dynamic_object_get_property(Value *obj, const std::string &name, const semantics::syntax_tree &tree, bool set = false) const;
             Value *generate_llvm_method_alloc(Value *method, const semantics::syntax_tree &tree) const;
+            Value *generate_llvm_dynamic_object_enable_finalizer(Value *method, const semantics::syntax_tree &tree) const;
             Value *generate_llvm_dynamic_object_get_root(const semantics::syntax_tree &tree) const;
             void generate_llvm_dynamic_object_set_doc_string(Value *obj, const std::string &doc, const semantics::syntax_tree &tree) const;
             void generate_llvm_dynamic_object_set_doc_string_arg(Value *obj, const std::string &name, const std::string &doc, const semantics::syntax_tree &tree) const;

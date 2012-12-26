@@ -254,7 +254,7 @@ void *kite_find_funccall(void *obj, const char *name, int numargs)
         
 failed_to_find_method:
         std::string theName(name);
-        if ((theName == "__init__" && numargs > 1) || (theName != "__init__"))
+        if ((theName == "__init__" && numargs > 1) || (theName != "__init__" && theName != "__destruct__"))
         {
             std::ostringstream ss;
             ss << "Could not find method " << name << " that takes " << (numargs - 1) << " argument(s).";

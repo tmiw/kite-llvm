@@ -61,6 +61,7 @@ namespace kite
                 ("get_base_object__o", function_semantics(semantics::OBJECT, (void*)&get_base_object__o))
                 ("list_properties__o", function_semantics(semantics::OBJECT, (void*)&list_properties__o))
                 ("list_methods__o", function_semantics(semantics::OBJECT, (void*)&list_methods__o))
+                ("get_method__ooo", function_semantics(semantics::OBJECT, (void*)&get_method__ooo))
                 ("get_property__oo", function_semantics(semantics::OBJECT, (void*)&get_property__oo))
                 ("get_property__os", function_semantics(semantics::OBJECT, (void*)&get_property__os))
                 ("get_property_string__oo", function_semantics(semantics::OBJECT, (void*)&get_property_string__oo))
@@ -356,7 +357,7 @@ void *get_property__oo(void *obj, void *prop)
     return val;
 }
 
-void *get_property__os(void *obj, char *prop)
+void *get_property__os(void *obj, const char *prop)
 {
     System::dynamic_object *object = (System::dynamic_object*)obj;
     if (object->type != kite::semantics::OBJECT)
@@ -474,4 +475,16 @@ void *is_class__o(void *obj)
         object != NULL &&
         object->type == kite::semantics::OBJECT &&
         object->properties.find("__name") != object->properties.end());
+}
+
+void *get_method__ooo(void *obj, void *prop, void *numargs)
+{
+    System::string *funcName = (System::string*)prop;
+    System::integer *numArgs = (System::integer*)numargs;
+    
+    std::string fullName(funcName->string_val.c_str());
+    fullName += "__";
+    fullName += std::string(numArgs->val + 1, 'o');
+    
+    return get_property__os(obj, fullName.c_str());
 }

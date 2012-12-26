@@ -115,7 +115,7 @@ namespace kite
                 ("charAt__si", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(charAt__si))))
                 ("float__s", function_semantics(semantics::FLOAT, (void*)&(PREFIX_STRING_METHOD_NAME(float__s))))
                 ("format__so", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(format__so))))
-                ("format__oo", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(format__oo))))
+                ("format__oo", function_semantics(semantics::OBJECT, (void*)&(PREFIX_STRING_METHOD_NAME(format__oo))))
                 ("int__s", function_semantics(semantics::INTEGER, (void*)&(PREFIX_STRING_METHOD_NAME(int__s))))
                 ("length__s", function_semantics(semantics::INTEGER, (void*)&(PREFIX_STRING_METHOD_NAME(length__s))))
                 ("lower__s", function_semantics(semantics::STRING, (void*)&(PREFIX_STRING_METHOD_NAME(lower__s))))
@@ -540,14 +540,15 @@ void *PREFIX_STRING_METHOD_NAME(__op_geq____oo)(void *lhs, void *rhs)
     return new System::boolean(lhs_str->string_val >= rhs_str->string_val);
 }
 
-char* PREFIX_STRING_METHOD_NAME(format__oo)(void *val, void *args)
+void* PREFIX_STRING_METHOD_NAME(format__oo)(void *val, void *args)
 {
     System::list *argList = (System::list*)args;
     System::string *stringVal = (System::string*)val;
-    return stringVal->format(argList);
+    return new System::string(stringVal->format(argList));
 }
 
 char* PREFIX_STRING_METHOD_NAME(format__so)(const char *val, void *args)
 {
-    return PREFIX_STRING_METHOD_NAME(format__oo)(new System::string(val), args);
+    System::string *stringVal = (System::string*)PREFIX_STRING_METHOD_NAME(format__oo)(new System::string(val), args);
+    return GC_strdup(stringVal->string_val.c_str());
 }

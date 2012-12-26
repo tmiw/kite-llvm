@@ -432,15 +432,15 @@ method generate_doc_helper(
             ];
             
             # Operators
-            #i = 0;
-            #while (i < System.object.operators.number_of_operators) [
-            #    decide [
-            #        (not (cls|get_operator_method(i) is System.null)) [
-            #            ret|add(System.doc|generate_operator(cls.operators|to_str(i), cls|get_operator_method(i)));
-            #        ]
-            #    ];
-            #    i = i + 1;
-            #];
+            i = 0;
+            while (i < System.object.operators.number_of_operators) [
+                decide [
+                    (not (cls|get_operator_method(i) is System.null)) [
+                        ret|add(System.doc|generate_operator(cls.operators|to_str(i), cls|get_operator_method(i)));
+                    ]
+                ];
+                i = i + 1;
+            ];
             
             ret;
         ],

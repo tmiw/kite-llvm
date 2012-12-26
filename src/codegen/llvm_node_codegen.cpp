@@ -245,6 +245,8 @@ namespace kite
             Value *parent = boost::apply_visitor(llvm_node_codegen(state), tree.children[0]);
             generate_llvm_dynamic_object_set_parent(this_obj, parent, tree);
             
+            state.push_class_from(const_cast<semantics::syntax_tree*>(
+                &boost::get<semantics::syntax_tree>(tree.children[0])));
             return this_obj;
         }
         
@@ -883,13 +885,16 @@ namespace kite
             else if (var_name == "base")
             {
                 state.overrideOverloadedProperties(true);
-                Value *this_obj = generate_debug_data(builder.CreateLoad(sym_stack["this"]), tree.position);
-                this_obj = builder.CreateBitCast(this_obj, get_object_type());
-                this_obj = builder.CreateStructGEP(this_obj, 1);
-                this_obj = generate_debug_data(builder.CreateLoad(this_obj), tree.position);
-                this_obj = builder.CreateBitCast(this_obj, get_object_type());
-                this_obj = builder.CreateStructGEP(this_obj, 1);
-                this_obj = generate_debug_data(builder.CreateLoad(this_obj), tree.position);
+                semantics::syntax_tree *baseTree = state.class_from();
+                Value *this_obj = NULL;
+                if (baseTree != NULL)
+                {
+                    this_obj = (*this)(*baseTree);
+                }
+                else
+                {
+                    this_obj = (*this)((void*)NULL);
+                }
                 return this_obj;
             }
             else
@@ -1856,6 +1861,18 @@ namespace kite
             state.push_namespace_stack(className);
             semantics::syntax_tree &body = const_cast<semantics::syntax_tree&>(boost::get<semantics::syntax_tree>(tree.children[tree.children.size() - 1]));
             std::vector<std::string> args;
+            
+            if (tree.children.size() > 2)
+            {
+                semantics::syntax_tree &base_tree = const_cast<semantics::syntax_tree&>(
+                    boost::get<semantics::syntax_tree>(tree.children[1]));
+                state.push_class_from(&base_tree);
+            }
+            else
+            {
+                state.push_class_from(NULL);
+            }
+            
             ret = generate_llvm_method(std::string("__static_init__"), args, body, tree);
 
             // Initialize dynamic_object that will store the class and insert
@@ -1873,7 +1890,8 @@ namespace kite
             
             generate_llvm_dynamic_object_set_name(obj, tree);
             state.pop_namespace_stack();
-                        
+            state.pop_class_from();
+            
             Value *property = generate_debug_data(
                 builder.CreateLoad(state.current_symbol_stack()["this"]),
                 tree.position);

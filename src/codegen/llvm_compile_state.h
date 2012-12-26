@@ -37,6 +37,8 @@
 #include <llvm/Support/IRBuilder.h>
 #include <llvm/Analysis/DIBuilder.h>
 #include <llvm/Analysis/DebugInfo.h>
+#include "../semantics/syntax_tree.h"
+
 using namespace llvm;
 
 namespace kite
@@ -68,6 +70,10 @@ namespace kite
             void push_c_method_name(std::string name); /*! Pushes new method onto stack. */
             inline std::string current_c_method_name() { return _cMethodStack.back(); }
             std::string pop_c_method_name(); /*! Pops method from top of stack. */
+            
+            void push_class_from(semantics::syntax_tree *tree) { _classInheritStack.push_back(tree); }
+            void pop_class_from() { _classInheritStack.pop_back(); }
+            semantics::syntax_tree *class_from() { return _classInheritStack.back(); }
             
             inline IRBuilder<> &module_builder() { return _moduleBuilder; }
             
@@ -103,6 +109,8 @@ namespace kite
             std::vector<BasicBlock*> _loopEndStack;
             std::vector<std::string> _methodStack;
             std::vector<std::string> _cMethodStack;
+            std::vector<semantics::syntax_tree*> _classInheritStack;
+            
             std::vector<std::map<std::string, Value*> *> _symbolTableStack;
             IRBuilder<> _moduleBuilder;
             bool _overrideOverloadedProperties;

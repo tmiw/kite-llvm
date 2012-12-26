@@ -34,7 +34,8 @@ namespace kite
         llvm_compile_state::llvm_compile_state()
 	    : _moduleBuilder(getGlobalContext()), _overrideOverloadedProperties(false), _skipRemainingStatements(false)
 	    {
-	        // empty
+	        // Initially we're not inheriting anything.
+            push_class_from(NULL);
 	    }
 	               
 	    llvm_compile_state::~llvm_compile_state()

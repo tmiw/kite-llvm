@@ -26,4 +26,6 @@ EXTRA_DIST = \
     ./property_default.kt \
     ./property_default.kt.out \
     ./type_method.kt \
-    ./type_method.kt.out
+    ./type_method.kt.out \
+    ./call_base_methods2.kt \
+    ./call_base_methods2.kt.out

@@ -88,6 +88,7 @@ extern "C"
     void *get_destructor__o(void *obj);
     void *list_properties__o(void *obj);
     void *list_methods__o(void *obj);
+    void *get_operator_method__oo(void *obj, void *idx);
 }
 
 #endif

@@ -66,7 +66,8 @@ namespace kite
                 ("get_property__oo", function_semantics(semantics::OBJECT, (void*)&get_property__oo))
                 ("get_property__os", function_semantics(semantics::OBJECT, (void*)&get_property__os))
                 ("get_property_string__oo", function_semantics(semantics::OBJECT, (void*)&get_property_string__oo))
-                ("get_property_string__os", function_semantics(semantics::OBJECT, (void*)&get_property_string__os));
+                ("get_property_string__os", function_semantics(semantics::OBJECT, (void*)&get_property_string__os))
+                ("get_operator_method__oo", function_semantics(semantics::OBJECT, (void*)&get_operator_method__oo));
 
             void object::cleanup( void* obj, void* displ )
             {
@@ -481,4 +482,14 @@ void *get_method__ooo(void *obj, void *prop, void *numargs)
 void *get_destructor__o(void *obj)
 {
     return get_method__ooo(obj, new System::string("__destruct__"), new System::integer(0));
+}
+
+void *get_operator_method__oo(void *obj, void *idx)
+{
+    System::integer *opId = (System::integer*)idx;
+    kite::semantics::code_operation op = (kite::semantics::code_operation)opId->val;
+    std::string &funcName = kite::semantics::Constants::Get().operator_map[op];
+    int numArgs = op < kite::semantics::__END_BINARY_OPS ? 2 : 1;
+    
+    return get_method__ooo(obj, new System::string(funcName.c_str()), new System::integer(numArgs));
 }

@@ -27,10 +27,10 @@
 
 #include "kite.h"
 
-// TODO: this causes all sorts of unit test failures on OSX, disable on that 
-// platform for now.
+// NOTE: lots of unit test failures on OSX and eval does not work on Linux
+// with the below enabled. Wait for future LLVM release to reenable.
 #ifdef __linux__
-#define ENABLE_ENHANCED_JIT
+//#define ENABLE_ENHANCED_JIT
 #endif
 
 #include <algorithm>

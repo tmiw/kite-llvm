@@ -28,6 +28,7 @@
 #include "dynamic_object.h"
 #include "string_type.h"
 #include "method.h"
+#include "integer.h"
 #include "../language/kite.h"
 #include "exceptions/NullReference.h"
 
@@ -69,6 +70,13 @@ namespace kite
             {
                 t_class_object.properties["__name"] = new System::string("System.object");
                 t_class_object.add_method("str", 0, (void*)&s_as_string);
+                
+                // Operator management.
+                t_class_object.properties["operators"] = new System::dynamic_object();
+                dynamic_object *operator_obj = (dynamic_object*)t_class_object.properties["operators"];
+                operator_obj->properties["__name"] = new System::string("System.object.operators");
+                operator_obj->properties["number_of_operators"] = new System::integer(semantics::__END_OVERRIDABLE_OPS);
+                
             }
             
             const char *dynamic_object::s_as_string(dynamic_object *obj)

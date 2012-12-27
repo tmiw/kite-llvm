@@ -68,7 +68,7 @@ namespace kite
             REDUCE,
             DEREF_ARRAY,
             __END_BINARY_OPS, // DO NOT USE
-            UNARY_PLUS,
+            UNARY_PLUS = DEREF_ARRAY + 1,
             UNARY_MINUS,
             __END_OVERRIDABLE_OPS, // DO NOT USE
             ITERATE,

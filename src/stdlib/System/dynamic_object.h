@@ -41,6 +41,8 @@ extern "C"
     void kite_dynamic_object_set_name(void *object, char *name);
     void **kite_dynamic_object_get_property(void *object, char *name, bool set);
     void *kite_dynamic_object_get_root();
+    
+    void *kite_dynamic_object_get_op_name(void *object, void *opId);
 }
  
 namespace kite

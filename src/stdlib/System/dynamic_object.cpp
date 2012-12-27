@@ -76,7 +76,7 @@ namespace kite
                 dynamic_object *operator_obj = (dynamic_object*)t_class_object.properties["operators"];
                 operator_obj->properties["__name"] = new System::string("System.object.operators");
                 operator_obj->properties["number_of_operators"] = new System::integer(semantics::__END_OVERRIDABLE_OPS);
-                
+                operator_obj->properties["to_str__oo"] = new System::method((void*)&kite_dynamic_object_get_op_name);
             }
             
             const char *dynamic_object::s_as_string(dynamic_object *obj)
@@ -186,4 +186,25 @@ void kite_dynamic_object_enable_finalizer(void *object, void *func)
             GC_register_finalizer_ignore_self( base, oldProc, oldData, 0, 0 );
         }
     }
+}
+
+void *kite_dynamic_object_get_op_name(void *object, void *idx)
+{
+    System::integer *opId = (System::integer*)idx;
+    kite::semantics::code_operation op = (kite::semantics::code_operation)opId->val;
+    kite::semantics::Constants &constants = kite::semantics::Constants::Get();
+    std::string &funcName = constants.operator_map[op];
+    
+    for (
+        kite::semantics::OperatorMethodNameMap::iterator i = constants.operator_name_map.begin();
+        i != constants.operator_name_map.end();
+        i++)
+    {
+        if (i->second == funcName)
+        {
+            return new System::string(i->first.c_str());
+        }
+    }
+    
+    return NULL;
 }

@@ -1,2 +1,2 @@
-property x = 1;
+global property x = 1;
 x|print;

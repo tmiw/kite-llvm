@@ -87,7 +87,12 @@ namespace kite
                 { }
             
             syntax_tree(const syntax_tree &other)
-                : op(other.op), children(other.children), position(other.position), doc_string(other.doc_string), prop_name(other.prop_name)
+                : op(other.op)
+                , children(other.children)
+                , position(other.position)
+                , doc_string(other.doc_string)
+                , prop_name(other.prop_name)
+                , is_global(other.is_global)
                 { }
         };
     }

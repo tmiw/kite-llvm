@@ -942,7 +942,6 @@ namespace kite
                     generate_debug_data(builder.CreateCondBr(cmpValue, has_var, end_var), tree.position);
                     
                     builder.SetInsertPoint(has_var);
-                    // TODO: check __root too.
                     Value *createVar = builder.CreateAlloca(kite_type_to_llvm_type(semantics::OBJECT));
                     generate_debug_data(builder.CreateStore(zeroPtr, createVar), tree.position);
                     generate_debug_data(builder.CreateBr(end_var), tree.position);
@@ -1169,7 +1168,6 @@ namespace kite
             }
             generate_debug_data(PN, tree.position);
             return PN;
-            //return ConstantInt::get(getGlobalContext(), APInt(32, 0, true)); // TODO
         }
         
         Value *llvm_node_codegen::codegen_run_catch_op(semantics::syntax_tree const &tree) const
@@ -1183,8 +1181,6 @@ namespace kite
             BasicBlock *end_block = BasicBlock::Create(getGlobalContext(), "end_block", currentFunc);
             
             // Create jump point
-            //Value *default_val = ConstantInt::get(Type::getInt32Ty(getGlobalContext()), 0); // TODO
-            
             Value *jmpbuf = 
                 builder.CreateAlloca(
                     Type::getInt8Ty(getGlobalContext()), 
@@ -2476,7 +2472,7 @@ namespace kite
                 DISubprogram subprogram;
                 if (subroutineCache.find(state.current_c_method_name()) == subroutineCache.end())
                 {
-                    DIType basicType = state.current_debug_builder()->createBasicType("System::object", sizeof(void*)*8 /* TODO */, 0, DW_ATE_address);
+                    DIType basicType = state.current_debug_builder()->createBasicType("System::object", sizeof(void*)*8, 0, DW_ATE_address);
                     DIType pointerType = state.current_debug_builder()->createPointerType(basicType, sizeof(void*)*8);
                     
                     std::vector<Value*> fxnTypes;

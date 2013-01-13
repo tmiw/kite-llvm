@@ -33,6 +33,7 @@
 #include <boost/variant/get.hpp>
 #include <boost/assign.hpp>
 #include <boost/filesystem.hpp>
+#include <stdlib/System/exceptions/FileError.h>
 #include "llvm_node_codegen.h"
 #include "stdlib/language/kite.h"
 
@@ -1074,7 +1075,16 @@ namespace kite
             BasicBlock *currentLoop = NULL;
             IRBuilder<> &builder = state.module_builder();
             
-            // TODO: verify that we're inside of a loop.
+            if (!state.is_inside_loop())
+            {
+                System::exceptions::exception *exc = 
+                    System::exceptions::FileError::Create(
+                        1,
+                        new System::string("break/continue can only be used inside of a loop.")
+                    );
+                exc->throw_exception();
+            }
+
             switch(tree.op)
             {
                 case semantics::CONTINUE:

@@ -71,6 +71,7 @@ namespace kite
             inline Module *current_module() { return _moduleStack.back(); }
             Module *pop_module(); /*! Pops module from top of stack. */
             
+            bool is_inside_loop() { return _loopStack.size() > 0; }
             void push_loop(BasicBlock *loop); /*! Pushes new loop onto stack. */
             inline BasicBlock *current_loop() { return _loopStack.back(); }
             BasicBlock *pop_loop(); /*! Pops loop from top of stack. */

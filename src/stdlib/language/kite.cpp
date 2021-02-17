@@ -320,7 +320,7 @@ namespace kite
                                 }
                             }
 
-                            void *fptr = execution_engine->getPointerToFunction(function);
+                            void *fptr = (void*)execution_engine->getFunctionAddress(function->getName().str());
                             System::object *(*FP)(System::object *) = (System::object*(*)(System::object*))fptr;
                             return (*FP)(context);
                         }

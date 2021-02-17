@@ -33,6 +33,7 @@
 
 #include <algorithm>
 #include <sys/stat.h>
+#include <dlfcn.h>
 #include <parser/parser.h>
 #include <stdlib/System/dynamic_object.h>
 #include <stdlib/System/method.h>
@@ -47,6 +48,7 @@
 #include <llvm/IR/LegacyPassManager.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/Support/MemoryBuffer.h>
+#include <llvm/Support/DynamicLibrary.h>
 #ifdef ENABLE_ENHANCED_JIT
 #include <llvm/ExecutionEngine/MCJIT.h>
 #else
@@ -88,6 +90,9 @@ namespace kite
                     InitializeNativeTarget();
                     InitializeNativeTargetAsmPrinter();
                     assert(llvm::llvm_is_multithreaded());
+
+                    // Ensure that the standard library can be seen by LLVM during JIT compilation.
+                    llvm::sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
 
                     current_module = new Module("__root_module", KiteGlobalContext);
                     state.push_module(current_module);

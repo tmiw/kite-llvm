@@ -328,7 +328,7 @@ namespace kite
 
                 void kite::DumpCompiledCode()
                 {
-                    current_module->dump();
+                    current_module->print(llvm::errs(), nullptr);
                 }
                 
                 static bool sort_pointers(std::pair<void *, Function*> i, std::pair<void *, Function*> j)

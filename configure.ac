@@ -30,6 +30,7 @@ AC_CHECK_HEADERS([fcntl.h netdb.h sys/socket.h sys/time.h unistd.h])
 # We need both of these due to ffi.h being in different locations on different OSes.
 AC_CHECK_HEADER(ffi/ffi.h, AC_DEFINE(FFI_HEADER, ["ffi/ffi.h"], [Path to ffi.h]))
 AC_CHECK_HEADER(ffi.h, AC_DEFINE(FFI_HEADER, ["ffi.h"], [Path to ffi.h]))
+AC_CHECK_LIB(ffi, ffi_prep_cif)
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL

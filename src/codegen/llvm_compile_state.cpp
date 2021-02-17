@@ -32,7 +32,7 @@ namespace kite
     namespace codegen
     {
         llvm_compile_state::llvm_compile_state()
-	    : _moduleBuilder(getGlobalContext()), _overrideOverloadedProperties(false), _skipRemainingStatements(false)
+	    : _moduleBuilder(KiteIRBuilder), _overrideOverloadedProperties(false), _skipRemainingStatements(false)
 	    {
 	        // Initially we're not inheriting anything.
             push_class_from(NULL);

@@ -25,8 +25,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <llvm/Support/Dwarf.h>
-#include <llvm/Analysis/DebugInfo.h>
+#include <llvm/BinaryFormat/Dwarf.h>
+#include <llvm/IR/DebugInfo.h>
 #include <setjmp.h>
 #include <boost/foreach.hpp>
 #include <boost/variant/apply_visitor.hpp>
@@ -45,12 +45,17 @@ namespace kite
 {
     namespace codegen
     {
+        // Global definition -- TBD
+        llvm::LLVMContext KiteGlobalContext;
+        llvm::IRBuilder<> KiteIRBuilder(KiteGlobalContext);
+
         // Map of arithmetic operations with two parameters.
         typedef Value *(IRBuilder<>::*IRBuilderFPtr)(Value*,Value*,const Twine&);
         typedef std::pair<semantics::code_operation, semantics::builtin_types> CodeOperationKey;
         typedef std::map<CodeOperationKey, IRBuilderFPtr> CodeOperationMap;
         typedef Value *(IRBuilder<>::*IRBuilderNUWFPtr)(Value*,Value*,const Twine&,bool,bool);
         typedef Value *(IRBuilder<>::*IRBuilderRShiftFPtr)(Value*,Value*,const Twine&,bool);
+        typedef Value *(IRBuilder<>::*IRBuilderFPMathPtr)(Value*,Value*,const Twine&,MDNode*);
 
         static CodeOperationMap codegen_map = map_list_of
             (CodeOperationKey(semantics::ADD, semantics::INTEGER), (IRBuilderFPtr)(IRBuilderNUWFPtr)&IRBuilder<>::CreateAdd)
@@ -66,19 +71,19 @@ namespace kite
             (CodeOperationKey(semantics::LEFT_SHIFT, semantics::INTEGER), (IRBuilderFPtr)(IRBuilderNUWFPtr)&IRBuilder<>::CreateShl)
             (CodeOperationKey(semantics::RIGHT_SHIFT, semantics::INTEGER), (IRBuilderFPtr)(IRBuilderRShiftFPtr)&IRBuilder<>::CreateLShr)
             (CodeOperationKey(semantics::LESS_THAN, semantics::INTEGER), &IRBuilder<>::CreateICmpSLT)
-            (CodeOperationKey(semantics::LESS_THAN, semantics::FLOAT), &IRBuilder<>::CreateFCmpULT)
+            (CodeOperationKey(semantics::LESS_THAN, semantics::FLOAT), (IRBuilderFPtr)(IRBuilderFPMathPtr)&IRBuilder<>::CreateFCmpULT)
             (CodeOperationKey(semantics::LESS_OR_EQUALS, semantics::INTEGER), &IRBuilder<>::CreateICmpSLE)
-            (CodeOperationKey(semantics::LESS_OR_EQUALS, semantics::FLOAT), &IRBuilder<>::CreateFCmpULE)
+            (CodeOperationKey(semantics::LESS_OR_EQUALS, semantics::FLOAT), (IRBuilderFPtr)(IRBuilderFPMathPtr)&IRBuilder<>::CreateFCmpULE)
             (CodeOperationKey(semantics::GREATER_THAN, semantics::INTEGER), &IRBuilder<>::CreateICmpSGT)
-            (CodeOperationKey(semantics::GREATER_THAN, semantics::FLOAT), &IRBuilder<>::CreateFCmpUGT)
+            (CodeOperationKey(semantics::GREATER_THAN, semantics::FLOAT), (IRBuilderFPtr)(IRBuilderFPMathPtr)&IRBuilder<>::CreateFCmpUGT)
             (CodeOperationKey(semantics::GREATER_OR_EQUALS, semantics::INTEGER), &IRBuilder<>::CreateICmpSGE)
-            (CodeOperationKey(semantics::GREATER_OR_EQUALS, semantics::FLOAT), &IRBuilder<>::CreateFCmpUGE)
+            (CodeOperationKey(semantics::GREATER_OR_EQUALS, semantics::FLOAT), (IRBuilderFPtr)(IRBuilderFPMathPtr)&IRBuilder<>::CreateFCmpUGE)
             (CodeOperationKey(semantics::EQUALS, semantics::INTEGER), &IRBuilder<>::CreateICmpEQ)
             (CodeOperationKey(semantics::EQUALS, semantics::BOOLEAN), &IRBuilder<>::CreateICmpEQ)
-            (CodeOperationKey(semantics::EQUALS, semantics::FLOAT), &IRBuilder<>::CreateFCmpUEQ)
+            (CodeOperationKey(semantics::EQUALS, semantics::FLOAT), (IRBuilderFPtr)(IRBuilderFPMathPtr)&IRBuilder<>::CreateFCmpUEQ)
             (CodeOperationKey(semantics::NOT_EQUALS, semantics::INTEGER), &IRBuilder<>::CreateICmpNE)
             (CodeOperationKey(semantics::NOT_EQUALS, semantics::BOOLEAN), &IRBuilder<>::CreateICmpNE)
-            (CodeOperationKey(semantics::NOT_EQUALS, semantics::FLOAT), &IRBuilder<>::CreateFCmpUNE)
+            (CodeOperationKey(semantics::NOT_EQUALS, semantics::FLOAT), (IRBuilderFPtr)(IRBuilderFPMathPtr)&IRBuilder<>::CreateFCmpUNE)
             (CodeOperationKey(semantics::AND, semantics::INTEGER), IRBuilderFPtr(&IRBuilder<>::CreateAnd))
             (CodeOperationKey(semantics::AND, semantics::BOOLEAN), IRBuilderFPtr(&IRBuilder<>::CreateAnd))
             (CodeOperationKey(semantics::OR, semantics::INTEGER), IRBuilderFPtr(&IRBuilder<>::CreateOr))
@@ -202,6 +207,9 @@ namespace kite
                 case semantics::FROM_TOP:
                     ret = codegen_from_op(tree);
                     break;
+                default:
+                    assert(0);
+                    break;
             }
             
             return ret;
@@ -213,23 +221,23 @@ namespace kite
             IRBuilder<> &builder = state.module_builder();
             
             return builder.CreateIntToPtr(
-                ConstantInt::get(getGlobalContext(), APInt(32, 0, true)),
+                ConstantInt::get(KiteGlobalContext, APInt(32, 0, true)),
                 kite_type_to_llvm_type(semantics::OBJECT));
         }
         
         Value *llvm_node_codegen::operator()(int const &val) const
         {
-            return ConstantInt::get(getGlobalContext(), APInt(32, val, true));
+            return ConstantInt::get(KiteGlobalContext, APInt(32, val, true));
         }
         
         Value *llvm_node_codegen::operator()(double const &val) const
         {
-            return ConstantFP::get(getGlobalContext(), APFloat(val));
+            return ConstantFP::get(KiteGlobalContext, APFloat(val));
         }
         
         Value *llvm_node_codegen::operator()(bool const &val) const
         {
-            return ConstantInt::get(getGlobalContext(), APInt(1, val, true));
+            return ConstantInt::get(KiteGlobalContext, APInt(1, val, true));
         }
         
         Value *llvm_node_codegen::operator()(std::string const &val) const
@@ -335,7 +343,7 @@ namespace kite
             
             language::kite::kite::ImportModule(module_name);
             
-            return ConstantInt::get(getGlobalContext(), APInt(32, 0, true));
+            return ConstantInt::get(KiteGlobalContext, APInt(32, 0, true));
         }
         
         Value *llvm_node_codegen::codegen_binary_op(semantics::syntax_tree const &tree) const
@@ -356,8 +364,8 @@ namespace kite
                  get_type(lhs) == semantics::BOOLEAN)
             {
                 // Short circuiting special handling.
-                BasicBlock *do_other = BasicBlock::Create(getGlobalContext(), "do_other", currentFunc);
-                BasicBlock *collect_result = BasicBlock::Create(getGlobalContext(), "collect_result", currentFunc);
+                BasicBlock *do_other = BasicBlock::Create(KiteGlobalContext, "do_other", currentFunc);
+                BasicBlock *collect_result = BasicBlock::Create(KiteGlobalContext, "collect_result", currentFunc);
                 if (tree.op == semantics::AND)
                 {
                     generate_debug_data(builder.CreateCondBr(lhs, do_other, collect_result), tree.position);
@@ -373,8 +381,8 @@ namespace kite
                 rhs = boost::apply_visitor(llvm_node_codegen(state), tree.children[1]);
                 if (get_type(rhs) != semantics::BOOLEAN)
                 {
-                    BasicBlock *type_error_block = BasicBlock::Create(getGlobalContext(), "raise_type_error", currentFunc);
-                    BasicBlock *type_error_block_end = BasicBlock::Create(getGlobalContext(), "raise_type_error_end", currentFunc);
+                    BasicBlock *type_error_block = BasicBlock::Create(KiteGlobalContext, "raise_type_error", currentFunc);
+                    BasicBlock *type_error_block_end = BasicBlock::Create(KiteGlobalContext, "raise_type_error_end", currentFunc);
                     if (get_type(rhs) == semantics::OBJECT)
                     {
                         std::vector<Type*> parameterTypes;
@@ -436,10 +444,10 @@ namespace kite
                         Value *valAsInt = rhs, *result_eqzero, *result_neqzero;
                         if (get_type(lhs) == semantics::FLOAT) valAsInt = builder.CreateFPToSI(rhs, kite_type_to_llvm_type(semantics::INTEGER));
                     
-                        BasicBlock *neq_zero = BasicBlock::Create(getGlobalContext(), "neq_zero", currentFunc);
-                        BasicBlock *eq_zero = BasicBlock::Create(getGlobalContext(), "eq_zero", currentFunc);
-                        BasicBlock *div_result = BasicBlock::Create(getGlobalContext(), "div_result", currentFunc);
-                        Value *cond = builder.CreateICmpEQ(valAsInt, ConstantInt::get(getGlobalContext(), APInt(32, 0, true)));
+                        BasicBlock *neq_zero = BasicBlock::Create(KiteGlobalContext, "neq_zero", currentFunc);
+                        BasicBlock *eq_zero = BasicBlock::Create(KiteGlobalContext, "eq_zero", currentFunc);
+                        BasicBlock *div_result = BasicBlock::Create(KiteGlobalContext, "div_result", currentFunc);
+                        Value *cond = builder.CreateICmpEQ(valAsInt, ConstantInt::get(KiteGlobalContext, APInt(32, 0, true)));
                         generate_debug_data(builder.CreateCondBr(cond, eq_zero, neq_zero), tree.position);
                     
                         builder.SetInsertPoint(eq_zero);
@@ -452,8 +460,8 @@ namespace kite
                             funPtrLookup = module->getFunction("kite_exception_raise_div_by_zero");
                         }
                         generate_debug_data(builder.CreateCall(funPtrLookup), tree.position);
-                        if (get_type(lhs) == semantics::FLOAT) result_eqzero = ConstantFP::get(getGlobalContext(), APFloat(0.0));
-                        else result_eqzero = ConstantInt::get(getGlobalContext(), APInt(32, 0, true));
+                        if (get_type(lhs) == semantics::FLOAT) result_eqzero = ConstantFP::get(KiteGlobalContext, APFloat(0.0));
+                        else result_eqzero = ConstantInt::get(KiteGlobalContext, APInt(32, 0, true));
                         generate_debug_data(builder.CreateBr(div_result), tree.position);
                     
                         builder.SetInsertPoint(neq_zero);
@@ -469,8 +477,8 @@ namespace kite
                         }
                         if (result_neqzero == NULL)
                         {
-                            if (get_type(lhs) == semantics::FLOAT) result_neqzero = ConstantFP::get(getGlobalContext(), APFloat(0.0));
-                            else result_neqzero = ConstantInt::get(getGlobalContext(), APInt(32, 0, true));
+                            if (get_type(lhs) == semantics::FLOAT) result_neqzero = ConstantFP::get(KiteGlobalContext, APFloat(0.0));
+                            else result_neqzero = ConstantInt::get(KiteGlobalContext, APInt(32, 0, true));
                         }
                         generate_debug_data(builder.CreateBr(div_result), tree.position);
                     
@@ -550,7 +558,7 @@ namespace kite
             // TODO: refactor
             std::vector<Type*> parameterTypesLookup;
             std::vector<Value*> paramValuesLookup;
-            parameterTypesLookup.push_back(PointerType::getUnqual(Type::getInt32Ty(getGlobalContext())));
+            parameterTypesLookup.push_back(PointerType::getUnqual(Type::getInt32Ty(KiteGlobalContext)));
             parameterTypesLookup.push_back(kite_type_to_llvm_type(semantics::STRING));
             parameterTypesLookup.push_back(kite_type_to_llvm_type(semantics::INTEGER));
             FunctionType *ftPtrLookup = FunctionType::get(parameterTypesLookup[0], ArrayRef<Type*>(parameterTypesLookup), false);
@@ -560,9 +568,9 @@ namespace kite
                 funPtrLookup->eraseFromParent();
                 funPtrLookup = module->getFunction("kite_find_funccall");
             }
-            paramValuesLookup.push_back(builder.CreateBitCast(this_ptr, PointerType::getUnqual(Type::getInt32Ty(getGlobalContext()))));
+            paramValuesLookup.push_back(builder.CreateBitCast(this_ptr, PointerType::getUnqual(Type::getInt32Ty(KiteGlobalContext))));
             paramValuesLookup.push_back(builder.CreateGlobalStringPtr(name.c_str()));
-            paramValuesLookup.push_back(ConstantInt::get(getGlobalContext(), APInt(32, args + 1, true)));
+            paramValuesLookup.push_back(ConstantInt::get(KiteGlobalContext, APInt(32, args + 1, true)));
             Value *fptr = generate_debug_data(builder.CreateCall(
                 funPtrLookup,
                 ArrayRef<Value*>(paramValuesLookup)
@@ -579,8 +587,9 @@ namespace kite
                 funPtr->eraseFromParent();
                 funPtr = module->getFunction("kite_method_alloc");
             }
+            Value* lArgs[2] = {builder.CreateBitCast(fptr, kite_type_to_llvm_type(semantics::OBJECT)), ConstantInt::get(kite_type_to_llvm_type(semantics::INTEGER), args + 0)};
             Value *method = generate_debug_data(
-                builder.CreateCall2(funPtr, builder.CreateBitCast(fptr, kite_type_to_llvm_type(semantics::OBJECT)), ConstantInt::get(kite_type_to_llvm_type(semantics::INTEGER), args + 0)),
+                builder.CreateCall(funPtr, lArgs),
                 tree.position);
             generate_debug_data(
                 builder.CreateStore(this_ptr, builder.CreateStructGEP(builder.CreateBitCast(method, get_method_type()), 5)),
@@ -597,12 +606,12 @@ namespace kite
         
             if (op_type == semantics::INTEGER)
             {
-                lhs = ConstantInt::get(getGlobalContext(), APInt(32, 0, true));
+                lhs = ConstantInt::get(KiteGlobalContext, APInt(32, 0, true));
                 lhs = state.module_builder().CreateSub(lhs, rhs);
             }
             else if (op_type == semantics::FLOAT)
             {
-                lhs = ConstantFP::get(getGlobalContext(), APFloat(0.0));
+                lhs = ConstantFP::get(KiteGlobalContext, APFloat(0.0));
                 lhs = state.module_builder().CreateFSub(lhs, rhs);
             }
             else
@@ -653,11 +662,11 @@ namespace kite
             
             if (tree.op == semantics::IS_CLASS)
             {
-                type = ConstantInt::get(getGlobalContext(), APInt(1, 0, true));
+                type = ConstantInt::get(KiteGlobalContext, APInt(1, 0, true));
             }
             else
             {
-                type = ConstantInt::get(getGlobalContext(), APInt(1, 1, true));
+                type = ConstantInt::get(KiteGlobalContext, APInt(1, 1, true));
             }
             
             std::vector<Type*> parameterTypes;
@@ -756,6 +765,9 @@ namespace kite
                 case semantics::DEREF_ARRAY:
                     ret = codegen_deref_array_op(param.tree, param.prev);
                     break;
+                default:
+                    assert(0);
+                    break;
             }
             
             return ret;
@@ -830,7 +842,7 @@ namespace kite
                 
                 std::vector<Type*> parameterTypesLookup;
                 std::vector<Value*> paramValuesLookup;
-                parameterTypesLookup.push_back(PointerType::getUnqual(Type::getInt32Ty(getGlobalContext())));
+                parameterTypesLookup.push_back(PointerType::getUnqual(Type::getInt32Ty(KiteGlobalContext)));
                 parameterTypesLookup.push_back(kite_type_to_llvm_type(semantics::INTEGER));
                 FunctionType *ftPtrLookup = FunctionType::get(parameterTypesLookup[0], ArrayRef<Type*>(parameterTypesLookup), false);
                 Function *funPtrLookup = Function::Create(ftPtrLookup, Function::ExternalLinkage, "kite_method_verify_semantics", module);
@@ -843,7 +855,7 @@ namespace kite
                     generate_debug_data(
                         builder.CreateLoad(sym_stack[method_name]),
                         tree.position));
-                paramValuesLookup.push_back(ConstantInt::get(getGlobalContext(), APInt(32, parameters.size(), true)));
+                paramValuesLookup.push_back(ConstantInt::get(KiteGlobalContext, APInt(32, parameters.size(), true)));
                 fptr = builder.CreateBitCast(
                     generate_debug_data(
                         builder.CreateCall(
@@ -867,6 +879,7 @@ namespace kite
                 }
                 return generate_debug_data(
                     builder.CreateCall(
+                        ft,
                         fptr,
                         ArrayRef<Value*>(parameters)
                     ), tree.position);
@@ -923,7 +936,7 @@ namespace kite
             {
                 if (sym_stack.count(var_name) == 0)
                 {
-                    BasicBlock *sym_block = BasicBlock::Create(getGlobalContext(), "varcreate", currentFunc);
+                    BasicBlock *sym_block = BasicBlock::Create(KiteGlobalContext, "varcreate", currentFunc);
                     generate_debug_data(builder.CreateBr(sym_block), tree.position);
                     
                     builder.SetInsertPoint(sym_block);
@@ -934,9 +947,9 @@ namespace kite
                     Value *getProp = generate_llvm_dynamic_object_get_property(sym_stack["this"], var_name, tree);
                     Value *propValue = generate_debug_data(builder.CreateLoad(getProp), tree.position);
                     
-                    BasicBlock *has_var = BasicBlock::Create(getGlobalContext(), "varnotexists", currentFunc);
-                    BasicBlock *end_var = BasicBlock::Create(getGlobalContext(), "varend", currentFunc);
-                    Value *zeroInt = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) * 8, 0, true));
+                    BasicBlock *has_var = BasicBlock::Create(KiteGlobalContext, "varnotexists", currentFunc);
+                    BasicBlock *end_var = BasicBlock::Create(KiteGlobalContext, "varend", currentFunc);
+                    Value *zeroInt = ConstantInt::get(KiteGlobalContext, APInt(sizeof(void*) * 8, 0, true));
                     Value *zeroPtr = builder.CreateIntToPtr(zeroInt, propValue->getType());
                     Value *cmpValue = builder.CreateICmpEQ(propValue, zeroPtr);
                     generate_debug_data(builder.CreateCondBr(cmpValue, has_var, end_var), tree.position);
@@ -1028,7 +1041,7 @@ namespace kite
         {
             BasicBlock *currentBB = state.module_builder().GetInsertBlock();
             Function *currentFunc = currentBB->getParent();
-            BasicBlock *BB = BasicBlock::Create(getGlobalContext(), "loop", currentFunc);
+            BasicBlock *BB = BasicBlock::Create(KiteGlobalContext, "loop", currentFunc);
             
             generate_debug_data(state.module_builder().CreateBr(BB), tree.position);
             state.module_builder().SetInsertPoint(BB);
@@ -1040,8 +1053,8 @@ namespace kite
                 condition = generate_llvm_method_call(condition, "bool", params, tree);
             }
             
-            BasicBlock *bodyBB = BasicBlock::Create(getGlobalContext(), "loopbody", currentFunc);
-            BasicBlock *afterLoopBB = BasicBlock::Create(getGlobalContext(), "loopend", currentFunc);
+            BasicBlock *bodyBB = BasicBlock::Create(KiteGlobalContext, "loopbody", currentFunc);
+            BasicBlock *afterLoopBB = BasicBlock::Create(KiteGlobalContext, "loopend", currentFunc);
             
             state.push_loop(BB);
             state.push_loop_end(afterLoopBB);
@@ -1053,6 +1066,9 @@ namespace kite
                     break;
                 case semantics::UNTIL:
                     generate_debug_data(state.module_builder().CreateCondBr(condition, afterLoopBB, bodyBB), tree.position);
+                    break;
+                default:
+                    assert(0);
                     break;
             }
             
@@ -1066,7 +1082,7 @@ namespace kite
             state.pop_loop();
             state.pop_loop_end();
             
-            return ConstantInt::get(getGlobalContext(), APInt(32, 0, true)); // TODO
+            return ConstantInt::get(KiteGlobalContext, APInt(32, 0, true)); // TODO
         }
         
         Value *llvm_node_codegen::codegen_break_continue_op(semantics::syntax_tree const &tree) const
@@ -1092,11 +1108,14 @@ namespace kite
                 case semantics::BREAK:
                     currentLoop = state.current_loop_end();
                     break;
+                default:
+                    assert(0);
+                    break;
             }
             
             generate_debug_data(builder.CreateBr(currentLoop), tree.position);
             state.skip_remaining(true);
-            return ConstantInt::get(getGlobalContext(), APInt(32, 0, true)); // TODO
+            return ConstantInt::get(KiteGlobalContext, APInt(32, 0, true)); // TODO
         }
         
         Value *llvm_node_codegen::codegen_decide_op(semantics::syntax_tree const &tree) const
@@ -1104,9 +1123,9 @@ namespace kite
             IRBuilder<> &builder = state.module_builder();
             BasicBlock *currentBB = builder.GetInsertBlock();
             Function *currentFunc = currentBB->getParent();
-            BasicBlock *endBB = BasicBlock::Create(getGlobalContext(), "decide_end", currentFunc);
+            BasicBlock *endBB = BasicBlock::Create(KiteGlobalContext, "decide_end", currentFunc);
             Value *condition = NULL;
-            BasicBlock *condBB = BasicBlock::Create(getGlobalContext(), "decide_cond", currentFunc, endBB);
+            BasicBlock *condBB = BasicBlock::Create(KiteGlobalContext, "decide_cond", currentFunc, endBB);
             BasicBlock *actionBB = NULL;
             PHINode *PN = NULL;
             std::vector<Value*> decideResults;
@@ -1117,14 +1136,14 @@ namespace kite
             for(int i = 0; i < tree.children.size(); i++)
             {
                 condition = boost::apply_visitor(llvm_node_codegen(state), tree.children[i++]);
-                actionBB = BasicBlock::Create(getGlobalContext(), "decide_true", currentFunc, endBB);
+                actionBB = BasicBlock::Create(KiteGlobalContext, "decide_true", currentFunc, endBB);
                 if (i < tree.children.size() - 1)
                 {
-                    condBB = BasicBlock::Create(getGlobalContext(), "decide_cond", currentFunc, endBB);
+                    condBB = BasicBlock::Create(KiteGlobalContext, "decide_cond", currentFunc, endBB);
                 }
                 else
                 {
-                    Value *zero = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) << 3, (uint64_t)0, true));
+                    Value *zero = ConstantInt::get(KiteGlobalContext, APInt(sizeof(void*) << 3, (uint64_t)0, true));
                     zero = builder.CreateIntToPtr(zero, kite_type_to_llvm_type(semantics::OBJECT));
                     decideResults.push_back(zero);
                     decideBlocks.push_back(builder.GetInsertBlock());
@@ -1176,18 +1195,18 @@ namespace kite
             IRBuilder<> &builder = state.module_builder();
             BasicBlock *currentBB = builder.GetInsertBlock();
             Function *currentFunc = currentBB->getParent();
-            BasicBlock *run_block = BasicBlock::Create(getGlobalContext(), "run_block", currentFunc);
-            BasicBlock *catch_block = BasicBlock::Create(getGlobalContext(), "catch_block", currentFunc);
-            BasicBlock *end_block = BasicBlock::Create(getGlobalContext(), "end_block", currentFunc);
+            BasicBlock *run_block = BasicBlock::Create(KiteGlobalContext, "run_block", currentFunc);
+            BasicBlock *catch_block = BasicBlock::Create(KiteGlobalContext, "catch_block", currentFunc);
+            BasicBlock *end_block = BasicBlock::Create(KiteGlobalContext, "end_block", currentFunc);
             
             // Create jump point
             Value *jmpbuf = 
                 builder.CreateAlloca(
-                    Type::getInt8Ty(getGlobalContext()), 
-                    ConstantInt::get(Type::getInt32Ty(getGlobalContext()), sizeof(jmp_buf)));
+                    Type::getInt8Ty(KiteGlobalContext), 
+                    ConstantInt::get(Type::getInt32Ty(KiteGlobalContext), sizeof(jmp_buf)));
             std::vector<Type*> setjmp_params;
             setjmp_params.push_back(jmpbuf->getType());
-            FunctionType *setjmp_type = FunctionType::get(Type::getInt32Ty(getGlobalContext()), ArrayRef<Type*>(setjmp_params), false);
+            FunctionType *setjmp_type = FunctionType::get(Type::getInt32Ty(KiteGlobalContext), ArrayRef<Type*>(setjmp_params), false);
             Function *setjmp_fun = Function::Create(setjmp_type, Function::ExternalLinkage, "setjmp", module);
             if (setjmp_fun->getName() != "setjmp")
             {
@@ -1195,14 +1214,14 @@ namespace kite
                 setjmp_fun = module->getFunction("setjmp");
             }
             Value *setjmp_ret = generate_debug_data(builder.CreateCall(setjmp_fun, jmpbuf), tree.position);
-            Value *setjmp_jumped = builder.CreateICmpEQ(setjmp_ret, ConstantInt::get(Type::getInt32Ty(getGlobalContext()), 1));
+            Value *setjmp_jumped = builder.CreateICmpEQ(setjmp_ret, ConstantInt::get(Type::getInt32Ty(KiteGlobalContext), 1));
             generate_debug_data(
                 builder.CreateCondBr(setjmp_jumped, catch_block, run_block),
                 tree.position);
             
             // Create run block
             builder.SetInsertPoint(run_block);
-            FunctionType *pushjmp_type = FunctionType::get(Type::getVoidTy(getGlobalContext()), ArrayRef<Type*>(setjmp_params), false);
+            FunctionType *pushjmp_type = FunctionType::get(Type::getVoidTy(KiteGlobalContext), ArrayRef<Type*>(setjmp_params), false);
             Function *pushjmp_fun = Function::Create(pushjmp_type, Function::ExternalLinkage, "kite_exception_stack_push", module);
             if (pushjmp_fun->getName() != "kite_exception_stack_push")
             {
@@ -1217,7 +1236,7 @@ namespace kite
             
             // Clear exception stack entry after successful completion of block.
             std::vector<Type*> pop_exc_params;
-            FunctionType *pop_exc_type = FunctionType::get(Type::getVoidTy(getGlobalContext()), ArrayRef<Type*>(pop_exc_params), false);
+            FunctionType *pop_exc_type = FunctionType::get(Type::getVoidTy(KiteGlobalContext), ArrayRef<Type*>(pop_exc_params), false);
             Function *pop_exc_fun = Function::Create(pop_exc_type, Function::ExternalLinkage, "kite_exception_stack_pop", module);
             if (pop_exc_fun->getName() != "kite_exception_stack_pop")
             {
@@ -1402,7 +1421,7 @@ namespace kite
             std::vector<Value*> argValues;
             std::vector<Type*> argValuesTypes;
             
-            Value *numArgs = ConstantInt::get(getGlobalContext(), APInt(32, symbolTable.size(), true));
+            Value *numArgs = ConstantInt::get(KiteGlobalContext, APInt(32, symbolTable.size(), true));
             argNames.push_back(numArgs);
             argNamesTypes.push_back(numArgs->getType());
             
@@ -1568,7 +1587,7 @@ namespace kite
             Module *currentModule = state.current_module();
             FunctionType *FT = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), ArrayRef<Type*>(argTypes), false);
             Function *F = Function::Create(FT, Function::ExternalLinkage, functionName.c_str(), currentModule);
-            BasicBlock *BB = BasicBlock::Create(getGlobalContext(), "entry", F);
+            BasicBlock *BB = BasicBlock::Create(KiteGlobalContext, "entry", F);
             IRBuilder<> &builder = state.module_builder();
             builder.SetInsertPoint(BB);
             
@@ -1609,7 +1628,7 @@ namespace kite
                 }
                 else
                 {
-                    ret = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) << 3, (uint64_t)0, true));
+                    ret = ConstantInt::get(KiteGlobalContext, APInt(sizeof(void*) << 3, (uint64_t)0, true));
                     ret = builder.CreateIntToPtr(ret, PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)));
                 }
             }
@@ -1649,7 +1668,7 @@ namespace kite
             Module *currentModule = state.current_module();
             FunctionType *FT = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), ArrayRef<Type*>(argTypes), false);
             Function *F = Function::Create(FT, Function::ExternalLinkage, functionName.c_str(), currentModule);
-            BasicBlock *BB = BasicBlock::Create(getGlobalContext(), "entry", F);
+            BasicBlock *BB = BasicBlock::Create(KiteGlobalContext, "entry", F);
             IRBuilder<> &builder = state.module_builder();
             builder.SetInsertPoint(BB);
             
@@ -1716,7 +1735,7 @@ namespace kite
                 }
                 else
                 {
-                    ret = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) << 3, (uint64_t)0, true));
+                    ret = ConstantInt::get(KiteGlobalContext, APInt(sizeof(void*) << 3, (uint64_t)0, true));
                     ret = builder.CreateIntToPtr(ret, PointerType::getUnqual(kite_type_to_llvm_type(semantics::OBJECT)));
                 }
             }
@@ -1784,7 +1803,7 @@ namespace kite
                 /*fptr = module->getFunction(prefixedMethod.c_str());
                 if (fptr == NULL)
                 {
-                    Value *fptrval = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*) << 3, (uint64_t)semantics.second, true));
+                    Value *fptrval = ConstantInt::get(KiteGlobalContext, APInt(sizeof(void*) << 3, (uint64_t)semantics.second, true));
                     fptr = builder.CreateIntToPtr(fptrval, PointerType::getUnqual(ft));
                 }*/
             }
@@ -1822,7 +1841,7 @@ namespace kite
                 {
                     std::vector<Type*> parameterTypesLookup;
                     std::vector<Value*> paramValuesLookup;
-                    parameterTypesLookup.push_back(PointerType::getUnqual(Type::getInt32Ty(getGlobalContext())));
+                    parameterTypesLookup.push_back(PointerType::getUnqual(Type::getInt32Ty(KiteGlobalContext)));
                     parameterTypesLookup.push_back(kite_type_to_llvm_type(semantics::STRING));
                     parameterTypesLookup.push_back(kite_type_to_llvm_type(semantics::INTEGER));
                     FunctionType *ftPtrLookup = FunctionType::get(parameterTypesLookup[0], ArrayRef<Type*>(parameterTypesLookup), false);
@@ -1832,9 +1851,9 @@ namespace kite
                         funPtrLookup->eraseFromParent();
                         funPtrLookup = module->getFunction("kite_find_funccall");
                     }
-                    paramValuesLookup.push_back(builder.CreateBitCast(self, PointerType::getUnqual(Type::getInt32Ty(getGlobalContext()))));
+                    paramValuesLookup.push_back(builder.CreateBitCast(self, PointerType::getUnqual(Type::getInt32Ty(KiteGlobalContext))));
                     paramValuesLookup.push_back(builder.CreateGlobalStringPtr(name.c_str()));
-                    paramValuesLookup.push_back(ConstantInt::get(getGlobalContext(), APInt(32, paramsCopy.size(), true)));
+                    paramValuesLookup.push_back(ConstantInt::get(KiteGlobalContext, APInt(32, paramsCopy.size(), true)));
                     fptr = builder.CreateBitCast(
                         generate_debug_data(
                             builder.CreateCall(
@@ -1851,8 +1870,8 @@ namespace kite
                         
                         BasicBlock *currentBB = builder.GetInsertBlock();
                         Function *currentFunc = currentBB->getParent();
-                        BasicBlock *not_null = BasicBlock::Create(getGlobalContext(), "not_null", currentFunc);
-                        BasicBlock *end_block = BasicBlock::Create(getGlobalContext(), "end_block", currentFunc);
+                        BasicBlock *not_null = BasicBlock::Create(KiteGlobalContext, "not_null", currentFunc);
+                        BasicBlock *end_block = BasicBlock::Create(KiteGlobalContext, "end_block", currentFunc);
                         generate_debug_data(
                             builder.CreateCondBr(validatePtr, not_null, end_block),
                             tree.position);
@@ -1860,6 +1879,7 @@ namespace kite
                         builder.SetInsertPoint(not_null);
                         generate_debug_data(
                             builder.CreateCall(
+                                ft,
                                 fptr,
                                 ArrayRef<Value*>(paramsCopy)
                             ),
@@ -1876,6 +1896,7 @@ namespace kite
             }
             self = generate_debug_data(
                 builder.CreateCall(
+                    ft,
                     fptr,
                     ArrayRef<Value*>(paramsCopy)
                 ),
@@ -1922,9 +1943,10 @@ namespace kite
             
             state.push_namespace_stack(className);
             ret = generate_llvm_method(std::string("__static_init__"), args, body, tree);
-            
+           
+            FunctionType* ft = (FunctionType*)ret->getType(); 
             generate_debug_data(
-                builder.CreateCall(ret, obj),
+                builder.CreateCall(ft, ret, obj),
                 tree.position);
             
             generate_llvm_dynamic_object_set_name(obj, tree);
@@ -2001,7 +2023,7 @@ namespace kite
             }
             
             Value *obj = generate_debug_data(
-                builder.CreateCall(alloc_method),
+                builder.CreateCall(ft, alloc_method),
                 tree.position);
             return obj;
         }
@@ -2029,9 +2051,10 @@ namespace kite
                     builder.CreateLoad(parent),
                     tree.position);
             }
-            
+           
+            Value* fArgs[2] = {obj, parent}; 
             generate_debug_data(
-                builder.CreateCall2(funPtr, obj, parent),
+                builder.CreateCall(ft, funPtr, fArgs),
                 tree.position);
         }
         
@@ -2054,8 +2077,9 @@ namespace kite
             
             // Form full class name.
             std::string fullName = state.full_class_name();
+            Value* fArgs[2] = {obj, builder.CreateGlobalStringPtr(fullName.c_str())};
             generate_debug_data(
-                builder.CreateCall2(funPtr, obj, builder.CreateGlobalStringPtr(fullName.c_str())),
+                builder.CreateCall(ft, funPtr, fArgs),
                 tree.position);
         }
         
@@ -2077,9 +2101,10 @@ namespace kite
                     funPtr->eraseFromParent();
                     funPtr = module->getFunction("kite_set_docstring");
                 }
-            
+           
+                Value* fArgs[2] = {obj, builder.CreateGlobalStringPtr(doc.c_str())}; 
                 generate_debug_data(
-                    builder.CreateCall2(funPtr, obj, builder.CreateGlobalStringPtr(doc.c_str())),
+                    builder.CreateCall(ft, funPtr, fArgs),
                     tree.position);
             }
         }
@@ -2101,13 +2126,16 @@ namespace kite
                 funPtr->eraseFromParent();
                 funPtr = module->getFunction("kite_set_docstring_arg");
             }
-        
-            generate_debug_data(
-                builder.CreateCall3(
-                    funPtr,
-                    obj, 
+       
+            Value* fArgs[3] = {obj,
                     builder.CreateGlobalStringPtr(name.c_str()),
-                    builder.CreateGlobalStringPtr(doc.c_str())),
+                    builder.CreateGlobalStringPtr(doc.c_str())};
+ 
+            generate_debug_data(
+                builder.CreateCall(
+                    ft,
+                    funPtr,
+                    fArgs),
                 tree.position);
         }
         
@@ -2129,12 +2157,15 @@ namespace kite
                 funPtr = module->getFunction("kite_set_docstring_prop");
             }
         
-            generate_debug_data(
-                builder.CreateCall3(
-                    funPtr,
-                    obj, 
+            Value* fArgs[3] = {obj,
                     builder.CreateGlobalStringPtr(name.c_str()),
-                    builder.CreateGlobalStringPtr(doc.c_str())),
+                    builder.CreateGlobalStringPtr(doc.c_str())};
+
+            generate_debug_data(
+                builder.CreateCall(
+                    ft,
+                    funPtr,
+                    fArgs),
                 tree.position);
         }
         
@@ -2156,13 +2187,15 @@ namespace kite
                 funPtr->eraseFromParent();
                 funPtr = module->getFunction("kite_method_alloc");
             }
-            return generate_debug_data(
-                builder.CreateCall2(
-                    funPtr, 
-                    builder.CreateBitCast(
+            Value* fArgs[2] = {builder.CreateBitCast(
                         method, 
-                        kite_type_to_llvm_type(semantics::OBJECT)), 
-                    ConstantInt::get(kite_type_to_llvm_type(semantics::INTEGER), num_args)),
+                        kite_type_to_llvm_type(semantics::OBJECT)),
+                    ConstantInt::get(kite_type_to_llvm_type(semantics::INTEGER), num_args)};
+            return generate_debug_data(
+                builder.CreateCall(
+                    ft,
+                    funPtr,
+                    fArgs),
                 tree.position);
         }
         
@@ -2188,12 +2221,16 @@ namespace kite
             {
                 obj = generate_debug_data(builder.CreateLoad(obj), tree.position);
             }
+
+            Value* fArgs[3] = {obj, 
+                    builder.CreateGlobalStringPtr(name.c_str()),
+                    ConstantInt::get(kite_type_to_llvm_type(semantics::BOOLEAN), set)};
+
             return generate_debug_data(
-                builder.CreateCall3(
+                builder.CreateCall(
+                    ft,
                     funPtr, 
-                    obj, 
-                    builder.CreateGlobalStringPtr(name.c_str()), 
-                    ConstantInt::get(kite_type_to_llvm_type(semantics::BOOLEAN), set)),
+                    fArgs),
                 tree.position);
         }
         
@@ -2217,12 +2254,13 @@ namespace kite
             Value *obj = generate_debug_data(
                 builder.CreateLoad(state.current_symbol_stack()["this"]),
                 tree.position);
-                
+               
+            Value* fArgs[2] = {obj, method}; 
             return generate_debug_data(
-                builder.CreateCall2(
+                builder.CreateCall(
+                    ft,
                     funPtr, 
-                    obj, 
-                    method),
+                    fArgs),
                 tree.position);
         }
         
@@ -2256,7 +2294,7 @@ namespace kite
             {
                 op_type = semantics::BOOLEAN;
             }
-            else if (type == Type::getInt8PtrTy(getGlobalContext()))
+            else if (type == Type::getInt8PtrTy(KiteGlobalContext))
             {
                 op_type = semantics::STRING;
             }
@@ -2275,32 +2313,32 @@ namespace kite
         Type *llvm_node_codegen::get_object_type() const
         {
             std::vector<Type*> struct_types;
-            struct_types.push_back(Type::getIntNTy(getGlobalContext(), sizeof(semantics::builtin_types) * 8)); // type
+            struct_types.push_back(Type::getIntNTy(KiteGlobalContext, sizeof(semantics::builtin_types) * 8)); // type
             struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT)); // parent
             struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT)); // alloc method
             struct_types.push_back(
                 ArrayType::get(
                     Type::getIntNTy(
-                        getGlobalContext(), 
+                        KiteGlobalContext, 
                         8),
                     sizeof(kite::stdlib::System::property_map) +
                     sizeof(kite::stdlib::System::property_doc_map) +
                     sizeof(std::string))); // placeholder
                         
-            return PointerType::getUnqual(StructType::get(getGlobalContext(), ArrayRef<Type*>(struct_types)));
+            return PointerType::getUnqual(StructType::get(KiteGlobalContext, ArrayRef<Type*>(struct_types)));
         }
 
         Type *llvm_node_codegen::get_method_type() const
         {
             std::vector<Type*> struct_types;
             // dynamic_object stuff
-            struct_types.push_back(Type::getIntNTy(getGlobalContext(), sizeof(semantics::builtin_types) * 8)); // type
+            struct_types.push_back(Type::getIntNTy(KiteGlobalContext, sizeof(semantics::builtin_types) * 8)); // type
             struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT)); // parent
             struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT)); // alloc method
             struct_types.push_back(
                 ArrayType::get(
                     Type::getIntNTy(
-                        getGlobalContext(), 
+                        KiteGlobalContext, 
                         8),
                     sizeof(kite::stdlib::System::property_map) +
                     sizeof(kite::stdlib::System::property_doc_map) +
@@ -2310,7 +2348,7 @@ namespace kite
             struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT)); // method pointer
             struct_types.push_back(kite_type_to_llvm_type(semantics::OBJECT)); // this pointer
             struct_types.push_back(kite_type_to_llvm_type(semantics::INTEGER)); // number of arguments
-            return PointerType::getUnqual(StructType::get(getGlobalContext(), ArrayRef<Type*>(struct_types)));
+            return PointerType::getUnqual(StructType::get(KiteGlobalContext, ArrayRef<Type*>(struct_types)));
         }
 
         stdlib::object_method_map &llvm_node_codegen::get_method_map(semantics::builtin_types type) const
@@ -2377,31 +2415,31 @@ namespace kite
             {
                 case semantics::INTEGER:
                 {
-                    return Type::getInt32Ty(getGlobalContext());
+                    return Type::getInt32Ty(KiteGlobalContext);
                 }
                 case semantics::FLOAT:
                 {
-                    return Type::getDoubleTy(getGlobalContext());
+                    return Type::getDoubleTy(KiteGlobalContext);
                 }
                 case semantics::BOOLEAN:
                 {
-                    return Type::getInt1Ty(getGlobalContext());
+                    return Type::getInt1Ty(KiteGlobalContext);
                 }
                 case semantics::STRING:
                 {
-                    return PointerType::getUnqual(Type::getInt8Ty(getGlobalContext()));
+                    return PointerType::getUnqual(Type::getInt8Ty(KiteGlobalContext));
                 }
                 case semantics::OBJECT:
                 {
-                    /*PATypeHolder StructTy = OpaqueType::get(getGlobalContext());
+                    /*PATypeHolder StructTy = OpaqueType::get(KiteGlobalContext);
                     std::vector<const Type*> Elts;
-                    Elts.push_back(Type::getInt32Ty(getGlobalContext()));
+                    Elts.push_back(Type::getInt32Ty(KiteGlobalContext));
                     Elts.push_back(PointerType::getUnqual(StructTy));
-                    StructType *newStructType = StructType::get(getGlobalContext(), Elts);
+                    StructType *newStructType = StructType::get(KiteGlobalContext, Elts);
                     cast<OpaqueType>(StructTy.get())->refineAbstractTypeTo(newStructType);
                     newStructType = cast<StructType>(StructTy.get());
                     return PointerType::getUnqual(newStructType);*/
-                    return PointerType::getUnqual(Type::getInt32Ty(getGlobalContext()));
+                    return PointerType::getUnqual(Type::getInt32Ty(KiteGlobalContext));
                 }
                 default:
                 {
@@ -2451,38 +2489,34 @@ namespace kite
         
         Instruction *llvm_node_codegen::generate_debug_data(Instruction *instruction, const semantics::syntax_tree_position &pos) const
         {
-            const DebugLoc &debugLoc = instruction->getDebugLoc();
+            //const DebugLoc &debugLoc = instruction->getDebugLoc();
             
-            if (debugLoc.getLine() == 0)
+            //if (debugLoc.getLine() == 0)
             {
                 boost::filesystem::path p(pos.file);
                 
                 // Create compile unit
+                llvm::DIFile* file = state.current_debug_builder()->createFile(p.filename().string(), p.parent_path().string());
                 if (state.compileUnitCache.find(pos.file) == state.compileUnitCache.end())
                 {
                     // Note: createCompileUnit seems to create one compile unit per module.
                     // Maybe we should look into this.
-                    state.current_debug_builder()->createCompileUnit (0xAA35, p.filename().string(), p.parent_path().string(), "Kite version 2.0", false, "", 0);
-                    state.compileUnitCache[pos.file] = const_cast<MDNode*>(state.current_debug_builder()->getCU());
+                    llvm::DICompileUnit* cu = state.current_debug_builder()->createCompileUnit (0xAA35, file, "Kite version 2.0", false, "", 0);
+                    state.compileUnitCache[pos.file] = const_cast<llvm::DICompileUnit*>(cu);
                 }
 
-                DIFile file = state.current_debug_builder()->createFile(p.filename().string(), p.parent_path().string());
-
-                std::map<std::string, DISubprogram> &subroutineCache = state.subroutineCache;
-                DISubprogram subprogram;
+                std::map<std::string, DISubprogram*> &subroutineCache = state.subroutineCache;
+                DISubprogram* subprogram;
                 if (subroutineCache.find(state.current_c_method_name()) == subroutineCache.end())
                 {
-                    DIType basicType = state.current_debug_builder()->createBasicType("System::object", sizeof(void*)*8, 0, DW_ATE_address);
-                    DIType pointerType = state.current_debug_builder()->createPointerType(basicType, sizeof(void*)*8);
+                    DIType* basicType = state.current_debug_builder()->createBasicType("System::object", sizeof(void*)*8, 0); //, DW_ATE_address);
+                    DIType* pointerType = state.current_debug_builder()->createPointerType(basicType, sizeof(void*)*8);
                     
-                    std::vector<Value*> fxnTypes;
-                    fxnTypes.push_back(pointerType);
-                    fxnTypes.push_back(pointerType);
-                    
-                    DIType type = state.current_debug_builder()->createSubroutineType(
-                        file,
-                        DIArray(MDNode::get(getGlobalContext(), fxnTypes))
-                        );
+                    Metadata* fxnTypes[2] = {pointerType, pointerType};
+                   
+                    llvm::DITypeRefArray typeRef = state.current_debug_builder()->getOrCreateTypeArray(fxnTypes); 
+                    DISubroutineType* type = state.current_debug_builder()->createSubroutineType(
+                        typeRef);
                     
                     subprogram = state.current_debug_builder()->createFunction(
                         file,
@@ -2491,12 +2525,10 @@ namespace kite
                         file,
                         1 /* TODO: line# */,
                         type,
-                        false,
-                        true,
                         1 /* TODO: line# */
                         );
                     
-                    assert(subprogram.Verify());
+                    assert(subprogram != nullptr);
                     
                     subroutineCache[state.current_c_method_name()] = subprogram;
                 }
@@ -2506,11 +2538,11 @@ namespace kite
                 }
 
                 // Create lexical block.
-                DILexicalBlock lexicalBlock;
+                DILexicalBlock* lexicalBlock;
                 if (state.lexicalBlockCache.find(state.current_c_method_name()) == state.lexicalBlockCache.end())
                 {
                     lexicalBlock = state.current_debug_builder()->createLexicalBlock(subprogram, file, 1 /* TODO: line */, 1 /* TODO: col */);
-                    assert(lexicalBlock.Verify());
+                    assert(lexicalBlock != nullptr);
                     state.lexicalBlockCache[state.current_c_method_name()] = lexicalBlock;
                 }
                 else
@@ -2519,7 +2551,7 @@ namespace kite
                 }
                                
                 // Create new debug location
-                DebugLoc newLoc = DebugLoc::get(pos.line, pos.column, lexicalBlock);
+                DebugLoc newLoc(lexicalBlock); //DebugLoc::get(pos.line, pos.column, lexicalBlock);
                 instruction->setDebugLoc(newLoc);
             }
             return instruction;

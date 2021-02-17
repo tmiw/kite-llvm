@@ -29,9 +29,7 @@
 
 // NOTE: lots of unit test failures on OSX and eval does not work on Linux
 // with the below enabled. Wait for future LLVM release to reenable.
-#ifdef __linux__
-//#define ENABLE_ENHANCED_JIT
-#endif
+#define ENABLE_ENHANCED_JIT
 
 #include <algorithm>
 #include <sys/stat.h>
@@ -45,22 +43,26 @@
 #include <stdlib/System/exceptions/FileError.h>
 #include <codegen/syntax_tree_printer.h>
 #include <codegen/llvm_node_codegen.h>
-#include <llvm/LLVMContext.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/LegacyPassManager.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/Support/MemoryBuffer.h>
 #ifdef ENABLE_ENHANCED_JIT
 #include <llvm/ExecutionEngine/MCJIT.h>
+#else
+#include <llvm/ExecutionEngine/Interpreter.h>
 #endif
-#include <llvm/ExecutionEngine/JIT.h>
-#include <llvm/PassManager.h>
-#include <llvm/Analysis/Verifier.h>
+#include <llvm/IR/PassManager.h>
+#include <llvm/IR/Verifier.h>
 #include <llvm/Analysis/Passes.h>
-#include <llvm/Target/TargetData.h>
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/Transforms/Scalar.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Target/TargetOptions.h>
+#include <llvm/Transforms/IPO/PassManagerBuilder.h>
+
 using namespace llvm;
+using namespace kite::codegen;
 
 namespace kite
 {
@@ -85,9 +87,9 @@ namespace kite
                     
                     InitializeNativeTarget();
                     InitializeNativeTargetAsmPrinter();
-                    llvm_start_multithreaded();
+                    assert(llvm::llvm_is_multithreaded());
 
-                    current_module = new Module("__root_module", getGlobalContext());
+                    current_module = new Module("__root_module", KiteGlobalContext);
                     state.push_module(current_module);
                     
                     System::dynamic_object *system_obj = (System::dynamic_object*)root()->properties["System"];
@@ -267,30 +269,13 @@ namespace kite
                     fake_ast.position.file = ast.ast->position.file;
                     Function *function = (Function*)cg.generate_llvm_method("__static_init__", argNames, *ast.ast, fake_ast);
 
-#ifdef LLVM3_1
-                    llvm::TargetOptions targetOptions;
-                    targetOptions.JITEmitDebugInfo = true;
-#else
-                    llvm::JITEmitDebugInfo = true; // for not-weird stack traces in gdb
-#endif
-
                     if (enable_optimizer)
                     {
-                        FunctionPassManager FPM(current_module);
-
-                        // Set up the optimizer pipeline.  Start with registering info about how the
-                        // target lays out data structures.
-                        FPM.add(new TargetData(*execution_engine->getTargetData()));
-                        // Provide basic AliasAnalysis support for GVN.
-                        FPM.add(createBasicAliasAnalysisPass());
-                        // Do simple "peephole" optimizations and bit-twiddling optzns.
-                        FPM.add(createInstructionCombiningPass());
-                        // Reassociate expressions.
-                        FPM.add(createReassociatePass());
-                        // Eliminate Common SubExpressions.
-                        FPM.add(createGVNPass());
-                        // Simplify the control flow graph (deleting unreachable blocks, etc).
-                        FPM.add(createCFGSimplificationPass());
+                        llvm::legacy::FunctionPassManager FPM(current_module);
+                        llvm::PassManagerBuilder builder;
+                        builder.OptLevel = 2;
+                        builder.populateFunctionPassManager(FPM);
+                        ///  Builder.populateModulePassManager(MPM);
 
                         FPM.doInitialization();
                         FPM.run(*function);
@@ -305,8 +290,8 @@ namespace kite
                         {
                             // Write LLVM code to manually call the generated function
                             // to ensure correct initialization.
-                            Value *val = ConstantInt::get(getGlobalContext(), APInt(sizeof(void*)*8, (uint64_t)context, false));
-                            val = state.module_builder().CreateIntToPtr(val, PointerType::getUnqual(Type::getInt32Ty(getGlobalContext())));
+                            Value *val = ConstantInt::get(KiteGlobalContext, APInt(sizeof(void*)*8, (uint64_t)context, false));
+                            val = state.module_builder().CreateIntToPtr(val, PointerType::getUnqual(Type::getInt32Ty(KiteGlobalContext)));
                             state.module_builder().CreateCall(function, val);
                         }
                         else
@@ -314,14 +299,20 @@ namespace kite
                             if (execution_engine == NULL)
                             {
                                 state.current_debug_builder()->finalize();
-                                EngineBuilder engineBuilder(current_module);
-#ifdef LLVM3_1
-                                engineBuilder.setTargetOptions(targetOptions);
-#endif
+                                llvm::EngineBuilder engineBuilder((std::unique_ptr<Module>(current_module)));
+                                std::string error;
+                                engineBuilder.setErrorStr(&error);
 #ifdef ENABLE_ENHANCED_JIT
-                                engineBuilder.setUseMCJIT(true);
-#endif
+                                engineBuilder.setEngineKind(EngineKind::Either);
+#else
+                                engineBuilder.setEngineKind(EngineKind::Interpreter);
+#endif // ENABLE_ENHANCED_JIT
                                 execution_engine = engineBuilder.create();
+                                if (execution_engine == nullptr)
+                                {
+                                    std::cerr << "LLVM engine creation error: " << error << std::endl;
+                                    assert(0);
+                                }
                             }
 
                             void *fptr = execution_engine->getPointerToFunction(function);
@@ -340,7 +331,7 @@ namespace kite
                     current_module->dump();
                 }
                 
-                static bool sort_pointers(std::pair<void *, Function *> i, std::pair<void *, Function *> j)
+                static bool sort_pointers(std::pair<void *, Function*> i, std::pair<void *, Function*> j)
                 {
                     return i.first > j.first;
                 }
@@ -361,25 +352,24 @@ namespace kite
                     // TODO: evaluate for possible performance improvement.
                     // TODO: this method will break once we begin compiling to ELF binary files.
                     std::string retValue;
-                    std::vector<std::pair<void *, Function *> > methods;
+                    std::vector<std::pair<void *, Function*> > methods;
                     for (Module::iterator i = current_module->begin();
                          i != current_module->end();
                          i++)
                     {
-                        Function *fxn = i;
                         //if (std::string(fxn->getName()).compare(0, 4, "kite") == 0) continue;
-                        void *fxn_begin_ptr = execution_engine->getPointerToFunction(fxn);
-                        methods.push_back(std::pair<void*, Function*>(fxn_begin_ptr, fxn));
+                        void *fxn_begin_ptr = execution_engine->getPointerToFunction(&*i);
+                        methods.push_back(std::pair<void*, Function*>(fxn_begin_ptr, &*i));
                     }
                     std::sort(methods.begin(), methods.end(), sort_pointers);
                     
-                    for (std::vector<std::pair<void *, Function *> >::iterator i = methods.begin();
+                    for (std::vector<std::pair<void *, Function*> >::iterator i = methods.begin();
                          i != methods.end();
                          i++)
                     {
                         if (ptr >= i->first /*&& std::string(i->second->getName()).compare(0, 4, "kite") != 0*/)
                         {
-                            retValue = i->second->getName();
+                            retValue = i->second->getName().str();
                             *beginPointer = i->first;
                             break;
                         }

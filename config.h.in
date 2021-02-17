@@ -42,6 +42,9 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
+/* Define to 1 if you have the `ffi' library (-lffi). */
+#undef HAVE_LIBFFI
+
 /* define if the llvm library is available */
 #undef HAVE_LLVM
 

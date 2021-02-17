@@ -58,7 +58,6 @@
 %lex-param   { void* scanner }
 
 %locations
-%pure-parser
 %initial-action
 {
     // Initialize the initial location.
@@ -992,7 +991,7 @@ void kite_driver::verify_version_less_than(
 }
 
 template<typename T>
-kite::semantics::syntax_tree *generate_range_object(T location, int from, int to, int step = 1)
+kite::semantics::syntax_tree *generate_range_object(T location, int from, int to, int step)
 {
     kite::semantics::syntax_tree *ret = new kite::semantics::syntax_tree(location);
     ret->op = kite::semantics::MAKE;

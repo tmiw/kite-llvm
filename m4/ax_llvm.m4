@@ -52,7 +52,7 @@ AC_ARG_WITH([llvm],
 		if test -e "$ac_llvm_config_path"; then
 			LLVM_CPPFLAGS=`$ac_llvm_config_path --cxxflags`
 			LLVM_LDFLAGS="$($ac_llvm_config_path --ldflags) $($ac_llvm_config_path --libs $1)"
-			LLVM_LIBS="$($ac_llvm_config_path --libs $1)"
+			LLVM_LIBS="$($ac_llvm_config_path --libs $1) $($ac_llvm_config_path --system-libs)"
 
 			AC_REQUIRE([AC_PROG_CXX])
 			CPPFLAGS_SAVED="$CPPFLAGS"
@@ -70,10 +70,10 @@ AC_ARG_WITH([llvm],
 			AC_CACHE_CHECK(can compile with and link with llvm([$1]),
 						   ax_cv_llvm,
 		[AC_LANG_PUSH([C++])
-				 AC_LINK_IFELSE([AC_LANG_PROGRAM([[@%:@include <llvm/Module.h>
-@%:@include <llvm/LLVMContext.h>
+				 AC_LINK_IFELSE([AC_LANG_PROGRAM([[@%:@include <llvm/IR/Module.h>
+@%:@include <llvm/IR/LLVMContext.h>
 													]],
-					   [[llvm::Module *M = new llvm::Module("test", llvm::getGlobalContext()); return 0;]])],
+					   [[static llvm::LLVMContext TheContext; llvm::Module *M = new llvm::Module("test", TheContext); return 0;]])],
 			   ax_cv_llvm=yes, ax_cv_llvm=no)
 		 AC_LANG_POP([C++])
 			])

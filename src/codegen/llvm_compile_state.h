@@ -30,13 +30,13 @@
 
 #include <map>
 #include <vector>
-#include <llvm/DerivedTypes.h>
-#include <llvm/LLVMContext.h>
-#include <llvm/Module.h>
-#include <llvm/Analysis/Verifier.h>
-#include <llvm/Support/IRBuilder.h>
-#include <llvm/Analysis/DIBuilder.h>
-#include <llvm/Analysis/DebugInfo.h>
+#include <llvm/IR/DerivedTypes.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/Verifier.h>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/DIBuilder.h>
+#include <llvm/IR/DebugInfo.h>
 #include "../semantics/syntax_tree.h"
 
 using namespace llvm;
@@ -45,6 +45,10 @@ namespace kite
 {
     namespace codegen
     {
+        // TBD
+        extern llvm::LLVMContext KiteGlobalContext;
+        extern llvm::IRBuilder<> KiteIRBuilder;
+
         class llvm_compile_state
         {
         public:
@@ -114,8 +118,8 @@ namespace kite
             inline bool get_skip_remaining() { return _skipRemainingStatements; }
 
             std::map<std::string, MDNode*> compileUnitCache;            
-            std::map<std::string, DISubprogram> subroutineCache;
-            std::map<std::string, DILexicalBlock> lexicalBlockCache;
+            std::map<std::string, DISubprogram*> subroutineCache;
+            std::map<std::string, DILexicalBlock*> lexicalBlockCache;
 
             inline DIBuilder *current_debug_builder() { return _debugBuilderStack.back(); }
         private:
@@ -132,7 +136,7 @@ namespace kite
             std::vector<semantics::syntax_tree*> _classInheritStack;
             
             std::vector<std::map<std::string, Value*> *> _symbolTableStack;
-            IRBuilder<> _moduleBuilder;
+            IRBuilder<>& _moduleBuilder;
             bool _overrideOverloadedProperties;
             bool _skipRemainingStatements;
         };

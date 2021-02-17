@@ -50,7 +50,7 @@ namespace kite
             
             object* digest::md5(string *message)
             {
-                MD5((unsigned char*)message->string_val.c_str(), message->string_val.size(), result);
+                ::MD5((unsigned char*)message->string_val.c_str(), message->string_val.size(), result);
                 return new string((char*)&result);
             }
             
@@ -62,7 +62,7 @@ namespace kite
                 size_t file_size = get_size_by_fd(file_descript);
                 
                 char *file_buffer = (char*)mmap(0, file_size, PROT_READ, MAP_SHARED, file_descript, 0);
-                MD5((unsigned char*) file_buffer, file_size, result);
+                ::MD5((unsigned char*) file_buffer, file_size, result);
                 munmap(file_buffer, file_size);
                 
                 return new string((char*)&result);

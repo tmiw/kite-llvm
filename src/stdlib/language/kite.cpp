@@ -247,15 +247,23 @@ namespace kite
                     std::string codeStr(codeString->string_val.c_str());
                     st.from_string(codeStr);
                     
+                    // New module onto the stack. Needed due to how the JIT works.
+                    Module* newMod = new Module("__eval_module", KiteGlobalContext);
+                    state.push_module(newMod);
+                        
                     // Generate LLVM Function* object.
                     semantics::syntax_tree fake_ast;
                     fake_ast.position.line = 1;
                     fake_ast.position.column = 1;
                     fake_ast.position.file = st.ast->position.file;
                     Function *function = (Function*)cg.generate_llvm_eval_method(argNames, *st.ast, fake_ast);
+                    state.pop_module();
                     
                     //current_module->dump();
-                    return (void*)execution_engine->getFunctionAddress(function->getName().str());
+                    execution_engine->addModule(std::unique_ptr<Module>(newMod));
+                    auto fPtr = (void*)execution_engine->getFunctionAddress(function->getName().str());
+                    
+                    return fPtr;
                 }
                 
                 System::object *kite::ExecuteCode(syntax_tree &ast, bool suppressExec)

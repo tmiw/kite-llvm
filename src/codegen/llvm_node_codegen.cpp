@@ -1476,12 +1476,12 @@ namespace kite
                 funEval->eraseFromParent();
                 funEval = module->getFunction("kite_eval_code");
             }
-            Value *functionPointer = generate_debug_data(builder.CreateCall(funEval, argNames), tree.position);
+            Value *functionPointer = generate_debug_data(builder.CreateCall(ftEvalType, funEval, argNames), tree.position);
             
             // Call method using the values from the symbol table.
             FunctionType *ftPtrType = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), ArrayRef<Type*>(argValuesTypes), false);
             Function *funPtr = (Function*)builder.CreateBitCast(functionPointer, PointerType::getUnqual(ftPtrType));
-            return builder.CreateCall(funPtr, argValues);
+            return builder.CreateCall(ftPtrType, funPtr, argValues);
         }
         
         Value *llvm_node_codegen::codegen_method_op(semantics::syntax_tree const &tree) const

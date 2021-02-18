@@ -1851,7 +1851,15 @@ namespace kite
                         funPtrLookup->eraseFromParent();
                         funPtrLookup = module->getFunction("kite_find_funccall");
                     }
-                    paramValuesLookup.push_back(builder.CreateBitCast(self, PointerType::getUnqual(Type::getInt32Ty(KiteGlobalContext))));
+                    
+                    if (get_type(self) != semantics::OBJECT && params[0] == self)
+                    {
+                        paramValuesLookup.push_back(paramsCopy[0]);
+                    }
+                    else
+                    {
+                        paramValuesLookup.push_back(builder.CreateBitCast(self, PointerType::getUnqual(Type::getInt32Ty(KiteGlobalContext))));
+                    }
                     paramValuesLookup.push_back(builder.CreateGlobalStringPtr(name.c_str()));
                     paramValuesLookup.push_back(ConstantInt::get(KiteGlobalContext, APInt(32, paramsCopy.size(), true)));
                     fptr = builder.CreateBitCast(

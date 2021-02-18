@@ -1952,9 +1952,14 @@ namespace kite
             state.push_namespace_stack(className);
             ret = generate_llvm_method(std::string("__static_init__"), args, body, tree);
            
-            FunctionType* ft = (FunctionType*)ret->getType(); 
+            // ret is typed as a function pointer, not the function itself. This causes issues performing JIT,
+            // so we explicitly create the function type here.
+            Type* pType[1] = {kite_type_to_llvm_type(semantics::OBJECT)};
+            FunctionType *ft = FunctionType::get(kite_type_to_llvm_type(semantics::OBJECT), ArrayRef<Type*>(pType), false);
+            
+            Value* fArgs[1] = {obj};
             generate_debug_data(
-                builder.CreateCall(ft, ret, obj),
+                builder.CreateCall(ft, ret, fArgs),
                 tree.position);
             
             generate_llvm_dynamic_object_set_name(obj, tree);

@@ -255,7 +255,7 @@ namespace kite
                     Function *function = (Function*)cg.generate_llvm_eval_method(argNames, *st.ast, fake_ast);
                     
                     //current_module->dump();
-                    return execution_engine->getPointerToFunction(function);
+                    return (void*)execution_engine->getFunctionAddress(function->getName().str());
                 }
                 
                 System::object *kite::ExecuteCode(syntax_tree &ast, bool suppressExec)
@@ -363,7 +363,7 @@ namespace kite
                          i++)
                     {
                         //if (std::string(fxn->getName()).compare(0, 4, "kite") == 0) continue;
-                        void *fxn_begin_ptr = execution_engine->getPointerToFunction(&*i);
+                        void *fxn_begin_ptr = (void*)execution_engine->getFunctionAddress(i->getName().str()); 
                         methods.push_back(std::pair<void*, Function*>(fxn_begin_ptr, &*i));
                     }
                     std::sort(methods.begin(), methods.end(), sort_pointers);

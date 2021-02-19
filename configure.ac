@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT(kite-llvm, 0.2.0, mooneer@kite-language.org)
+AC_INIT(kite-llvm, 0.3.0, mooneer@kite-language.org)
 LT_INIT
 LT_LANG([C++])
 AC_CONFIG_SRCDIR([src/ikt.cpp])

@@ -65,6 +65,7 @@ namespace kite
                     static System::object *ExecuteCode(syntax_tree &ast, System::object *context, bool suppressExec = false);
                     static System::object *ExecuteCode(syntax_tree &ast, bool suppressExec = false);
                     static System::object *ImportModule(std::string &module_name);
+                    static void PushModule();
                     
                     static void DumpCompiledCode();
 
@@ -75,6 +76,7 @@ namespace kite
                     static System::dynamic_object *last_exception;
                     static System::dynamic_object *root_object;   
                     static char *app_name;
+                    static int executeCount;
                     
                     private:
                         static llvm::Module *current_module;

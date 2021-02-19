@@ -32,6 +32,7 @@
 #define ENABLE_ENHANCED_JIT
 
 #include <algorithm>
+#include <sstream>
 #include <sys/stat.h>
 #include <dlfcn.h>
 #include <parser/parser.h>
@@ -82,6 +83,13 @@ namespace kite
                 semantics::gc_vector<jmp_buf*>::type kite::exception_stack;
                 System::dynamic_object *kite::last_exception = NULL;
                 char *kite::app_name = NULL;
+                int kite::executeCount = 0;
+                
+                void kite::PushModule()
+                {
+                    auto mod = new Module("__root_module", KiteGlobalContext);
+                    state.push_module(mod);
+                }
                 
                 void kite::InitializeRuntimeSystem(char *appname, int argc, char **argv)
                 {
@@ -280,11 +288,15 @@ namespace kite
                     fake_ast.position.line = 1;
                     fake_ast.position.column = 1;
                     fake_ast.position.file = ast.ast->position.file;
-                    Function *function = (Function*)cg.generate_llvm_method("__static_init__", argNames, *ast.ast, fake_ast);
+                    
+                    std::stringstream ss;
+                    ss << "__static_init__" << executeCount++;
+                    
+                    Function *function = (Function*)cg.generate_llvm_method(ss.str().c_str(), argNames, *ast.ast, fake_ast);
 
                     if (enable_optimizer)
                     {
-                        llvm::legacy::FunctionPassManager FPM(current_module);
+                        llvm::legacy::FunctionPassManager FPM(state.current_module());
                         llvm::PassManagerBuilder builder;
                         builder.OptLevel = 2;
                         builder.populateFunctionPassManager(FPM);
@@ -312,7 +324,7 @@ namespace kite
                             if (execution_engine == NULL)
                             {
                                 state.current_debug_builder()->finalize();
-                                llvm::EngineBuilder engineBuilder((std::unique_ptr<Module>(current_module)));
+                                llvm::EngineBuilder engineBuilder((std::unique_ptr<Module>(state.current_module())));
                                 std::string error;
                                 engineBuilder.setErrorStr(&error);
 #ifdef ENABLE_ENHANCED_JIT
@@ -326,6 +338,10 @@ namespace kite
                                     std::cerr << "LLVM engine creation error: " << error << std::endl;
                                     assert(0);
                                 }
+                            }
+                            else
+                            {
+                                execution_engine->addModule(std::unique_ptr<Module>(state.current_module()));
                             }
 
                             void *fptr = (void*)execution_engine->getFunctionAddress(function->getName().str());

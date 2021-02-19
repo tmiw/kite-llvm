@@ -86,6 +86,7 @@ int main(int argc, char **argv)
                 language::kite::syntax_tree ast; 
                 r = ast.from_string(code);
 
+                language::kite::kite::PushModule();
                 System::object *retValue = language::kite::kite::ExecuteCode(ast);
                 cout << "---> ";
                 if (retValue) retValue->print();
